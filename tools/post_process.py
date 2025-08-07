@@ -20,11 +20,14 @@ input_write_dict = {
 }
 
 def get_line_address(line):
-    toks = line.split("|")
-    address = toks[1].strip(" [$").split(":")[0]
-    return int(address,16)
+    try:
+        toks = line.split("|")
+        address = toks[1].strip(" [$").split(":")[0]
+        return int(address,16)
+    except (ValueError,IndexError):
+        return None
 
-
+nb_errors = 0
 # various dirty but at least automatic patches applying on the specific track and field code
 with open(source_dir / "conv.s") as f:
     lines = list(f)
@@ -32,6 +35,8 @@ with open(source_dir / "conv.s") as f:
 
     while i < len(lines):
         line = lines[i]
+        line_address = get_line_address(line)
+
         if " = " in line:
             equates.append(line.replace("$","0x"))
             line = ""
@@ -39,14 +44,48 @@ with open(source_dir / "conv.s") as f:
         if re.search("GET_ADDRESS\t\w*table",line):
             index = "X" if ",x" in line else "Y"
             line = line.replace("GET_ADDRESS",f"PUSH_TABLE_{index}_ADDRESS")
-            line_address = get_line_address(line)
+
             if line_address in {0xBE09,0xBA7F,0xB781,0xA73B,0XA650,0X8710,0x917c}:
                 lines[i+1] = "\trts   | rest of the code is useless, just jump\n\n"
             else:
                 lines[i+1] = ""
 
+        if line_address in {0xf79b}:
+            # remove ERROR directive, false alarm
+            lines[i+1] = remove_error(lines[i+1])
+
+        if line_address == 0xf12d:
+            lines[i-2] = remove_error(lines[i-2])
+            line = change_instruction("moveq\t#1,d4",lines,i)
+            lines[i+1] = change_instruction("sbcd\td4,d0",lines,i+1)
+        if line_address in {0xc8bf,0xc8ca,0Xcab9,0xe964,0xe9d6,
+        0xec00,0xb0cd,0xb3c3,0xec52,0xecc5,0xed23,0xee01,0xf773}:
+            # remove ERROR directive just after a tst
+            lines[i-1] = remove_error(lines[i-1])
+
+        if line_address in {0xb914,0x8f6f}:
+            # useless cmp #0 => tst
+            lines[i-1] = remove_error(lines[i-1])
+            line = remove_instruction(lines,i)
+
+        if "insert SET_X_FROM_CLEARED_C" in line:
+            line = "\tSET_X_FROM_CLEARED_C\n"
+
+        if line_address in {0xb4fd,0xd9ea,0xdaf9,0x8b7d,0x9903,0xa129,0x9689,0Xb4e8,0xd817,0x9767}:
+            # X is valid from previous add/sub,asl..: copy X to C just before bcc/bcs
+            line = "\tSET_C_FROM_X\n"+line
+            lines[i+1] = remove_error(lines[i+1])
+
+        if line_address in {0xeedf,0xef0c}:
+            # rti => rts
+            line = change_instruction("rts",lines,i)
+
+        if "stray bc" in line and "jbsr" in lines[i-2]:
+            # the previous call sets carry, the bcc/bcs is not a problem
+            line = remove_error(line)
+
         if "unsupported transfer to stack register" in line:
-            line = ""
+            line = remove_error(line)
 
         if "indirect jmp" in line:
             line = ""
@@ -131,21 +170,29 @@ with open(source_dir / "conv.s") as f:
                 reg = {"x":"A2","y":"A3"}[m.group(3)]
                 rest = re.sub(".*\"","",line)
                 line = f"\t{inst}_{ireg}_INDEXED\t{reg}{rest}"
-        if "ERROR" in line:
-            print(line,end="")
         lines[i] = line
         i+=1
 
+# merge/split lines so numbers match
+lines = "".join(lines).splitlines(True)
 
+header = """\t.include "data.inc"
+\t.global\tnmi_ee9e
+\t.global\treset_eea1
+\t.global\tirq_eea4
+"""
+
+for i,line in enumerate(lines,header.count("\n")):
+    if "ERROR" in line:
+        nb_errors += 1
+        print(i+1,line,end="")
+
+print(f"nb_errors: {nb_errors}")
 
 
 with open(source_dir / "data.inc","w") as fw:
     fw.writelines(equates)
 
 with open(source_dir / "us_champ_vball.68k","w") as fw:
-    fw.write("""\t.include "us_champ_vball.inc"
-*\t.include "data.inc"
-*\t.global\tinsert_coin_irq_f000
-*\t.global\treset_f003
-""")
+    fw.write(header)
     fw.writelines(lines)

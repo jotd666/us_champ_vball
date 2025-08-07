@@ -6,7 +6,7 @@
 
 	.include	"breakpoint.inc"
     .macro    ERROR    arg
-    .error    "\arg"     | comment out to disable errors
+    *.error    "\arg"     | comment out to disable errors
     .endm
 
 	.ifdef	MC68020
@@ -188,6 +188,7 @@ skip\@:
 	lea	\offset,a0
 	lea		(a6,a0.l),a0
 	.endm
+	
 	.macro	PREP_GET_ADDRESS_X	offset
 	.ifgt	\offset-0x8000
 	lea	\offset,a0
@@ -198,6 +199,7 @@ skip\@:
 	lea	(a0,d1.w),a0
 	READ_LE_WORD	a0
 	.endm
+	
 	.macro GET_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_ADDRESS_FUNC

@@ -30,6 +30,12 @@ def remove_code(pattern,lines,i):
         remove_continuing_lines(lines,i)
     return lines[i]
 
+def remove_error(line):
+    if "ERROR" in line:
+        return ""
+    else:
+        raise Exception(f"No ERROR to remove in {line}")
+
 def subt(m):
     tn = m.group(1)
     rn = m.group(2)

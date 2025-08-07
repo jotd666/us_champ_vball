@@ -18,8 +18,20 @@
 ;	map(0x4000, 0x7fff).bankr(m_mainbank);
 ;	map(0x8000, 0xffff).rom();
 
-bankswitch_1009 = $1009
+nb_credits_0035 = $35
 
+p1_1000 = $1000
+p2_1001 = $1001
+dsw1_1003 = $1003
+dsw2_1004 = $1004
+scrollx_hi_1008 = $1008
+bankswitch_1009 = $1009
+irq_ack_100a = $100a
+irq_ack_100b = $100b
+scrollx_lo_100c = $100c
+sound_100d = $100d
+
+bankswitch_copy_022d = $022d
 
 800C: A9 00    lda #$00
 800E: 9D B8 03 sta $03b8, x
@@ -800,6 +812,11 @@ bankswitch_1009 = $1009
 8718: 85 1C    sta $1c
 871A: 6C 1B 00 jmp ($001b)		; [indirect_jump]
 
+873D: A5 1E    lda $1e
+873F: 0A       asl a
+8740: 65 1E    adc $1e
+8742: A8       tay
+8743: 8A       txa
 8744: 29 02    and #$02
 8746: F0 12    beq $875a
 8748: B9 1B 88 lda $881b, y
@@ -1908,11 +1925,12 @@ bankswitch_1009 = $1009
 926E: 85 1B    sta $1b
 9270: B9 EB 92 lda $92eb, y
 9273: 85 1C    sta $1c
-9275: A9 80    lda #$80
+9275: A9 80    lda #$80				; callback/jump next address: 9280
 9277: 85 00    sta $00
 9279: A9 92    lda #$92
 927B: 85 01    sta $01
 927D: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
+callback_9280:
 9280: 20 8D 9D jsr $9d8d
 9283: 4C 89 91 jmp $9189
 9286: BD 1A 03 lda $031a, x
@@ -1946,11 +1964,12 @@ bankswitch_1009 = $1009
 92BF: 85 1B    sta $1b
 92C1: B9 EB 92 lda $92eb, y
 92C4: 85 1C    sta $1c
-92C6: A9 D1    lda #$d1
+92C6: A9 D1    lda #$d1			; callback/jump in 92d1
 92C8: 85 00    sta $00
 92CA: A9 92    lda #$92
 92CC: 85 01    sta $01
 92CE: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
+callback_92d1:
 92D1: 20 15 A2 jsr $a215
 92D4: B0 03    bcs $92d9
 92D6: 20 C2 B5 jsr $b5c2
@@ -1968,7 +1987,7 @@ bankswitch_1009 = $1009
 9306: A8       tay
 9307: 98       tya
 9308: 9D C4 03 sta $03c4, x
-930B: 6C 00 00 jmp ($0000)        ; [indirect_jump]
+930B: 6C 00 00 jmp ($0000)        ; [jump_to_callback]
 930E: A0 20    ldy #$20
 9310: B5 B9    lda $b9, x
 9312: C9 48    cmp #$48
@@ -1984,10 +2003,10 @@ bankswitch_1009 = $1009
 9326: A8       tay
 9327: 98       tya
 9328: 9D C4 03 sta $03c4, x
-932B: 6C 00 00 jmp ($0000)        ; [indirect_jump]
+932B: 6C 00 00 jmp ($0000)        ; [jump_to_callback]
 932E: BD 54 02 lda $0254, x
 9331: 9D C4 03 sta $03c4, x
-9334: 6C 00 00 jmp ($0000)        ; [indirect_jump]
+9334: 6C 00 00 jmp ($0000)        ; [jump_to_callback]
 9337: BD 1A 03 lda $031a, x
 933A: 30 0B    bmi $9347
 933C: 20 95 A1 jsr $a195
@@ -2028,7 +2047,8 @@ bankswitch_1009 = $1009
 938C: 20 B8 D7 jsr $d7b8
 938F: 4C 89 91 jmp $9189
 
-93A6: 48       pha
+93A2: BD 1A 03 lda $031a, x
+93A5: 30 48    bmi $93ef
 93A7: 20 95 A1 jsr $a195
 93AA: BD 2B 03 lda $032b, x
 93AD: 9D 54 02 sta $0254, x
@@ -3235,7 +3255,7 @@ A2F1: BD 1A 03 lda $031a, x
 A2F4: 29 3F    and #$3f
 A2F6: 0A       asl a
 A2F7: A8       tay
-A2F8: B9 0E A3 lda $a30e, y
+A2F8: B9 0E A3 lda table_a30e, y
 A2FB: 85 00    sta $00
 A2FD: B9 0F A3 lda $a30f, y
 A300: 85 01    sta $01
@@ -4066,6 +4086,7 @@ AA8A: 68       pla
 AA8B: AA       tax
 AA8C: 60       rts
 
+AB21: A6 4C    ldx $4c
 AB23: BD 1A 03 lda $031a, x
 AB26: 10 09    bpl $ab31
 AB28: B5 65    lda $65, x
@@ -4383,6 +4404,12 @@ AE5B: A9 00    lda #$00
 AE5D: 9D F0 02 sta $02f0, x
 AE60: 60       rts
 
+AE74: BD 0A 03 lda $030a, x
+AE77: 29 08    and #$08
+AE79: D0 01    bne $ae7c
+AE7B: E8       inx
+AE7C: 96 4D    stx $4d, y
+AE7E: 96 51    stx $51, y
 AE80: B9 47 00 lda $0047, y
 AE83: 10 08    bpl $ae8d
 AE85: BD 0A 03 lda $030a, x
@@ -5686,11 +5713,7 @@ B976: 9D D4 03 sta $03d4, x
 B979: 68       pla
 B97A: A8       tay
 B97B: 60       rts
-B97C: 90 10    bcc $b98e
-B97E: 95 05    sta $05, x
-B980: 70 30    bvs $b9b2
-B982: 75 25    adc $25, x
-B984: 60       rts
+
 
 B9FB: 46 29    lsr $29
 B9FD: 08       php
@@ -7104,8 +7127,7 @@ C96C: 8D 03 04 sta $0403
 C96F: 8D 04 04 sta $0404
 C972: 8D 05 04 sta $0405
 C975: 60       rts
-C976: 10 10    bpl $c988
-C978: F0 F0    beq $c96a
+
 C97A: 48       pha
 C97B: A9 00    lda #$00
 C97D: 85 02    sta $02
@@ -8642,13 +8664,13 @@ D7D0: AD E9 07 lda $07e9
 D7D3: F0 25    beq $d7fa
 D7D5: A5 36    lda $36
 D7D7: D0 05    bne $d7de
-D7D9: 2C 04 10 bit $1004
+D7D9: 2C 04 10 bit dsw2_1004
 D7DC: 10 0C    bpl $d7ea
 D7DE: AD EA 07 lda $07ea
 D7E1: F0 07    beq $d7ea
 D7E3: C9 52    cmp #$52
 D7E5: B0 03    bcs $d7ea
-D7E7: 8D 0D 10 sta $100d
+D7E7: 8D 0D 10 sta sound_100d
 D7EA: A2 00    ldx #$00
 D7EC: BD EB 07 lda $07eb, x
 D7EF: 9D EA 07 sta $07ea, x
@@ -8702,9 +8724,9 @@ D843: 48       pha
 D844: 98       tya
 D845: 48       pha
 D846: 20 22 D8 jsr $d822
-D849: AD 01 10 lda $1001
-D84C: 2D 00 10 and $1000
-D84F: 2C 03 10 bit $1003
+D849: AD 01 10 lda p2_1001
+D84C: 2D 00 10 and p1_1000
+D84F: 2C 03 10 bit dsw1_1003
 D852: 30 06    bmi $d85a
 D854: 2D 05 10 and $1005
 D857: 2D 06 10 and $1006
@@ -8743,11 +8765,11 @@ D88D: 68       pla
 D88E: 60       rts
 D88F: AD 2C 02 lda $022c
 D892: 29 FE    and #$fe
-D894: 2C 04 10 bit $1004
+D894: 2C 04 10 bit dsw2_1004
 D897: 70 02    bvs $d89b
 D899: 09 01    ora #$01
 D89B: 8D 2C 02 sta $022c
-D89E: 8D 08 10 sta $1008
+D89E: 8D 08 10 sta scrollx_hi_1008
 D8A1: 60       rts
 D8A2: AD F4 07 lda $07f4
 D8A5: 29 07    and #$07
@@ -8765,7 +8787,7 @@ D8B7: AD 2C 02 lda $022c
 D8BA: 29 03    and #$03
 D8BC: 05 00    ora $00
 D8BE: 8D 2C 02 sta $022c
-D8C1: 8D 08 10 sta $1008
+D8C1: 8D 08 10 sta scrollx_hi_1008
 D8C4: 60       rts
 D8C5: AD F4 07 lda $07f4
 D8C8: 29 07    and #$07
@@ -8779,7 +8801,7 @@ D8D1: AD 2C 02 lda $022c
 D8D4: 29 1F    and #$1f
 D8D6: 05 00    ora $00
 D8D8: 8D 2C 02 sta $022c
-D8DB: 8D 08 10 sta $1008
+D8DB: 8D 08 10 sta scrollx_hi_1008
 D8DE: 60       rts
 D8DF: 85 00    sta $00
 D8E1: AD 2D 02 lda bankswitch_copy_022d
@@ -8792,10 +8814,10 @@ D8EF: 98       tya
 D8F0: 48       pha
 D8F1: AD 2E 02 lda $022e
 D8F4: 8D 36 02 sta $0236
-D8F7: AD 00 10 lda $1000
+D8F7: AD 00 10 lda p1_1000
 D8FA: 49 FF    eor #$ff
 D8FC: 8D 2E 02 sta $022e
-D8FF: 2C 03 10 bit $1003
+D8FF: 2C 03 10 bit dsw1_1003
 D902: 30 10    bmi $d914
 D904: 70 0E    bvs $d914
 D906: 29 0F    and #$0f
@@ -8806,7 +8828,7 @@ D90E: 19 86 D9 ora $d986, y
 D911: 8D 2E 02 sta $022e
 D914: AD 2F 02 lda $022f
 D917: 8D 37 02 sta $0237
-D91A: AD 01 10 lda $1001
+D91A: AD 01 10 lda p2_1001
 D91D: 49 FF    eor #$ff
 D91F: 8D 2F 02 sta $022f
 D922: AD 30 02 lda $0230
@@ -8819,7 +8841,7 @@ D933: 8D 39 02 sta $0239
 D936: AD 06 10 lda $1006
 D939: 49 FF    eor #$ff
 D93B: 8D 31 02 sta $0231
-D93E: 2C 03 10 bit $1003
+D93E: 2C 03 10 bit dsw1_1003
 D941: 30 10    bmi $d953
 D943: 70 0E    bvs $d953
 D945: 29 0F    and #$0f
@@ -9256,6 +9278,11 @@ E17E: A9 00    lda #$00
 E180: 20 DF D8 jsr $d8df
 E183: 60       rts
 
+E1B5: A9 01    lda #$01
+E1B7: 20 DF D8 jsr $d8df
+E1BA: A5 4C    lda $4c
+E1BC: AA       tax
+E1BD: 0A       asl a
 E1BE: A8       tay
 E1BF: 85 0B    sta $0b
 E1C1: E0 0D    cpx #$0d
@@ -10258,7 +10285,7 @@ EA92: 20 76 D8 jsr $d876
 EA95: AD DE 07 lda $07de
 EA98: 38       sec
 EA99: E9 04    sbc #$04
-EA9B: 8D 0C 10 sta $100c
+EA9B: 8D 0C 10 sta scrollx_lo_100c
 EA9E: AD DF 07 lda $07df
 EAA1: E9 00    sbc #$00
 EAA3: 29 01    and #$01
@@ -10268,7 +10295,7 @@ EAA9: AD 2C 02 lda $022c
 EAAC: 29 FD    and #$fd
 EAAE: 0D F8 07 ora $07f8
 EAB1: 8D 2C 02 sta $022c
-EAB4: 8D 08 10 sta $1008
+EAB4: 8D 08 10 sta scrollx_hi_1008
 EAB7: 68       pla
 EAB8: A8       tay
 EAB9: 60       rts
@@ -10281,20 +10308,20 @@ EAC5: 88       dey
 EAC6: 10 FC    bpl $eac4
 EAC8: AD 2C 02 lda $022c
 EACB: A9 FC    lda #$fc
-EACD: 8D 0C 10 sta $100c
+EACD: 8D 0C 10 sta scrollx_lo_100c
 EAD0: AD 2C 02 lda $022c
 EAD3: 09 02    ora #$02
 EAD5: 8D 2C 02 sta $022c
-EAD8: 8D 08 10 sta $1008
+EAD8: 8D 08 10 sta scrollx_hi_1008
 EADB: 4C B7 EA jmp $eab7
 
 EAE2: AD 2C 02 lda $022c		; [disable] useless lda
 EAE5: A9 FC    lda #$fc
-EAE7: 8D 0C 10 sta $100c
+EAE7: 8D 0C 10 sta scrollx_lo_100c
 EAEA: AD 2C 02 lda $022c
 EAED: 09 02    ora #$02
 EAEF: 8D 2C 02 sta $022c
-EAF2: 8D 08 10 sta $1008
+EAF2: 8D 08 10 sta scrollx_hi_1008
 EAF5: A9 00    lda #$00
 EAF7: 8D 0E 10 sta $100e
 EAFA: AD 2D 02 lda bankswitch_copy_022d
@@ -10305,7 +10332,7 @@ EB05: 60       rts
 EB06: AD DE 07 lda $07de
 EB09: 38       sec
 EB0A: E9 04    sbc #$04
-EB0C: 8D 0C 10 sta $100c
+EB0C: 8D 0C 10 sta scrollx_lo_100c
 EB0F: AD DF 07 lda $07df
 EB12: E9 00    sbc #$00
 EB14: 29 01    and #$01
@@ -10315,7 +10342,7 @@ EB1A: AD 2C 02 lda $022c
 EB1D: 29 FD    and #$fd
 EB1F: 0D F8 07 ora $07f8
 EB22: 8D 2C 02 sta $022c
-EB25: 8D 08 10 sta $1008
+EB25: 8D 08 10 sta scrollx_hi_1008
 EB28: AD E0 07 lda $07e0
 EB2B: F0 14    beq $eb41
 EB2D: AD 2D 02 lda bankswitch_copy_022d
@@ -10353,7 +10380,7 @@ EB7D: AD 2C 02 lda $022c
 EB80: 29 E3    and #$e3
 EB82: 19 CB EB ora $ebcb, y
 EB85: 8D 2C 02 sta $022c
-EB88: 8D 08 10 sta $1008
+EB88: 8D 08 10 sta scrollx_hi_1008
 EB8B: AD 2D 02 lda bankswitch_copy_022d
 EB8E: 29 DF    and #$df
 EB90: 19 DE EB ora $ebde, y
@@ -10363,12 +10390,12 @@ EB99: 60       rts
 EB9A: AC DC 07 ldy $07dc
 EB9D: 8C DB 07 sty $07db
 EBA0: B9 C5 EB lda $ebc5, y
-EBA3: 8D 0C 10 sta $100c
+EBA3: 8D 0C 10 sta scrollx_lo_100c
 EBA6: AD 2C 02 lda $022c
 EBA9: 29 FD    and #$fd
 EBAB: 19 C8 EB ora $ebc8, y
 EBAE: 8D 2C 02 sta $022c
-EBB1: 8D 08 10 sta $1008
+EBB1: 8D 08 10 sta scrollx_hi_1008
 EBB4: A9 00    lda #$00
 EBB6: 8D 0E 10 sta $100e
 EBB9: AD 2D 02 lda bankswitch_copy_022d
@@ -10724,7 +10751,7 @@ EE9E: 4C E0 EE jmp $eee0
 reset_eea1:
 EEA1: 4C 0D EF jmp reset_ef0d
 
-irq_eea7:
+irq_eea4:
 EEA4: 4C A7 EE jmp $eea7
 EEA7: D8       cld
 EEA8: 48       pha
@@ -10733,7 +10760,7 @@ EEAB: 20 7C EA jsr $ea7c
 EEAE: A5 31    lda $31
 EEB0: 29 07    and #$07
 EEB2: D0 27    bne $eedb
-EEB4: A5 35    lda $35
+EEB4: A5 35    lda nb_credits_0035
 EEB6: 48       pha
 EEB7: 8A       txa
 EEB8: 48       pha
@@ -10746,7 +10773,7 @@ EEC2: A8       tay
 EEC3: 68       pla
 EEC4: AA       tax
 EEC5: 68       pla
-EEC6: C5 35    cmp $35
+EEC6: C5 35    cmp nb_credits_0035
 EEC8: F0 11    beq $eedb
 EECA: A5 36    lda $36
 EECC: 0D F9 07 ora $07f9
@@ -10754,9 +10781,9 @@ EECF: D0 0A    bne $eedb
 EED1: A2 FF    ldx #$ff
 EED3: 9A       txs
 EED4: 58       cli
-EED5: 8D 0B 10 sta $100b
+EED5: 8D 0B 10 sta irq_ack_100b
 EED8: 4C F5 EF jmp $eff5
-EEDB: 8D 0B 10 sta $100b
+EEDB: 8D 0B 10 sta irq_ack_100b
 EEDE: 68       pla
 EEDF: 40       rti
 EEE0: 48       pha
@@ -10778,7 +10805,7 @@ EEFC: 29 08    and #$08
 EEFE: D0 F9    bne $eef9
 EF00: A9 00    lda #$00
 EF02: 85 31    sta $31
-EF04: 8D 0A 10 sta $100a
+EF04: 8D 0A 10 sta irq_ack_100a
 EF07: 68       pla
 EF08: A8       tay
 EF09: 68       pla
@@ -10804,8 +10831,8 @@ EF29: 85 43    sta $43
 EF2B: 85 44    sta $44
 EF2D: 85 45    sta $45
 EF2F: 58       cli
-EF30: 8D 0A 10 sta $100a
-EF33: 8D 0B 10 sta $100b
+EF30: 8D 0A 10 sta irq_ack_100a
+EF33: 8D 0B 10 sta irq_ack_100b
 EF36: A9 02    lda #$02
 EF38: 8D F3 07 sta $07f3
 EF3B: A9 00    lda #$00
@@ -10814,7 +10841,7 @@ EF40: 20 A2 D8 jsr $d8a2
 EF43: 20 8F D8 jsr $d88f
 EF46: 20 E2 EA jsr $eae2
 EF49: A9 00    lda #$00
-EF4B: 8D 0D 10 sta $100d
+EF4B: 8D 0D 10 sta sound_100d
 EF4E: A9 02    lda #$02
 EF50: 20 2B D8 jsr $d82b
 EF53: A9 05    lda #$05
@@ -10977,7 +11004,7 @@ F0CD: A5 2F    lda $2f
 F0CF: D0 FC    bne $f0cd
 F0D1: EE F5 07 inc $07f5
 F0D4: 20 EF D8 jsr $d8ef
-F0D7: AD 03 10 lda $1003
+F0D7: AD 03 10 lda dsw1_1003
 F0DA: 30 03    bmi $f0df
 F0DC: 4C B5 F1 jmp $f1b5
 F0DF: AD 2F 02 lda $022f
@@ -10986,7 +11013,7 @@ F0E4: A9 02    lda #$02
 F0E6: 38       sec
 F0E7: E5 37    sbc $37
 F0E9: 85 00    sta $00
-F0EB: A5 35    lda $35
+F0EB: A5 35    lda nb_credits_0035
 F0ED: C5 00    cmp $00
 F0EF: 90 4C    bcc $f13d
 F0F1: A9 80    lda #$80
@@ -11004,7 +11031,7 @@ F10B: AD 2E 02 lda $022e
 F10E: 10 2D    bpl $f13d
 F110: A5 37    lda $37
 F112: D0 5D    bne $f171
-F114: A5 35    lda $35
+F114: A5 35    lda nb_credits_0035
 F116: F0 25    beq $f13d
 F118: A9 80    lda #$80
 F11A: 85 47    sta $47
@@ -11015,10 +11042,10 @@ F124: A9 01    lda #$01
 F126: 85 37    sta $37
 F128: 85 00    sta $00
 F12A: F8       sed
-F12B: A5 35    lda $35
+F12B: A5 35    lda nb_credits_0035
 F12D: 38       sec
 F12E: E5 00    sbc $00
-F130: 85 35    sta $35
+F130: 85 35    sta nb_credits_0035
 F132: D8       cld
 F133: A9 80    lda #$80
 F135: 85 36    sta $36
@@ -11077,7 +11104,7 @@ F1B2: 4C 13 F2 jmp $f213
 F1B5: A9 03    lda #$03
 F1B7: 85 00    sta $00
 F1B9: A6 00    ldx $00
-F1BB: AD 03 10 lda $1003
+F1BB: AD 03 10 lda dsw1_1003
 F1BE: 49 FF    eor #$ff
 F1C0: 29 30    and #$30
 F1C2: F0 04    beq $f1c8
@@ -11086,16 +11113,16 @@ F1C6: D0 02    bne $f1ca
 F1C8: A9 80    lda #$80
 F1CA: 3D 2E 02 and $022e, x
 F1CD: F0 3D    beq $f20c
-F1CF: A5 35    lda $35
+F1CF: A5 35    lda nb_credits_0035
 F1D1: F0 39    beq $f20c
 F1D3: B5 42    lda $42, x
 F1D5: C5 00    cmp $00
 F1D7: F0 33    beq $f20c
-F1D9: A5 35    lda $35
+F1D9: A5 35    lda nb_credits_0035
 F1DB: F8       sed
 F1DC: 38       sec
 F1DD: E9 01    sbc #$01
-F1DF: 85 35    sta $35
+F1DF: 85 35    sta nb_credits_0035
 F1E1: D8       cld
 F1E2: E6 37    inc $37
 F1E4: A9 80    lda #$80
@@ -11158,9 +11185,9 @@ F25F: A8       tay
 F260: 98       tya
 F261: 20 DC ED jsr $eddc
 F264: 20 22 D8 jsr $d822
-F267: AD 00 10 lda $1000
-F26A: 2D 01 10 and $1001
-F26D: 2C 03 10 bit $1003
+F267: AD 00 10 lda p1_1000
+F26A: 2D 01 10 and p2_1001
+F26D: 2C 03 10 bit dsw1_1003
 F270: 30 06    bmi $f278
 F272: 2D 05 10 and $1005
 F275: 2D 06 10 and $1006
@@ -11175,9 +11202,9 @@ F288: A9 00    lda #$00
 F28A: 8D F5 07 sta $07f5
 F28D: EE F5 07 inc $07f5
 F290: 20 22 D8 jsr $d822
-F293: AD 00 10 lda $1000
-F296: 2D 01 10 and $1001
-F299: 2C 03 10 bit $1003
+F293: AD 00 10 lda p1_1000
+F296: 2D 01 10 and p2_1001
+F299: 2C 03 10 bit dsw1_1003
 F29C: 30 06    bmi $f2a4
 F29E: 2D 05 10 and $1005
 F2A1: 2D 06 10 and $1006
@@ -11228,7 +11255,7 @@ F30C: A8       tay
 F30D: B9 6A F3 lda $f36a, y
 F310: 20 B8 D7 jsr $d7b8
 F313: 4C 6F F3 jmp $f36f
-F316: AD 03 10 lda $1003
+F316: AD 03 10 lda dsw1_1003
 F319: 49 FF    eor #$ff
 F31B: 48       pha
 F31C: 29 03    and #$03
@@ -11485,7 +11512,7 @@ F54C: B5 47    lda $47, x
 F54E: 10 37    bpl $f587
 F550: A9 00    lda #$00
 F552: 95 47    sta $47, x
-F554: AD 03 10 lda $1003
+F554: AD 03 10 lda dsw1_1003
 F557: 30 1D    bmi $f576
 F559: 98       tya
 F55A: D9 42 00 cmp $0042, y
@@ -11608,18 +11635,18 @@ F65F: 85 44    sta $44
 F661: 85 45    sta $45
 F663: A9 00    lda #$00
 F665: 85 36    sta $36
-F667: A5 35    lda $35
+F667: A5 35    lda nb_credits_0035
 F669: F0 03    beq $f66e
 F66B: 20 F5 EF jsr $eff5
 F66E: 4C 53 EF jmp $ef53
 F671: A5 37    lda $37
 F673: 8D 16 04 sta $0416
 F676: 38       sec
-F677: E5 35    sbc $35
+F677: E5 35    sbc nb_credits_0035
 F679: 8D 17 04 sta $0417
 F67C: A0 13    ldy #$13
 F67E: A2 04    ldx #$04
-F680: A5 35    lda $35
+F680: A5 35    lda nb_credits_0035
 F682: CD 16 04 cmp $0416
 F685: B0 0B    bcs $f692
 F687: A0 0B    ldy #$0b
@@ -11654,18 +11681,18 @@ F6BB: A9 01    lda #$01
 F6BD: 20 A6 D9 jsr $d9a6
 F6C0: A9 02    lda #$02
 F6C2: 20 A6 D9 jsr $d9a6
-F6C5: A5 35    lda $35
+F6C5: A5 35    lda nb_credits_0035
 F6C7: CD 16 04 cmp $0416
 F6CA: 90 46    bcc $f712
 F6CC: 20 EF D8 jsr $d8ef
 F6CF: AE 16 04 ldx $0416
 F6D2: BD 2D 02 lda bankswitch_copy_022d, x
 F6D5: 10 3B    bpl $f712
-F6D7: A5 35    lda $35
+F6D7: A5 35    lda nb_credits_0035
 F6D9: F8       sed
 F6DA: 38       sec
 F6DB: ED 16 04 sbc $0416
-F6DE: 85 35    sta $35
+F6DE: 85 35    sta nb_credits_0035
 F6E0: D8       cld
 F6E1: A9 01    lda #$01
 F6E3: 8D DB 07 sta $07db
@@ -11730,7 +11757,7 @@ F765: A5 32    lda $32
 F767: C9 01    cmp #$01
 F769: F0 01    beq $f76c
 F76B: E8       inx
-F76C: AD 04 10 lda $1004
+F76C: AD 04 10 lda dsw2_1004
 F76F: 49 FF    eor #$ff
 F771: 29 3F    and #$3f
 F773: E0 00    cpx #$00
@@ -11751,22 +11778,24 @@ F78B: 90 1D    bcc $f7aa
 F78D: A9 00    lda #$00
 F78F: 95 33    sta $33, x
 F791: A0 00    ldy #$00
-F793: A5 35    lda $35
+F793: A5 35    lda nb_credits_0035
 F795: F8       sed
 F796: 18       clc
 F797: 79 B2 F7 adc $f7b2, y
 F79A: D8       cld
 F79B: 90 02    bcc $f79f
 F79D: A9 99    lda #$99
-F79F: 85 35    sta $35
+F79F: 85 35    sta nb_credits_0035
 F7A1: A9 34    lda #$34
-F7A3: 8D 0D 10 sta $100d
+F7A3: 8D 0D 10 sta sound_100d
 F7A6: A9 04    lda #$04
 F7A8: 85 3B    sta $3b
 F7AA: A9 00    lda #$00
 F7AC: 85 32    sta $32
 F7AE: 60       rts
 
+F7B7: AD 03 10 lda dsw1_1003
+F7BA: 10 05    bpl $f7c1
 F7BC: A5 4C    lda $4c
 F7BE: 4A       lsr a
 F7BF: A8       tay
@@ -11793,7 +11822,7 @@ F7E6: A9 12    lda #$12
 F7E8: 20 DC ED jsr $eddc
 F7EB: 60       rts
 F7EC: A0 03    ldy #$03
-F7EE: AD 03 10 lda $1003
+F7EE: AD 03 10 lda dsw1_1003
 F7F1: 10 02    bpl $f7f5
 F7F3: A0 01    ldy #$01
 F7F5: B9 2E 02 lda $022e, y
@@ -11803,7 +11832,7 @@ F7FC: 88       dey
 F7FD: 10 FA    bpl $f7f9
 F7FF: 29 F0    and #$f0
 F801: 48       pha
-F802: AD 03 10 lda $1003
+F802: AD 03 10 lda dsw1_1003
 F805: 49 FF    eor #$ff
 F807: 4A       lsr a
 F808: 4A       lsr a
