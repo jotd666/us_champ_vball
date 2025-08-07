@@ -20,12 +20,7 @@
 
 bankswitch_1009 = $1009
 
-8000: B8       clv
-8001: 03 4C    slo ($4c, x)
-8003: 6C 70 A9 jmp ($a970)
-8006: 17 09    slo $09, x
-8008: 80 9D    nop #$9d
-800A: 27 03    rla $03
+
 800C: A9 00    lda #$00
 800E: 9D B8 03 sta $03b8, x
 8011: 4C 6C 70 jmp $706c
@@ -8114,387 +8109,7 @@ C188: 69 00    adc #$00
 C18A: 85 11    sta $11
 C18C: 20 09 66 jsr $6609
 C18F: 60       rts
-C190: A6 C1    ldx $c1
-C192: E6 C1    inc $c1
-C194: 26 C2    rol $c2
-C196: 66 C2    ror $c2
-C198: A6 C2    ldx $c2
-C19A: E6 C2    inc $c2
-C19C: 26 C3    rol $c3
-C19E: 66 C3    ror $c3
-C1A0: A6 C3    ldx $c3
-C1A2: E6 C3    inc $c3
-C1A4: 26 C4    rol $c4
-C1A6: 00       brk
-C1A7: 99 00 99 sta $9900, y
-C1AA: 00       brk
-C1AB: 99 40 60 sta $6040, y
-C1AE: 00       brk
-C1AF: 99 10 90 sta $9010, y
-C1B2: 20 80 50 jsr $5080
-C1B5: 50 00    bvc $c1b7
-C1B7: 99 15 85 sta $8515, y
-C1BA: 30 70    bmi $c22c
-C1BC: 60       rts
-C1BD: 40       rti
-C1BE: 00       brk
-C1BF: 99 20 80 sta $8020, y
-C1C2: 40       rti
-C1C3: 60       rts
-C1C4: 70 30    bvs $c1f6
-C1C6: 00       brk
-C1C7: 99 15 85 sta $8515, y
-C1CA: 30 70    bmi $c23c
-C1CC: 60       rts
-C1CD: 40       rti
-C1CE: 00       brk
-C1CF: 99 15 85 sta $8515, y
-C1D2: 30 70    bmi $c244
-C1D4: 60       rts
-C1D5: 40       rti
-C1D6: 00       brk
-C1D7: 99 08 92 sta $9208, y
-C1DA: 15 85    ora $85, x
-C1DC: 55 45    eor $45, x
-C1DE: 00       brk
-C1DF: 99 08 92 sta $9208, y
-C1E2: 15 85    ora $85, x
-C1E4: 55 45    eor $45, x
-C1E6: 40       rti
-C1E7: 60       rts
-C1E8: 60       rts
-C1E9: 40       rti
-C1EA: 99 00 99 sta $9900, y
-C1ED: 00       brk
-C1EE: 60       rts
-C1EF: 40       rti
-C1F0: 80 20    nop #$20
-C1F2: 99 00 99 sta $9900, y
-C1F5: 00       brk
-C1F6: 80 20    nop #$20
-C1F8: 99 00 99 sta $9900, y
-C1FB: 00       brk
-C1FC: 99 00 99 sta $9900, y
-C1FF: 00       brk
-C200: 99 00 99 sta $9900, y
-C203: 00       brk
-C204: 99 00 80 sta $8000, y
-C207: 20 99 00 jsr $0099
-C20A: 99 00 99 sta $9900, y
-C20D: 00       brk
-C20E: 80 20    nop #$20
-C210: 99 00 99 sta $9900, y
-C213: 00       brk
-C214: 99 00 50 sta $5000, y
-C217: 50 70    bvc $c289
-C219: 30 99    bmi $c1b4
-C21B: 00       brk
-C21C: 99 00 50 sta $5000, y
-C21F: 50 70    bvc $c291
-C221: 30 99    bmi $c1bc
-C223: 00       brk
-C224: 99 00 10 sta $1000, y
-C227: 90 20    bcc $c249
-C229: 80 60    nop #$60
-C22B: 40       rti
-C22C: 80 20    nop #$20
-C22E: 20 80 30 jsr $3080
-C231: 70 70    bvs $c2a3
-C233: 30 90    bmi $c1c5
-C235: 10 30    bpl $c267
-C237: 70 40    bvs $c279
-C239: 60       rts
-C23A: 80 20    nop #$20
-C23C: 99 00 40 sta $4000, y
-C23F: 60       rts
-C240: 50 50    bvc $c292
-C242: 90 10    bcc $c254
-C244: 99 00 30 sta $3000, y
-C247: 70 40    bvs $c289
-C249: 60       rts
-C24A: 80 20    nop #$20
-C24C: 99 00 30 sta $3000, y
-C24F: 70 40    bvs $c291
-C251: 60       rts
-C252: 80 20    nop #$20
-C254: 99 00 15 sta $1500, y
-C257: 85 25    sta $25
-C259: 75 65    adc $65, x
-C25B: 35 85    and $85, x
-C25D: 15 15    ora $15, x
-C25F: 85 25    sta $25
-C261: 75 65    adc $65, x
-C263: 35 85    and $85, x
-C265: 15 05    ora $05, x
-C267: 95 15    sta $15, x
-C269: 85 40    sta $40
-C26B: 60       rts
-C26C: 50 50    bvc $c2be
-C26E: 15 85    ora $85, x
-C270: 25 75    and $75
-C272: 50 50    bvc $c2c4
-C274: 60       rts
-C275: 40       rti
-C276: 25 75    and $75
-C278: 35 65    and $65, x
-C27A: 60       rts
-C27B: 40       rti
-C27C: 70 10    bvs $c28e
-C27E: 35 65    and $65, x
-C280: 45 55    eor $55
-C282: 70 30    bvs $c2b4
-C284: 90 10    bcc $c296
-C286: 25 75    and $75
-C288: 35 65    and $65, x
-C28A: 60       rts
-C28B: 40       rti
-C28C: 80 20    nop #$20
-C28E: 25 75    and $75
-C290: 35 65    and $65, x
-C292: 60       rts
-C293: 40       rti
-C294: 80 20    nop #$20
-C296: 10 90    bpl $c228
-C298: 20 80 45 jsr $4580
-C29B: 55 65    eor $65, x
-C29D: 35 10    and $10, x
-C29F: 90 20    bcc $c2c1
-C2A1: 80 45    nop #$45
-C2A3: 55 65    eor $65, x
-C2A5: 35 00    and $00, x
-C2A7: 99 10 90 sta $9010, y
-C2AA: 40       rti
-C2AB: 60       rts
-C2AC: 60       rts
-C2AD: 40       rti
-C2AE: 10 90    bpl $c240
-C2B0: 20 80 50 jsr $5080
-C2B3: 50 70    bvc $c325
-C2B5: 30 20    bmi $c2d7
-C2B7: 80 30    nop #$30
-C2B9: 70 60    bvs $c31b
-C2BB: 40       rti
-C2BC: 80 20    nop #$20
-C2BE: 30 70    bmi $c330
-C2C0: 40       rti
-C2C1: 60       rts
-C2C2: 70 30    bvs $c2f4
-C2C4: 90 10    bcc $c2d6
-C2C6: 20 80 30 jsr $3080
-C2C9: 70 60    bvs $c32b
-C2CB: 40       rti
-C2CC: 80 20    nop #$20
-C2CE: 20 80 30 jsr $3080
-C2D1: 70 60    bvs $c333
-C2D3: 40       rti
-C2D4: 80 20    nop #$20
-C2D6: 05 95    ora $95
-C2D8: 15 85    ora $85, x
-C2DA: 45 55    eor $55
-C2DC: 65 35    adc $35
-C2DE: 05 95    ora $95
-C2E0: 15 85    ora $85, x
-C2E2: 45 55    eor $55
-C2E4: 65 35    adc $35
-C2E6: 00       brk
-C2E7: 99 00 99 sta $9900, y
-C2EA: 30 70    bmi $c35c
-C2EC: 50 50    bvc $c33e
-C2EE: 00       brk
-C2EF: 99 10 90 sta $9010, y
-C2F2: 40       rti
-C2F3: 60       rts
-C2F4: 60       rts
-C2F5: 40       rti
-C2F6: 10 90    bpl $c288
-C2F8: 20 80 50 jsr $5080
-C2FB: 50 70    bvc $c36d
-C2FD: 30 20    bmi $c31f
-C2FF: 80 30    nop #$30
-C301: 70 60    bvs $c363
-C303: 40       rti
-C304: 80 20    nop #$20
-C306: 10 90    bpl $c298
-C308: 20 80 50 jsr $5080
-C30B: 50 70    bvc $c37d
-C30D: 30 10    bmi $c31f
-C30F: 90 20    bcc $c331
-C311: 80 50    nop #$50
-C313: 50 70    bvc $c385
-C315: 30 00    bmi $c317
-C317: 99 05 95 sta $9505, y
-C31A: 35 65    and $65, x
-C31C: 55 45    eor $45, x
-C31E: 00       brk
-C31F: 99 05 95 sta $9505, y
-C322: 35 65    and $65, x
-C324: 55 45    eor $45, x
-C326: 00       brk
-C327: 99 00 99 sta $9900, y
-C32A: 20 80 40 jsr $4080
-C32D: 60       rts
-C32E: 00       brk
-C32F: 99 00 99 sta $9900, y
-C332: 30 70    bmi $c3a4
-C334: 50 50    bvc $c386
-C336: 00       brk
-C337: 99 10 90 sta $9010, y
-C33A: 40       rti
-C33B: 60       rts
-C33C: 60       rts
-C33D: 40       rti
-C33E: 10 90    bpl $c2d0
-C340: 20 80 50 jsr $5080
-C343: 50 70    bvc $c3b5
-C345: 30 00    bmi $c347
-C347: 99 10 90 sta $9010, y
-C34A: 40       rti
-C34B: 60       rts
-C34C: 60       rts
-C34D: 40       rti
-C34E: 00       brk
-C34F: 99 10 90 sta $9010, y
-C352: 40       rti
-C353: 60       rts
-C354: 60       rts
-C355: 40       rti
-C356: 00       brk
-C357: 99 00 99 sta $9900, y
-C35A: 25 75    and $75
-C35C: 45 55    eor $55
-C35E: 00       brk
-C35F: 99 00 99 sta $9900, y
-C362: 25 75    and $75
-C364: 45 55    eor $55
-C366: 00       brk
-C367: 99 00 99 sta $9900, y
-C36A: 10 90    bpl $c2fc
-C36C: 30 70    bmi $c3de
-C36E: 00       brk
-C36F: 99 00 99 sta $9900, y
-C372: 20 80 40 jsr $4080
-C375: 60       rts
-C376: 00       brk
-C377: 99 00 99 sta $9900, y
-C37A: 30 70    bmi $c3ec
-C37C: 50 50    bvc $c3ce
-C37E: 00       brk
-C37F: 99 10 90 sta $9010, y
-C382: 40       rti
-C383: 60       rts
-C384: 60       rts
-C385: 40       rti
-C386: 00       brk
-C387: 99 00 99 sta $9900, y
-C38A: 30 70    bmi $c3fc
-C38C: 50 50    bvc $c3de
-C38E: 00       brk
-C38F: 99 00 99 sta $9900, y
-C392: 30 70    bmi $c404
-C394: 50 50    bvc $c3e6
-C396: 00       brk
-C397: 99 00 99 sta $9900, y
-C39A: 15 85    ora $85, x
-C39C: 35 65    and $65, x
-C39E: 00       brk
-C39F: 99 00 99 sta $9900, y
-C3A2: 15 85    ora $85, x
-C3A4: 35 65    and $65, x
-C3A6: 00       brk
-C3A7: 99 00 99 sta $9900, y
-C3AA: 00       brk
-C3AB: 99 20 80 sta $8020, y
-C3AE: 00       brk
-C3AF: 99 00 99 sta $9900, y
-C3B2: 10 90    bpl $c344
-C3B4: 30 70    bmi $c426
-C3B6: 00       brk
-C3B7: 99 00 99 sta $9900, y
-C3BA: 20 80 40 jsr $4080
-C3BD: 60       rts
-C3BE: 00       brk
-C3BF: 99 00 99 sta $9900, y
-C3C2: 30 70    bmi $c434
-C3C4: 50 50    bvc $c416
-C3C6: 00       brk
-C3C7: 99 00 99 sta $9900, y
-C3CA: 20 80 40 jsr $4080
-C3CD: 60       rts
-C3CE: 00       brk
-C3CF: 99 00 99 sta $9900, y
-C3D2: 20 80 40 jsr $4080
-C3D5: 60       rts
-C3D6: 00       brk
-C3D7: 99 00 99 sta $9900, y
-C3DA: 05 95    ora $95
-C3DC: 25 75    and $75
-C3DE: 00       brk
-C3DF: 99 00 99 sta $9900, y
-C3E2: 05 95    ora $95
-C3E4: 25 75    and $75
-C3E6: 00       brk
-C3E7: 99 00 99 sta $9900, y
-C3EA: 00       brk
-C3EB: 99 10 90 sta $9010, y
-C3EE: 00       brk
-C3EF: 99 00 99 sta $9900, y
-C3F2: 00       brk
-C3F3: 99 20 80 sta $8020, y
-C3F6: 00       brk
-C3F7: 99 00 99 sta $9900, y
-C3FA: 10 90    bpl $c38c
-C3FC: 30 70    bmi $c46e
-C3FE: 00       brk
-C3FF: 99 00 99 sta $9900, y
-C402: 20 80 40 jsr $4080
-C405: 60       rts
-C406: 00       brk
-C407: 99 00 99 sta $9900, y
-C40A: 10 90    bpl $c39c
-C40C: 30 70    bmi $c47e
-C40E: 00       brk
-C40F: 99 00 99 sta $9900, y
-C412: 10 90    bpl $c3a4
-C414: 30 70    bmi $c486
-C416: 00       brk
-C417: 99 00 99 sta $9900, y
-C41A: 00       brk
-C41B: 99 15 85 sta $8515, y
-C41E: 00       brk
-C41F: 99 00 99 sta $9900, y
-C422: 00       brk
-C423: 99 15 85 sta $8515, y
-C426: 00       brk
-C427: 99 00 99 sta $9900, y
-C42A: 00       brk
-C42B: 99 00 99 sta $9900, y
-C42E: 00       brk
-C42F: 99 00 99 sta $9900, y
-C432: 00       brk
-C433: 99 10 90 sta $9010, y
-C436: 00       brk
-C437: 99 00 99 sta $9900, y
-C43A: 00       brk
-C43B: 99 20 80 sta $8020, y
-C43E: 00       brk
-C43F: 99 00 99 sta $9900, y
-C442: 10 90    bpl $c3d4
-C444: 30 70    bmi $c4b6
-C446: 00       brk
-C447: 99 00 99 sta $9900, y
-C44A: 00       brk
-C44B: 99 20 80 sta $8020, y
-C44E: 00       brk
-C44F: 99 00 99 sta $9900, y
-C452: 00       brk
-C453: 99 20 80 sta $8020, y
-C456: 00       brk
-C457: 99 00 99 sta $9900, y
-C45A: 00       brk
-C45B: 99 05 95 sta $9505, y
-C45E: 00       brk
-C45F: 99 00 99 sta $9900, y
-C462: 00       brk
+
 C463: 99 05 95 sta $9505, y
 C466: E6 53    inc $53
 C468: A9 10    lda #$10
@@ -10785,10 +10400,10 @@ D8D8: 8D 2C 02 sta $022c
 D8DB: 8D 08 10 sta $1008
 D8DE: 60       rts
 D8DF: 85 00    sta $00
-D8E1: AD 2D 02 lda $022d
+D8E1: AD 2D 02 lda bankswitch_copy_022d
 D8E4: 29 F8    and #$f8
 D8E6: 05 00    ora $00
-D8E8: 8D 2D 02 sta $022d
+D8E8: 8D 2D 02 sta bankswitch_copy_022d
 D8EB: 8D 09 10 sta bankswitch_1009
 D8EE: 60       rts
 D8EF: 98       tya
@@ -10850,31 +10465,8 @@ D980: 8D 35 02 sta $0235
 D983: 68       pla
 D984: A8       tay
 D985: 60       rts
-D986: 00       brk
-D987: 04 08    nop $08
-D989: 00       brk
-D98A: 02       kil
-D98B: 06 0A    asl $0a
-D98D: 00       brk
-D98E: 01 05    ora ($05, x)
-D990: 09 00    ora #$00
-D992: 00       brk
-D993: 00       brk
-D994: 00       brk
-D995: 00       brk
-D996: 00       brk
-D997: 08       php
-D998: 04 00    nop $00
-D99A: 01 09    ora ($09, x)
-D99C: 05 00    ora $00
-D99E: 02       kil
-D99F: 0A       asl a
-D9A0: 06 00    asl $00
-D9A2: 00       brk
-D9A3: 00       brk
-D9A4: 00       brk
-D9A5: 00       brk
-D9A6: 85 0C    sta $0c
+
+
 D9A8: 8A       txa
 D9A9: 48       pha
 D9AA: 98       tya
@@ -10963,42 +10555,7 @@ DA40: E6 12    inc $12
 DA42: D0 02    bne $da46
 DA44: E6 13    inc $13
 DA46: 60       rts
-DA47: B3 2B    lax ($2b), y
-DA49: 02       kil
-DA4A: 35 00    and $00, x
-DA4C: 00       brk
-DA4D: 80 91    nop #$91
-DA4F: 29 02    and #$02
-DA51: 55 00    eor $00, x
-DA53: 40       rti
-DA54: 00       brk
-DA55: 53 2A    sre ($2a), y
-DA57: 02       kil
-DA58: 35 00    and $00, x
-DA5A: 40       rti
-DA5B: 00       brk
-DA5C: C8       iny
-DA5D: 29 01    and #$01
-DA5F: 17 04    slo $04, x
-DA61: 40       rti
-DA62: 00       brk
-DA63: 0E 2A 01 asl $012a
-DA66: 16 04    asl $04, x
-DA68: 40       rti
-DA69: 00       brk
-DA6A: 51 2A    eor ($2a), y
-DA6C: 06 1C    asl $1c
-DA6E: 04 40    nop $40
-DA70: 00       brk
-DA71: FB 28 02 isb $0228, y
-DA74: 55 00    eor $00, x
-DA76: 40       rti
-DA77: 00       brk
-DA78: 73 2B    rra ($2b), y
-DA7A: 02       kil
-DA7B: 35 00    and $00, x
-DA7D: 40       rti
-DA7E: 00       brk
+
 DA7F: 85 0F    sta $0f
 DA81: 85 10    sta $10
 DA83: 8A       txa
@@ -11721,90 +11278,7 @@ E477: A9 01    lda #$01
 E479: A0 05    ldy #$05
 E47B: 91 14    sta ($14), y
 E47D: 60       rts
-E47E: 28       plp
-E47F: 04 4E    nop $4e
-E481: 04 74    nop $74
-E483: 04 9A    nop $9a
-E485: 04 C0    nop $c0
-E487: 04 CE    nop $ce
-E489: 04 EC    nop $ec
-E48B: 04 36    nop $36
-E48D: 05 7C    ora $7c
-E48F: 05 C2    ora $c2
-E491: 05 08    ora $08
-E493: 06 4E    asl $4e
-E495: 06 94    asl $94
-E497: 06 A2    asl $a2
-E499: 06 B0    asl $b0
-E49B: 06 BE    asl $be
-E49D: 06 CC    asl $cc
-E49F: 06 00    asl $00
-E4A1: 00       brk
-E4A2: 00       brk
-E4A3: 00       brk
-E4A4: 00       brk
-E4A5: 00       brk
-E4A6: 00       brk
-E4A7: 00       brk
-E4A8: 00       brk
-E4A9: 00       brk
-E4AA: 00       brk
-E4AB: 00       brk
-E4AC: 00       brk
-E4AD: 00       brk
-E4AE: 06 00    asl $00
-E4B0: 00       brk
-E4B1: 00       brk
-E4B2: 00       brk
-E4B3: 00       brk
-E4B4: 00       brk
-E4B5: 00       brk
-E4B6: 00       brk
-E4B7: 00       brk
-E4B8: 00       brk
-E4B9: 00       brk
-E4BA: 00       brk
-E4BB: 00       brk
-E4BC: 00       brk
-E4BD: 00       brk
-E4BE: 00       brk
-E4BF: 00       brk
-E4C0: 04 04    nop $04
-E4C2: 05 00    ora $00
-E4C4: 00       brk
-E4C5: 00       brk
-E4C6: 03 03    slo ($03, x)
-E4C8: 03 02    slo ($02, x)
-E4CA: 02       kil
-E4CB: 02       kil
-E4CC: 00       brk
-E4CD: 00       brk
-E4CE: 00       brk
-E4CF: 00       brk
-E4D0: 00       brk
-E4D1: 00       brk
-E4D2: 00       brk
-E4D3: 00       brk
-E4D4: 00       brk
-E4D5: 00       brk
-E4D6: 00       brk
-E4D7: 00       brk
-E4D8: 00       brk
-E4D9: 00       brk
-E4DA: 00       brk
-E4DB: 00       brk
-E4DC: 00       brk
-E4DD: 00       brk
-E4DE: 00       brk
-E4DF: 00       brk
-E4E0: 00       brk
-E4E1: 00       brk
-E4E2: 00       brk
-E4E3: 00       brk
-E4E4: 00       brk
-E4E5: 00       brk
-E4E6: 00       brk
-E4E7: 00       brk
+
 E4E8: A9 00    lda #$00
 E4EA: 85 1B    sta $1b
 E4EC: 85 1C    sta $1c
@@ -12267,82 +11741,7 @@ E888: 8D 61 2C sta $2c61
 E88B: B9 B8 E8 lda $e8b8, y
 E88E: 8D 62 2C sta $2c62
 E891: 60       rts
-E892: D7 DA    dcp $da, x
-E894: C7 CE    dcp $ce
-E896: C8       iny
-E897: CF C9 D0 dcp $d0c9
-E89A: CA       dex
-E89B: D1 CB    cmp ($cb), y
-E89D: D2       kil
-E89E: CC D3 CD cpy $cdd3
-E8A1: D4 D5    nop $d5, x
-E8A3: D8       cld
-E8A4: D6 D9    dec $d9, x
-E8A6: C6 C6    dec $c6
-E8A8: C6 C6    dec $c6
-E8AA: C5 C6    cmp $c6
-E8AC: C5 C5    cmp $c5
-E8AE: 09 1D    ora #$1d
-E8B0: 24 2A    bit $2a
-E8B2: 08       php
-E8B3: 07 04    slo $04
-E8B5: 0A       asl a
-E8B6: 32       kil
-E8B7: A0 AB    ldy #$ab
-E8B9: A0 AA    ldy #$aa
-E8BB: A0 B9    ldy #$b9
-E8BD: A0 B1    ldy #$b1
-E8BF: A2 A0    ldx #$a0
-E8C1: A2 AE    ldx #$ae
-E8C3: A2 B3    ldx #$b3
-E8C5: A3 A4    lax ($a4, x)
-E8C7: A5 AB    lda $ab
-E8C9: A6 A0    ldx $a0
-E8CB: A7 A8    lax $a8
-E8CD: A8       tay
-E8CE: A3 A8    lax ($a8, x)
-E8D0: AB A8    lxa #$a8
-E8D2: AD A8 A0 lda $a0a8
-E8D5: AA       tax
-E8D6: B2       kil
-E8D7: AA       tax
-E8D8: B8       clv
-E8D9: AB A0    lxa #$a0
-E8DB: AC A4 AC ldy $aca4
-E8DE: A3 AC    lax ($ac, x)
-E8E0: A0 AC    ldy #$ac
-E8E2: A8       tay
-E8E3: AC AD AC ldy $acad
-E8E6: B2       kil
-E8E7: AC AE AC ldy $acae
-E8EA: B3 AD    lax ($ad), y
-E8EC: A4 AD    ldy $ad
-E8EE: B5 AD    lda $ad, x
-E8F0: A7 AD    lax $ad
-E8F2: A9 AD    lda #$ad
-E8F4: AC AD B8 ldy $b8ad
-E8F7: AD A2 AD lda $ada2
-E8FA: A3 AE    lax ($ae, x)
-E8FC: A7 AE    lax $ae
-E8FE: AA       tax
-E8FF: AE B1 AF ldx $afb1
-E902: A0 B1    ldy #$b1
-E904: A8       tay
-E905: B2       kil
-E906: A2 B2    ldx #$b2
-E908: A3 B3    lax ($b3, x)
-E90A: AD B3 B7 lda $b7b3
-E90D: B4 B3    ldy $b3, x
-E90F: B5 B3    lda $b3, x
-E911: B5 A0    lda $a0, x
-E913: B6 A0    ldx $a0, y
-E915: B6 B5    ldx $b5, y
-E917: B6 A8    ldx $a8, y
-E919: B6 B8    ldx $b8, y
-E91B: B4 B2    ldy $b2, x
-E91D: BA       tsx
-E91E: AF BB AF lax $afbb
-E921: C6 C6    dec $c6
+
 E923: AD DB 07 lda $07db
 E926: D0 01    bne $e929
 E928: 60       rts
@@ -12561,10 +11960,10 @@ EAEF: 8D 2C 02 sta $022c
 EAF2: 8D 08 10 sta $1008
 EAF5: A9 00    lda #$00
 EAF7: 8D 0E 10 sta $100e
-EAFA: AD 2D 02 lda $022d
+EAFA: AD 2D 02 lda bankswitch_copy_022d
 EAFD: 09 40    ora #$40
 EAFF: 8D 09 10 sta bankswitch_1009
-EB02: 8D 2D 02 sta $022d
+EB02: 8D 2D 02 sta bankswitch_copy_022d
 EB05: 60       rts
 EB06: AD DE 07 lda $07de
 EB09: 38       sec
@@ -12582,17 +11981,17 @@ EB22: 8D 2C 02 sta $022c
 EB25: 8D 08 10 sta $1008
 EB28: AD E0 07 lda $07e0
 EB2B: F0 14    beq $eb41
-EB2D: AD 2D 02 lda $022d
+EB2D: AD 2D 02 lda bankswitch_copy_022d
 EB30: 29 BF    and #$bf
-EB32: 8D 2D 02 sta $022d
+EB32: 8D 2D 02 sta bankswitch_copy_022d
 EB35: 8D 09 10 sta bankswitch_1009
 EB38: AD E0 07 lda $07e0
 EB3B: 49 FF    eor #$ff
 EB3D: 8D 0E 10 sta $100e
 EB40: 60       rts
-EB41: AD 2D 02 lda $022d
+EB41: AD 2D 02 lda bankswitch_copy_022d
 EB44: 09 40    ora #$40
-EB46: 8D 2D 02 sta $022d
+EB46: 8D 2D 02 sta bankswitch_copy_022d
 EB49: 8D 09 10 sta bankswitch_1009
 EB4C: A9 00    lda #$00
 EB4E: 8D 0E 10 sta $100e
@@ -12607,10 +12006,10 @@ EB61: AD DB 07 lda $07db
 EB64: 8D DC 07 sta $07dc
 EB67: A9 FF    lda #$ff
 EB69: 8D DB 07 sta $07db
-EB6C: AD 2D 02 lda $022d
+EB6C: AD 2D 02 lda bankswitch_copy_022d
 EB6F: 29 BF    and #$bf
 EB71: 8D 09 10 sta bankswitch_1009
-EB74: 8D 2D 02 sta $022d
+EB74: 8D 2D 02 sta bankswitch_copy_022d
 EB77: 20 35 CF jsr $cf35
 EB7A: AC E4 07 ldy $07e4
 EB7D: AD 2C 02 lda $022c
@@ -12618,10 +12017,10 @@ EB80: 29 E3    and #$e3
 EB82: 19 CB EB ora $ebcb, y
 EB85: 8D 2C 02 sta $022c
 EB88: 8D 08 10 sta $1008
-EB8B: AD 2D 02 lda $022d
+EB8B: AD 2D 02 lda bankswitch_copy_022d
 EB8E: 29 DF    and #$df
 EB90: 19 DE EB ora $ebde, y
-EB93: 8D 2D 02 sta $022d
+EB93: 8D 2D 02 sta bankswitch_copy_022d
 EB96: 8D 09 10 sta bankswitch_1009
 EB99: 60       rts
 EB9A: AC DC 07 ldy $07dc
@@ -12635,36 +12034,13 @@ EBAE: 8D 2C 02 sta $022c
 EBB1: 8D 08 10 sta $1008
 EBB4: A9 00    lda #$00
 EBB6: 8D 0E 10 sta $100e
-EBB9: AD 2D 02 lda $022d
+EBB9: AD 2D 02 lda bankswitch_copy_022d
 EBBC: 09 40    ora #$40
 EBBE: 8D 09 10 sta bankswitch_1009
-EBC1: 8D 2D 02 sta $022d
+EBC1: 8D 2D 02 sta bankswitch_copy_022d
 EBC4: 60       rts
-EBC5: FC 80 FC nop $fc80, x
-EBC8: 02       kil
-EBC9: 00       brk
-EBCA: 02       kil
-EBCB: 00       brk
-EBCC: 04 08    nop $08
-EBCE: 0C 10 1C nop $1c10
-EBD1: 18       clc
-EBD2: 18       clc
-EBD3: 18       clc
-EBD4: 14 14    nop $14, x
-EBD6: 1C 1C 18 nop $181c, x
-EBD9: 18       clc
-EBDA: 1C 1C 1C nop $1c1c, x
-EBDD: 00       brk
-EBDE: 00       brk
-EBDF: 00       brk
-EBE0: 00       brk
-EBE1: 00       brk
-EBE2: 00       brk
-EBE3: 20 20 20 jsr $2020
-EBE6: 20 20 20 jsr $2020
-EBE9: 20 20 20 jsr $2020
-EBEC: 20 20 20 jsr $2020
-EBEF: 20 00 A9 jsr $a900
+
+
 EBF2: 0A       asl a
 EBF3: 8D E4 07 sta $07e4
 EBF6: 20 5E EB jsr $eb5e
@@ -13979,7 +13355,7 @@ F6C7: CD 16 04 cmp $0416
 F6CA: 90 46    bcc $f712
 F6CC: 20 EF D8 jsr $d8ef
 F6CF: AE 16 04 ldx $0416
-F6D2: BD 2D 02 lda $022d, x
+F6D2: BD 2D 02 lda bankswitch_copy_022d, x
 F6D5: 10 3B    bpl $f712
 F6D7: A5 35    lda $35
 F6D9: F8       sed
