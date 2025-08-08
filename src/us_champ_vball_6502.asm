@@ -887,6 +887,10 @@ bankswitch_copy_022d = $022d
 6335: 85 1C    sta $1c
 6337: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 
+6362: A5 56    lda $56
+6364: 29 0F    and #$0f
+6366: 38       sec
+6367: E9 02    sbc #$02
 6369: 30 0F    bmi $637a
 636B: C9 03    cmp #$03
 636D: B0 0B    bcs $637a
@@ -3868,7 +3872,9 @@ bankswitch_copy_022d = $022d
 7FF0: 9D B8 03 sta $03b8, x
 7FF3: 4C 6C 70 jmp $706c
 
-
+8005: A9 17    lda #$17
+8007: 09 80    ora #$80
+8009: 9D 27 03 sta $0327, x
 800C: A9 00    lda #$00
 800E: 9D B8 03 sta $03b8, x
 8011: 4C 6C 70 jmp $706c
@@ -4348,6 +4354,7 @@ bankswitch_copy_022d = $022d
 8436: 38       sec
 8437: 60       rts
 
+843E: D0 17    bne $8457
 8440: AD F0 03 lda $03f0
 8443: 85 1B    sta $1b
 8445: AD EF 03 lda $03ef
@@ -5698,6 +5705,9 @@ bankswitch_copy_022d = $022d
 9186: 6C 10 00 jmp ($0010)        ; [indirect_jump]
 9189: 60       rts
 
+91D8: BD 1A 03 lda $031a, x
+91DB: 29 7F    and #$7f
+91DD: C9 0A    cmp #$0a
 91DF: F0 04    beq $91e5
 91E1: C9 0B    cmp #$0b
 91E3: D0 09    bne $91ee
@@ -5816,6 +5826,10 @@ callback_92d1:
 92DC: 20 1C 9C jsr $9c1c
 92DF: 4C 89 91 jmp $9189
 
+92F0: A0 20    ldy #$20
+92F2: BD 37 03 lda $0337, x
+92F5: 29 40    and #$40
+92F7: F0 02    beq $92fb
 92F9: A0 60    ldy #$60
 92FB: BD 37 03 lda $0337, x
 92FE: 30 07    bmi $9307
@@ -6623,7 +6637,9 @@ callback_92d1:
 9AB8: 20 8D 9D jsr $9d8d
 9ABB: 4C 89 91 jmp $9189
 
-9ACB: 20 95 A1 jsr $95a1
+9AC6: BD 1A 03 lda $031a, x
+9AC9: 30 03    bmi $9ace
+9ACB: 20 95 A1 jsr $a195
 9ACE: 20 8D 9D jsr $9d8d
 9AD1: 4C 89 91 jmp $9189
 9AD4: BD 1A 03 lda $031a, x
@@ -7115,8 +7131,10 @@ A309: C9 0C    cmp #$0c
 A30B: 90 D7    bcc $a2e4
 A30D: 60       rts
 
-A329: 4C 38 E9 jmp $e938
-
+A328: A5 4C    lda $4c
+A32A: 38       sec
+A32B: E9 07    sbc #$07
+A32D: A8       tay
 A32E: BD 1A 03 lda $031a, x
 A331: 29 3F    and #$3f
 A333: 0A       asl a
@@ -7480,7 +7498,10 @@ A658: 85 1C    sta $1c
 A65A: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 A65D: 60       rts
 
-A671: 18       clc
+A668: BD 1A 03 lda $031a, x
+A66B: 30 1D    bmi $a68a
+A66D: 20 1F A7 jsr $a71f
+A670: A9 18    lda #$18
 A672: 95 65    sta $65, x
 A674: A9 00    lda #$00
 A676: 95 8F    sta $8f, x
@@ -7550,6 +7571,9 @@ A6FA: 9D D6 02 sta $02d6, x
 A6FD: FE F0 02 inc $02f0, x
 A700: 4C 5D A6 jmp $a65d
 
+A71F: BD 1A 03 lda $031a, x
+A722: 09 80    ora #$80
+A724: 9D 1A 03 sta $031a, x
 A727: A9 00    lda #$00
 A729: 9D D6 02 sta $02d6, x
 A72C: 9D F0 02 sta $02f0, x
@@ -7807,6 +7831,11 @@ A95C: 85 4C    sta $4c
 A95E: 20 F3 DF jsr $dff3
 A961: 60       rts
 
+A9A2: 85 1B    sta $1b
+A9A4: 8A       txa
+A9A5: 48       pha
+A9A6: 98       tya
+A9A7: 48       pha
 A9A8: A5 4C    lda $4c
 A9AA: 18       clc
 A9AB: 69 07    adc #$07
@@ -7994,6 +8023,8 @@ AB9A: A9 00    lda #$00
 AB9C: 95 65    sta $65, x
 AB9E: 60       rts
 
+ABF8: 8A       txa
+ABF9: 48       pha
 ABFA: 98       tya
 ABFB: 48       pha
 ABFC: 8A       txa
@@ -8608,6 +8639,7 @@ B155: 20 0F B4 jsr $b40f
 B158: B0 CE    bcs $b128
 B15A: 90 C4    bcc $b120	; unconditional jump
 
+B17C: A5 00    lda $00
 B17E: 29 10    and #$10
 B180: F0 7A    beq $b1fc
 B182: BD 1A 03 lda $031a, x
@@ -9070,8 +9102,8 @@ B536: 68       pla
 B537: AA       tax
 B538: A5 1D    lda $1d
 B53A: 60       rts
-B53B: 20 E0 E0 jsr $e0e0
-B53E: 20 A5 10 jsr $10a5
+
+B53F: A5 10    lda $10
 B541: 48       pha
 B542: A5 11    lda $11
 B544: 48       pha
@@ -9271,6 +9303,7 @@ B6B1: A9 20    lda #$20
 B6B3: 95 02    sta $02, x
 B6B5: 60       rts
 
+B6BE: A2 00    ldx #$00
 B6C0: A0 00    ldy #$00
 B6C2: A9 00    lda #$00
 B6C4: 85 11    sta $11
@@ -14278,7 +14311,7 @@ EBC1: 8D 2D 02 sta bankswitch_copy_022d
 EBC4: 60       rts
 
 
-EBF2: 0A       asl a
+EBF1: A9 0A    lda #$0a
 EBF3: 8D E4 07 sta $07e4
 EBF6: 20 5E EB jsr $eb5e
 EBF9: 20 9D EC jsr $ec9d
@@ -15753,7 +15786,6 @@ table_5eb0:
 	dc.w	$5eda	; $5eca
 	dc.w	$5f32	; $5ecc
 	dc.w	$5eda	; $5ece
-	dc.w	$7020	; $5ed0
 table_633a:
 	dc.w	$6362	; $633a
 	dc.w	$6381	; $633c
@@ -15839,7 +15871,6 @@ table_6bba:
 	dc.w	$6bb7	; $6bf8
 	dc.w	$6bb7	; $6bfa
 	dc.w	$6bb7	; $6bfc
-	dc.w	$4a8a	; $6bfe
 table_707a:
 	dc.w	$70a6	; $707a
 	dc.w	$70a6	; $707c
@@ -15862,25 +15893,25 @@ table_707a:
 	dc.w	$7eff	; $709e
 	dc.w	$7f13	; $70a0
 table_7345:
-	dc.w	$7345	; $7345
+	dc.w	table_7345	; $7345
 	dc.w	$738c	; $7347
 	dc.w	$7391	; $7349
 	dc.w	$7396	; $734b
 table_7430:
-	dc.w	$7430	; $7430
+	dc.w	table_7430	; $7430
 	dc.w	$7444	; $7432
 	dc.w	$74a2	; $7434
 	dc.w	$74a7	; $7436
 	dc.w	$74ae	; $7438
 table_756d:
-	dc.w	$756d	; $756d
+	dc.w	table_756d	; $756d
 	dc.w	$75a6	; $756f
 	dc.w	$75ab	; $7571
 	dc.w	$75fa	; $7573
 	dc.w	$75ff	; $7575
 	dc.w	$760b	; $7577
 table_76d6:
-	dc.w	$76d6	; $76d6
+	dc.w	table_76d6	; $76d6
 	dc.w	$7727	; $76d8
 	dc.w	$772c	; $76da
 	dc.w	$7785	; $76dc
@@ -15888,13 +15919,13 @@ table_76d6:
 	dc.w	$778f	; $76e0
 	dc.w	$7840	; $76e2
 table_788d:
-	dc.w	$788d	; $788d
+	dc.w	table_788d	; $788d
 	dc.w	$78e4	; $788f
 	dc.w	$78e4	; $7891
 	dc.w	$7909	; $7893
 	dc.w	$7909	; $7895
 table_79da:
-	dc.w	$79da	; $79da
+	dc.w	table_79da	; $79da
 	dc.w	$7ae5	; $79dc
 	dc.w	$7b16	; $79de
 	dc.w	$7b23	; $79e0
@@ -15904,7 +15935,7 @@ table_79da:
 	dc.w	$7aae	; $79e8
 	dc.w	$7d45	; $79ea
 table_7f44:
-	dc.w	$7f44	; $7f44
+	dc.w	table_7f44	; $7f44
 	dc.w	$7f66	; $7f46
 	dc.w	$7f75	; $7f48
 	dc.w	$7f85	; $7f4a
@@ -16029,8 +16060,6 @@ table_ba8c:
 	dc.w	$bc97	; $baac
 	dc.w	$e0ad	; $baae
 	dc.w	$c903	; $bab0
-	dc.w	$d008	; $bab2
-	dc.w	$ad13	; $bab4
 table_be61:
 	dc.w	$c50e	; $be61
 	dc.w	$c466	; $be63
