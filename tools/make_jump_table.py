@@ -2,17 +2,21 @@
 # - tag the jump/jsr calls
 # - name the jump tables and dump their contents as words in the end of the file
 
-import pathlib
+import pathlib,re
 
-def process(asm_file,rom_file,offset,end_address):
+def process(asm_file,rom_file,banked_rom,offset,end_address):
     with open(asm_file) as f:
         asm_lines = f.readlines()
 
     with open(rom_file,"rb") as f:
         rom = f.read()
+    with open(banked_rom,"rb") as f:
+        brom = f.read()
 
 
     size = 0x100
+
+    known_tables = set()
 
     # first pass: add "jump_table" tag
     for i,line in enumerate(asm_lines):
@@ -22,6 +26,8 @@ def process(asm_file,rom_file,offset,end_address):
             else:
                 line = line.strip() + "        ; [indirect_jump]\n"
                 asm_lines[i] = line
+        if re.match("^\w*table_\w+:",line):
+            known_tables.add(line.strip().strip(":"))
 
     # second pass: find tag, then previous LDx instruction to get table address
     # create a label for table at the previous LDx instruction that matches the
@@ -37,6 +43,9 @@ def process(asm_file,rom_file,offset,end_address):
                     dest = toks[0][-5:].strip("_")
                     break
             if dest:
+                if dest in known_tables:
+                    continue   # already declared
+
                 if "table_" in dest:
                     # already processed, re-process
                     dest = dest.replace("table_","")
@@ -45,14 +54,24 @@ def process(asm_file,rom_file,offset,end_address):
                 except ValueError:
                     print(f"no table {i}")
                     raise
-                block = rom[table_address-offset:table_address-offset+size]
+                if table_address > 0x8000:
+                    data = rom
+                    sub = offset
+                    end = end_address
+
+                else:
+                    data = brom
+                    sub = 0x4000
+                    end = 0x8000
+
+                block = data[table_address-sub:table_address-sub+size]
                 label = f"table_{table_address:04x}"
                 asm_lines[j] = asm_lines[j].replace(dest,label).replace("table_table","table")
 
                 asm_lines.append(f"{label}:\n")
                 for i in range(0,len(block),2):
                     a = block[i] + block[i+1]*256   # little endian!
-                    if offset > a or a >= end_address:
+                    if sub > a or a >= end:
                         break
                     asm_lines.append(f"\tdc.w\t${a:04x}\t; ${table_address:04x}\n")
                     table_address += 2
@@ -62,4 +81,4 @@ def process(asm_file,rom_file,offset,end_address):
     with open(asm_file.stem + "_new.asm","w") as f:
         f.writelines(asm_lines)
 
-process(pathlib.Path("../src/us_champ_vball_6502.asm"),"../assets/mame/rom.bin",offset=0x8000,end_address=0x10000)
+process(pathlib.Path("../src/us_champ_vball_6502.asm"),"../assets/mame/rom.bin","../assets/mame/bank0.bin",offset=0x8000,end_address=0x10000)
