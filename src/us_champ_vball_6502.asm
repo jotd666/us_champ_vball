@@ -3251,8 +3251,7 @@ bankswitch_copy_022d = $022d
 79D5: 85 1C    sta $1c
 79D7: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 
-79E8: AE 7A 45 ldx $457a
-79EB: 7D 09 80 adc $8009, x
+79EC: 09 80    ora #$80
 79EE: 9D 16 03 sta $0316, x
 79F1: A9 00    lda #$00
 79F3: 9D B8 03 sta $03b8, x
@@ -4180,6 +4179,7 @@ bankswitch_copy_022d = $022d
 82DC: 18       clc
 82DD: 60       rts
 
+82EA: BD B0 03 lda $03b0, x
 82ED: 18       clc
 82EE: 69 03    adc #$03
 82F0: CD 06 04 cmp $0406
@@ -4913,6 +4913,8 @@ bankswitch_copy_022d = $022d
 89BF: 85 1D    sta $1d
 89C1: 60       rts
 
+89D7: 86 1B    stx $1b
+89D9: 8A       txa
 89DA: 48       pha
 89DB: A9 0D    lda #$0d
 89DD: 85 1C    sta $1c
@@ -7209,7 +7211,10 @@ A3CB: F0 03    beq $a3d0
 A3CD: 20 29 A6 jsr $a629
 A3D0: 4C 05 A3 jmp $a305
 
-A3E9: 29 A6    and #$a6
+A3E1: B9 0E 03 lda $030e, y
+A3E4: 29 10    and #$10
+A3E6: D0 03    bne $a3eb
+A3E8: 20 29 A6 jsr $a629
 A3EB: 4C 44 A3 jmp $a344
 A3EE: B9 1A 03 lda $031a, y
 A3F1: 29 7F    and #$7f
@@ -7967,6 +7972,8 @@ AA8A: 68       pla
 AA8B: AA       tax
 AA8C: 60       rts
 
+AB1D: A2 07    ldx #$07
+AB1F: 86 4C    stx $4c
 AB21: A6 4C    ldx $4c
 AB23: BD 1A 03 lda $031a, x
 AB26: 10 09    bpl $ab31
@@ -8174,7 +8181,8 @@ AD04: C9 FF    cmp #$ff
 AD06: D0 BC    bne $acc4
 AD08: 60       rts
 
-
+AD82: A2 07    ldx #$07
+AD84: 86 4C    stx $4c
 AD86: A6 4C    ldx $4c
 AD88: BD 1A 03 lda $031a, x
 AD8B: 10 09    bpl $ad96
@@ -9613,8 +9621,8 @@ B97A: A8       tay
 B97B: 60       rts
 
 
-B9FB: 46 29    lsr $29
-B9FD: 08       php
+B9FA: A5 46    lda $46
+B9FC: 29 08    and #$08
 B9FE: D0 79    bne $ba79
 BA00: A9 04    lda #$04
 BA02: 85 4C    sta $4c
@@ -15807,7 +15815,6 @@ table_633a:
 	dc.w	$649f	; $635c
 	dc.w	$64a6	; $635e
 	dc.w	$64ad	; $6360
-	dc.w	$56a5	; $6362
 table_66ee:
 	dc.w	$67d9	; $66ee
 	dc.w	$67c7	; $66f0
