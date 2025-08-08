@@ -1,3 +1,6 @@
+; US Championship Volleyball
+; disassembly by JOTD (c) 2025
+;
 ;	map(0x0000, 0x07ff).ram();
 ;	map(0x0800, 0x08ff).ram().share(m_spriteram);
 ;	map(0x1000, 0x1000).portr("P1");
@@ -22,6 +25,7 @@ nb_credits_0035 = $35
 
 p1_1000 = $1000
 p2_1001 = $1001
+system_1002 = $1002
 dsw1_1003 = $1003
 dsw2_1004 = $1004
 scrollx_hi_1008 = $1008
@@ -30,6 +34,7 @@ irq_ack_100a = $100a
 irq_ack_100b = $100b
 scrollx_lo_100c = $100c
 sound_100d = $100d
+scrolly_lo_100e = $100e
 
 bankswitch_copy_022d = $022d
 
@@ -12971,10 +12976,10 @@ DB2F: 24 0F    bit $0f
 DB31: 10 03    bpl $db36
 DB33: 4C B6 DA jmp $dab6
 DB36: A6 0C    ldx $0c
-DB38: AD 02 10 lda $1002
+DB38: AD 02 10 lda system_1002
 DB3B: 29 01    and #$01
 DB3D: F0 F9    beq $db38
-DB3F: AD 02 10 lda $1002
+DB3F: AD 02 10 lda system_1002
 DB42: 29 01    and #$01
 DB44: D0 F9    bne $db3f
 DB46: CA       dex
@@ -14237,7 +14242,7 @@ EAED: 09 02    ora #$02
 EAEF: 8D 2C 02 sta $022c
 EAF2: 8D 08 10 sta scrollx_hi_1008
 EAF5: A9 00    lda #$00
-EAF7: 8D 0E 10 sta $100e
+EAF7: 8D 0E 10 sta scrolly_lo_100e
 EAFA: AD 2D 02 lda bankswitch_copy_022d
 EAFD: 09 40    ora #$40
 EAFF: 8D 09 10 sta bankswitch_1009
@@ -14265,14 +14270,14 @@ EB32: 8D 2D 02 sta bankswitch_copy_022d
 EB35: 8D 09 10 sta bankswitch_1009
 EB38: AD E0 07 lda $07e0
 EB3B: 49 FF    eor #$ff
-EB3D: 8D 0E 10 sta $100e
+EB3D: 8D 0E 10 sta scrolly_lo_100e
 EB40: 60       rts
 EB41: AD 2D 02 lda bankswitch_copy_022d
 EB44: 09 40    ora #$40
 EB46: 8D 2D 02 sta bankswitch_copy_022d
 EB49: 8D 09 10 sta bankswitch_1009
 EB4C: A9 00    lda #$00
-EB4E: 8D 0E 10 sta $100e
+EB4E: 8D 0E 10 sta scrolly_lo_100e
 EB51: 60       rts
 EB52: 20 5E EB jsr $eb5e
 EB55: 20 9D EC jsr $ec9d
@@ -14311,7 +14316,7 @@ EBAB: 19 C8 EB ora $ebc8, y
 EBAE: 8D 2C 02 sta $022c
 EBB1: 8D 08 10 sta scrollx_hi_1008
 EBB4: A9 00    lda #$00
-EBB6: 8D 0E 10 sta $100e
+EBB6: 8D 0E 10 sta scrolly_lo_100e
 EBB9: AD 2D 02 lda bankswitch_copy_022d
 EBBC: 09 40    ora #$40
 EBBE: 8D 09 10 sta bankswitch_1009
@@ -14720,7 +14725,7 @@ EEF0: A9 00    lda #$00
 EEF2: 85 2F    sta $2f
 EEF4: 85 30    sta $30
 EEF6: 20 6B EA jsr $ea6b
-EEF9: AD 02 10 lda $1002
+EEF9: AD 02 10 lda system_1002
 EEFC: 29 08    and #$08
 EEFE: D0 F9    bne $eef9
 EF00: A9 00    lda #$00
@@ -15642,7 +15647,7 @@ F719: A5 3B    lda $3b
 F71B: F0 04    beq $f721
 F71D: C6 3B    dec $3b
 F71F: D0 10    bne $f731
-F721: AD 02 10 lda $1002
+F721: AD 02 10 lda system_1002
 F724: 49 FF    eor #$ff
 F726: 29 07    and #$07
 F728: F0 07    beq $f731
@@ -15653,13 +15658,13 @@ F731: 60       rts
 F732: A5 32    lda $32
 F734: 29 04    and #$04
 F736: F0 0E    beq $f746
-F738: AD 02 10 lda $1002
+F738: AD 02 10 lda system_1002
 F73B: 49 FF    eor #$ff
 F73D: 29 04    and #$04
 F73F: D0 F0    bne $f731
 F741: A0 00    ldy #$00
 F743: 4C 93 F7 jmp $f793
-F746: AD 02 10 lda $1002
+F746: AD 02 10 lda system_1002
 F749: 49 FF    eor #$ff
 F74B: 29 07    and #$07
 F74D: C5 32    cmp $32

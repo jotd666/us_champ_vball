@@ -1,3 +1,6 @@
+	.ifndef	BREAKPOINT_INCLUDED
+BREAKPOINT_INCLUDED = 1
+
 	.ifdef	RELEASE
 	.macro	BREAKPOINT comment
 	.endm
@@ -46,4 +49,6 @@ next\@:
 	jbsr	osd_cpu_logging_control	
 	.endm	
 	.endif
+	
+	.endif  | BREAKPOINT_INCLUDED
 	

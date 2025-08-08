@@ -1,22 +1,28 @@
 from shared import *
 
 # post-conversion automatic patches, allowing not to change the asm file by hand
-
+# when everything is stable, I use to stop using 6502 source as source, and work on the 68k file
+# directly (to remove PUSH_SR...) but not too soon. It allows to change generation type, fix conversion bugs
+# until only the optimizations remain (the non-optimized code generated from 6502+post processing is still correct)
 
 
 input_read_dict = {
-"player_1_controls_9000":"read_inputs",
-"dsw1_8000":"read_dsw1",
-"dsw2_8001":"read_dsw2",
-"system_9002":"read_system"
+"p1_1000":"read_p1_inputs",
+"p2_1001":"read_p2_inputs",
+"system_1002":"read_system",
+"dsw1_1003":"read_dsw1",
+"dsw2_1004":"read_dsw2",
+
 }
 
 input_write_dict = {
-"player_1_controls_9000":"",
-"dsw1_8000":"",
-"dsw2_8001":"",    # video control is useless here
-"system_9002":"sound_start",   # sound_start
-"charbank_8003":"set_charbank",  # inc charbank
+"irq_ack_100a":"",
+"irq_ack_100b":"",
+"sound_100d":"sound_start",   # sound_start
+"bankswitch_1009":"set_bank",
+"scrollx_lo_100c":"set_scrollx_lo",
+"scrolly_lo_100e":"set_scrolly_lo",
+"scrollx_hi_1008":"set_scrollx_hi",
 }
 
 def get_line_address(line):
@@ -40,6 +46,9 @@ with open(source_dir / "conv.s") as f:
         if " = " in line:
             equates.append(line.replace("$","0x"))
             line = ""
+
+        if "[jump_to_callback]" in line:
+            line = change_instruction("jbsr\tcallback_0000",lines,i)
 
         if re.search("GET_ADDRESS\t\w*table",line):
             index = "X" if ",x" in line else "Y"
@@ -177,9 +186,22 @@ with open(source_dir / "conv.s") as f:
 lines = "".join(lines).splitlines(True)
 
 header = """\t.include "data.inc"
+\t.include "breakpoint.inc"
 \t.global\tnmi_ee9e
 \t.global\treset_eea1
 \t.global\tirq_eea4
+* game performs indirect jump to 0000
+* sometimes it's a jump table, but sometimes it's
+* an address that was set by the game as return callback
+* there are 2 known addresses: callback_9280 and
+
+callback_0000:
+    cmp.w    #0x8092,(a6)
+    jne        0f
+    jra        callback_9280
+0:
+    BREAKPOINT    "callback 0000 unknown"
+    rts
 """
 
 for i,line in enumerate(lines,header.count("\n")):

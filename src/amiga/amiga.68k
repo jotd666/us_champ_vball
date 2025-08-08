@@ -179,13 +179,17 @@ w\@:
 	.global osd_blitz		| for debug
 	.global osd_read_dsw1
 	.global osd_read_dsw2
+	.global	osd_set_bank
+	.global	osd_read_system
 	.global	osd_sound_command
-	.global	osd_read_inputs
+	.global	osd_read_p1_inputs
+	.global	osd_read_p2_inputs
+	
 	.global	osd_wait_for_sync
 	.global	osd_video_control
 	.global	osd_video_byte_dirty
-	.global	osd_set_charbank
-	.global	osd_read_system
+	.global	osd_set_scrollx_hi
+	.global	osd_set_scrollx_lo
 
 	.global	is_game_playing
 		
@@ -631,8 +635,7 @@ demo_game:
 	jbsr	cpu_init		| zero all registers
 	moveq	#1,d0
 	jbsr	osd_interrupt_control
-	illegal
-	*jmp								| pass control to the mpatrol core
+	jmp		reset_eea1								| pass control to the mpatrol core
 		
 * < A6: memory base
 copy_bank_1:
@@ -676,19 +679,7 @@ _vblank:
 	bne.b	0f
 	bsr		toggle_pause
 0:
-	* here music doesn't loop. We have to stop it when it ends
-	move.w	music_tick,d1
-	beq.b	13f
-	bmi.b	13f		| negative: infinite, not interruptible
-	
-	subq	#1,d1
 
-	move.w	d1,music_tick
-	bne.b	13f
-	move.b	music_track_start_number,d1
-	jbsr		osd_music_stop
-
-13:
 	
 	* ack vbl twice (040/pistorm bug)
 	move.w	#0x20,(intreq,a5)
@@ -713,17 +704,13 @@ _vblank:
 	* is the source of the interrupt
 	btst	#2,d0
 	beq.b	2f
-	* mid-screen copper interrupt, must occur once every 7 times
-	* to simulate ~57 Hz on 50 Hz display
-	* clocking main character going up the stairs with MAME: 6.7 seconds
-	* roughly the same with the amiga version now, good!!
+	* mid-screen copper interrupt, must occur once every 5 times
+	* to simulate ~60 Hz on 50 Hz display
 	move.b	mid_screen_interrupt_count,d0
 	addq.b	#1,d0
-	cmp.b	#7,d0
+	cmp.b	#5,d0
 	bne.b	1f
-	* clear the sync flag a few lines later
-	* to simulate an extra vblank
-	st.b	bof_sync_flag
+	jbsr	nmi_ee9e
 	clr.b	d0
 1:
 	move.b	d0,mid_screen_interrupt_count
@@ -732,7 +719,7 @@ _vblank:
 
 	subq.w	#1,delay_timer
 		
-	st.b	bof_sync_flag
+	jbsr	nmi_ee9e
 
 	tst.b	frameskip
 	jeq		0f
@@ -740,7 +727,7 @@ _vblank:
 	jeq		23f
 0:
 
-	jbsr		really_update_sprites
+	**jbsr		really_update_sprites
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
@@ -1803,8 +1790,8 @@ mirrored_videoram:
 	add.w	d7,a0
 	rts
 	
-osd_set_charbank:
-	move.b	d0,charbank_value
+osd_set_bank:
+	BREAKPOINT	"set_bank"
 	rts
 	
 * a0=screen address (preserved)
@@ -2106,12 +2093,20 @@ set_bitplanes:
 osd_debug_hook:
 	rts
 	
-osd_video_control:
+	
+osd_read_p1_inputs:
+	move.b	#0xFF,d0
 	rts
 	
-osd_read_inputs:
-	move.b	player_1_controls,d0
+osd_read_p2_inputs:
+	move.b	#0xFF,d0
 	rts
+	
+osd_set_scrollx_hi:
+	rts
+osd_set_scrollx_lo:
+	rts
+
 	
 
 * < D1: previous state
