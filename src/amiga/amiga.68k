@@ -19,7 +19,9 @@ AttnFlags = 0x128
 AFB_68010 = 0
 AFB_68020 = 1
 
-NO68020 = 1
+*NO68020 = 1
+
+BORDERBLANK = 0
 
 PREVIOUS_SPRITE_SIZE = 8
 CURRENT_SPRITE_SIZE = 4
@@ -35,15 +37,14 @@ HW_SPRITE_Y_CORRECTION = 8
 * full display
 NTSC_Y_SHIFT = 12
 
-Y_MAX = 256
+Y_MAX = 512
 
 
 BASE_BPLCON2_VALUE = 0x0064		| sprites above all playfields
-SPRITE_ADDRESS = 0x3C00
-MIRROR_ADDRESS = 0x7C00
-SCREEN_TILE_ADDRESS = SPRITE_ADDRESS+0x21
-SCREEN_COLOR_ADDRESS = 0x7800
 
+SCREEN_TILE_ADDRESS = 0x2000
+SCREEN_COLOR_ADDRESS = 0x3000
+SPRITE_ADDRESS = 0x800
 
 
 * if the alloc_sprite & update_sprite routines
@@ -76,12 +77,12 @@ _custom = 0xDFF000
 
 OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
-NB_PLAYFIELD_PLANES = 3
+NB_PLAYFIELD_PLANES = 6
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
-NB_BYTES_PER_ROW = 40
+NB_BYTES_PER_ROW = 80
 
 
-NB_LINES = 256
+NB_LINES = 512
 NB_PLAYFIELD_LINES = NB_LINES
 
 
@@ -185,8 +186,6 @@ w\@:
 	.global	osd_read_p1_inputs
 	.global	osd_read_p2_inputs
 	
-	.global	osd_wait_for_sync
-	.global	osd_video_control
 	.global	osd_video_byte_dirty
 	.global	osd_set_scrollx_hi
 	.global	osd_set_scrollx_lo
@@ -325,9 +324,6 @@ _user:
 	move.l	a0,playfield_screen_data_1
 	move.l	a0,playfield_drawed_screen_ptr
 	move.l	a0,playfield_displayed_screen_ptr
-
-	lea		bg_screen_buffer,a0
-	move.l	a0,background_screen_ptr
 	
 	st		music_track_start_number
 
@@ -338,6 +334,29 @@ _user:
 	move.l	a0,playfield_displayed_screen_ptr
 	.endif
 		
+	* init color table
+	lea		copperlist_colors+2,a0
+	lea		color_copper_pointers,a1
+	moveq	#NB_PLAYFIELD_PLANES-1,d0
+0:
+	addq.w	#4,a0
+	move.w	#31,d1
+1:
+	move.l	a0,(a1)+
+	addq.w	#4,a0
+	dbf		d1,1b
+	dbf		d0,0b
+	
+	* temp load palette there
+	lea		palette,a0
+	lea		color_copper_pointers,a1
+	move.w	#TOTAL_NB_COLORS-1,d0
+	BREAKPOINT 	"set palette"
+0:
+	move.l	(a1)+,a2
+	move.w	(a0)+,(a2)
+	dbf		d0,0b
+	
 	* blank sprites
 	lea		game_sprites,a2
 	
@@ -353,26 +372,9 @@ _user:
 	bcs		1b
 2:
 
-	bsr		set_background_bitplanes
 	bsr		set_bobs_bitplanes
 
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		playfield_palette,a0
-	lea		game_colors,a1
-	bsr		load_palette
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		playfield_palette,a0
-	lea		background_colors,a1
-	bsr		load_palette
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		playfield_palette,a0
-	lea		sprite_colors,a1
-	bsr		load_palette
-	* load same colors again to be safe
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		playfield_palette,a0	| skip 8 copper writes
-	lea		sprite_colors+32,a1
-	bsr		load_palette
+	* TODO set colors here
 	
 
 	move.l	cheat_flags,d0
@@ -383,11 +385,7 @@ _user:
 	* cheat key disable highscore only if used
 	st.b	cheat_used
 2:
-	btst	#0,d0
-	sne		invincible_flag
 
-	BTST	#1,d0
-	sne		infinite_lives_flag
 
 0:
 1:
@@ -417,10 +415,6 @@ _user:
 
 	move.b	d1,dip_switches_2
 
-	* something that is not a dip switch but could be
-	* considered like it is the gate bug fix flag
-	btst	#2,d0
-	sne		leave_gate_bug_flag
 
 	
 
@@ -431,7 +425,6 @@ _user:
 0:
 	btst	#1,d0
 	beq.b	0f
-	st		infinite_lives_flag
 	st		cheat_used
 0:
 	btst	#2,d0
@@ -896,8 +889,8 @@ blit_background:
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
 	
 	.rept	NB_PLAYFIELD_PLANES-1
-	lea	(SCREEN_PLANE_SIZE,a0),a0
-	lea	(SCREEN_PLANE_SIZE,a1),a1
+	add.l	#SCREEN_PLANE_SIZE,a0
+	add.l	#SCREEN_PLANE_SIZE,a1
 	WAIT_BLIT
 	* second bitplane
 	move.l a0,bltapt(a5)	|source graphic top left corner
@@ -913,49 +906,7 @@ blit_background:
 really_update_sprites:
 update_bobs_and_hw_sprites:
 	
-	* make a copy of the sprite memory
-	GET_RAM_START_IN_A6
 
-	lea	(MIRROR_ADDRESS,a6),a0
-	lea	sprite_memory,a1
-	* super-quick copy of 32 bytes of memory
-	movem.l	(a0),d0-d7
-	movem.l	d0-d7,(a1)
-
-
-	*****************************
-	* position hardware sprites *
-	*****************************
-
-	lea	sprite_memory,a0
-	lea	HW_SpriteYTable_16,a1
-	lea	game_sprites+2,a3
-	lea	sprite_type_table,a2
-	lea	sprite_table,a4
-	moveq	#0,d6
-	moveq	#NB_TARGET_SPRITES-1,d7
-1:
-	jbsr	update_one_sprite
-	cmp.b	#4,d6
-	jeq		2f		| used all the slots: exit!
-	addq.w	#CURRENT_SPRITE_SIZE,a0
-	dbf		d7,1b
-	* reached here means that not all sprites have been allocated:
-	* clear the rest of the sprites
-	move.l	#blank_sprite,d1
-	move.l	d1,d2
-	swap 	d2
-11:
-	move.w	d1,(4,a3)
-	move.w	d1,(4+8,a3)
-	move.w	d2,(a3)
-	move.w	d2,(8,a3)
-	add.w	#0x10,a3
-	addq	#1,d6
-	cmp.b	#4,d6
-	jne		11b
-2:
-	
 	***********************
 	* erase previous BOBs *
 	***********************
@@ -992,11 +943,11 @@ update_bobs_and_hw_sprites:
 	* draw current BOBs *
 	*********************
 
-	lea	sprite_memory,a0
+	GET_RAM_START_IN_A6
+	lea		(SPRITE_ADDRESS,a6),a0
     lea _custom,A5
 	move.l	bob_previous_drawed_sprites(pc),a6
 	lea		bob_table,a4
-	lea	sprite_type_table,a2
 	
 	moveq	#NB_TARGET_SPRITES-1,d7
 1:
@@ -1107,8 +1058,6 @@ update_one_bob:
 	jeq	2f			| bit not set: not shown
 
 	jbsr	compute_sprite_xy_code
-	cmp.b	#2,(a2,d2.w)
-	jeq		2f					| already drawn as sprite
 	add.w	d2,d2
 	add.w	d2,d2
 	move.l	(a4,d2.w),d4		| get pointer from bob table
@@ -1228,7 +1177,7 @@ clear_planes_any_blitter_internal:
 	move.l a1,bltdpt(a5)	|destination top left corner
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
 32:
-	lea		(SCREEN_PLANE_SIZE,a1),a1
+	add.l	#SCREEN_PLANE_SIZE,a1
 	dbf		d3,3b
 4:
 	rts
@@ -1396,8 +1345,7 @@ start_process_1_plane:
 * 2 words: first shift (as bplcon value), then
 * offset in bytes
 
-sprite_memory:
-	.skip	0x20
+
 hw_sprite_allocated_frames:
 	.skip	0x80
 current_hw_sprite:
@@ -1582,7 +1530,9 @@ platform_init:
 	move.w	#0x1FE,pal_intreq_block_game
 	move.w	#0x1FE,pal_wait			| else intreq never happens
 0:
-    move.w #0x6600,bplcon0(a5)		| dual playfield!
+    move.w #0x0210+BORDERBLANK,bplcon0(a5) | 8 bitplanes, borderblank
+    move.w #0x0024,bplcon2(a5)
+    move.w #0x0C00+BORDERBLANK<<5,bplcon3(a5)     | no AGA specificities, default ECS
 
  	*         VVHH
     move.w #0x2489,d0
@@ -1596,7 +1546,7 @@ platform_init:
      move.w d1,diwstop(a5)
 
     move.w #0x0038,ddfstrt(a5)
-    move.w #0x00D0,ddfstop(a5)
+    move.w #0x00D0,ddfstop(a5)		| C0 for fmode=3
 
 
 	* applies -8 on X for bobs by applying 8
@@ -1766,30 +1716,6 @@ sound_indirection_table:
     .byte    -1   | 62
     .byte    -1   | 63
 	
-* python code to switch between 0x1000-0x17FF <=> 0x1800-0x2000
-*def wrap_address(a):
-*    # 0x1182 => 0x184C
-*    q,r = divmod(a&0xFFF,32)
-*    return (0x1800+(32*r)+(q))
-*
-*def unwrap_address(a):
-*    offset = a-0x1800
-*    q,r = divmod(offset,32)
-*    return (0x1000+(32*r)+q)
-
-mirrored_videoram:
-	* compute valid 0x3C00-0x3FFF un-mirror
-	sub.w	#MIRROR_ADDRESS,d7
-	move.w	d7,d1		| save
-	lsr.w	#5,d7		| quotient
-	and.w	#0x1F,d1
-	lsl.w	#5,d1
-	add.w	d1,d7
-	* update A0 as well to unmirrored ram 
-	move.l	a6,a0
-	add.w	#SPRITE_ADDRESS,d7
-	add.w	d7,a0
-	rts
 	
 osd_set_bank:
 	move.b	d0,d4
@@ -1815,13 +1741,9 @@ set_bank_1:
 * a0=screen address (preserved)
 * a6=ram base
 * should preserve all registers
-* allows 3C00-3FFF and 7C00-7FFF ranges
-* 3C00->3C20: sprites
-* 3C21: start of screen (+1 => next column)
-* 3FDF: last char (bottom right)
-*
-* 7C21: start of screen (+1 => next row, +$20 => next column)
-
+* allows 2000-3FFF range
+* 2000: tiles
+* 3000: attributes
 osd_video_byte_dirty:
 
 	movem.l	d0-d7/a0-a2,-(a7)
@@ -1830,52 +1752,31 @@ osd_video_byte_dirty:
 	sub.l	a6,d7
 	.ifndef	RELEASE
 	jmi		2f
-	* sprite area? (seems like double check as would be minus)
-	cmp.w	#MIRROR_ADDRESS+0x400,d7
-	jcs		0f
-	* above mirror address: error
-	BREAKPOINT	"write videoram out of range (D7)"
-	bra.b	osd_w_videoram_out	
-0:
 	.endif
-	* we're below 8000. Are we in the mirror zone
-	cmp.w	#MIRROR_ADDRESS,d7
-	jcs		0f
-	move.b	(a0),d0			| read data that was just written
-	jbsr	mirrored_videoram		| "correct" address
-	* special operation: write data to "unmirrored"
-	move.b	d0,(a0)
-0:
-	* not in/back from the mirrored zone
-	* we now suppose that we're in 3C00-3FFF
+
+	* we now suppose that we're in 2000-3FFF
 	* check that in debug mode
 	.ifndef		RELEASE
-	cmp.w	#SPRITE_ADDRESS,d7
-	jcc		0f
+	cmp.w	#SCREEN_TILE_ADDRESS+0x2000,d7
+	jcs		0f
 1:
 	BREAKPOINT	"write videoram out of range (D7)"
 	bra.b	osd_w_videoram_out	
 0:
-	* we should update mirror zone now TODO
-	
-	cmp.w	#SPRITE_ADDRESS+0x400,d7
-	jcc		1b
 	.endif
-	* now check if not in sprite memory (start)
-	* else skip
 	
 	sub.w	#SCREEN_TILE_ADDRESS,d7
-	jmi		osd_w_videoram_out		| sprite memory: out
+	.ifndef	RELEASE
+	jpl		0f
+	add.w	#SCREEN_TILE_ADDRESS,d7
+	BREAKPOINT	"write videoram out of range (D7)"
+	jra		osd_w_videoram_out		| sprite memory: out
+0:
+	.endif
 	
-
-
-	move.b	charbank_value,d1		| char bank
-	* update "color" table in write only memory, this is not needed
-	*move.b	d1,(0x7800,a0,d7)	
-	and.w	#3,d1
-	lsl.w	#8,d1
-	add.w	d1,d0		| extended char code
-
+	and.w	#0xFFF,d7
+	move.b	(a6,d7.w),d0
+	move.b	(0x1000,a6,d7.w),d1
 	jbsr	update_bg_tile
 
 osd_w_videoram_out:
@@ -1912,16 +1813,16 @@ osd_w_videoram_out:
 	.endm
 
 
-* < D7: 0-0x400
-* > D0: 
+* < D7: 0-0x2000
+* > D0/D1: coords 
 compute_tile_xy:
 	moveq	#0,d0
 	move.b	d7,d0
 	
-	and.b	#0x1F,d0	| x
+	and.b	#0x3F,d0	| x
 	move.w	d7,d1
-	and.w	#0x3FF,d1
-	lsr.w	#5,d1		| Y
+	and.w	#0xFFF,d1
+	lsr.w	#6,d1		| Y
 	lsl.w	#3,d1		| times 8
 	rts
 
@@ -1944,11 +1845,13 @@ compute_tile_xy:
 * each column has 0x20*8 = 256 pixels
 * each visible row has 28*8 = 244 pixels
 
-* < D7: 0-0x400 address
-* < D0: extended tile code
+* < D7: 0-0x1000 address
+* < D0: tile code
+* < D1: tile attribute
 
 update_bg_tile:
 	move.w	d0,d2	| code
+	move.w	d1,d3	| attribute
 	
 	bsr		compute_tile_xy
 	
@@ -1958,7 +1861,7 @@ update_bg_tile:
 	* updating bitplanes
 	move.l	#SCREEN_PLANE_SIZE,d5
 	move.w	#NB_PLAYFIELD_PLANES-1,d4
-	move.l	background_screen_ptr,a1
+	move.l	playfield_drawed_screen_ptr,a1
 
 
 	lea		mulNB_BYTES_PER_ROW_table,A2
@@ -2080,14 +1983,6 @@ HW_SpriteYTable_\height:
 	.endm
 
 	DEF_HW_SPRITE_Y_TABLE	16
-
-set_background_bitplanes:
-	movem.l	a0-a1/d0-d2,-(a7)
-	move.l	background_screen_ptr,d0
-	lea	background_bitplanes+2,a0
-    moveq #NB_PLAYFIELD_PLANES-1,d1
- 	move.l	#SCREEN_PLANE_SIZE,d2
- 	jra		set_bitplanes
 
 set_bobs_bitplanes:
 	movem.l	a0-a1/d0-d2,-(a7)
@@ -2318,7 +2213,7 @@ handle_keyboard:
 	bne.b	0f
 	st.b	cheat_used
 	move.w	#0x0FF,_custom+color
-	eor.b	#1,invincible_flag
+
 0:
 *	cmp.b	#0x54,d0	| F5 key
 *	bne.b	0f
@@ -2390,7 +2285,7 @@ beamdelay:
 	rts
 
 	
-	MUL_TABLE	NB_BYTES_PER_ROW,NB_LINES*2
+	MUL_TABLE	NB_BYTES_PER_ROW,NB_LINES
 
 	.align	4		| leave this long word alignment
 program_args:	ds.l	64,0
@@ -2462,7 +2357,13 @@ mid_screen_interrupt_count:
 system_vbr:
 	.long	0
 
+color_copper_pointers:
+	.skip	(1<<NB_PLAYFIELD_PLANES)*4
 
+player_1_controls:
+	.byte	0
+player_2_controls:
+	.byte	0
 flip_flop:
 	.byte	0
 bank_value:
@@ -2516,8 +2417,7 @@ playfield_screen_data_2:
 	.endif
 	
 	
-background_screen_ptr:
-	.long	0
+
 playfield_drawed_screen_ptr:
 	.long	0
 playfield_displayed_screen_ptr:
@@ -2552,7 +2452,7 @@ _end_of_ng_code:
 
 
 
-
+palette:
 	.include "palette.68k"
 
 	
@@ -2577,7 +2477,14 @@ tile_log_table:
 
 	.section	.datachip
 
-* title
+
+.macro	DECL_32_COLORS
+	.set	colidx,0
+	.rept	32
+	dc.w	color+(colidx*2),0
+	.set	colidx,colidx+1
+	.endr
+	.endm
 .macro	DECL_BITPLANES	bpoff_start,nb_planes
 	.set	bpoff,\bpoff_start
 	.rept	\nb_planes
@@ -2587,14 +2494,6 @@ tile_log_table:
 	.endr
 	.endm
 	
-.macro	DECL_EVEN_BITPLANES	bpoff_start,nb_planes
-	.set	bpoff,\bpoff_start
-	.rept	\nb_planes
-	dc.w  bplpt+bpoff,0
-	dc.w  bplpt+bpoff+2,0
-	.set	bpoff,bpoff+8
-	.endr
-	.endm
 
 	
 .macro	DECL_COLORS	offset,nb_colors
@@ -2639,17 +2538,16 @@ game_copperlist:
 	* enable sprite colors now
 
 bobs_bitplanes:
-	DECL_EVEN_BITPLANES	4,3
-background_bitplanes:
-	DECL_EVEN_BITPLANES	0,3
+	DECL_BITPLANES	0
 
-	* priority: BOBs playfield on top
-	.word	bplcon2,BASE_BPLCON2_VALUE
+copperlist_colors:
+	.set	bpl_count,0
+	.rept	8
+	.word	bplcon3,(bpl_count<<13)+(BORDERBLANK<<5)
+	.set	bpl_count,bpl_count+1
+	DECL_32_COLORS
+	.endr
 
-background_colors:
-	DECL_COLORS	0,8
-game_colors:
-	DECL_COLORS	8,8
 	
 sprite_colors:
 	DECL_COLORS	16,16
@@ -2686,11 +2584,6 @@ pal_wait:
 	
 		.section .bsschip
 		
-
-bg_screen_buffer:
-	.skip	SCREEN_SIZE
-	.skip	8
-	.skip	8	
 
 		
 bobs_screen_buffer_1:
