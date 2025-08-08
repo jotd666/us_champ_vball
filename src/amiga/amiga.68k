@@ -613,6 +613,9 @@ demo_game:
 	move.l	a6,ram_start_0000
 	.endif
 	
+	* default: install RAM 0
+	jbsr	copy_bank_0
+	
 	* copy ROM at the end. Memory is one big block now
 	lea	rom_8000,a0
 	move.l	a6,a1
@@ -631,6 +634,20 @@ demo_game:
 	illegal
 	*jmp								| pass control to the mpatrol core
 		
+* < A6: memory base
+copy_bank_1:
+	lea	bank1_4000,a0
+	jra		cb
+copy_bank_0:
+	lea	bank0_4000,a0
+cb:
+	move.l	a6,a1
+	add.l	#0x4000,a1
+	move.w	#0xFFF,d0
+0:
+	move.l	(a0)+,(a1)+
+	dbf		d0,0b
+	rts
 	
 * just in case some hardware calls nmi
 _nmi:
@@ -737,19 +754,6 @@ _vblank:
     movem.l (a7)+,d0-d7/a0-a6
     rte
 	
-osd_wait_for_sync:
-	tst.b	insert_coin_requested
-	jeq		0f
-	clr.b	insert_coin_requested
-	jbsr	insert_coin
-0:
-	tst.b	bof_sync_flag
-	jeq		osd_wait_for_sync
-	clr.b	bof_sync_flag
-	.ifndef	RELEASE
-	move.b	#0x3F,d0 	| same value as MAME
-	.endif
-	rts
 	
 osd_blitz:
 	blitz
@@ -838,7 +842,6 @@ lose_all_lives:
 skip_level:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
-	st.b	(player_state_3b,a6)		| found by mistake :)
 	move.l	(a7)+,a6
 	rts
 
@@ -2174,7 +2177,7 @@ update_controls:
 	jeq		0f
 	btst	#JPB_BTN_RED,d2
 	jne		0f
-	st.b	insert_coin_requested
+	nop  | todo insertcoin
 0:
 	rts
 	
@@ -2217,7 +2220,6 @@ osd_read_system:
 0:	
 1:	
 	movem.l	(a7)+,a0/d1
-	or.b	dsw0_value_high_bit,d0
 	rts
 
 	
@@ -2226,18 +2228,6 @@ osd_read_dsw2:
 	move.b	dip_switches_2(pc),d0
 	
 	rts
-
-insert_coin:
-	movem.l	d0-a6,-(a7)
-	GET_RAM_START_IN_A6
-	jbsr 	cpu_init
-
-	move.b	#0x40,dsw0_value_high_bit	| COIN 1
-	jbsr	insert_coin_irq_f000
-	move.b	#0,dsw0_value_high_bit
-
-	movem.l (a7)+,d0-a6
-	rts	
 
 
 	
@@ -2276,10 +2266,7 @@ handle_keyboard:
     bsr	toggle_pause
 0:
 
-	cmp.b	#5,d0
-	jne	0f
-	st.b	insert_coin_requested
-0:
+
 	* cheat keys are always active in dev mode
 	.ifdef	RELEASE
 	btst	#4,cheat_flags+3
@@ -2449,10 +2436,7 @@ dip_switches_1:
 		.byte	0
 dip_switches_0:
 		.byte	0
-insert_coin_requested:
-	.byte	0
-dsw0_value_high_bit:
-	.byte	0
+
 dip_switches_2:
 	.byte	0
 ntsc_flag:
