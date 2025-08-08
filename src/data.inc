@@ -1,6 +1,7 @@
 nb_credits_0035 = 0x35
 p1_1000 = 0x1000
 p2_1001 = 0x1001
+system_1002 = 0x1002
 dsw1_1003 = 0x1003
 dsw2_1004 = 0x1004
 scrollx_hi_1008 = 0x1008
@@ -9,4 +10,5 @@ irq_ack_100a = 0x100a
 irq_ack_100b = 0x100b
 scrollx_lo_100c = 0x100c
 sound_100d = 0x100d
+scrolly_lo_100e = 0x100e
 bankswitch_copy_022d = 0x022d

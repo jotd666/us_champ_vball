@@ -11700,8 +11700,8 @@ CF3F: 85 11    sta $11
 CF41: A9 30    lda #$30
 CF43: 85 13    sta $13
 CF45: A9 00    lda #$00
-CF47: 91 10    sta ($10), y
-CF49: 91 12    sta ($12), y
+CF47: 91 10    sta ($10), y	; [video_address]
+CF49: 91 12    sta ($12), y	; [video_address]
 CF4B: C8       iny
 CF4C: D0 F9    bne $cf47
 CF4E: E6 11    inc $11

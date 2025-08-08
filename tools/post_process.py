@@ -59,6 +59,26 @@ with open(source_dir / "conv.s") as f:
             else:
                 lines[i+1] = ""
 
+        if line_address == 0xbdd5:
+            line = "\tSET_X_FROM_CLEARED_C\n"+line
+
+        if line_address in {0x6582,0Xbde4}:
+            line = "\tSET_C_FROM_X\n"+line
+            lines[i+1] = remove_error(lines[i+1])
+
+        if line_address in {0xd04b,0xd0a9}:
+            lines[i-3] = "\tscs\td6\n"+lines[i-3]
+        if line_address in {0xd04e,0xd0ac}:
+            line = "\ttst.b\td6\n"+line.replace("cc\tl","eq\tl")
+        if line_address in {0xd059,0xd0b7}:
+            # carry clear tested above, just branch
+            line = line.replace("cs\tl","ra\tl")
+            lines[i+1] = remove_error(lines[i+1])
+
+        if line_address in {0x603e,0x606f,0x618e,0x60f4,0x61de,0x60ea,0x62a3}:
+            # cmp + rts
+            line = "\tINVERT_XC_FLAGS\n"+line
+            lines[i+1] = remove_error(lines[i+1])
         if line_address in {0xf79b}:
             # remove ERROR directive, false alarm
             lines[i+1] = remove_error(lines[i+1])

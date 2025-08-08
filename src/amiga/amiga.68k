@@ -190,6 +190,7 @@ w\@:
 	.global	osd_video_byte_dirty
 	.global	osd_set_scrollx_hi
 	.global	osd_set_scrollx_lo
+	.global	osd_set_scrolly_lo
 
 	.global	is_game_playing
 		
@@ -1791,9 +1792,26 @@ mirrored_videoram:
 	rts
 	
 osd_set_bank:
-	BREAKPOINT	"set_bank"
+	move.b	d0,d4
+	bclr	#0,d4
+	jne		set_bank_1
+	move.b	d4,bank_value
+	cmp.b	#0,current_rom_bank
+	jeq		0f
+	* set bank 0
+	BREAKPOINT	"setting bank 0"
+	move.b	#0,current_rom_bank
 	rts
-	
+set_bank_1:
+	move.b	d4,bank_value
+	cmp.b	#1,current_rom_bank
+	jeq		0f
+	* set bank 1
+	BREAKPOINT	"setting bank 1"
+	move.b	#1,current_rom_bank
+0:
+	rts
+
 * a0=screen address (preserved)
 * a6=ram base
 * should preserve all registers
@@ -2105,6 +2123,8 @@ osd_read_p2_inputs:
 osd_set_scrollx_hi:
 	rts
 osd_set_scrollx_lo:
+	rts
+osd_set_scrolly_lo:
 	rts
 
 	
@@ -2445,7 +2465,10 @@ system_vbr:
 
 flip_flop:
 	.byte	0
-
+bank_value:
+	.byte	0
+current_rom_bank:
+	.byte	0
 	.align	2
 
 host_sprites:
