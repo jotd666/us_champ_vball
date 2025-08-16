@@ -7,3 +7,5 @@ snapshot
 src/datetime
 *.slave
 *.bak
+graphics.68k
+*.tr

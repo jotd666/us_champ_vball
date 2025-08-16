@@ -141,8 +141,6 @@ except OSError:
 
 
 
-all_tile_cluts = True
-
 if all_tile_cluts:
     tile_cluts = None
 else:

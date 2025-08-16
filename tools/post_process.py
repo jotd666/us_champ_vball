@@ -83,6 +83,8 @@ with open(source_dir / "conv.s") as f:
             # remove ERROR directive, false alarm
             lines[i+1] = remove_error(lines[i+1])
 
+        if line_address == 0xeefe:
+            line = remove_instruction(lines,i)
         if line_address == 0xf12d:
             lines[i-2] = remove_error(lines[i-2])
             line = change_instruction("moveq\t#1,d4",lines,i)
