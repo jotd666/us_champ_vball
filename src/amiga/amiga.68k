@@ -652,8 +652,9 @@ demo_game:
 	.ifndef	RELEASE
 	* install dump and quit handler
 	pea		dump_and_quit
-	move.w	#0x4EF9,4
-	move.l	(a7)+,6
+	lea		2.W,a0
+	move.l	#0x4AFC4EF9,(a0)+
+	move.l	(a7)+,(a0)+
 	.endif
 	* enable interrupts. Game doesn't use them
 	* but relies on vbl sync flags
@@ -1382,7 +1383,7 @@ blit_planes_any_internal_cookie_cut:
 	move.l	a1,bltcpt(a5)	|pristine background top (bottom) left corner
 	move.l	a1,bltdpt(a5)	|destination top (bottom) left corner
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
-	lea		(SCREEN_PLANE_SIZE,a1),a1
+	add.l		#SCREEN_PLANE_SIZE,a1
 	WAIT_BLIT
 	dbf		d3,6b
 7:
@@ -1647,7 +1648,7 @@ platform_init:
     move.w #TILE_PLANE_X_SHIFT,bplcon1(a5)
 	
 	# 0 modulo (OCS)
-	moveq	#0,d0
+	move	#NB_BYTES_PER_ROW-40,d0
     move.w d0,bpl1mod(a5)
     move.w d0,bpl2mod(a5)
 
@@ -1811,6 +1812,15 @@ sound_indirection_table:
 	
 osd_set_bank:
 	move.b	d0,d4
+	* graphics set (there are 0x4000 tiles, activate upper 0x2000-0x3FFF half)
+	btst	#5,d0
+	seq		higher_gfxset		| inverted logic
+	
+	rol.b	#2,d0
+	and.b	#3,d0
+	move.b	d0,scroll_y			| set scroll high value
+	
+	* now memory bank (bit 1 of the input)
 	bclr	#0,d4
 	jne		set_bank_1
 	move.b	d4,bank_value
@@ -1868,8 +1878,19 @@ osd_video_byte_dirty:
 	.endif
 	
 	and.w	#0xFFF,d7
-	move.b	(a6,d7.w),d0
-	move.b	(0x1000,a6,d7.w),d1
+
+	lea		(SCREEN_TILE_ADDRESS,a6),a0
+	move.b	(a0,d7.w),d0
+	lea		(SCREEN_COLOR_ADDRESS,a6),a0
+	move.b	(a0,d7.w),d1
+
+		tst.b	d0
+		jeq		444f
+	cmp.w	#0x841,d7
+	jne	444f
+	BREAKPOINT	"841!! nonzero"
+444:
+
 	jbsr	update_bg_tile
 
 osd_w_videoram_out:
@@ -1889,24 +1910,13 @@ osd_w_videoram_out:
 	.endm
 	
 	.macro	TILE8_NEXT_PLANE
-	add.w	d5,a1
+	add.l	d5,a1			| needs LONG
 	.endm
 
 	
-	.macro	COPY_TILE16_PLANE_ROW
-	move.w	d0,(offset,a1)  | buffer
-	.endm
-	
-	.macro	CLEAR_TILE16_PLANE
-	.set	offset,0
-	.rept	16
-	clr.w	(offset,a1)
-	.set	offset,offset+NB_BYTES_PER_ROW
-	.endr	
-	.endm
 
 
-* < D7: 0-0x2000
+* < D7: 0-0x1000
 * > D0/D1: coords 
 compute_tile_xy:
 	moveq	#0,d0
@@ -1914,7 +1924,6 @@ compute_tile_xy:
 	
 	and.b	#0x3F,d0	| x
 	move.w	d7,d1
-	and.w	#0xFFF,d1
 	lsr.w	#6,d1		| Y
 	lsl.w	#3,d1		| times 8
 	rts
@@ -1938,14 +1947,23 @@ compute_tile_xy:
 * each column has 0x20*8 = 256 pixels
 * each visible row has 28*8 = 244 pixels
 
-* < D7: 0-0x1000 address
+* < D7: 0-0x1000 offset
 * < D0: tile code
 * < D1: tile attribute
 
 update_bg_tile:
+	moveq	#0,d2
 	move.w	d0,d2	| code
-	move.w	d1,d3	| attribute
-	
+	move.w	d1,d3	| attribute + tile msbits
+	and.w	#0x1F,d3
+	lsl.w	#8,d3
+	add.w	d3,d2			| extended tile code
+	move.w	d1,d3	| attribute + tile msbits
+	lsr.w	#5,d3	| clut
+*	tst.b	higher_gfxset
+*	jeq		12f
+*	add.w	#NB_TILES/2,d2		| upper half
+*12:
 	bsr		compute_tile_xy
 	
 	lea		character_table,a0
@@ -1966,18 +1984,23 @@ update_bg_tile:
 	add.w	d2,d2
 	jeq		11f				| optimize
 	add.w	d2,d2	
-	move.l	(a0,d2.w),d0		| tile pointer
+	move.l	(a0,d2.l),d0		| tile pointer as LONG!
 	
-	jeq		11f 	| can happen when tile code is read when screen is being erased	
-*	.ifndef	RELEASE
-*	jne		12f
-*	add.w	#0x1400,d7
-*	lsr.w	#2,d2
-*	BREAKPOINT	"game tile (in D2) not registered"	
-*	.endif
-*
-*	jra		11f
+	*jeq		11f 	| can happen when tile code is read when screen is being erased	
+	.ifndef	RELEASE
+	jne		12f
+	lsr.w	#2,d2
+	add.w	#SCREEN_TILE_ADDRESS,d7
+	*BREAKPOINT	"unregistered game tile (in D2, at address D7)"	
+	.endif
+
+	jra		11f
 12:
+	move.l	d0,a2
+	move.l	(a2,d3.w*4),d0	| get proper clut
+	jeq		11f
+	
+	
 	move.l	d0,a2		| directly pointer on tile bitplanes
 	
 	
@@ -2083,6 +2106,8 @@ set_bobs_bitplanes:
     moveq #NB_PLAYFIELD_PLANES-1,d1
  	move.l	#SCREEN_PLANE_SIZE,d2
     move.l	playfield_displayed_screen_ptr(pc),d0
+	
+	add.l	#SCREEN_PLANE_SIZE/2,d0		| TEMP
 set_bitplanes:
 1:
     swap d0
@@ -2109,10 +2134,13 @@ osd_read_p2_inputs:
 	rts
 	
 osd_set_scrollx_hi:
+	move.b	d0,scroll_x
 	rts
 osd_set_scrollx_lo:
+	move.b	d0,scroll_x+1
 	rts
 osd_set_scrolly_lo:
+	move.b	d0,scroll_y+1
 	rts
 
 	
@@ -2241,6 +2269,15 @@ level2_interrupt:
 	rte
 	
 	
+*TILE_GET_INFO_MEMBER(vball_state::get_bg_tile_info)
+*{
+*	uint8_t code = m_videoram[tile_index];
+*	uint8_t attr = m_attribram[tile_index];
+*	tileinfo.set(0,
+*			code + ((attr & 0x1f) << 8) + (m_gfxset << 8),
+*			(attr >> 5) & 0x7,
+*			0);
+*}
 
 
 log_used_tiles:
@@ -2261,13 +2298,23 @@ log_used_tiles:
 	and.w	#0x1F,d2
 	lsl.w	#8,d2
 	add.w	d2,d0			| extended tile code
+	tst.b	higher_gfxset
+	jeq		12f
+	add.w	#NB_TILES/2,d0		| upper half
+12:
 	lsr.w	#5,d1
 	
+*		tst.b	d0
+*		jeq		444f
+*	cmp.w	#0x841,d7
+*	jne	444f
+*	BREAKPOINT	"logging 841!! nonzero"
+*444:
 
-	and.b	#NB_CLUTS-1,d1		| remove flip/mirror
-	lsl.w	#NB_CLUTS_POW,d0			| tile code * NB_CLUTS
-	add.w	d1,d0			| add clut
-	st.b	(a0,d0.w)
+	and.b	#7,d1		| remove flip/mirror
+	lsl.l	#NB_CLUTS_POW,d0			| tile code * NB_CLUTS (long!)
+	add.l	d1,d0			| add clut
+	st.b	(a0,d0.l)
 	dbf		d7,0b
 
 	rts
@@ -2868,6 +2915,10 @@ mid_screen_interrupt_count:
 system_vbr:
 	.long	0
 
+scroll_y:
+	.word	0
+scroll_x:
+	.word	0
 
 tile_log_table:
 	* 64 cluts, 256 tiles
@@ -2885,6 +2936,8 @@ player_2_controls:
 flip_flop:
 	.byte	0
 bank_value:
+	.byte	0
+higher_gfxset:
 	.byte	0
 current_rom_bank:
 	.byte	0

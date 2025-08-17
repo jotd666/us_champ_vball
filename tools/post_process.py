@@ -142,6 +142,9 @@ with open(source_dir / "conv.s") as f:
             line = line.rstrip() + " [video_address]\n"
 
 
+        if "[unchecked_address" in line:
+            # give me the original instruction
+            line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")
         if "[video_address" in line:
             # give me the original instruction
             line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")

@@ -14,7 +14,7 @@ used_tile_cluts_file = this_dir / "used_tile_cluts.json"
 used_graphics_dir = this_dir / "used_graphics"
 
 NB_SPRITES = 0x100
-NB_TILES = 0x300
+NB_TILES = 0x4000
 
 def palette_pad(palette,pad_nb):
     palette += (pad_nb-len(palette)) * [(0x10,0x20,0x30)]

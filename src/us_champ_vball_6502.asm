@@ -16,7 +16,7 @@
 ;	map(0x100c, 0x100c).w(FUNC(vball_state::scrollx_lo_w));
 ;	map(0x100d, 0x100d).w("soundlatch", FUNC(generic_latch_8_device::write));
 ;	map(0x100e, 0x100e).writeonly().share(m_scrolly_lo);
-;	map(0x2000, 0x2fff).w(FUNC(vball_state::videoram_w)).share(m_videoram);
+;	map(0x2000, 0x2fff).w(FUNC(vball_state::videoram_w)).share(m_videoram); <- this seems write only!
 ;	map(0x3000, 0x3fff).w(FUNC(vball_state::attrib_w)).share(m_attribram);
 ;	map(0x4000, 0x7fff).bankr(m_mainbank);
 ;	map(0x8000, 0xffff).rom();
@@ -11798,7 +11798,7 @@ CF3F: 85 11    sta $11
 CF41: A9 30    lda #$30
 CF43: 85 13    sta $13
 CF45: A9 00    lda #$00
-CF47: 91 10    sta ($10), y	; [video_address]
+CF47: 91 10    sta ($10), y	; [unchecked_address]
 CF49: 91 12    sta ($12), y	; [video_address]
 CF4B: C8       iny
 CF4C: D0 F9    bne $cf47
@@ -13058,7 +13058,7 @@ DB0F: E9 20    sbc #$20
 DB11: F0 03    beq $db16
 DB13: 18       clc
 DB14: 65 0D    adc $0d
-DB16: 81 12    sta ($12, x)	; [video_address]
+DB16: 81 12    sta ($12, x)	; [unchecked_address]
 DB18: A5 0B    lda $0b
 DB1A: 81 14    sta ($14, x)	; [video_address]
 DB1C: E6 12    inc $12
@@ -14570,7 +14570,7 @@ ED27: 20 B5 ED jsr $edb5
 ED2A: 4C 19 ED jmp $ed19
 ED2D: A0 00    ldy #$00
 ED2F: A5 12    lda $12
-ED31: 91 14    sta ($14), y		; [video_address]
+ED31: 91 14    sta ($14), y		; [unchecked_address]
 ED33: A5 13    lda $13
 ED35: 91 16    sta ($16), y		; [video_address]
 ED37: C8       iny

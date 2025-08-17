@@ -109,11 +109,9 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 all_tile_cluts = False
 
 
-nb_planes = 6
-
-nb_colors = 64
-
-
+nb_planes = 8
+nb_colors = 1<<nb_planes
+nb_cluts = 8
 
 
 
@@ -126,12 +124,12 @@ def add_tile(table,index,cluts=[0]):
         table[idx] = cluts
 
 sprite_cluts = {}
-tile_cluts = {}
+
 
 try:
     with open(used_graphics_dir / "used_sprites","rb") as f:
         for index in range(NB_SPRITES):
-            d = f.read(16)
+            d = f.read(nb_cluts)
             cluts = [i for i,c in enumerate(d) if c]
             if cluts:
                 add_tile(sprite_cluts,index,cluts=cluts)
@@ -144,10 +142,11 @@ except OSError:
 if all_tile_cluts:
     tile_cluts = None
 else:
+    tile_cluts = {}
     try:
         with open(used_graphics_dir / "used_tiles","rb") as f:
             for index in range(NB_TILES):
-                d = f.read(16)
+                d = f.read(nb_cluts)
                 cluts = [i for i,c in enumerate(d) if c]
                 if cluts:
                     add_tile(tile_cluts,index,cluts=cluts)
@@ -156,7 +155,7 @@ else:
 
 # now gather all cluts used by letter/digit tiles, logging probably
 # missed some
-used_cluts = set()
+#used_cluts = set()
 ##for atc in alphanum_tile_codes:
 ##    cluts = tile_cluts.get(atc)
 ##    if cluts:
@@ -164,8 +163,6 @@ used_cluts = set()
 ### now set cluts for all alphanum tiles
 ##for atc in alphanum_tile_codes:
 ##    tile_cluts[atc] = sorted(used_cluts)
-
-
 
 
 
@@ -194,7 +191,7 @@ tile_sheet_dict = {i:Image.open(sheets_path / "intro" / "tiles" / f"pal_{i:02x}.
 tile_palette = set()
 tile_set_list = []
 
-dump_it = False
+dump_it = True
 for i,tsd in tile_sheet_dict.items():
     print(f"loading {i}")
     tp,tile_set = load_tileset(tsd,i,8,8,"tiles",dump_dir,dump=dump_it,
@@ -208,7 +205,7 @@ tile_palette = sorted(tile_palette)
 tile_palette += (nb_colors-len(tile_palette)) * [(0x10,0x20,0x30)]
 
 sprite_palette = set()
-sprite_set_list = [[] for _ in range(16)]
+sprite_set_list = [[] for _ in range(nb_cluts)]
 hw_sprite_set_list = []
 
 sprite_dump_dir = dump_dir / "sprites"
@@ -327,7 +324,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
         tile_table.append(tile_entry)
 
-    new_tile_table = [[[] for _ in range(16)] for _ in range(len(tile_table[0]))]
+    new_tile_table = [[[] for _ in range(nb_cluts)] for _ in range(len(tile_table[0]))]
 
     # reorder/transpose. We have 16 * 256 we need 256 * 16
     for i,u in enumerate(tile_table):
