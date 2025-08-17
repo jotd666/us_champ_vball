@@ -3113,7 +3113,7 @@ debug_color:
 	dc.l	-2
 	
 
-	
+* outside the copperlist for now
 sprite_colors:
 	DECL_COLORS	16,16
 

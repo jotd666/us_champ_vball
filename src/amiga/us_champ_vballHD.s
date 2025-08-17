@@ -67,7 +67,7 @@ _data   dc.b    0
 _name	dc.b	"US Championship Volleyball",0
 _copy	dc.b	'2025 JOTD',0
 _info
-    dc.b    "Original by Techmos 1988",0
+    dc.b    "Original by Technos 1988",0
 	dc.b	0
 _kickname   dc.b    0
 ;--- version id

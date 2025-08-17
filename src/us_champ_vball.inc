@@ -137,10 +137,25 @@ skip\@:
 	POP_SR
 	.endm
 
-* N and V flag set on bits 7 and 6 is not supported
+* N and V flag set on bits 7 and 6 is now supported
 	.macro    BIT    arg
 	move.b    d0,d4
-	and.b    \arg,d4
+	and.b    \arg,d4	| zero flag
+	PUSH_SR
+	move.b	\arg,d4
+	move.w	(a7),d3
+	bclr	#3,d3
+	tst.b	d4
+	jpl		pos\@
+	bset	#3,d3	| set N
+pos\@:
+	bclr	#1,d3
+	btst.b	#6,d4
+	jeq		b6\@
+	bset	#1,d3	| set V
+b6\@:
+	move.w	d3,(a7)
+	POP_SR
 	.endm
 
 	.macro CLR_XC_FLAGS
@@ -156,6 +171,20 @@ skip\@:
 	moveq	#0,d3
 	add.b	d3,d3
 	.endm
+	
+	.macro SET_V_FLAG
+	move.b	#0x70,d3
+	add.b	d3,d3
+	.endm
+	
+	.macro	SET_NV_FLAGS 
+	PUSH_SR
+	move.w	(sp),d3
+	or.w	#0xA,d3		| bit 1 = V, bit 3 = N
+	move.w	d3,(sp)	
+	POP_SR
+	.endm
+	
 
 	.macro SET_I_FLAG
 	ERROR "TODO: insert interrupt disable code here"

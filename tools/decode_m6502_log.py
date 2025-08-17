@@ -53,6 +53,7 @@ def rework(name):
     regs[name] = decode_address(regs[name])
 
 lst = []
+old_pc = None
 for i in range(0,len(contents),len_block):
     chunk = contents[i:i+len_block]
     if len(chunk)<len_block:
@@ -61,6 +62,12 @@ for i in range(0,len(contents),len_block):
     regs["pc"],regs["a"],regs["x"],regs["y"],end = struct.unpack_from(">HHHHH",chunk)
     if end==0xCCCC:
         break
+
+    if old_pc == regs["pc"]:
+        # sometimes 2 68k instructions for 1 address
+        continue
+
+    old_pc = regs["pc"]
     pcs.add(regs["pc"])
 
 
@@ -81,6 +88,7 @@ with open("amiga.tr","w") as f:
 
 # generated using log:     trace mame.tr,,noloop,{tracelog "A=%02X, X=%02X, Y=%02X, P=%02X ",a,x,y,p}
 lst = []
+
 print("reading MAME trace file...")
 with open(r"K:\Emulation\MAME\mame.tr","r") as f:
     l = len("A=04, X=18, Y=FF, P=30 ")
