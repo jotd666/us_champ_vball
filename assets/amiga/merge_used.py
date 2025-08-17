@@ -22,6 +22,7 @@ def merge(used_name,nb_items):
     else:
         old_contents = bytes(nb_cluts*nb_items)
 
+    print(len(old_contents),len(new_contents))
     contents = bytes([a|b for a,b in zip(new_contents,old_contents)])
 
     if old_contents == contents:
@@ -35,4 +36,4 @@ def merge(used_name,nb_items):
             f.write(contents)
 
 #merge("used_sprites",256)
-merge("used_tiles",4096)
+merge("used_tiles",0x4000)

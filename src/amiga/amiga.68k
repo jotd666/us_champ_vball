@@ -85,7 +85,7 @@ OPT_ENABLE_LOGGING = 0
 	.endif
 	
 
-OPT_ENABLE_DOUBLE_BUFFERING = 1
+OPT_ENABLE_DOUBLE_BUFFERING = 0
 
 _custom = 0xDFF000
 
@@ -346,7 +346,7 @@ _user:
 	move.l	a0,cop1lc(a5)
 	
 	lea		bobs_screen_buffer_1,a0
-	addq	#2,a0	| leave 16 bits hidden for left side clipping
+	*addq	#2,a0	| leave 16 bits hidden for left side clipping
 	move.l	a0,playfield_screen_data_1
 	move.l	a0,playfield_drawed_screen_ptr
 	move.l	a0,playfield_displayed_screen_ptr
@@ -767,6 +767,8 @@ _vblank:
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
+	.else
+	jbsr	set_bobs_bitplanes
 	.endif
 	
 	
@@ -1884,12 +1886,6 @@ osd_video_byte_dirty:
 	lea		(SCREEN_COLOR_ADDRESS,a6),a0
 	move.b	(a0,d7.w),d1
 
-		tst.b	d0
-		jeq		444f
-	cmp.w	#0x841,d7
-	jne	444f
-	BREAKPOINT	"841!! nonzero"
-444:
 
 	jbsr	update_bg_tile
 
@@ -1922,10 +1918,21 @@ compute_tile_xy:
 	moveq	#0,d0
 	move.b	d7,d0
 	
-	and.b	#0x3F,d0	| x
+	* for each screen quadrant, compute base X/Y (0-31)
+	and.b	#0x1F,d0	| x
 	move.w	d7,d1
-	lsr.w	#6,d1		| Y
-	lsl.w	#3,d1		| times 8
+	lsr.w	#5,d1		| Y
+	and.b	#0x1F,d1
+	* now add X or Y shift depending on quadrant
+	btst	#11,d7		| 0x8xx ?
+	jeq		0f
+	add.w	#0x20,d1	| lower quadrant
+0:
+	btst	#10,d7		| 0x4xx / 0xCxx ? right quadrant
+	jeq		0f
+	add.w	#0x20,d0	| right quadrant
+0:
+	lsl.w	#3,d1		| Y times 8
 	rts
 
 *compute_tile_xy_portrait:
@@ -1965,7 +1972,6 @@ update_bg_tile:
 *	add.w	#NB_TILES/2,d2		| upper half
 *12:
 	bsr		compute_tile_xy
-	
 	lea		character_table,a0
 
 	
@@ -1978,8 +1984,11 @@ update_bg_tile:
 	lea		mulNB_BYTES_PER_ROW_table,A2
 	add.w	d1,d1
 	move.w	(a2,d1.w),d1
+	swap	d0
+	clr		d0
+	swap	d0
 	add.w	d1,d0
-	add.w	d0,a1
+	add.l	d0,a1		| long!
 	
 	add.w	d2,d2
 	jeq		11f				| optimize
@@ -2105,9 +2114,14 @@ set_bobs_bitplanes:
  	lea	bobs_bitplanes+2,a0
     moveq #NB_PLAYFIELD_PLANES-1,d1
  	move.l	#SCREEN_PLANE_SIZE,d2
-    move.l	playfield_displayed_screen_ptr(pc),d0
+
+	move.w	scroll_y,d0
+	add.w	d0,d0
+	lea		mulNB_BYTES_PER_ROW_table,a2
+	move.w	(a2,d0.w),d0		| compute Y offset
+    add.l	playfield_displayed_screen_ptr(pc),d0
+	* TODO X offset
 	
-	add.l	#SCREEN_PLANE_SIZE/2,d0		| TEMP
 set_bitplanes:
 1:
     swap d0
@@ -2294,6 +2308,7 @@ log_used_tiles:
 	moveq	#0,d0
 	move.b	(a5,d7.w),d0	| tile code
 	move.b	(a4,d7.w),d1	| tile attribute
+
 	move.b	d1,d2
 	and.w	#0x1F,d2
 	lsl.w	#8,d2
