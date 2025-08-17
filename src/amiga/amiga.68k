@@ -36,8 +36,6 @@ SCORE_FILE_SIZE = 0x23		| wrong
 
 LOG_BUFFER_SIZE = 0x20000
 
-TILE_PLANE_X_SHIFT = 8
-
 NB_CLUTS_POW = 3
 NB_CLUTS = 1<<NB_CLUTS_POW
 NB_TILES = 0x4000
@@ -1644,10 +1642,7 @@ platform_init:
     move.w #0x00D0,ddfstop(a5)		| C0 for fmode=3
 
 
-	* applies -8 on X for bobs by applying 8
-	* on X for tile bitplanes (and bobs are properly clipped)
-	
-    move.w #TILE_PLANE_X_SHIFT,bplcon1(a5)
+   
 	
 	# 0 modulo (OCS)
 	move	#NB_BYTES_PER_ROW-40,d0
@@ -1971,6 +1966,11 @@ update_bg_tile:
 *	jeq		12f
 *	add.w	#NB_TILES/2,d2		| upper half
 *12:
+*	cmp.w	#0x9A3,d7
+*	jeq 	100f
+*	rts
+*100:
+*	BREAKPOINT	"US"
 	bsr		compute_tile_xy
 	lea		character_table,a0
 
@@ -2014,9 +2014,7 @@ update_bg_tile:
 	
 	
 standard_tile:
-
 	* just copy
-
 4:
 	move.l	(a2)+,d0		| next plane
 	jeq		5f
@@ -2028,6 +2026,8 @@ standard_tile:
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 41:
+
+
 	TILE8_NEXT_PLANE
 	dbf		d4,4b
 0:
@@ -3113,6 +3113,13 @@ debug_color:
 	dc.l	-2
 	
 
+	
+sprite_colors:
+	DECL_COLORS	16,16
+
+game_sprites:
+	DECL_SPRITES
+game_sprites_end:
 
 	
 	* main copperlist
@@ -3122,9 +3129,11 @@ game_copperlist:
 	* black color background plane
 
 	* enable sprite colors now
+	.word	0x0801,0xFFFE
 
 bobs_bitplanes:
 	DECL_BITPLANES	0,NB_PLAYFIELD_PLANES
+
 
 copperlist_colors:
 	.set	bpl_count,0
@@ -3134,14 +3143,6 @@ copperlist_colors:
 	DECL_32_COLORS
 	.endr
 
-	
-sprite_colors:
-	DECL_COLORS	16,16
-	.word	0x0801,0xFFFE
-game_sprites:
-	DECL_SPRITES
-game_sprites_end:
-
 
 
 	* mid-line wait & extra interrupt
@@ -3150,7 +3151,7 @@ pal_intreq_block_game:
 	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
 
 
-	.word	0xF001,0xFFFE	| if we don't add an extra wait, NTSC version locks up
+	*.word	0xF001,0xFFFE	| if we don't add an extra wait, NTSC version locks up
 	
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait

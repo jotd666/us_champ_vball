@@ -293,7 +293,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
                                 bitplane_sprite_data = bitplanelib.palette_image2attached_sprites(wtile,None,palette,
                                 sprite_fmode=2,with_control_words=True)
                         else:
-                            # 4 planes, no mask
+                            # no mask
                             height = 8
                             width = 1
                             y_start = 0
