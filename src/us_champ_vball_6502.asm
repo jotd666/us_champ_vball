@@ -15869,6 +15869,7 @@ F80F: 39 13 F8 and $f813, y
 F812: 60       rts
 
 
+
 table_5d2d:
 	dc.w	$5d41	; $5d2d
 	dc.w	$5d41	; $5d2f
@@ -15982,6 +15983,7 @@ table_6bba:
 	dc.w	$6bb7	; $6bf8
 	dc.w	$6bb7	; $6bfa
 	dc.w	$6bb7	; $6bfc
+
 table_707a:
 	dc.w	$70a6	; $707a
 	dc.w	$70a6	; $707c
@@ -16003,17 +16005,21 @@ table_707a:
 	dc.w	$7eeb	; $709c
 	dc.w	$7eff	; $709e
 	dc.w	$7f13	; $70a0
+	dc.w	$8014	; $70a2
+	dc.w	$8167	; $70a4
 table_7345:
 	dc.w	table_7345	; $7345
 	dc.w	$738c	; $7347
 	dc.w	$7391	; $7349
 	dc.w	$7396	; $734b
+	dc.w	$8009	; $734d
 table_7430:
 	dc.w	table_7430	; $7430
 	dc.w	$7444	; $7432
 	dc.w	$74a2	; $7434
 	dc.w	$74a7	; $7436
 	dc.w	$74ae	; $7438
+	dc.w	$8009	; $743a
 table_756d:
 	dc.w	table_756d	; $756d
 	dc.w	$75a6	; $756f
@@ -16021,6 +16027,7 @@ table_756d:
 	dc.w	$75fa	; $7573
 	dc.w	$75ff	; $7575
 	dc.w	$760b	; $7577
+	dc.w	$8009	; $7579
 table_76d6:
 	dc.w	table_76d6	; $76d6
 	dc.w	$7727	; $76d8
@@ -16029,12 +16036,14 @@ table_76d6:
 	dc.w	$778a	; $76de
 	dc.w	$778f	; $76e0
 	dc.w	$7840	; $76e2
+	dc.w	$8009	; $76e4
 table_788d:
 	dc.w	table_788d	; $788d
 	dc.w	$78e4	; $788f
 	dc.w	$78e4	; $7891
 	dc.w	$7909	; $7893
 	dc.w	$7909	; $7895
+	dc.w	$8009	; $7897
 table_79da:
 	dc.w	table_79da	; $79da
 	dc.w	$7ae5	; $79dc
@@ -16045,11 +16054,13 @@ table_79da:
 	dc.w	$7aae	; $79e6
 	dc.w	$7aae	; $79e8
 	dc.w	$7d45	; $79ea
+	dc.w	$8009	; $79ec
 table_7f44:
 	dc.w	table_7f44	; $7f44
 	dc.w	$7f66	; $7f46
 	dc.w	$7f75	; $7f48
 	dc.w	$7f85	; $7f4a
+	dc.w	$8009	; $7f4c
 table_871d:
 	dc.w	$873d	; $871d
 	dc.w	$876c	; $871f
@@ -16171,6 +16182,7 @@ table_ba8c:
 	dc.w	$bc97	; $baac
 	dc.w	$e0ad	; $baae
 	dc.w	$c903	; $bab0
+
 table_be61:
 	dc.w	$c50e	; $be61
 	dc.w	$c466	; $be63

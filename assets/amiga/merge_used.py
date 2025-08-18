@@ -1,4 +1,4 @@
-import os,pathlib,shutil,json
+import os,pathlib,shutil,json,itertools
 
 from shared import *
 
@@ -22,13 +22,12 @@ def merge(used_name,nb_items):
     else:
         old_contents = bytes(nb_cluts*nb_items)
 
-    print(len(old_contents),len(new_contents))
-    contents = bytes([a|b for a,b in zip(new_contents,old_contents)])
+    contents = bytes([a|b for a,b in itertools.zip_longest(new_contents,old_contents,fillvalue=0)])
 
     if old_contents == contents:
         print(f"Nothing new for {used_name}")
     else:
-        for i,(a,b) in enumerate(zip(old_contents,contents)):
+        for i,(a,b) in enumerate(itertools.zip_longest(old_contents,contents,fillvalue=0)):
             if a!=b:
                 code,clut = divmod(i,nb_cluts)
                 print(f"{used_name}: New: code={code:02x}, clut={clut:02x}")

@@ -4,6 +4,8 @@
 
 import pathlib,re
 
+fake = {0x56a5}
+
 def process(asm_file,rom_file,banked_rom,offset,end_address):
     with open(asm_file) as f:
         asm_lines = f.readlines()
@@ -31,7 +33,7 @@ def process(asm_file,rom_file,banked_rom,offset,end_address):
 
     # second pass: find tag, then previous LDx instruction to get table address
     # create a label for table at the previous LDx instruction that matches the
-    # index register (X,Y,U). Widely used in a lot of games, Konami but not just them.
+    # index register (X,Y). Widely used in a lot of games, Konami but not just them.
     for i,line in enumerate(asm_lines):
         if "[indirect_jump]" in line:
 
@@ -62,7 +64,7 @@ def process(asm_file,rom_file,banked_rom,offset,end_address):
                 else:
                     data = brom
                     sub = 0x4000
-                    end = 0x8000
+                    end = end_address
 
                 block = data[table_address-sub:table_address-sub+size]
                 label = f"table_{table_address:04x}"
