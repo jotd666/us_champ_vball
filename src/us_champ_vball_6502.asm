@@ -125,8 +125,10 @@
 unpack_mode_02 = $02
 tile_lsb_value_to_write_12 = $12
 tile_msb_to_write_13 = $13
-base_screen_pointer_list_001d = $1d		; probably used for other pointers
-screen_source_pointer_0010 = $10		; as zero page pointers are precious
+; probably used for other pointers
+base_screen_pointer_list_001d = $1d
+; as zero page pointers are precious
+screen_source_pointer_0010 = $10
 screen_tile_dest_address_14 = $14
 screen_attribute_dest_address_16 = $16
 nb_credits_0035 = $35
@@ -14618,7 +14620,8 @@ ED0E: A5 14    lda screen_tile_dest_address_14
 ED10: 85 16    sta screen_attribute_dest_address_16
 ED12: A5 15    lda $15
 ED14: 18       clc
-ED15: 69 10    adc #$10		; ($16) = ($14)+$1000 (attribute)
+; ($16) = ($14)+$1000 (attribute)
+ED15: 69 10    adc #$10
 ED17: 85 17    sta $17
 ED19: B1 10    lda (screen_source_pointer_0010), y
 ED1B: C8       iny

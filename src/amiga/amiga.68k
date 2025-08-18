@@ -1986,15 +1986,11 @@ update_bg_tile:
 	add.w	d3,d2			| extended tile code
 	move.w	d1,d3	| attribute + tile msbits
 	lsr.w	#5,d3	| clut
-*	tst.b	higher_gfxset
-*	jeq		12f
-*	add.w	#NB_TILES/2,d2		| upper half
-*12:
-*	cmp.w	#0x9A3,d7
-*	jeq 	100f
-*	rts
-*100:
-*	BREAKPOINT	"US"
+	tst.b	higher_gfxset
+	jeq		12f
+	add.w	#NB_TILES/2,d2		| upper half
+12:
+
 	bsr		compute_tile_xy
 	lea		character_table,a0
 
