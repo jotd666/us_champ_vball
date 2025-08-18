@@ -2129,7 +2129,51 @@ HW_SpriteYTable_\height:
 
 	DEF_HW_SPRITE_Y_TABLE	16
 
+
 set_bobs_bitplanes:
+	movem.l	a0-a1/d0-d2,-(a7)
+	
+	* set bitplanes
+	moveq	#0,d0
+	move.w	scroll_y,d0
+	*add.b	scroll_y+1,d0
+	add.w	d0,d0
+	lea		mulNB_BYTES_PER_ROW_table,a2
+	move.w	(a2,d0.w),d0		| compute Y offset
+	
+	moveq	#4,d2
+	*move.b	scroll_x,d2
+	*add.b	scroll_x+1,d2
+
+	add.w	d2,d2
+	add.w	d2,d2
+	lea		scroll_table,a2
+	move.w	(a2,d2.w),fine_x_scroll_value
+	add.w	(2,a2,d2.w),d0
+	
+    moveq #NB_PLAYFIELD_PLANES-1,d1
+ 	move.l	#SCREEN_PLANE_SIZE,d2
+    move.l	playfield_displayed_screen_ptr(pc),a0
+	add.l	d0,a0		| X/Y scroll offset (long!)
+	move.l	a0,d0		| first bitplane screen pointer
+ 	lea	bobs_bitplanes+2,a0
+set_bitplanes:
+1:
+    swap d0
+    move.w d0,(a0)
+    swap d0
+    move.w d0,(4,a0)    
+    addq.w  #8,a0
+    add.l d2,d0
+    dbf d1,1b
+	movem.l	(a7)+,a0-a1/d0-d2
+    rts
+
+scroll_table:
+	.include	"scroll_table_16.68k"
+	
+
+set_bobs_bitplanes_old:
 	movem.l	a0-a1/d0-d2,-(a7)
  	lea	bobs_bitplanes+2,a0
     moveq #NB_PLAYFIELD_PLANES-1,d1
@@ -2142,7 +2186,7 @@ set_bobs_bitplanes:
     add.l	playfield_displayed_screen_ptr(pc),d0
 	* TODO X offset
 	
-set_bitplanes:
+set_bitplanes_old:
 1:
     swap d0
     move.w d0,(a0)
@@ -2168,7 +2212,23 @@ osd_read_p2_inputs:
 	rts
 	
 osd_set_scrollx_hi:
+	movem.w	d0/d1,-(a7)
+	move.b	d0,d1
+	and.b	#2,d0
+	lsl.b	#7,d0
 	move.b	d0,scroll_x
+	move.b	d1,d0
+	lsr.b	#2,d0
+	and.b	#7,d0
+	* this is tiles prom bank number
+	
+	move.b	d1,d0
+	lsr.b	#5,d0
+	and.b	#7,d0
+	* this is tiles prom bank number
+	
+	movem.w	(a7)+,d0/d1
+	
 	rts
 osd_set_scrollx_lo:
 	move.b	d0,scroll_x+1
@@ -3168,6 +3228,9 @@ game_copperlist:
 bobs_bitplanes:
 	DECL_BITPLANES	0,NB_PLAYFIELD_PLANES
 
+	.word	bplcon1
+fine_x_scroll_value:
+	.word	0
 
 copperlist_colors:
 	.set	bpl_count,0
