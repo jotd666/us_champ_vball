@@ -781,11 +781,31 @@ _vblank:
 osd_blitz:
 	blitz
 	rts
-	
+	cmp.b #0x47,(a7)
+	jeq 0f
+  move.b  #0,0x100
+0:
 osd_break:
 	* sends a WinUAE command to enter WinUAE debugger
 	.ifndef	RELEASE
+* wait for VBL, so when breakpoint is hit, the DMA has displayed the current picture
 	move.l	D0,-(a7)
+	move.l	a0,-(a7)
+	move.w	SR,-(a7)
+	* block interrupts during the vblank wait
+	* in dev mode, we use whdload in supervisor mode so SR can be written to
+	move.w	#0x2700,SR
+	lea	_custom,a0
+	.rept	2
+	move.w	#0x7FFF,intreq(a0)
+0:
+	move.w	intreqr(a0),d0
+	btst	#5,d0
+	beq.b	0b
+	.endr
+	move.w	(a7)+,sr
+	move.l	(a7)+,a0
+
 	pea     0.w
 	* Normally it would point to where the result of the command is written, but since the last parameter (first pushed)
 	* indicating the number of bytes to write is 0, nothing is written.
@@ -803,8 +823,6 @@ osd_break:
 1002: .asciz    "AKS_ENTERDEBUGGER 1"
 1003:
         .align	2
-
-	
 
 * < D0: number of 1/60Hz ticks
 * can work with interrupts enabled or disabled
@@ -1827,6 +1845,9 @@ osd_set_bank:
 	*BREAKPOINT	"setting bank 0"
 	jbsr	copy_bank_0
 	move.b	#0,current_rom_bank
+	.ifndef	RELEASE
+	move.w	last_known_m6502_pc,last_bankswitch_pc
+	.endif
 	rts
 set_bank_1:
 	move.b	d4,bank_value
@@ -1836,6 +1857,9 @@ set_bank_1:
 	*BREAKPOINT	"setting bank 1"
 	jbsr	copy_bank_1
 	move.b	#1,current_rom_bank
+	.ifndef	RELEASE
+	move.w	last_known_m6502_pc,last_bankswitch_pc
+	.endif
 0:
 	rts
 
@@ -2752,6 +2776,18 @@ osd_log_cpu:
 	move.w	(6,a7),0x100
 
 	move.l	a6,-(a7)
+	cmp.w	#0x4000,last_known_m6502_pc
+	jcs		0f
+	cmp.w	#0x8000,last_known_m6502_pc
+	jcc		0f
+	* 4000-8000 PC: check if bank 0 is set
+	tst.b	current_rom_bank
+	jeq		0f
+	* we could have missed one bankswitch
+	move.w	last_bankswitch_pc,d5
+	BREAKPOINT		"running code in 4000-8000 when bank doesn't match"
+	ILLEGAL
+0:
 	* check if cpu log is enabled
 	tst.b	cpu_log_enable
 	jeq		445f
@@ -2859,6 +2895,8 @@ music_pattern:
 music_tick:
 	.word	0
 last_known_m6502_pc:
+	.word	0xFFFF
+last_bankswitch_pc:
 	.word	0xFFFF
 music_duration:
 	.word	0

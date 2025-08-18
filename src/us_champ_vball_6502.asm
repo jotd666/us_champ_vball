@@ -5795,10 +5795,10 @@ bankswitch_copy_022d = $022d
 9164: C9 0A    cmp #$0a
 9166: B0 0D    bcs $9175
 9168: A9 01    lda #$01
-916A: 20 DF D8 jsr $d8df
+916A: 20 DF D8 jsr set_bank_d8df
 916D: 20 F3 7F jsr $7ff3
 9170: A9 00    lda #$00
-9172: 20 DF D8 jsr $d8df
+9172: 20 DF D8 jsr set_bank_d8df
 9175: BD 1A 03 lda $031a, x
 9178: 29 7F    and #$7f
 917A: 0A       asl a
@@ -10158,11 +10158,11 @@ BDCF: B0 C2    bcs $bd93
 BDD1: C9 19    cmp #$19
 BDD3: F0 11    beq $bde6
 BDD5: A9 01    lda #$01
-BDD7: 20 DF D8 jsr $d8df
+BDD7: 20 DF D8 jsr set_bank_d8df
 BDDA: 20 F0 7F jsr $7ff0
 BDDD: 08       php
 BDDE: A9 00    lda #$00
-BDE0: 20 DF D8 jsr $d8df
+BDE0: 20 DF D8 jsr set_bank_d8df
 BDE3: 28       plp
 BDE4: 90 75    bcc $be5b
 BDE6: AD E0 03 lda $03e0
@@ -12820,13 +12820,16 @@ D8D6: 05 00    ora $00
 D8D8: 8D 2C 02 sta $022c
 D8DB: 8D 08 10 sta scrollx_hi_1008
 D8DE: 60       rts
-D8DF: 85 00    sta $00
-D8E1: AD 2D 02 lda bankswitch_copy_022d
-D8E4: 29 F8    and #$f8
-D8E6: 05 00    ora $00
+
+set_bank_d8df:
+D8DF: 85 00    sta $00			| save A in temp
+D8E1: AD 2D 02 lda bankswitch_copy_022d  | get old value
+D8E4: 29 F8    and #$f8      | remove 3 low bits
+D8E6: 05 00    ora $00       | set A bits
 D8E8: 8D 2D 02 sta bankswitch_copy_022d
-D8EB: 8D 09 10 sta bankswitch_1009
+D8EB: 8D 09 10 sta bankswitch_1009   | set bank value
 D8EE: 60       rts
+
 D8EF: 98       tya
 D8F0: 48       pha
 D8F1: AD 2E 02 lda $022e
@@ -13092,7 +13095,7 @@ DB50: 60       rts
 ; this region contains ascii strings
 
 DFF3: A9 01    lda #$01
-DFF5: 20 DF D8 jsr $d8df
+DFF5: 20 DF D8 jsr set_bank_d8df
 DFF8: AD DA 06 lda $06da
 DFFB: C9 FC    cmp #$fc
 DFFD: 90 03    bcc $e002
@@ -13292,11 +13295,11 @@ E176: F0 03    beq $e17b
 E178: 4C AA E0 jmp $e0aa
 E17B: 4C 5C E0 jmp $e05c
 E17E: A9 00    lda #$00
-E180: 20 DF D8 jsr $d8df
+E180: 20 DF D8 jsr set_bank_d8df
 E183: 60       rts
 
 E1B5: A9 01    lda #$01
-E1B7: 20 DF D8 jsr $d8df
+E1B7: 20 DF D8 jsr set_bank_d8df
 E1BA: A5 4C    lda $4c
 E1BC: AA       tax
 E1BD: 0A       asl a
@@ -13634,7 +13637,7 @@ E42F: BD 3A 02 lda $023a, x
 E432: 29 02    and #$02
 E434: 9D 3A 02 sta $023a, x
 E437: A9 00    lda #$00
-E439: 20 DF D8 jsr $d8df
+E439: 20 DF D8 jsr set_bank_d8df
 E43C: 60       rts
 E43D: B5 C7    lda $c7, x
 E43F: 30 36    bmi $e477
@@ -13798,7 +13801,7 @@ E5D8: 90 EB    bcc $e5c5
 E5DA: 60       rts
 E5DB: 48       pha
 E5DC: A9 01    lda #$01
-E5DE: 20 DF D8 jsr $d8df
+E5DE: 20 DF D8 jsr set_bank_d8df
 E5E1: 68       pla
 E5E2: AE DA 06 ldx $06da
 E5E5: E0 FC    cpx #$fc
@@ -13920,7 +13923,7 @@ E6BF: C6 00    dec $00
 E6C1: F0 03    beq $e6c6
 E6C3: 4C 48 E6 jmp $e648
 E6C6: A9 00    lda #$00
-E6C8: 20 DF D8 jsr $d8df
+E6C8: 20 DF D8 jsr set_bank_d8df
 E6CB: 60       rts
 E6CC: 20 E8 E4 jsr $e4e8
 E6CF: 20 3E E5 jsr $e53e
@@ -14495,8 +14498,9 @@ EC94: 65 00    adc $00
 EC96: 20 80 EE jsr $ee80
 EC99: EE E7 07 inc $07e7
 EC9C: 60       rts
+
 EC9D: A9 01    lda #$01
-EC9F: 20 DF D8 jsr $d8df
+EC9F: 20 DF D8 jsr set_bank_d8df
 ECA2: AD 00 60 lda $6000	; from bank #1
 ECA5: 85 1D    sta $1d
 ECA7: AD 01 60 lda $6001	; from bank #1
@@ -14638,7 +14642,7 @@ EDA8: 69 00    adc #$00
 EDAA: 85 11    sta $11
 EDAC: 4C BE EC jmp $ecbe
 EDAF: A9 00    lda #$00
-EDB1: 20 DF D8 jsr $d8df
+EDB1: 20 DF D8 jsr set_bank_d8df
 EDB4: 60       rts
 EDB5: 98       tya
 EDB6: 48       pha
@@ -14666,7 +14670,7 @@ EDD9: A0 00    ldy #$00
 EDDB: 60       rts
 EDDC: 48       pha
 EDDD: A9 01    lda #$01
-EDDF: 20 DF D8 jsr $d8df
+EDDF: 20 DF D8 jsr set_bank_d8df
 EDE2: 68       pla
 EDE3: 0A       asl a
 EDE4: A8       tay
@@ -14698,7 +14702,7 @@ EE10: 4C FA ED jmp $edfa
 EE13: C9 FF    cmp #$ff
 EE15: D0 06    bne $ee1d
 EE17: A9 00    lda #$00
-EE19: 20 DF D8 jsr $d8df
+EE19: 20 DF D8 jsr set_bank_d8df
 EE1C: 60       rts
 EE1D: B1 10    lda ($10), y
 EE1F: C8       iny
@@ -14755,7 +14759,7 @@ EE7B: A4 00    ldy $00
 EE7D: 4C FC ED jmp $edfc
 EE80: 48       pha
 EE81: A9 01    lda #$01
-EE83: 20 DF D8 jsr $d8df
+EE83: 20 DF D8 jsr set_bank_d8df
 EE86: AD 04 60 lda $6004
 EE89: 85 1D    sta $1d
 EE8B: AD 05 60 lda $6005
@@ -14765,7 +14769,7 @@ EE92: 85 03    sta $03
 EE94: 68       pla
 EE95: 20 B3 EC jsr $ecb3
 EE98: A9 00    lda #$00
-EE9A: 20 DF D8 jsr $d8df
+EE9A: 20 DF D8 jsr set_bank_d8df
 EE9D: 60       rts
 
 nmi_ee9e:
