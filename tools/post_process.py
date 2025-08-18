@@ -75,6 +75,14 @@ with open(source_dir / "conv.s") as f:
             line = line.replace("cs\tl","ra\tl")
             lines[i+1] = remove_error(lines[i+1])
 
+        if line_address in [0x916d,0xbdda]:
+            # jumping to bank 1!
+            line = line.replace("l_7","b1_7")
+
+        if line.startswith("l_7ff0:") or line.startswith("l_7ff3:"):
+            # remove those confusing labels
+            line = ""
+
         if line_address in {0x603e,0x606f,0x618e,0x60f4,0x61de,0x60ea,0x62a3}:
             # cmp + rts
             line = "\tINVERT_XC_FLAGS\n"+line
@@ -220,11 +228,16 @@ header = """\t.include "data.inc"
 * an address that was set by the game as return callback
 * there are 2 known addresses: callback_9280 and
 
-callback_0000:
-    cmp.w    #0x8092,(a6)
+    .macro  CB_CASE  msb,lsb
+    cmp.w    #0x\lsb\msb,(a6)
     jne        0f
-    jra        callback_9280
+    jra        callback_\msb\lsb
 0:
+    .endm
+
+callback_0000:
+    CB_CASE     92,80
+    CB_CASE     92,37
     BREAKPOINT    "callback 0000 unknown"
     rts
 """
@@ -243,3 +256,5 @@ with open(source_dir / "data.inc","w") as fw:
 with open(source_dir / "us_champ_vball.68k","w") as fw:
     fw.write(header)
     fw.writelines(lines)
+    # add the bank 1 small code part
+    fw.write('\n\t.include\t"us_champ_vball_bank1.68k"\n\n')

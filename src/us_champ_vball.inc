@@ -82,6 +82,14 @@
 	INVERT_XC_FLAGS
 	.endm
 
+	.macro	SBC_IND_Y	address
+	INVERT_XC_FLAGS
+	GET_INDIRECT_ADDRESS	\address
+	move.b	(a0,d2.w),d4
+	subx.b	d4,d0
+	INVERT_XC_FLAGS
+	.endm
+
 	.macro	SBCD_DIRECT	address
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address

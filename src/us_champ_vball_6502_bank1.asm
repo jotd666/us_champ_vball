@@ -443,7 +443,7 @@
 7CE4: 6E A6 02 ror $02a6
 7CE7: 60       rts
 
-
+; entrypoints to bank 1 code
 7FF0: 4C B9 79 jmp $79b9
 7FF3: 4C AD 7A jmp $7aad
 

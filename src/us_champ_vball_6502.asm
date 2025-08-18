@@ -3974,6 +3974,7 @@ bankswitch_copy_022d = $022d
 7FF0: 9D B8 03 sta $03b8, x
 7FF3: 4C 6C 70 jmp $706c
 
+
 8005: A9 17    lda #$17
 8007: 09 80    ora #$80
 8009: 9D 27 03 sta $0327, x
@@ -5796,6 +5797,7 @@ bankswitch_copy_022d = $022d
 9166: B0 0D    bcs $9175
 9168: A9 01    lda #$01
 916A: 20 DF D8 jsr set_bank_d8df
+; this is not the 7FF3 in this asm file, there's a bankswitch!
 916D: 20 F3 7F jsr $7ff3
 9170: A9 00    lda #$00
 9172: 20 DF D8 jsr set_bank_d8df
@@ -5853,6 +5855,7 @@ bankswitch_copy_022d = $022d
 9230: A9 92    lda #$92
 9232: 85 01    sta $01
 9234: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
+callback_9237:
 9237: BD 43 03 lda $0343, x
 923A: C9 80    cmp #$80
 923C: 90 0A    bcc $9248
@@ -10159,7 +10162,8 @@ BDD1: C9 19    cmp #$19
 BDD3: F0 11    beq $bde6
 BDD5: A9 01    lda #$01
 BDD7: 20 DF D8 jsr set_bank_d8df
-BDDA: 20 F0 7F jsr $7ff0
+; this is not the 7FF0 in this asm file, there's a bankswitch!
+BDDA: 20 F0 7F jsr $7ff0		; [bank1]
 BDDD: 08       php
 BDDE: A9 00    lda #$00
 BDE0: 20 DF D8 jsr set_bank_d8df
@@ -12822,12 +12826,12 @@ D8DB: 8D 08 10 sta scrollx_hi_1008
 D8DE: 60       rts
 
 set_bank_d8df:
-D8DF: 85 00    sta $00			| save A in temp
-D8E1: AD 2D 02 lda bankswitch_copy_022d  | get old value
-D8E4: 29 F8    and #$f8      | remove 3 low bits
-D8E6: 05 00    ora $00       | set A bits
+D8DF: 85 00    sta $00			; save A in temp
+D8E1: AD 2D 02 lda bankswitch_copy_022d  ; get old value
+D8E4: 29 F8    and #$f8      ; remove 3 low bits
+D8E6: 05 00    ora $00       ; set A bits
 D8E8: 8D 2D 02 sta bankswitch_copy_022d
-D8EB: 8D 09 10 sta bankswitch_1009   | set bank value
+D8EB: 8D 09 10 sta bankswitch_1009   ; set bank value
 D8EE: 60       rts
 
 D8EF: 98       tya
@@ -15872,7 +15876,11 @@ F80E: 68       pla
 F80F: 39 13 F8 and $f813, y
 F812: 60       rts
 
-
+l_ff80:
+FF80: 4C A2 A9 jmp $a9a2
+l_ff83:
+FF83: 4C B8 D7 jmp $d7b8
+FF86: 4C 50 BF jmp $bf50
 
 table_5d2d:
 	dc.w	$5d41	; $5d2d
