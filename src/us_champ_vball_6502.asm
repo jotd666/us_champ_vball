@@ -119,8 +119,20 @@
 ;	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(4)
 ;	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 ;	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START4 )
-nb_credits_0035 = $35
 
+; tried to name a few variables when reversing some bits. It's possible that
+; the variables (specially zero page ones) are used for other purposes
+unpack_mode_02 = $02
+tile_lsb_value_to_write_12 = $12
+tile_msb_to_write_13 = $13
+base_screen_pointer_list_001d = $1d		; probably used for other pointers
+screen_source_pointer_0010 = $10		; as zero page pointers are precious
+screen_tile_dest_address_14 = $14
+screen_attribute_dest_address_16 = $16
+nb_credits_0035 = $35
+bankswitch_copy_022d = $022d
+scrollx_hi_copy_022c = $022c
+screen_id_07e4 = $7e4
 p1_1000 = $1000
 p2_1001 = $1001
 system_1002 = $1002
@@ -134,7 +146,30 @@ scrollx_lo_100c = $100c
 sound_100d = $100d
 scrolly_lo_100e = $100e
 
-bankswitch_copy_022d = $022d
+
+; screen_id_07e4 contains the identification of the background screen
+; to be displayed. Some ids seem corrupt or repeated
+;
+; $00: Daytona volley playfield
+; $01: New-York volley playfield
+; $02: Los Angeles volley playfield
+; $03: Honolulu? volley playfield
+; $04: Navy volley playfield
+; $05: title screen
+; $06: Catroonish screen with team backstory
+; $07: Catroonish screen with team backstory 2
+; $08: Catroonish screen with team backstory 3 (tournament ad)
+; $09: US map
+; $0A: US map
+; $0B: US map (trashed)
+; $0C: US map (trashed)
+; $0D: street background
+; $0E: street background
+; $0F: title screen (the one that is used at bootup)
+; $10: high-score screen
+; $11: winning screen
+; $12: bare volley field, no net
+; after that, other values crash the code
 
 ; code from bank 0
 
@@ -588,14 +623,14 @@ bankswitch_copy_022d = $022d
 6014: 0A       asl a
 6015: A8       tay
 6016: B9 14 40 lda $4014, y
-6019: 85 10    sta $10
+6019: 85 10    sta screen_source_pointer_0010
 601B: A5 56    lda $56
 601D: 29 0F    and #$0f
 601F: F0 02    beq $6023
 6021: A9 02    lda #$02
 6023: 18       clc
-6024: 65 10    adc $10
-6026: 85 10    sta $10
+6024: 65 10    adc screen_source_pointer_0010
+6026: 85 10    sta screen_source_pointer_0010
 6028: A9 00    lda #$00
 602A: 79 15 40 adc $4015, y
 602D: 85 11    sta $11
@@ -614,7 +649,7 @@ bankswitch_copy_022d = $022d
 6047: 0A       asl a
 6048: A8       tay
 6049: B9 3E 40 lda $403e, y
-604C: 85 10    sta $10
+604C: 85 10    sta screen_source_pointer_0010
 604E: B9 3F 40 lda $403f, y
 6051: 85 11    sta $11
 6053: 38       sec
@@ -624,8 +659,8 @@ bankswitch_copy_022d = $022d
 605B: A8       tay
 605C: 18       clc
 605D: B9 77 40 lda $4077, y
-6060: 65 10    adc $10
-6062: 85 10    sta $10
+6060: 65 10    adc screen_source_pointer_0010
+6062: 85 10    sta screen_source_pointer_0010
 6064: A9 00    lda #$00
 6066: 65 11    adc $11
 6068: 85 11    sta $11
@@ -639,7 +674,7 @@ bankswitch_copy_022d = $022d
 6078: 0A       asl a
 6079: A8       tay
 607A: B9 3E 40 lda $403e, y
-607D: 85 10    sta $10
+607D: 85 10    sta screen_source_pointer_0010
 607F: B9 3F 40 lda $403f, y
 6082: 85 11    sta $11
 6084: AD E9 03 lda $03e9
@@ -647,8 +682,8 @@ bankswitch_copy_022d = $022d
 6089: A8       tay
 608A: 18       clc
 608B: B9 68 40 lda $4068, y
-608E: 65 10    adc $10
-6090: 85 10    sta $10
+608E: 65 10    adc screen_source_pointer_0010
+6090: 85 10    sta screen_source_pointer_0010
 6092: A9 00    lda #$00
 6094: 65 11    adc $11
 6096: 85 11    sta $11
@@ -688,7 +723,7 @@ bankswitch_copy_022d = $022d
 60D6: 18       clc
 60D7: B9 14 40 lda $4014, y
 60DA: 69 04    adc #$04
-60DC: 85 10    sta $10
+60DC: 85 10    sta screen_source_pointer_0010
 60DE: B9 15 40 lda $4015, y
 60E1: 69 00    adc #$00
 60E3: 85 11    sta $11
@@ -795,7 +830,7 @@ bankswitch_copy_022d = $022d
 61A8: 18       clc
 61A9: B9 14 40 lda $4014, y
 61AC: 69 06    adc #$06
-61AE: 85 10    sta $10
+61AE: 85 10    sta screen_source_pointer_0010
 61B0: B9 15 40 lda $4015, y
 61B3: 69 00    adc #$00
 61B5: 85 11    sta $11
@@ -812,7 +847,7 @@ bankswitch_copy_022d = $022d
 61CA: 18       clc
 61CB: B9 14 40 lda $4014, y
 61CE: 69 BB    adc #$bb
-61D0: 85 10    sta $10
+61D0: 85 10    sta screen_source_pointer_0010
 61D2: B9 15 40 lda $4015, y
 61D5: 69 00    adc #$00
 61D7: 85 11    sta $11
@@ -824,7 +859,7 @@ bankswitch_copy_022d = $022d
 61E3: 0A       asl a
 61E4: A8       tay
 61E5: B9 00 40 lda $4000, y
-61E8: 85 10    sta $10
+61E8: 85 10    sta screen_source_pointer_0010
 61EA: B9 01 40 lda $4001, y
 61ED: 85 11    sta $11
 61EF: 8A       txa
@@ -843,8 +878,8 @@ bankswitch_copy_022d = $022d
 6207: 0A       asl a
 6208: 0A       asl a
 6209: 65 1B    adc $1b
-620B: 65 10    adc $10
-620D: 85 10    sta $10
+620B: 65 10    adc screen_source_pointer_0010
+620D: 85 10    sta screen_source_pointer_0010
 620F: A5 11    lda $11
 6211: 69 00    adc #$00
 6213: 85 11    sta $11
@@ -856,7 +891,7 @@ bankswitch_copy_022d = $022d
 6220: 0A       asl a
 6221: A8       tay
 6222: B9 14 40 lda $4014, y
-6225: 85 10    sta $10
+6225: 85 10    sta screen_source_pointer_0010
 6227: B9 15 40 lda $4015, y
 622A: 85 11    sta $11
 622C: A5 00    lda $00
@@ -876,8 +911,8 @@ bankswitch_copy_022d = $022d
 6246: 0A       asl a
 6247: 0A       asl a
 6248: 69 44    adc #$44
-624A: 65 10    adc $10
-624C: 85 10    sta $10
+624A: 65 10    adc screen_source_pointer_0010
+624C: 85 10    sta screen_source_pointer_0010
 624E: A5 11    lda $11
 6250: 69 00    adc #$00
 6252: 85 11    sta $11
@@ -913,13 +948,13 @@ bankswitch_copy_022d = $022d
 6288: 0A       asl a
 6289: A8       tay
 628A: A9 A4    lda #$a4
-628C: 85 10    sta $10
+628C: 85 10    sta screen_source_pointer_0010
 628E: A9 62    lda #$62
 6290: 85 11    sta $11
 6292: 98       tya
 6293: 18       clc
-6294: 65 10    adc $10
-6296: 85 10    sta $10
+6294: 65 10    adc screen_source_pointer_0010
+6296: 85 10    sta screen_source_pointer_0010
 6298: A5 11    lda $11
 629A: 69 00    adc #$00
 629C: 85 11    sta $11
@@ -1253,18 +1288,18 @@ bankswitch_copy_022d = $022d
 659D: B9 C3 65 lda $65c3, y
 65A0: 85 1C    sta $1c
 65A2: B9 C4 65 lda $65c4, y
-65A5: 85 1D    sta $1d
+65A5: 85 1D    sta base_screen_pointer_list_001d
 65A7: A5 2A    lda $2a
 65A9: C5 01    cmp $01
 65AB: F0 09    beq $65b6
 65AD: A5 1C    lda $1c
-65AF: 85 1D    sta $1d
+65AF: 85 1D    sta base_screen_pointer_list_001d
 65B1: B9 C4 65 lda $65c4, y
 65B4: 85 1C    sta $1c
 65B6: A6 01    ldx $01
 65B8: A5 1C    lda $1c
 65BA: 9D 16 03 sta $0316, x
-65BD: A5 1D    lda $1d
+65BD: A5 1D    lda base_screen_pointer_list_001d
 65BF: 9D 17 03 sta $0317, x
 65C2: 60       rts
 
@@ -1282,18 +1317,18 @@ bankswitch_copy_022d = $022d
 661B: A9 32    lda #$32
 661D: 85 1C    sta $1c
 661F: A9 A0    lda #$a0
-6621: 85 1D    sta $1d
+6621: 85 1D    sta base_screen_pointer_list_001d
 6623: A9 00    lda #$00
 6625: 85 1E    sta $1e
 6627: A0 00    ldy #$00
 6629: A5 1C    lda $1c
 662B: 38       sec
-662C: E5 1D    sbc $1d
+662C: E5 1D    sbc base_screen_pointer_list_001d
 662E: 90 05    bcc $6635
 6630: E6 1E    inc $1e
 6632: 4C 37 66 jmp $6637
-6635: 65 1D    adc $1d
-6637: 46 1D    lsr $1d
+6635: 65 1D    adc base_screen_pointer_list_001d
+6637: 46 1D    lsr base_screen_pointer_list_001d
 6639: 06 1E    asl $1e
 663B: C8       iny
 663C: C0 05    cpy #$05
@@ -1307,7 +1342,7 @@ bankswitch_copy_022d = $022d
 664C: A0 00    ldy #$00
 664E: F8       sed
 664F: 18       clc
-6650: 71 10    adc ($10), y
+6650: 71 10    adc (screen_source_pointer_0010), y
 6652: B0 0A    bcs $665e
 6654: F0 04    beq $665a
 6656: C5 1B    cmp $1b
@@ -1675,44 +1710,44 @@ bankswitch_copy_022d = $022d
 6972: 38       sec
 6973: B5 E3    lda $e3, x
 6975: F9 E3 00 sbc $00e3, y
-6978: 85 1D    sta $1d
+6978: 85 1D    sta base_screen_pointer_list_001d
 697A: B5 F1    lda $f1, x
 697C: F9 F1 00 sbc $00f1, y
 697F: F0 14    beq $6995
 6981: C9 FF    cmp #$ff
 6983: B0 07    bcs $698c
 6985: A9 FF    lda #$ff
-6987: 85 1D    sta $1d
+6987: 85 1D    sta base_screen_pointer_list_001d
 6989: 4C 95 69 jmp $6995
 698C: 18       clc
-698D: A5 1D    lda $1d
+698D: A5 1D    lda base_screen_pointer_list_001d
 698F: 49 FF    eor #$ff
 6991: 69 01    adc #$01
-6993: 85 1D    sta $1d
+6993: 85 1D    sta base_screen_pointer_list_001d
 6995: A5 1B    lda $1b
 6997: C9 FF    cmp #$ff
 6999: F0 38    beq $69d3
-699B: 85 10    sta $10
-699D: 85 12    sta $12
+699B: 85 10    sta screen_source_pointer_0010
+699D: 85 12    sta tile_lsb_value_to_write_12
 699F: A9 00    lda #$00
 69A1: 85 11    sta $11
-69A3: 85 13    sta $13
+69A3: 85 13    sta tile_msb_to_write_13
 69A5: 20 29 D1 jsr $d129
-69A8: A5 14    lda $14
+69A8: A5 14    lda screen_tile_dest_address_14
 69AA: 85 1E    sta $1e
 69AC: A5 15    lda $15
 69AE: 85 1F    sta $1f
 69B0: A5 1C    lda $1c
 69B2: C9 FF    cmp #$ff
 69B4: F0 1D    beq $69d3
-69B6: 85 10    sta $10
-69B8: 85 12    sta $12
+69B6: 85 10    sta screen_source_pointer_0010
+69B8: 85 12    sta tile_lsb_value_to_write_12
 69BA: A9 00    lda #$00
 69BC: 85 11    sta $11
-69BE: 85 13    sta $13
+69BE: 85 13    sta tile_msb_to_write_13
 69C0: 20 29 D1 jsr $d129
 69C3: 18       clc
-69C4: A5 14    lda $14
+69C4: A5 14    lda screen_tile_dest_address_14
 69C6: 65 1E    adc $1e
 69C8: 85 1E    sta $1e
 69CA: A5 15    lda $15
@@ -1798,10 +1833,10 @@ bankswitch_copy_022d = $022d
 6A60: 85 1C    sta $1c
 6A62: 18       clc
 6A63: B9 14 40 lda $4014, y
-6A66: 85 16    sta $16
+6A66: 85 16    sta screen_attribute_dest_address_16
 6A68: 65 1C    adc $1c
 6A6A: 65 27    adc $27
-6A6C: 85 10    sta $10
+6A6C: 85 10    sta screen_source_pointer_0010
 6A6E: B9 15 40 lda $4015, y
 6A71: 85 17    sta $17
 6A73: 69 00    adc #$00
@@ -1818,8 +1853,8 @@ bankswitch_copy_022d = $022d
 6A89: 0A       asl a
 6A8A: 65 26    adc $26
 6A8C: 65 28    adc $28
-6A8E: 65 16    adc $16
-6A90: 85 10    sta $10
+6A8E: 65 16    adc screen_attribute_dest_address_16
+6A90: 85 10    sta screen_source_pointer_0010
 6A92: A5 17    lda $17
 6A94: 69 00    adc #$00
 6A96: 85 11    sta $11
@@ -1833,9 +1868,9 @@ bankswitch_copy_022d = $022d
 6AA7: 29 DF    and #$df
 6AA9: 85 56    sta $56
 6AAB: 18       clc
-6AAC: A5 16    lda $16
+6AAC: A5 16    lda screen_attribute_dest_address_16
 6AAE: 65 29    adc $29
-6AB0: 85 10    sta $10
+6AB0: 85 10    sta screen_source_pointer_0010
 6AB2: A5 17    lda $17
 6AB4: 69 00    adc #$00
 6AB6: 85 11    sta $11
@@ -1848,8 +1883,8 @@ bankswitch_copy_022d = $022d
 6AC2: 0A       asl a
 6AC3: 65 26    adc $26
 6AC5: 65 2A    adc $2a
-6AC7: 65 16    adc $16
-6AC9: 85 10    sta $10
+6AC7: 65 16    adc screen_attribute_dest_address_16
+6AC9: 85 10    sta screen_source_pointer_0010
 6ACB: A5 17    lda $17
 6ACD: 69 00    adc #$00
 6ACF: 85 11    sta $11
@@ -1904,7 +1939,7 @@ bankswitch_copy_022d = $022d
 6B30: 18       clc
 6B31: B9 14 40 lda $4014, y
 6B34: 65 26    adc $26
-6B36: 85 10    sta $10
+6B36: 85 10    sta screen_source_pointer_0010
 6B38: B9 15 40 lda $4015, y
 6B3B: 69 00    adc #$00
 6B3D: 85 11    sta $11
@@ -1969,7 +2004,7 @@ bankswitch_copy_022d = $022d
 6BA9: 85 26    sta $26
 6BAB: 6C 25 00 jmp ($0025)        ; [indirect_jump]
 6BAE: A9 00    lda #$00
-6BB0: 85 1D    sta $1d
+6BB0: 85 1D    sta base_screen_pointer_list_001d
 6BB2: 68       pla
 6BB3: A8       tay
 6BB4: 68       pla
@@ -2347,7 +2382,7 @@ bankswitch_copy_022d = $022d
 6F05: B9 22 70 lda $7022, y
 6F08: 85 1C    sta $1c
 6F0A: B9 23 70 lda $7023, y
-6F0D: 85 1D    sta $1d
+6F0D: 85 1D    sta base_screen_pointer_list_001d
 6F0F: B9 24 70 lda $7024, y
 6F12: 85 1E    sta $1e
 6F14: A9 30    lda #$30
@@ -2459,7 +2494,7 @@ bankswitch_copy_022d = $022d
 70F1: 9D 84 03 sta $0384, x
 70F4: A5 1C    lda $1c
 70F6: 9D 80 03 sta $0380, x
-70F9: A5 1D    lda $1d
+70F9: A5 1D    lda base_screen_pointer_list_001d
 70FB: 9D 88 03 sta $0388, x
 70FE: A9 00    lda #$00
 7100: 9D 8C 03 sta $038c, x
@@ -2528,7 +2563,7 @@ bankswitch_copy_022d = $022d
 719E: 9D 84 03 sta $0384, x
 71A1: A5 1C    lda $1c
 71A3: 9D 80 03 sta $0380, x
-71A6: A5 1D    lda $1d
+71A6: A5 1D    lda base_screen_pointer_list_001d
 71A8: 9D 88 03 sta $0388, x
 71AB: A9 00    lda #$00
 71AD: 9D 8C 03 sta $038c, x
@@ -2585,7 +2620,7 @@ bankswitch_copy_022d = $022d
 722F: 9D 84 03 sta $0384, x
 7232: A5 1C    lda $1c
 7234: 9D 80 03 sta $0380, x
-7237: A5 1D    lda $1d
+7237: A5 1D    lda base_screen_pointer_list_001d
 7239: 9D 8C 03 sta $038c, x
 723C: A5 1E    lda $1e
 723E: 9D 88 03 sta $0388, x
@@ -2804,7 +2839,7 @@ bankswitch_copy_022d = $022d
 7467: A5 1C    lda $1c
 7469: 9D 80 03 sta $0380, x
 746C: 8D 0A 04 sta $040a
-746F: A5 1D    lda $1d
+746F: A5 1D    lda base_screen_pointer_list_001d
 7471: 9D 88 03 sta $0388, x
 7474: 8D 0C 04 sta $040c
 7477: A9 00    lda #$00
@@ -2876,7 +2911,7 @@ bankswitch_copy_022d = $022d
 751A: 9D 84 03 sta $0384, x
 751D: A5 1C    lda $1c
 751F: 9D 80 03 sta $0380, x
-7522: A5 1D    lda $1d
+7522: A5 1D    lda base_screen_pointer_list_001d
 7524: 9D 8C 03 sta $038c, x
 7527: A5 1E    lda $1e
 7529: 9D 88 03 sta $0388, x
@@ -2916,7 +2951,7 @@ bankswitch_copy_022d = $022d
 7588: 9D 84 03 sta $0384, x
 758B: A5 1C    lda $1c
 758D: 9D 80 03 sta $0380, x
-7590: A5 1D    lda $1d
+7590: A5 1D    lda base_screen_pointer_list_001d
 7592: 9D 88 03 sta $0388, x
 7595: A9 00    lda #$00
 7597: 9D 8C 03 sta $038c, x
@@ -3066,7 +3101,7 @@ bankswitch_copy_022d = $022d
 7709: 9D 84 03 sta $0384, x
 770C: A5 1C    lda $1c
 770E: 9D 80 03 sta $0380, x
-7711: A5 1D    lda $1d
+7711: A5 1D    lda base_screen_pointer_list_001d
 7713: 9D 88 03 sta $0388, x
 7716: A9 00    lda #$00
 7718: 9D 8C 03 sta $038c, x
@@ -3176,7 +3211,7 @@ bankswitch_copy_022d = $022d
 7822: 9D 84 03 sta $0384, x
 7825: A5 1C    lda $1c
 7827: 9D 80 03 sta $0380, x
-782A: A5 1D    lda $1d
+782A: A5 1D    lda base_screen_pointer_list_001d
 782C: 9D 8C 03 sta $038c, x
 782F: A5 1E    lda $1e
 7831: 9D 88 03 sta $0388, x
@@ -3321,7 +3356,7 @@ bankswitch_copy_022d = $022d
 7985: AD F5 03 lda $03f5
 7988: 85 1C    sta $1c
 798A: AD F8 03 lda $03f8
-798D: 85 1D    sta $1d
+798D: 85 1D    sta base_screen_pointer_list_001d
 798F: AD F7 03 lda $03f7
 7992: 85 1E    sta $1e
 7994: 20 6B 84 jsr $846b
@@ -3785,7 +3820,7 @@ bankswitch_copy_022d = $022d
 7E1B: 9D 84 03 sta $0384, x
 7E1E: A5 1C    lda $1c
 7E20: 9D 80 03 sta $0380, x
-7E23: A5 1D    lda $1d
+7E23: A5 1D    lda base_screen_pointer_list_001d
 7E25: 9D 88 03 sta $0388, x
 7E28: A9 00    lda #$00
 7E2A: 9D 8C 03 sta $038c, x
@@ -3820,7 +3855,7 @@ bankswitch_copy_022d = $022d
 7E6C: 9D 84 03 sta $0384, x
 7E6F: A5 1C    lda $1c
 7E71: 9D 80 03 sta $0380, x
-7E74: A5 1D    lda $1d
+7E74: A5 1D    lda base_screen_pointer_list_001d
 7E76: 9D 88 03 sta $0388, x
 7E79: A9 00    lda #$00
 7E7B: 9D 8C 03 sta $038c, x
@@ -4032,7 +4067,7 @@ bankswitch_copy_022d = $022d
 8086: 9D 84 03 sta $0384, x
 8089: A5 1C    lda $1c
 808B: 9D 80 03 sta $0380, x
-808E: A5 1D    lda $1d
+808E: A5 1D    lda base_screen_pointer_list_001d
 8090: 9D 88 03 sta $0388, x
 8093: A9 00    lda #$00
 8095: 9D 8C 03 sta $038c, x
@@ -4050,7 +4085,7 @@ bankswitch_copy_022d = $022d
 80B7: 9D 84 03 sta $0384, x
 80BA: A5 1C    lda $1c
 80BC: 9D 80 03 sta $0380, x
-80BF: A5 1D    lda $1d
+80BF: A5 1D    lda base_screen_pointer_list_001d
 80C1: 9D 88 03 sta $0388, x
 80C4: A9 00    lda #$00
 80C6: 9D 8C 03 sta $038c, x
@@ -4161,7 +4196,7 @@ bankswitch_copy_022d = $022d
 81C3: 9D 84 03 sta $0384, x
 81C6: A5 1C    lda $1c
 81C8: 9D 80 03 sta $0380, x
-81CB: A5 1D    lda $1d
+81CB: A5 1D    lda base_screen_pointer_list_001d
 81CD: 9D 8C 03 sta $038c, x
 81D0: A5 1E    lda $1e
 81D2: 9D 88 03 sta $0388, x
@@ -4276,7 +4311,7 @@ bankswitch_copy_022d = $022d
 82CF: 90 09    bcc $82da
 82D1: 4C DC 82 jmp $82dc
 82D4: A5 1E    lda $1e
-82D6: C5 14    cmp $14
+82D6: C5 14    cmp screen_tile_dest_address_14
 82D8: B0 02    bcs $82dc
 82DA: 38       sec
 82DB: 60       rts
@@ -4464,7 +4499,7 @@ bankswitch_copy_022d = $022d
 8445: AD EF 03 lda $03ef
 8448: 85 1C    sta $1c
 844A: AD F2 03 lda $03f2
-844D: 85 1D    sta $1d
+844D: 85 1D    sta base_screen_pointer_list_001d
 844F: AD F1 03 lda $03f1
 8452: 85 1E    sta $1e
 8454: 4C 6B 84 jmp $846b
@@ -4473,10 +4508,10 @@ bankswitch_copy_022d = $022d
 845C: AD EA 03 lda $03ea
 845F: 85 1C    sta $1c
 8461: AD ED 03 lda $03ed
-8464: 85 1D    sta $1d
+8464: 85 1D    sta base_screen_pointer_list_001d
 8466: AD EC 03 lda $03ec
 8469: 85 1E    sta $1e
-846B: A5 1D    lda $1d
+846B: A5 1D    lda base_screen_pointer_list_001d
 846D: D0 22    bne $8491
 846F: A5 1E    lda $1e
 8471: C9 90    cmp #$90
@@ -4553,32 +4588,32 @@ bankswitch_copy_022d = $022d
 8506: 85 00    sta $00
 8508: 20 7C B6 jsr $b67c
 850B: 20 5E 90 jsr $905e
-850E: A5 10    lda $10
-8510: 85 16    sta $16
+850E: A5 10    lda screen_source_pointer_0010
+8510: 85 16    sta screen_attribute_dest_address_16
 8512: A5 11    lda $11
 8514: 85 17    sta $17
 8516: A0 08    ldy #$08
 8518: B9 E5 94 lda $94e5, y
-851B: 85 10    sta $10
+851B: 85 10    sta screen_source_pointer_0010
 851D: B9 E6 94 lda $94e6, y
 8520: 85 11    sta $11
 8522: BD B0 03 lda $03b0, x
-8525: 85 12    sta $12
+8525: 85 12    sta tile_lsb_value_to_write_12
 8527: A9 00    lda #$00
-8529: 85 13    sta $13
+8529: 85 13    sta tile_msb_to_write_13
 852B: 20 29 D1 jsr $d129
 852E: A5 1B    lda $1b
 8530: 38       sec
 8531: E5 15    sbc $15
 8533: 85 11    sta $11
 8535: A9 00    lda #$00
-8537: 85 10    sta $10
-8539: A5 16    lda $16
-853B: 85 12    sta $12
+8537: 85 10    sta screen_source_pointer_0010
+8539: A5 16    lda screen_attribute_dest_address_16
+853B: 85 12    sta tile_lsb_value_to_write_12
 853D: A5 17    lda $17
-853F: 85 13    sta $13
+853F: 85 13    sta tile_msb_to_write_13
 8541: 20 2E D0 jsr $d02e
-8544: A5 10    lda $10
+8544: A5 10    lda screen_source_pointer_0010
 8546: 85 1B    sta $1b
 8548: 60       rts
 8549: 85 23    sta $23
@@ -4639,18 +4674,18 @@ bankswitch_copy_022d = $022d
 85BD: A5 1C    lda $1c
 85BF: 85 11    sta $11
 85C1: A9 00    lda #$00
-85C3: 85 10    sta $10
+85C3: 85 10    sta screen_source_pointer_0010
 85C5: 4C D8 85 jmp $85d8
-85C8: A5 10    lda $10
-85CA: 85 12    sta $12
+85C8: A5 10    lda screen_source_pointer_0010
+85CA: 85 12    sta tile_lsb_value_to_write_12
 85CC: A5 11    lda $11
-85CE: 85 13    sta $13
+85CE: 85 13    sta tile_msb_to_write_13
 85D0: A5 1B    lda $1b
 85D2: 85 11    sta $11
 85D4: A9 00    lda #$00
-85D6: 85 10    sta $10
+85D6: 85 10    sta screen_source_pointer_0010
 85D8: 20 2E D0 jsr $d02e
-85DB: A5 10    lda $10
+85DB: A5 10    lda screen_source_pointer_0010
 85DD: 85 1B    sta $1b
 85DF: 60       rts
 85E0: 8A       txa
@@ -4671,19 +4706,19 @@ bankswitch_copy_022d = $022d
 8601: C9 60    cmp #$60
 8603: F0 07    beq $860c
 8605: A9 60    lda #$60
-8607: 85 1D    sta $1d
+8607: 85 1D    sta base_screen_pointer_list_001d
 8609: 4C 25 86 jmp $8625
 860C: A9 30    lda #$30
-860E: 85 1D    sta $1d
+860E: 85 1D    sta base_screen_pointer_list_001d
 8610: 4C 25 86 jmp $8625
 8613: B9 B9 00 lda $00b9, y
 8616: C9 48    cmp #$48
 8618: B0 07    bcs $8621
 861A: A9 60    lda #$60
-861C: 85 1D    sta $1d
+861C: 85 1D    sta base_screen_pointer_list_001d
 861E: 4C 25 86 jmp $8625
 8621: A9 30    lda #$30
-8623: 85 1D    sta $1d
+8623: 85 1D    sta base_screen_pointer_list_001d
 8625: AD E9 03 lda $03e9
 8628: 85 1E    sta $1e
 862A: 5D 73 03 eor $0373, x
@@ -4700,7 +4735,7 @@ bankswitch_copy_022d = $022d
 8643: 0A       asl a
 8644: 0A       asl a
 8645: A8       tay
-8646: A5 1D    lda $1d
+8646: A5 1D    lda base_screen_pointer_list_001d
 8648: C9 60    cmp #$60
 864A: F0 02    beq $864e
 864C: C8       iny
@@ -4719,7 +4754,7 @@ bankswitch_copy_022d = $022d
 866A: 85 1C    sta $1c
 866C: 60       rts
 866D: A9 48    lda #$48
-866F: 85 1D    sta $1d
+866F: 85 1D    sta base_screen_pointer_list_001d
 8671: B9 16 03 lda $0316, y
 8674: 10 05    bpl $867b
 8676: A0 06    ldy #$06
@@ -4771,14 +4806,14 @@ bankswitch_copy_022d = $022d
 874D: B9 1C 88 lda $881c, y
 8750: 85 1C    sta $1c
 8752: B9 1D 88 lda $881d, y
-8755: 85 1D    sta $1d
+8755: 85 1D    sta base_screen_pointer_list_001d
 8757: 4C 01 88 jmp $8801
 875A: B9 24 88 lda $8824, y
 875D: 85 1B    sta $1b
 875F: B9 25 88 lda $8825, y
 8762: 85 1C    sta $1c
 8764: B9 26 88 lda $8826, y
-8767: 85 1D    sta $1d
+8767: 85 1D    sta base_screen_pointer_list_001d
 8769: 4C 01 88 jmp $8801
 876C: A5 1E    lda $1e
 876E: 0A       asl a
@@ -4799,14 +4834,14 @@ bankswitch_copy_022d = $022d
 8787: B9 2E 88 lda $882e, y
 878A: 85 1C    sta $1c
 878C: B9 2F 88 lda $882f, y
-878F: 85 1D    sta $1d
+878F: 85 1D    sta base_screen_pointer_list_001d
 8791: 4C 01 88 jmp $8801
 8794: B9 3F 88 lda $883f, y
 8797: 85 1B    sta $1b
 8799: B9 40 88 lda $8840, y
 879C: 85 1C    sta $1c
 879E: B9 41 88 lda $8841, y
-87A1: 85 1D    sta $1d
+87A1: 85 1D    sta base_screen_pointer_list_001d
 87A3: 4C 01 88 jmp $8801
 87A6: A5 1E    lda $1e
 87A8: 0A       asl a
@@ -4820,14 +4855,14 @@ bankswitch_copy_022d = $022d
 87B6: B9 52 88 lda $8852, y
 87B9: 85 1C    sta $1c
 87BB: B9 53 88 lda $8853, y
-87BE: 85 1D    sta $1d
+87BE: 85 1D    sta base_screen_pointer_list_001d
 87C0: 4C 01 88 jmp $8801
 87C3: B9 5A 88 lda $885a, y
 87C6: 85 1B    sta $1b
 87C8: B9 5B 88 lda $885b, y
 87CB: 85 1C    sta $1c
 87CD: B9 5C 88 lda $885c, y
-87D0: 85 1D    sta $1d
+87D0: 85 1D    sta base_screen_pointer_list_001d
 87D2: 4C 01 88 jmp $8801
 87D5: A5 1E    lda $1e
 87D7: 0A       asl a
@@ -4841,14 +4876,14 @@ bankswitch_copy_022d = $022d
 87E5: B9 64 88 lda $8864, y
 87E8: 85 1C    sta $1c
 87EA: B9 65 88 lda $8865, y
-87ED: 85 1D    sta $1d
+87ED: 85 1D    sta base_screen_pointer_list_001d
 87EF: 4C 01 88 jmp $8801
 87F2: B9 6C 88 lda $886c, y
 87F5: 85 1B    sta $1b
 87F7: B9 6D 88 lda $886d, y
 87FA: 85 1C    sta $1c
 87FC: B9 6E 88 lda $886e, y
-87FF: 85 1D    sta $1d
+87FF: 85 1D    sta base_screen_pointer_list_001d
 8801: 60       rts
 
 8875: 8A       txa
@@ -4900,15 +4935,15 @@ bankswitch_copy_022d = $022d
 88D2: 69 08    adc #$08
 88D4: A8       tay
 88D5: B9 E5 94 lda $94e5, y
-88D8: 85 10    sta $10
-88DA: 85 12    sta $12
+88D8: 85 10    sta screen_source_pointer_0010
+88DA: 85 12    sta tile_lsb_value_to_write_12
 88DC: B9 E6 94 lda $94e6, y
 88DF: 85 11    sta $11
-88E1: 85 13    sta $13
+88E1: 85 13    sta tile_msb_to_write_13
 88E3: C8       iny
 88E4: C8       iny
 88E5: B9 E5 94 lda $94e5, y
-88E8: 85 14    sta $14
+88E8: 85 14    sta screen_tile_dest_address_14
 88EA: B9 E6 94 lda $94e6, y
 88ED: 85 15    sta $15
 88EF: A9 00    lda #$00
@@ -4918,18 +4953,18 @@ bankswitch_copy_022d = $022d
 88F7: C5 1C    cmp $1c
 88F9: B0 1D    bcs $8918
 88FB: 38       sec
-88FC: A5 12    lda $12
-88FE: E5 14    sbc $14
-8900: 85 12    sta $12
-8902: A5 13    lda $13
+88FC: A5 12    lda tile_lsb_value_to_write_12
+88FE: E5 14    sbc screen_tile_dest_address_14
+8900: 85 12    sta tile_lsb_value_to_write_12
+8902: A5 13    lda tile_msb_to_write_13
 8904: E5 15    sbc $15
-8906: 85 13    sta $13
+8906: 85 13    sta tile_msb_to_write_13
 8908: 18       clc
-8909: A5 10    lda $10
-890B: 65 12    adc $12
-890D: 85 10    sta $10
+8909: A5 10    lda screen_source_pointer_0010
+890B: 65 12    adc tile_lsb_value_to_write_12
+890D: 85 10    sta screen_source_pointer_0010
 890F: A5 11    lda $11
-8911: 65 13    adc $13
+8911: 65 13    adc tile_msb_to_write_13
 8913: 85 11    sta $11
 8915: 4C F3 88 jmp $88f3
 8918: 60       rts
@@ -4950,7 +4985,7 @@ bankswitch_copy_022d = $022d
 8937: B5 9D    lda $9d, x
 8939: 85 1B    sta $1b
 893B: B5 B9    lda $b9, x
-893D: 85 1D    sta $1d
+893D: 85 1D    sta base_screen_pointer_list_001d
 893F: 4C 78 89 jmp $8978
 8942: B9 9D 00 lda $009d, y
 8945: 85 1B    sta $1b
@@ -4976,7 +5011,7 @@ bankswitch_copy_022d = $022d
 8970: B9 B9 00 lda $00b9, y
 8973: 38       sec
 8974: E9 18    sbc #$18
-8976: 85 1D    sta $1d
+8976: 85 1D    sta base_screen_pointer_list_001d
 8978: A9 80    lda #$80
 897A: 85 1E    sta $1e
 897C: 60       rts
@@ -4999,7 +5034,7 @@ bankswitch_copy_022d = $022d
 8999: B9 CC 89 lda $89cc, y
 899C: 85 1C    sta $1c
 899E: B5 B9    lda $b9, x
-89A0: 85 1D    sta $1d
+89A0: 85 1D    sta base_screen_pointer_list_001d
 89A2: 4C C1 89 jmp $89c1
 89A5: 8A       txa
 89A6: 29 02    and #$02
@@ -5014,7 +5049,7 @@ bankswitch_copy_022d = $022d
 89B9: A9 70    lda #$70
 89BB: 85 1C    sta $1c
 89BD: A9 48    lda #$48
-89BF: 85 1D    sta $1d
+89BF: 85 1D    sta base_screen_pointer_list_001d
 89C1: 60       rts
 
 89D7: 86 1B    stx $1b
@@ -5044,25 +5079,25 @@ bankswitch_copy_022d = $022d
 8A07: 90 10    bcc $8a19
 8A09: 38       sec
 8A0A: E9 30    sbc #$30
-8A0C: 85 1D    sta $1d
+8A0C: 85 1D    sta base_screen_pointer_list_001d
 8A0E: 4C 33 8A jmp $8a33
 8A11: 18       clc
 8A12: 69 30    adc #$30
-8A14: 85 1D    sta $1d
+8A14: 85 1D    sta base_screen_pointer_list_001d
 8A16: 4C 33 8A jmp $8a33
 8A19: CD EC 03 cmp $03ec
 8A1C: B0 07    bcs $8a25
 8A1E: B5 B9    lda $b9, x
 8A20: 38       sec
 8A21: E9 10    sbc #$10
-8A23: 85 1D    sta $1d
+8A23: 85 1D    sta base_screen_pointer_list_001d
 8A25: B5 B9    lda $b9, x
 8A27: 18       clc
 8A28: 69 10    adc #$10
-8A2A: 85 1D    sta $1d
+8A2A: 85 1D    sta base_screen_pointer_list_001d
 8A2C: 4C 33 8A jmp $8a33
 8A2F: B5 B9    lda $b9, x
-8A31: 85 1D    sta $1d
+8A31: 85 1D    sta base_screen_pointer_list_001d
 8A33: BD 73 03 lda $0373, x
 8A36: 29 0F    and #$0f
 8A38: C9 04    cmp #$04
@@ -5219,7 +5254,7 @@ bankswitch_copy_022d = $022d
 8B69: B9 85 8B lda $8b85, y
 8B6C: 85 1C    sta $1c
 8B6E: B9 86 8B lda $8b86, y
-8B71: 85 1D    sta $1d
+8B71: 85 1D    sta base_screen_pointer_list_001d
 8B73: 68       pla
 8B74: AA       tax
 8B75: 60       rts
@@ -5277,10 +5312,10 @@ bankswitch_copy_022d = $022d
 8C25: A5 2A    lda $2a
 8C27: F0 07    beq $8c30
 8C29: B5 B9    lda $b9, x
-8C2B: 85 1D    sta $1d
+8C2B: 85 1D    sta base_screen_pointer_list_001d
 8C2D: 4C 35 8C jmp $8c35
 8C30: B9 38 8C lda $8c38, y
-8C33: 85 1D    sta $1d
+8C33: 85 1D    sta base_screen_pointer_list_001d
 8C35: 60       rts
 
 8C4D: 48       pha
@@ -5310,7 +5345,7 @@ bankswitch_copy_022d = $022d
 8C7B: B9 8C 8C lda $8c8c, y
 8C7E: 85 1C    sta $1c
 8C80: B9 8D 8C lda $8c8d, y
-8C83: 85 1D    sta $1d
+8C83: 85 1D    sta base_screen_pointer_list_001d
 8C85: B9 8E 8C lda $8c8e, y
 8C88: 85 1E    sta $1e
 8C8A: 60       rts
@@ -5488,7 +5523,7 @@ bankswitch_copy_022d = $022d
 8EAE: B9 F8 8E lda $8ef8, y
 8EB1: 85 1C    sta $1c
 8EB3: B9 F9 8E lda $8ef9, y
-8EB6: 85 1D    sta $1d
+8EB6: 85 1D    sta base_screen_pointer_list_001d
 8EB8: B9 FA 8E lda $8efa, y
 8EBB: 85 1E    sta $1e
 8EBD: 4C F6 8E jmp $8ef6
@@ -5513,7 +5548,7 @@ bankswitch_copy_022d = $022d
 8EE7: B9 00 8F lda $8f00, y
 8EEA: 85 1C    sta $1c
 8EEC: B9 01 8F lda $8f01, y
-8EEF: 85 1D    sta $1d
+8EEF: 85 1D    sta base_screen_pointer_list_001d
 8EF1: B9 02 8F lda $8f02, y
 8EF4: 85 1E    sta $1e
 8EF6: 60       rts
@@ -5579,13 +5614,13 @@ bankswitch_copy_022d = $022d
 8F94: D0 11    bne $8fa7
 8F96: 4C A0 8F jmp $8fa0
 8F99: A9 68    lda #$68
-8F9B: 85 1D    sta $1d
+8F9B: 85 1D    sta base_screen_pointer_list_001d
 8F9D: 4C AB 8F jmp $8fab
 8FA0: A9 48    lda #$48
-8FA2: 85 1D    sta $1d
+8FA2: 85 1D    sta base_screen_pointer_list_001d
 8FA4: 4C AB 8F jmp $8fab
 8FA7: A9 28    lda #$28
-8FA9: 85 1D    sta $1d
+8FA9: 85 1D    sta base_screen_pointer_list_001d
 8FAB: 8A       txa
 8FAC: 29 02    and #$02
 8FAE: F0 0B    beq $8fbb
@@ -5646,11 +5681,11 @@ bankswitch_copy_022d = $022d
 9026: BD 84 03 lda $0384, x
 9029: 85 11    sta $11
 902B: BD 80 03 lda $0380, x
-902E: 85 10    sta $10
+902E: 85 10    sta screen_source_pointer_0010
 9030: BD 88 03 lda $0388, x
-9033: 85 12    sta $12
+9033: 85 12    sta tile_lsb_value_to_write_12
 9035: BD 8C 03 lda $038c, x
-9038: 85 13    sta $13
+9038: 85 13    sta tile_msb_to_write_13
 903A: 20 6A B4 jsr $b46a
 903D: 60       rts
 903E: A0 0D    ldy #$0d
@@ -5669,30 +5704,30 @@ bankswitch_copy_022d = $022d
 9060: 10 17    bpl $9079
 9062: 49 FF    eor #$ff
 9064: 85 11    sta $11
-9066: A5 10    lda $10
+9066: A5 10    lda screen_source_pointer_0010
 9068: 49 FF    eor #$ff
-906A: 85 10    sta $10
+906A: 85 10    sta screen_source_pointer_0010
 906C: 18       clc
-906D: A5 10    lda $10
+906D: A5 10    lda screen_source_pointer_0010
 906F: 69 01    adc #$01
-9071: 85 10    sta $10
+9071: 85 10    sta screen_source_pointer_0010
 9073: A5 11    lda $11
 9075: 69 00    adc #$00
 9077: 85 11    sta $11
-9079: A5 13    lda $13
+9079: A5 13    lda tile_msb_to_write_13
 907B: 10 17    bpl $9094
 907D: 49 FF    eor #$ff
-907F: 85 13    sta $13
-9081: A5 12    lda $12
+907F: 85 13    sta tile_msb_to_write_13
+9081: A5 12    lda tile_lsb_value_to_write_12
 9083: 49 FF    eor #$ff
-9085: 85 12    sta $12
+9085: 85 12    sta tile_lsb_value_to_write_12
 9087: 18       clc
-9088: A5 12    lda $12
+9088: A5 12    lda tile_lsb_value_to_write_12
 908A: 69 01    adc #$01
-908C: 85 12    sta $12
-908E: A5 13    lda $13
+908C: 85 12    sta tile_lsb_value_to_write_12
+908E: A5 13    lda tile_msb_to_write_13
 9090: 69 00    adc #$00
-9092: 85 13    sta $13
+9092: 85 13    sta tile_msb_to_write_13
 9094: 60       rts
 9095: 8A       txa
 9096: 29 02    and #$02
@@ -5806,7 +5841,7 @@ bankswitch_copy_022d = $022d
 917A: 0A       asl a
 917B: A8       tay
 917C: B9 8A 91 lda table_918a, y
-917F: 85 10    sta $10
+917F: 85 10    sta screen_source_pointer_0010
 9181: B9 8B 91 lda $918b, y
 9184: 85 11    sta $11
 9186: 6C 10 00 jmp ($0010)        ; [indirect_jump]
@@ -6948,7 +6983,7 @@ callback_92d1:
 9DB1: F0 19    beq $9dcc
 9DB3: 38       sec
 9DB4: E9 01    sbc #$01
-9DB6: 85 1D    sta $1d
+9DB6: 85 1D    sta base_screen_pointer_list_001d
 9DB8: BD FD 02 lda $02fd, x
 9DBB: 85 1E    sta $1e
 9DBD: 85 1F    sta $1f
@@ -6956,7 +6991,7 @@ callback_92d1:
 9DC1: 18       clc
 9DC2: 65 1F    adc $1f
 9DC4: 85 1E    sta $1e
-9DC6: C6 1D    dec $1d
+9DC6: C6 1D    dec base_screen_pointer_list_001d
 9DC8: D0 F5    bne $9dbf
 9DCA: A5 1E    lda $1e
 9DCC: 18       clc
@@ -8027,7 +8062,7 @@ AA2E: B9 8E AA lda $aa8e, y
 AA31: 08       php
 AA32: 18       clc
 AA33: 75 B9    adc $b9, x
-AA35: 85 02    sta $02
+AA35: 85 02    sta unpack_mode_02
 AA37: B5 C7    lda $c7, x
 AA39: 69 00    adc #$00
 AA3B: 28       plp
@@ -8042,10 +8077,10 @@ AA49: B5 B9    lda $b9, x
 AA4B: 38       sec
 AA4C: E5 BD    sbc $bd
 AA4E: 85 1B    sta $1b
-AA50: A5 02    lda $02
+AA50: A5 02    lda unpack_mode_02
 AA52: 38       sec
 AA53: E5 1B    sbc $1b
-AA55: 85 02    sta $02
+AA55: 85 02    sta unpack_mode_02
 AA57: A5 03    lda $03
 AA59: E9 00    sbc #$00
 AA5B: 85 03    sta $03
@@ -8064,7 +8099,7 @@ AA70: A5 00    lda $00
 AA72: 95 8F    sta $8f, x
 AA74: A5 01    lda $01
 AA76: 95 9D    sta $9d, x
-AA78: A5 02    lda $02
+AA78: A5 02    lda unpack_mode_02
 AA7A: 95 B9    sta $b9, x
 AA7C: A5 03    lda $03
 AA7E: 95 C7    sta $c7, x
@@ -8599,7 +8634,7 @@ B00F: 85 00    sta $00
 B011: B5 8F    lda $8f, x
 B013: 38       sec
 B014: E5 93    sbc $93
-B016: 85 10    sta $10
+B016: 85 10    sta screen_source_pointer_0010
 B018: B5 9D    lda $9d, x
 B01A: E5 A1    sbc $a1
 B01C: 85 11    sta $11
@@ -8608,7 +8643,7 @@ B020: A5 00    lda $00
 B022: 09 80    ora #$80
 B024: 85 00    sta $00
 B026: 20 98 CF jsr $cf98
-B029: A5 10    lda $10
+B029: A5 10    lda screen_source_pointer_0010
 B02B: A4 11    ldy $11
 B02D: F0 02    beq $b031
 B02F: A9 FF    lda #$ff
@@ -8616,7 +8651,7 @@ B031: 9D 3B 03 sta $033b, x
 B034: B5 B9    lda $b9, x
 B036: 38       sec
 B037: E5 BD    sbc $bd
-B039: 85 10    sta $10
+B039: 85 10    sta screen_source_pointer_0010
 B03B: B5 C7    lda $c7, x
 B03D: E5 CB    sbc $cb
 B03F: 85 11    sta $11
@@ -8625,7 +8660,7 @@ B043: A5 00    lda $00
 B045: 29 BF    and #$bf
 B047: 85 00    sta $00
 B049: 20 98 CF jsr $cf98
-B04C: A5 10    lda $10
+B04C: A5 10    lda screen_source_pointer_0010
 B04E: A4 11    ldy $11
 B050: F0 02    beq $b054
 B052: A9 FF    lda #$ff
@@ -8633,13 +8668,13 @@ B054: 9D 3F 03 sta $033f, x
 B057: B5 E3    lda $e3, x
 B059: 38       sec
 B05A: E5 E7    sbc $e7
-B05C: 85 10    sta $10
+B05C: 85 10    sta screen_source_pointer_0010
 B05E: B5 F1    lda $f1, x
 B060: E5 F5    sbc $f5
 B062: 85 11    sta $11
 B064: 10 03    bpl $b069
 B066: 20 98 CF jsr $cf98
-B069: A5 10    lda $10
+B069: A5 10    lda screen_source_pointer_0010
 B06B: A4 11    ldy $11
 B06D: F0 02    beq $b071
 B06F: A9 FF    lda #$ff
@@ -8809,11 +8844,11 @@ B1E3: D0 03    bne $b1e8
 B1E5: 20 FE B1 jsr $b1fe
 B1E8: A6 4C    ldx $4c
 B1EA: 09 80    ora #$80
-B1EC: 85 02    sta $02
+B1EC: 85 02    sta unpack_mode_02
 B1EE: 5D 1A 03 eor $031a, x
 B1F1: 29 7F    and #$7f
 B1F3: F0 05    beq $b1fa
-B1F5: A5 02    lda $02
+B1F5: A5 02    lda unpack_mode_02
 B1F7: 9D 27 03 sta $0327, x
 B1FA: 38       sec
 B1FB: 60       rts
@@ -9092,13 +9127,13 @@ B450: 48       pha
 B451: 08       php
 B452: A6 1B    ldx $1b
 B454: B5 8F    lda $8f, x
-B456: 85 10    sta $10
+B456: 85 10    sta screen_source_pointer_0010
 B458: B5 9D    lda $9d, x
 B45A: 85 11    sta $11
 B45C: B5 B9    lda $b9, x
-B45E: 85 12    sta $12
+B45E: 85 12    sta tile_lsb_value_to_write_12
 B460: B5 C7    lda $c7, x
-B462: 85 13    sta $13
+B462: 85 13    sta tile_msb_to_write_13
 B464: 4C 70 B4 jmp $b470
 B467: 38       sec
 B468: B0 01    bcs $b46b
@@ -9110,11 +9145,11 @@ B46E: 48       pha
 B46F: 08       php
 B470: A6 4C    ldx $4c
 B472: B5 8F    lda $8f, x
-B474: 85 14    sta $14
+B474: 85 14    sta screen_tile_dest_address_14
 B476: B5 9D    lda $9d, x
 B478: 85 15    sta $15
 B47A: B5 B9    lda $b9, x
-B47C: 85 16    sta $16
+B47C: 85 16    sta screen_attribute_dest_address_16
 B47E: B5 C7    lda $c7, x
 B480: 85 17    sta $17
 B482: 4C 8E B4 jmp $b48e
@@ -9129,8 +9164,8 @@ B48D: 08       php
 B48E: A9 00    lda #$00
 B490: 85 03    sta $03
 B492: 38       sec
-B493: A5 10    lda $10
-B495: E5 14    sbc $14
+B493: A5 10    lda screen_source_pointer_0010
+B495: E5 14    sbc screen_tile_dest_address_14
 B497: 85 04    sta $04
 B499: A5 11    lda $11
 B49B: E5 15    sbc $15
@@ -9150,22 +9185,22 @@ B4B5: 85 03    sta $03
 B4B7: A9 00    lda #$00
 B4B9: 85 00    sta $00
 B4BB: 38       sec
-B4BC: A5 12    lda $12
-B4BE: E5 16    sbc $16
+B4BC: A5 12    lda tile_lsb_value_to_write_12
+B4BE: E5 16    sbc screen_attribute_dest_address_16
 B4C0: 85 01    sta $01
-B4C2: A5 13    lda $13
+B4C2: A5 13    lda tile_msb_to_write_13
 B4C4: E5 17    sbc $17
-B4C6: 85 02    sta $02
+B4C6: 85 02    sta unpack_mode_02
 B4C8: 10 16    bpl $b4e0
 B4CA: 49 FF    eor #$ff
-B4CC: 85 02    sta $02
+B4CC: 85 02    sta unpack_mode_02
 B4CE: A5 01    lda $01
 B4D0: 49 FF    eor #$ff
 B4D2: 69 01    adc #$01
 B4D4: 85 01    sta $01
-B4D6: A5 02    lda $02
+B4D6: A5 02    lda unpack_mode_02
 B4D8: 69 00    adc #$00
-B4DA: 85 02    sta $02
+B4DA: 85 02    sta unpack_mode_02
 B4DC: A9 01    lda #$01
 B4DE: 85 00    sta $00
 B4E0: A5 00    lda $00
@@ -9177,63 +9212,63 @@ B4E8: 90 45    bcc $b52f
 B4EA: A5 01    lda $01
 B4EC: E5 04    sbc $04
 B4EE: 85 1B    sta $1b
-B4F0: A5 02    lda $02
+B4F0: A5 02    lda unpack_mode_02
 B4F2: E5 05    sbc $05
 B4F4: 85 1C    sta $1c
 B4F6: A6 07    ldx $07
 B4F8: BD 3B B5 lda $b53b, x
-B4FB: 85 1D    sta $1d
+B4FB: 85 1D    sta base_screen_pointer_list_001d
 B4FD: B0 1B    bcs $b51a
 B4FF: A9 04    lda #$04
 B501: 05 07    ora $07
 B503: 85 07    sta $07
-B505: A5 02    lda $02
+B505: A5 02    lda unpack_mode_02
 B507: D0 06    bne $b50f
 B509: A9 08    lda #$08
 B50B: C5 01    cmp $01
 B50D: B0 11    bcs $b520
-B50F: A5 1D    lda $1d
+B50F: A5 1D    lda base_screen_pointer_list_001d
 B511: 49 FF    eor #$ff
 B513: 18       clc
 B514: 69 01    adc #$01
-B516: 85 1D    sta $1d
+B516: 85 1D    sta base_screen_pointer_list_001d
 B518: D0 0A    bne $b524
 B51A: A9 03    lda #$03
 B51C: C5 1B    cmp $1b
 B51E: B0 04    bcs $b524
 B520: A9 00    lda #$00
-B522: 85 1D    sta $1d
+B522: 85 1D    sta base_screen_pointer_list_001d
 B524: A6 07    ldx $07
 B526: BD BA B5 lda $b5ba, x
 B529: 18       clc
-B52A: 65 1D    adc $1d
+B52A: 65 1D    adc base_screen_pointer_list_001d
 B52C: 4C 32 B5 jmp $b532
 B52F: 20 3F B5 jsr $b53f
-B532: 85 1D    sta $1d
+B532: 85 1D    sta base_screen_pointer_list_001d
 B534: 68       pla
 B535: A8       tay
 B536: 68       pla
 B537: AA       tax
-B538: A5 1D    lda $1d
+B538: A5 1D    lda base_screen_pointer_list_001d
 B53A: 60       rts
 
-B53F: A5 10    lda $10
+B53F: A5 10    lda screen_source_pointer_0010
 B541: 48       pha
 B542: A5 11    lda $11
 B544: 48       pha
-B545: A5 12    lda $12
+B545: A5 12    lda tile_lsb_value_to_write_12
 B547: 48       pha
-B548: A5 13    lda $13
+B548: A5 13    lda tile_msb_to_write_13
 B54A: 48       pha
 B54B: A5 01    lda $01
 B54D: 38       sec
 B54E: E5 04    sbc $04
-B550: A5 02    lda $02
+B550: A5 02    lda unpack_mode_02
 B552: E5 05    sbc $05
 B554: 90 0D    bcc $b563
 B556: A5 01    lda $01
-B558: 85 12    sta $12
-B55A: A5 02    lda $02
+B558: 85 12    sta tile_lsb_value_to_write_12
+B55A: A5 02    lda unpack_mode_02
 B55C: A6 04    ldx $04
 B55E: A4 05    ldy $05
 B560: 4C 73 B5 jmp $b573
@@ -9241,19 +9276,19 @@ B563: A9 04    lda #$04
 B565: 05 07    ora $07
 B567: 85 07    sta $07
 B569: A5 04    lda $04
-B56B: 85 12    sta $12
+B56B: 85 12    sta tile_lsb_value_to_write_12
 B56D: A5 05    lda $05
 B56F: A6 01    ldx $01
-B571: A4 02    ldy $02
-B573: 85 13    sta $13
-B575: 86 10    stx $10
+B571: A4 02    ldy unpack_mode_02
+B573: 85 13    sta tile_msb_to_write_13
+B575: 86 10    stx screen_source_pointer_0010
 B577: 84 11    sty $11
 B579: A0 04    ldy #$04
-B57B: 06 10    asl $10
+B57B: 06 10    asl screen_source_pointer_0010
 B57D: 26 11    rol $11
 B57F: 88       dey
 B580: 10 F9    bpl $b57b
-B582: A5 14    lda $14
+B582: A5 14    lda screen_tile_dest_address_14
 B584: 48       pha
 B585: A5 15    lda $15
 B587: 48       pha
@@ -9261,9 +9296,9 @@ B588: 20 2E D0 jsr $d02e
 B58B: 68       pla
 B58C: 85 15    sta $15
 B58E: 68       pla
-B58F: 85 14    sta $14
+B58F: 85 14    sta screen_tile_dest_address_14
 B591: A6 07    ldx $07
-B593: A5 10    lda $10
+B593: A5 10    lda screen_source_pointer_0010
 B595: BC B2 B5 ldy $b5b2, x
 B598: F0 05    beq $b59f
 B59A: 49 FF    eor #$ff
@@ -9273,13 +9308,13 @@ B59F: 18       clc
 B5A0: 7D BA B5 adc $b5ba, x
 B5A3: AA       tax
 B5A4: 68       pla
-B5A5: 85 13    sta $13
+B5A5: 85 13    sta tile_msb_to_write_13
 B5A7: 68       pla
-B5A8: 85 12    sta $12
+B5A8: 85 12    sta tile_lsb_value_to_write_12
 B5AA: 68       pla
 B5AB: 85 11    sta $11
 B5AD: 68       pla
-B5AE: 85 10    sta $10
+B5AE: 85 10    sta screen_source_pointer_0010
 B5B0: 8A       txa
 B5B1: 60       rts
 
@@ -9289,7 +9324,7 @@ B5C7: 85 00    sta $00
 B5C9: BD 61 02 lda $0261, x
 B5CC: 85 01    sta $01
 B5CE: 20 7C B6 jsr $b67c
-B5D1: A5 10    lda $10
+B5D1: A5 10    lda screen_source_pointer_0010
 B5D3: 9D 6E 02 sta $026e, x
 B5D6: 18       clc
 B5D7: 75 81    adc $81, x
@@ -9306,12 +9341,12 @@ B5EA: 10 03    bpl $b5ef
 B5EC: 18       clc
 B5ED: 69 FF    adc #$ff
 B5EF: 95 9D    sta $9d, x
-B5F1: A5 12    lda $12
+B5F1: A5 12    lda tile_lsb_value_to_write_12
 B5F3: 9D 88 02 sta $0288, x
 B5F6: 18       clc
 B5F7: 75 AB    adc $ab, x
 B5F9: 95 AB    sta $ab, x
-B5FB: A5 13    lda $13
+B5FB: A5 13    lda tile_msb_to_write_13
 B5FD: 9D 95 02 sta $0295, x
 B600: 08       php
 B601: 75 B9    adc $b9, x
@@ -9403,31 +9438,31 @@ B699: B9 B7 B6 lda $b6b7, y
 B69C: 08       php
 B69D: A5 00    lda $00
 B69F: 29 1F    and #$1f
-B6A1: 95 02    sta $02, x
+B6A1: 95 02    sta unpack_mode_02, x
 B6A3: 28       plp
 B6A4: 10 07    bpl $b6ad
 B6A6: A9 20    lda #$20
 B6A8: 38       sec
-B6A9: F5 02    sbc $02, x
-B6AB: 95 02    sta $02, x
+B6A9: F5 02    sbc unpack_mode_02, x
+B6AB: 95 02    sta unpack_mode_02, x
 B6AD: 8A       txa
 B6AE: 49 01    eor #$01
 B6B0: AA       tax
 B6B1: A9 20    lda #$20
-B6B3: 95 02    sta $02, x
+B6B3: 95 02    sta unpack_mode_02, x
 B6B5: 60       rts
 
 B6BE: A2 00    ldx #$00
 B6C0: A0 00    ldy #$00
 B6C2: A9 00    lda #$00
 B6C4: 85 11    sta $11
-B6C6: 85 13    sta $13
-B6C8: B5 02    lda $02, x
-B6CA: 85 10    sta $10
+B6C6: 85 13    sta tile_msb_to_write_13
+B6C8: B5 02    lda unpack_mode_02, x
+B6CA: 85 10    sta screen_source_pointer_0010
 B6CC: A5 01    lda $01
-B6CE: 85 12    sta $12
+B6CE: 85 12    sta tile_lsb_value_to_write_12
 B6D0: 20 29 D1 jsr $d129
-B6D3: A5 14    lda $14
+B6D3: A5 14    lda screen_tile_dest_address_14
 B6D5: 99 04 00 sta $0004, y
 B6D8: A5 15    lda $15
 B6DA: 99 05 00 sta $0005, y
@@ -9438,7 +9473,7 @@ B6E0: E0 02    cpx #$02
 B6E2: 90 DE    bcc $b6c2
 B6E4: A2 03    ldx #$03
 B6E6: B5 04    lda $04, x
-B6E8: 95 10    sta $10, x
+B6E8: 95 10    sta screen_source_pointer_0010, x
 B6EA: CA       dex
 B6EB: 10 F9    bpl $b6e6
 B6ED: A5 00    lda $00
@@ -9452,11 +9487,11 @@ B6F6: A8       tay
 B6F7: A2 00    ldx #$00
 B6F9: B9 17 B7 lda $b717, y
 B6FC: 10 11    bpl $b70f
-B6FE: B5 10    lda $10, x
+B6FE: B5 10    lda screen_source_pointer_0010, x
 B700: 49 FF    eor #$ff
 B702: 18       clc
 B703: 69 01    adc #$01
-B705: 95 10    sta $10, x
+B705: 95 10    sta screen_source_pointer_0010, x
 B707: B5 11    lda $11, x
 B709: 49 FF    eor #$ff
 B70B: 69 00    adc #$00
@@ -9476,7 +9511,7 @@ B724: 48       pha
 B725: A6 1B    ldx $1b
 B727: A9 00    lda #$00
 B729: 85 1B    sta $1b
-B72B: 85 1D    sta $1d
+B72B: 85 1D    sta base_screen_pointer_list_001d
 B72D: 85 24    sta $24
 B72F: B5 8F    lda $8f, x
 B731: 85 29    sta $29
@@ -9500,7 +9535,7 @@ B751: 49 FF    eor #$ff
 B753: 69 01    adc #$01
 B755: 85 29    sta $29
 B757: D0 02    bne $b75b
-B759: E6 1D    inc $1d
+B759: E6 1D    inc base_screen_pointer_list_001d
 B75B: B5 C7    lda $c7, x
 B75D: 10 05    bpl $b764
 B75F: A0 07    ldy #$07
@@ -9515,7 +9550,7 @@ B770: C5 1B    cmp $1b
 B772: B0 04    bcs $b778
 B774: C8       iny
 B775: 4C 6D B7 jmp $b76d
-B778: A5 1D    lda $1d
+B778: A5 1D    lda base_screen_pointer_list_001d
 B77A: D0 19    bne $b795
 B77C: 84 2A    sty $2a
 B77E: 98       tya
@@ -9687,13 +9722,13 @@ B924: 49 10    eor #$10
 B926: DD 73 03 cmp $0373, x
 B929: D0 2A    bne $b955
 B92B: A9 7C    lda #$7c
-B92D: 85 10    sta $10
+B92D: 85 10    sta screen_source_pointer_0010
 B92F: A9 B9    lda #$b9
 B931: 85 11    sta $11
 B933: BD 12 03 lda $0312, x
 B936: 0A       asl a
-B937: 65 10    adc $10
-B939: 85 10    sta $10
+B937: 65 10    adc screen_source_pointer_0010
+B939: 85 10    sta screen_source_pointer_0010
 B93B: A5 11    lda $11
 B93D: 69 00    adc #$00
 B93F: 85 11    sta $11
@@ -9708,14 +9743,14 @@ B952: 4C 79 B9 jmp $b979
 B955: A9 00    lda #$00
 B957: 9D C8 03 sta $03c8, x
 B95A: A9 A6    lda #$a6
-B95C: 85 10    sta $10
+B95C: 85 10    sta screen_source_pointer_0010
 B95E: A9 B9    lda #$b9
 B960: 85 11    sta $11
 B962: BD 12 03 lda $0312, x
 B965: 0A       asl a
 B966: 0A       asl a
-B967: 65 10    adc $10
-B969: 85 10    sta $10
+B967: 65 10    adc screen_source_pointer_0010
+B969: 85 10    sta screen_source_pointer_0010
 B96B: A5 11    lda $11
 B96D: 69 00    adc #$00
 B96F: 85 11    sta $11
@@ -9789,7 +9824,7 @@ BA7A: AD E0 03 lda $03e0
 BA7D: 0A       asl a
 BA7E: A8       tay
 BA7F: B9 8C BA lda table_ba8c, y
-BA82: 85 10    sta $10
+BA82: 85 10    sta screen_source_pointer_0010
 BA84: B9 8D BA lda $ba8d, y
 BA87: 85 11    sta $11
 BA89: 6C 10 00 jmp ($0010)        ; [indirect_jump]
@@ -10185,7 +10220,7 @@ BE05: E9 0C    sbc #$0c
 BE07: 0A       asl a
 BE08: A8       tay
 BE09: B9 61 BE lda table_be61, y
-BE0C: 85 10    sta $10
+BE0C: 85 10    sta screen_source_pointer_0010
 BE0E: B9 62 BE lda $be62, y
 BE11: 85 11    sta $11
 BE13: 6C 10 00 jmp ($0010)        ; [indirect_jump]
@@ -10508,7 +10543,7 @@ C117: 8D FC 03 sta $03fc
 C11A: A5 1E    lda $1e
 C11C: 85 C6    sta $c6
 C11E: 8D FD 03 sta $03fd
-C121: A5 1D    lda $1d
+C121: A5 1D    lda base_screen_pointer_list_001d
 C123: 85 D4    sta $d4
 C125: A5 20    lda $20
 C127: 8D FE 03 sta $03fe
@@ -10550,7 +10585,7 @@ C17B: A4 00    ldy $00
 C17D: B9 90 C1 lda $c190, y
 C180: 18       clc
 C181: 65 01    adc $01
-C183: 85 10    sta $10
+C183: 85 10    sta screen_source_pointer_0010
 C185: B9 91 C1 lda $c191, y
 C188: 69 00    adc #$00
 C18A: 85 11    sta $11
@@ -10689,33 +10724,33 @@ C580: 69 3C    adc #$3c
 C582: 8D 65 02 sta $0265
 C585: 4C F3 C0 jmp $c0f3
 C588: A5 E7    lda $e7
-C58A: 85 10    sta $10
+C58A: 85 10    sta screen_source_pointer_0010
 C58C: A5 F5    lda $f5
 C58E: 85 11    sta $11
 C590: A5 D9    lda $d9
 C592: 85 00    sta $00
 C594: AD A6 02 lda $02a6
-C597: 85 12    sta $12
+C597: 85 12    sta tile_lsb_value_to_write_12
 C599: AD B3 02 lda $02b3
-C59C: 85 13    sta $13
+C59C: 85 13    sta tile_msb_to_write_13
 C59E: AD C0 02 lda $02c0
-C5A1: 85 14    sta $14
+C5A1: 85 14    sta screen_tile_dest_address_14
 C5A3: AD CD 02 lda $02cd
 C5A6: 85 15    sta $15
 C5A8: A9 00    lda #$00
 C5AA: 85 01    sta $01
-C5AC: 85 02    sta $02
+C5AC: 85 02    sta unpack_mode_02
 C5AE: 85 03    sta $03
 C5B0: 85 04    sta $04
 C5B2: 85 1B    sta $1b
-C5B4: A5 12    lda $12
+C5B4: A5 12    lda tile_lsb_value_to_write_12
 C5B6: 18       clc
 C5B7: 65 00    adc $00
 C5B9: 85 00    sta $00
-C5BB: A5 13    lda $13
+C5BB: A5 13    lda tile_msb_to_write_13
 C5BD: 08       php
-C5BE: 65 10    adc $10
-C5C0: 85 10    sta $10
+C5BE: 65 10    adc screen_source_pointer_0010
+C5C0: 85 10    sta screen_source_pointer_0010
 C5C2: A5 11    lda $11
 C5C4: 69 00    adc #$00
 C5C6: 28       plp
@@ -10723,38 +10758,38 @@ C5C7: 10 03    bpl $c5cc
 C5C9: 18       clc
 C5CA: 69 FF    adc #$ff
 C5CC: 85 11    sta $11
-C5CE: A5 12    lda $12
+C5CE: A5 12    lda tile_lsb_value_to_write_12
 C5D0: 38       sec
-C5D1: E5 14    sbc $14
-C5D3: 85 12    sta $12
-C5D5: A5 13    lda $13
+C5D1: E5 14    sbc screen_tile_dest_address_14
+C5D3: 85 12    sta tile_lsb_value_to_write_12
+C5D5: A5 13    lda tile_msb_to_write_13
 C5D7: E5 15    sbc $15
-C5D9: 85 13    sta $13
+C5D9: 85 13    sta tile_msb_to_write_13
 C5DB: E6 01    inc $01
-C5DD: A5 13    lda $13
+C5DD: A5 13    lda tile_msb_to_write_13
 C5DF: 10 D3    bpl $c5b4
 C5E1: A5 11    lda $11
 C5E3: 30 44    bmi $c629
 C5E5: D0 CD    bne $c5b4
-C5E7: 05 10    ora $10
+C5E7: 05 10    ora screen_source_pointer_0010
 C5E9: F0 3E    beq $c629
-C5EB: A5 02    lda $02
+C5EB: A5 02    lda unpack_mode_02
 C5ED: D0 0A    bne $c5f9
-C5EF: A5 10    lda $10
+C5EF: A5 10    lda screen_source_pointer_0010
 C5F1: C9 50    cmp #$50
 C5F3: B0 04    bcs $c5f9
 C5F5: A5 01    lda $01
-C5F7: 85 02    sta $02
+C5F7: 85 02    sta unpack_mode_02
 C5F9: A5 03    lda $03
 C5FB: D0 0A    bne $c607
-C5FD: A5 10    lda $10
+C5FD: A5 10    lda screen_source_pointer_0010
 C5FF: C9 30    cmp #$30
 C601: B0 04    bcs $c607
 C603: A5 01    lda $01
 C605: 85 03    sta $03
 C607: A5 04    lda $04
 C609: D0 0D    bne $c618
-C60B: A5 10    lda $10
+C60B: A5 10    lda screen_source_pointer_0010
 C60D: CD FE 03 cmp $03fe
 C610: F0 02    beq $c614
 C612: B0 04    bcs $c618
@@ -10762,7 +10797,7 @@ C614: A5 01    lda $01
 C616: 85 04    sta $04
 C618: A5 1B    lda $1b
 C61A: D0 0A    bne $c626
-C61C: A5 10    lda $10
+C61C: A5 10    lda screen_source_pointer_0010
 C61E: C9 40    cmp #$40
 C620: B0 04    bcs $c626
 C622: A5 01    lda $01
@@ -10770,19 +10805,19 @@ C624: 85 1B    sta $1b
 C626: 4C B4 C5 jmp $c5b4
 C629: A5 01    lda $01
 C62B: 8D EE 03 sta $03ee
-C62E: A5 02    lda $02
+C62E: A5 02    lda unpack_mode_02
 C630: 8D F9 03 sta $03f9
 C633: A5 03    lda $03
 C635: 8D F4 03 sta $03f4
 C638: A5 04    lda $04
 C63A: 8D FF 03 sta $03ff
 C63D: AD 72 02 lda $0272
-C640: 85 10    sta $10
+C640: 85 10    sta screen_source_pointer_0010
 C642: AD 7F 02 lda $027f
 C645: 85 11    sta $11
 C647: 10 03    bpl $c64c
 C649: 20 98 CF jsr $cf98
-C64C: A5 10    lda $10
+C64C: A5 10    lda screen_source_pointer_0010
 C64E: 85 00    sta $00
 C650: A5 11    lda $11
 C652: 85 01    sta $01
@@ -10790,7 +10825,7 @@ C654: A9 00    lda #$00
 C656: 24 01    bit $01
 C658: 10 02    bpl $c65c
 C65A: A9 FF    lda #$ff
-C65C: 85 02    sta $02
+C65C: 85 02    sta unpack_mode_02
 C65E: AD EE 03 lda $03ee
 C661: 85 03    sta $03
 C663: 20 60 D1 jsr $d160
@@ -10827,12 +10862,12 @@ C6AE: A5 06    lda $06
 C6B0: E9 00    sbc #$00
 C6B2: 85 AA    sta $aa
 C6B4: AD 8C 02 lda $028c
-C6B7: 85 10    sta $10
+C6B7: 85 10    sta screen_source_pointer_0010
 C6B9: AD 99 02 lda $0299
 C6BC: 85 11    sta $11
 C6BE: 10 03    bpl $c6c3
 C6C0: 20 98 CF jsr $cf98
-C6C3: A5 10    lda $10
+C6C3: A5 10    lda screen_source_pointer_0010
 C6C5: 85 00    sta $00
 C6C7: A5 11    lda $11
 C6C9: 85 01    sta $01
@@ -10840,7 +10875,7 @@ C6CB: A9 00    lda #$00
 C6CD: 24 01    bit $01
 C6CF: 10 02    bpl $c6d3
 C6D1: A9 FF    lda #$ff
-C6D3: 85 02    sta $02
+C6D3: 85 02    sta unpack_mode_02
 C6D5: AD EE 03 lda $03ee
 C6D8: 85 03    sta $03
 C6DA: 20 60 D1 jsr $d160
@@ -10961,60 +10996,60 @@ C7D0: E0 08    cpx #$08
 C7D2: 90 F5    bcc $c7c9
 C7D4: A4 01    ldy $01
 C7D6: B9 D5 C8 lda $c8d5, y
-C7D9: 85 02    sta $02
+C7D9: 85 02    sta unpack_mode_02
 C7DB: A6 00    ldx $00
-C7DD: A4 02    ldy $02
+C7DD: A4 02    ldy unpack_mode_02
 C7DF: B5 8F    lda $8f, x
 C7E1: 38       sec
 C7E2: F9 EA 03 sbc $03ea, y
-C7E5: 85 10    sta $10
+C7E5: 85 10    sta screen_source_pointer_0010
 C7E7: B5 9D    lda $9d, x
 C7E9: F9 EB 03 sbc $03eb, y
 C7EC: 85 11    sta $11
 C7EE: 10 03    bpl $c7f3
 C7F0: 20 98 CF jsr $cf98
 C7F3: A4 00    ldy $00
-C7F5: A5 10    lda $10
+C7F5: A5 10    lda screen_source_pointer_0010
 C7F7: A6 11    ldx $11
 C7F9: F0 02    beq $c7fd
 C7FB: A9 FF    lda #$ff
 C7FD: 91 08    sta ($08), y
 C7FF: A6 00    ldx $00
-C801: A4 02    ldy $02
+C801: A4 02    ldy unpack_mode_02
 C803: B5 B9    lda $b9, x
 C805: 38       sec
 C806: F9 EC 03 sbc $03ec, y
-C809: 85 10    sta $10
+C809: 85 10    sta screen_source_pointer_0010
 C80B: B5 C7    lda $c7, x
 C80D: F9 ED 03 sbc $03ed, y
 C810: 85 11    sta $11
 C812: 10 03    bpl $c817
 C814: 20 98 CF jsr $cf98
 C817: A4 00    ldy $00
-C819: A5 10    lda $10
+C819: A5 10    lda screen_source_pointer_0010
 C81B: A6 11    ldx $11
 C81D: F0 02    beq $c821
 C81F: A9 FF    lda #$ff
 C821: 91 0A    sta ($0a), y
 C823: B1 08    lda ($08), y
-C825: 85 10    sta $10
-C827: 85 12    sta $12
+C825: 85 10    sta screen_source_pointer_0010
+C827: 85 12    sta tile_lsb_value_to_write_12
 C829: A9 00    lda #$00
 C82B: 85 11    sta $11
-C82D: 85 13    sta $13
+C82D: 85 13    sta tile_msb_to_write_13
 C82F: 20 29 D1 jsr $d129
-C832: A5 14    lda $14
+C832: A5 14    lda screen_tile_dest_address_14
 C834: 91 0C    sta ($0c), y
 C836: A5 15    lda $15
 C838: 91 0E    sta ($0e), y
 C83A: B1 0A    lda ($0a), y
-C83C: 85 10    sta $10
-C83E: 85 12    sta $12
+C83C: 85 10    sta screen_source_pointer_0010
+C83E: 85 12    sta tile_lsb_value_to_write_12
 C840: A9 00    lda #$00
 C842: 85 11    sta $11
-C844: 85 13    sta $13
+C844: 85 13    sta tile_msb_to_write_13
 C846: 20 29 D1 jsr $d129
-C849: A5 14    lda $14
+C849: A5 14    lda screen_tile_dest_address_14
 C84B: 18       clc
 C84C: 71 0C    adc ($0c), y
 C84E: 91 0C    sta ($0c), y
@@ -11112,11 +11147,11 @@ C911: ED 00 04 sbc $0400
 C914: 85 01    sta $01
 C916: A5 A1    lda $a1
 C918: ED 01 04 sbc $0401
-C91B: 85 02    sta $02
+C91B: 85 02    sta unpack_mode_02
 C91D: 10 03    bpl $c922
 C91F: 20 D6 CF jsr $cfd6
 C922: AD 72 02 lda $0272
-C925: 85 10    sta $10
+C925: 85 10    sta screen_source_pointer_0010
 C927: AD 7F 02 lda $027f
 C92A: 85 11    sta $11
 C92C: 10 03    bpl $c931
@@ -11128,13 +11163,13 @@ C939: 90 23    bcc $c95e
 C93B: A5 00    lda $00
 C93D: 8D 06 04 sta $0406
 C940: 20 7A C9 jsr $c97a
-C943: A5 14    lda $14
+C943: A5 14    lda screen_tile_dest_address_14
 C945: 8D 02 04 sta $0402
 C948: A5 15    lda $15
 C94A: 8D 03 04 sta $0403
 C94D: AC 06 04 ldy $0406
 C950: 20 B2 C9 jsr $c9b2
-C953: A5 10    lda $10
+C953: A5 10    lda screen_source_pointer_0010
 C955: 8D 04 04 sta $0404
 C958: A5 11    lda $11
 C95A: 8D 05 04 sta $0405
@@ -11151,14 +11186,14 @@ C975: 60       rts
 
 C97A: 48       pha
 C97B: A9 00    lda #$00
-C97D: 85 02    sta $02
+C97D: 85 02    sta unpack_mode_02
 C97F: AD 8C 02 lda $028c
 C982: 85 00    sta $00
 C984: AD 99 02 lda $0299
 C987: 85 01    sta $01
 C989: 10 07    bpl $c992
 C98B: A9 FF    lda #$ff
-C98D: 85 02    sta $02
+C98D: 85 02    sta unpack_mode_02
 C98F: 20 D6 CF jsr $cfd6
 C992: 68       pla
 C993: 85 03    sta $03
@@ -11171,7 +11206,7 @@ C9A2: 18       clc
 C9A3: 65 AF    adc $af
 C9A5: A5 05    lda $05
 C9A7: 65 BD    adc $bd
-C9A9: 85 14    sta $14
+C9A9: 85 14    sta screen_tile_dest_address_14
 C9AB: A5 06    lda $06
 C9AD: 65 CB    adc $cb
 C9AF: 85 15    sta $15
@@ -11179,21 +11214,21 @@ C9B1: 60       rts
 C9B2: A5 D9    lda $d9
 C9B4: 85 00    sta $00
 C9B6: A5 E7    lda $e7
-C9B8: 85 10    sta $10
+C9B8: 85 10    sta screen_source_pointer_0010
 C9BA: A5 F5    lda $f5
 C9BC: 85 11    sta $11
 C9BE: AD A6 02 lda $02a6
-C9C1: 85 12    sta $12
+C9C1: 85 12    sta tile_lsb_value_to_write_12
 C9C3: AD B3 02 lda $02b3
-C9C6: 85 13    sta $13
-C9C8: A5 12    lda $12
+C9C6: 85 13    sta tile_msb_to_write_13
+C9C8: A5 12    lda tile_lsb_value_to_write_12
 C9CA: 18       clc
 C9CB: 65 00    adc $00
 C9CD: 85 00    sta $00
-C9CF: A5 13    lda $13
+C9CF: A5 13    lda tile_msb_to_write_13
 C9D1: 08       php
-C9D2: 65 10    adc $10
-C9D4: 85 10    sta $10
+C9D2: 65 10    adc screen_source_pointer_0010
+C9D4: 85 10    sta screen_source_pointer_0010
 C9D6: A5 11    lda $11
 C9D8: 69 00    adc #$00
 C9DA: 28       plp
@@ -11201,13 +11236,13 @@ C9DB: 10 03    bpl $c9e0
 C9DD: 18       clc
 C9DE: 69 FF    adc #$ff
 C9E0: 85 11    sta $11
-C9E2: A5 12    lda $12
+C9E2: A5 12    lda tile_lsb_value_to_write_12
 C9E4: 38       sec
 C9E5: ED C0 02 sbc $02c0
-C9E8: 85 12    sta $12
-C9EA: A5 13    lda $13
+C9E8: 85 12    sta tile_lsb_value_to_write_12
+C9EA: A5 13    lda tile_msb_to_write_13
 C9EC: ED CD 02 sbc $02cd
-C9EF: 85 13    sta $13
+C9EF: 85 13    sta tile_msb_to_write_13
 C9F1: 88       dey
 C9F2: D0 D4    bne $c9c8
 C9F4: 60       rts
@@ -11233,11 +11268,11 @@ CA12: F5 8F    sbc $8f, x
 CA14: 85 01    sta $01
 CA16: A5 A1    lda $a1
 CA18: F5 9D    sbc $9d, x
-CA1A: 85 02    sta $02
+CA1A: 85 02    sta unpack_mode_02
 CA1C: 10 03    bpl $ca21
 CA1E: 20 D6 CF jsr $cfd6
 CA21: AD 72 02 lda $0272
-CA24: 85 10    sta $10
+CA24: 85 10    sta screen_source_pointer_0010
 CA26: AD 7F 02 lda $027f
 CA29: 85 11    sta $11
 CA2B: 10 03    bpl $ca30
@@ -11249,14 +11284,14 @@ CA38: 90 30    bcc $ca6a
 CA3A: A5 00    lda $00
 CA3C: 9D A0 03 sta $03a0, x
 CA3F: 20 7A C9 jsr $c97a
-CA42: A5 14    lda $14
+CA42: A5 14    lda screen_tile_dest_address_14
 CA44: 9D 90 03 sta $0390, x
 CA47: A5 15    lda $15
 CA49: 9D 94 03 sta $0394, x
 CA4C: BD A0 03 lda $03a0, x
 CA4F: A8       tay
 CA50: 20 B2 C9 jsr $c9b2
-CA53: A5 10    lda $10
+CA53: A5 10    lda screen_source_pointer_0010
 CA55: 9D 98 03 sta $0398, x
 CA58: A5 11    lda $11
 CA5A: 9D 9C 03 sta $039c, x
@@ -11295,14 +11330,14 @@ CAA8: 85 00    sta $00
 CAAA: BD 17 04 lda $0417, x
 CAAD: 85 01    sta $01
 CAAF: BD 18 04 lda $0418, x
-CAB2: 85 02    sta $02
+CAB2: 85 02    sta unpack_mode_02
 CAB4: 10 03    bpl $cab9
 CAB6: 20 D6 CF jsr $cfd6
 CAB9: E0 00    cpx #$00
 CABB: F0 08    beq $cac5
-CABD: A5 12    lda $12
-CABF: 85 10    sta $10
-CAC1: A5 13    lda $13
+CABD: A5 12    lda tile_lsb_value_to_write_12
+CABF: 85 10    sta screen_source_pointer_0010
+CAC1: A5 13    lda tile_msb_to_write_13
 CAC3: 85 11    sta $11
 CAC5: 24 11    bit $11
 CAC7: 10 03    bpl $cacc
@@ -11313,7 +11348,7 @@ CAD2: A5 00    lda $00
 CAD4: 18       clc
 CAD5: 79 E4 CC adc $cce4, y
 CAD8: 8D 1F 04 sta $041f
-CADB: 85 10    sta $10
+CADB: 85 10    sta screen_source_pointer_0010
 CADD: A9 00    lda #$00
 CADF: 85 11    sta $11
 CAE1: AD 16 04 lda $0416
@@ -11321,7 +11356,7 @@ CAE4: 85 00    sta $00
 CAE6: AD 17 04 lda $0417
 CAE9: 85 01    sta $01
 CAEB: AD 18 04 lda $0418
-CAEE: 85 02    sta $02
+CAEE: 85 02    sta unpack_mode_02
 CAF0: 10 03    bpl $caf5
 CAF2: 20 D6 CF jsr $cfd6
 CAF5: 20 86 D0 jsr $d086
@@ -11337,7 +11372,7 @@ CB0D: 85 00    sta $00
 CB0F: AD 1A 04 lda $041a
 CB12: 85 01    sta $01
 CB14: AD 1B 04 lda $041b
-CB17: 85 02    sta $02
+CB17: 85 02    sta unpack_mode_02
 CB19: 10 03    bpl $cb1e
 CB1B: 20 D6 CF jsr $cfd6
 CB1E: 20 86 D0 jsr $d086
@@ -11360,7 +11395,7 @@ CB45: 85 00    sta $00
 CB47: AD 1D 04 lda $041d
 CB4A: 85 01    sta $01
 CB4C: AD 1E 04 lda $041e
-CB4F: 85 02    sta $02
+CB4F: 85 02    sta unpack_mode_02
 CB51: 10 03    bpl $cb56
 CB53: 20 D6 CF jsr $cfd6
 CB56: 20 86 D0 jsr $d086
@@ -11372,17 +11407,17 @@ CB63: 8D A6 02 sta $02a6
 CB66: A5 01    lda $01
 CB68: 8D B3 02 sta $02b3
 CB6B: AD 72 02 lda $0272
-CB6E: 85 10    sta $10
+CB6E: 85 10    sta screen_source_pointer_0010
 CB70: AD 7F 02 lda $027f
 CB73: 85 11    sta $11
 CB75: 10 03    bpl $cb7a
 CB77: 20 98 CF jsr $cf98
-CB7A: A5 10    lda $10
+CB7A: A5 10    lda screen_source_pointer_0010
 CB7C: 85 00    sta $00
 CB7E: A5 11    lda $11
 CB80: 85 01    sta $01
 CB82: A9 00    lda #$00
-CB84: 85 02    sta $02
+CB84: 85 02    sta unpack_mode_02
 CB86: AD 1F 04 lda $041f
 CB89: 85 03    sta $03
 CB8B: 20 60 D1 jsr $d160
@@ -11411,17 +11446,17 @@ CBB7: A5 A1    lda $a1
 CBB9: 65 06    adc $06
 CBBB: 85 A1    sta $a1
 CBBD: AD 8C 02 lda $028c
-CBC0: 85 10    sta $10
+CBC0: 85 10    sta screen_source_pointer_0010
 CBC2: AD 99 02 lda $0299
 CBC5: 85 11    sta $11
 CBC7: 10 03    bpl $cbcc
 CBC9: 20 98 CF jsr $cf98
-CBCC: A5 10    lda $10
+CBCC: A5 10    lda screen_source_pointer_0010
 CBCE: 85 00    sta $00
 CBD0: A5 11    lda $11
 CBD2: 85 01    sta $01
 CBD4: A9 00    lda #$00
-CBD6: 85 02    sta $02
+CBD6: 85 02    sta unpack_mode_02
 CBD8: AD 1F 04 lda $041f
 CBDB: 85 03    sta $03
 CBDD: 20 60 D1 jsr $d160
@@ -11457,17 +11492,17 @@ CC18: 90 60    bcc $cc7a
 CC1A: C9 0C    cmp #$0c
 CC1C: B0 5C    bcs $cc7a
 CC1E: AD A6 02 lda $02a6
-CC21: 85 10    sta $10
+CC21: 85 10    sta screen_source_pointer_0010
 CC23: AD B3 02 lda $02b3
 CC26: 85 11    sta $11
 CC28: 10 03    bpl $cc2d
 CC2A: 20 98 CF jsr $cf98
-CC2D: A5 10    lda $10
+CC2D: A5 10    lda screen_source_pointer_0010
 CC2F: 85 00    sta $00
 CC31: A5 11    lda $11
 CC33: 85 01    sta $01
 CC35: A9 00    lda #$00
-CC37: 85 02    sta $02
+CC37: 85 02    sta unpack_mode_02
 CC39: AD 1F 04 lda $041f
 CC3C: 85 03    sta $03
 CC3E: 20 60 D1 jsr $d160
@@ -11503,26 +11538,26 @@ CC7A: AD 1F 04 lda $041f
 CC7D: 4A       lsr a
 CC7E: 85 00    sta $00
 CC80: A5 00    lda $00
-CC82: 85 10    sta $10
+CC82: 85 10    sta screen_source_pointer_0010
 CC84: A9 00    lda #$00
 CC86: 85 11    sta $11
 CC88: A9 40    lda #$40
-CC8A: 85 12    sta $12
+CC8A: 85 12    sta tile_lsb_value_to_write_12
 CC8C: A9 00    lda #$00
-CC8E: 85 13    sta $13
+CC8E: 85 13    sta tile_msb_to_write_13
 CC90: 20 29 D1 jsr $d129
-CC93: A5 14    lda $14
+CC93: A5 14    lda screen_tile_dest_address_14
 CC95: 8D A6 02 sta $02a6
 CC98: A5 15    lda $15
 CC9A: 8D B3 02 sta $02b3
 CC9D: AD 1F 04 lda $041f
-CCA0: 85 12    sta $12
+CCA0: 85 12    sta tile_lsb_value_to_write_12
 CCA2: A9 00    lda #$00
-CCA4: 85 13    sta $13
+CCA4: 85 13    sta tile_msb_to_write_13
 CCA6: A5 E2    lda $e2
 CCA8: 38       sec
 CCA9: E5 D9    sbc $d9
-CCAB: 85 10    sta $10
+CCAB: 85 10    sta screen_source_pointer_0010
 CCAD: A5 F0    lda $f0
 CCAF: E5 E7    sbc $e7
 CCB1: 85 11    sta $11
@@ -11531,12 +11566,12 @@ CCB5: 20 98 CF jsr $cf98
 CCB8: 20 2E D0 jsr $d02e
 CCBB: 20 98 CF jsr $cf98
 CCBE: 4C C8 CC jmp $ccc8
-CCC1: 05 10    ora $10
+CCC1: 05 10    ora screen_source_pointer_0010
 CCC3: F0 14    beq $ccd9
 CCC5: 20 2E D0 jsr $d02e
 CCC8: AD A6 02 lda $02a6
 CCCB: 18       clc
-CCCC: 65 10    adc $10
+CCCC: 65 10    adc screen_source_pointer_0010
 CCCE: 8D A6 02 sta $02a6
 CCD1: AD B3 02 lda $02b3
 CCD4: 65 11    adc $11
@@ -11593,11 +11628,11 @@ CD52: C9 16    cmp #$16
 CD54: D0 03    bne $cd59
 CD56: 20 9F CD jsr $cd9f
 CD59: AD A6 02 lda $02a6
-CD5C: 85 10    sta $10
+CD5C: 85 10    sta screen_source_pointer_0010
 CD5E: AD B3 02 lda $02b3
 CD61: 85 11    sta $11
 CD63: 20 98 CF jsr $cf98
-CD66: A5 10    lda $10
+CD66: A5 10    lda screen_source_pointer_0010
 CD68: 8D A6 02 sta $02a6
 CD6B: A5 11    lda $11
 CD6D: 8D B3 02 sta $02b3
@@ -11643,11 +11678,11 @@ CDC2: 6E B3 02 ror $02b3
 CDC5: 6E A6 02 ror $02a6
 CDC8: 60       rts
 CDC9: AD 72 02 lda $0272
-CDCC: 85 10    sta $10
+CDCC: 85 10    sta screen_source_pointer_0010
 CDCE: AD 7F 02 lda $027f
 CDD1: 85 11    sta $11
 CDD3: 20 98 CF jsr $cf98
-CDD6: A5 10    lda $10
+CDD6: A5 10    lda screen_source_pointer_0010
 CDD8: 8D 72 02 sta $0272
 CDDB: A5 11    lda $11
 CDDD: 8D 7F 02 sta $027f
@@ -11777,7 +11812,7 @@ CF10: 95 00    sta $00, x
 CF12: E8       inx
 CF13: D0 FB    bne $cf10
 CF15: 60       rts
-CF16: 85 02    sta $02
+CF16: 85 02    sta unpack_mode_02
 CF18: A9 00    lda #$00
 CF1A: 85 00    sta $00
 CF1C: A9 02    lda #$02
@@ -11789,25 +11824,28 @@ CF26: C8       iny
 CF27: D0 FB    bne $cf24
 CF29: E6 01    inc $01
 CF2B: A5 01    lda $01
-CF2D: C5 02    cmp $02
+CF2D: C5 02    cmp unpack_mode_02
 CF2F: 90 F1    bcc $cf22
 CF31: 20 8F D8 jsr $d88f
 CF34: 60       rts
+
+clear_screen_cf35:
 CF35: A0 00    ldy #$00
 CF37: A9 00    lda #$00
-CF39: 85 10    sta $10
-CF3B: 85 12    sta $12
+CF39: 85 10    sta screen_source_pointer_0010
+CF3B: 85 12    sta tile_lsb_value_to_write_12
 CF3D: A9 20    lda #$20
 CF3F: 85 11    sta $11
 CF41: A9 30    lda #$30
-CF43: 85 13    sta $13
+CF43: 85 13    sta tile_msb_to_write_13
 CF45: A9 00    lda #$00
-CF47: 91 10    sta ($10), y	; [unchecked_address]
+; clear the screen
+CF47: 91 10    sta (screen_source_pointer_0010), y	; [unchecked_address]
 CF49: 91 12    sta ($12), y	; [video_address]
 CF4B: C8       iny
 CF4C: D0 F9    bne $cf47
 CF4E: E6 11    inc $11
-CF50: E6 13    inc $13
+CF50: E6 13    inc tile_msb_to_write_13
 CF52: A5 11    lda $11
 CF54: C9 30    cmp #$30
 CF56: 90 ED    bcc $cf45
@@ -11842,21 +11880,21 @@ CF93: E8       inx
 CF94: E8       inx
 CF95: D0 DE    bne $cf75
 CF97: 60       rts
-CF98: A5 10    lda $10
+CF98: A5 10    lda screen_source_pointer_0010
 CF9A: 49 FF    eor #$ff
 CF9C: 18       clc
 CF9D: 69 01    adc #$01
-CF9F: 85 10    sta $10
+CF9F: 85 10    sta screen_source_pointer_0010
 CFA1: A5 11    lda $11
 CFA3: 49 FF    eor #$ff
 CFA5: 69 00    adc #$00
 CFA7: 85 11    sta $11
 CFA9: 60       rts
-CFAA: A5 14    lda $14
+CFAA: A5 14    lda screen_tile_dest_address_14
 CFAC: 49 FF    eor #$ff
 CFAE: 18       clc
 CFAF: 69 01    adc #$01
-CFB1: 85 14    sta $14
+CFB1: 85 14    sta screen_tile_dest_address_14
 CFB3: A5 15    lda $15
 CFB5: 49 FF    eor #$ff
 CFB7: 69 00    adc #$00
@@ -11867,10 +11905,10 @@ CFBE: 49 FF    eor #$ff
 CFC0: 18       clc
 CFC1: 69 01    adc #$01
 CFC3: 85 00    sta $00
-CFC5: A5 10    lda $10
+CFC5: A5 10    lda screen_source_pointer_0010
 CFC7: 49 FF    eor #$ff
 CFC9: 69 00    adc #$00
-CFCB: 85 10    sta $10
+CFCB: 85 10    sta screen_source_pointer_0010
 CFCD: A5 11    lda $11
 CFCF: 49 FF    eor #$ff
 CFD1: 69 00    adc #$00
@@ -11885,10 +11923,10 @@ CFDF: A5 01    lda $01
 CFE1: 49 FF    eor #$ff
 CFE3: 69 00    adc #$00
 CFE5: 85 01    sta $01
-CFE7: A5 02    lda $02
+CFE7: A5 02    lda unpack_mode_02
 CFE9: 49 FF    eor #$ff
 CFEB: 69 00    adc #$00
-CFED: 85 02    sta $02
+CFED: 85 02    sta unpack_mode_02
 CFEF: 60       rts
 CFF0: A5 04    lda $04
 CFF2: 49 FF    eor #$ff
@@ -11929,44 +11967,44 @@ D030: 98       tya
 D031: 48       pha
 D032: A9 00    lda #$00
 D034: 85 15    sta $15
-D036: 85 14    sta $14
-D038: A5 12    lda $12
-D03A: 05 13    ora $13
+D036: 85 14    sta screen_tile_dest_address_14
+D038: A5 12    lda tile_lsb_value_to_write_12
+D03A: 05 13    ora tile_msb_to_write_13
 D03C: D0 06    bne $d044
-D03E: 85 10    sta $10
+D03E: 85 10    sta screen_source_pointer_0010
 D040: 85 11    sta $11
 D042: F0 3D    beq $d081
 D044: A2 10    ldx #$10
 D046: 18       clc
-D047: 26 10    rol $10
+D047: 26 10    rol screen_source_pointer_0010
 D049: 26 11    rol $11
 D04B: CA       dex
 D04C: F0 33    beq $d081
 D04E: 90 F7    bcc $d047
-D050: A5 10    lda $10
+D050: A5 10    lda screen_source_pointer_0010
 D052: 09 01    ora #$01
-D054: 85 10    sta $10
+D054: 85 10    sta screen_source_pointer_0010
 D056: E8       inx
 D057: 86 00    stx $00
 D059: B0 05    bcs $d060
 D05B: 38       sec
-D05C: 26 10    rol $10
+D05C: 26 10    rol screen_source_pointer_0010
 D05E: 26 11    rol $11
-D060: 26 14    rol $14
+D060: 26 14    rol screen_tile_dest_address_14
 D062: 26 15    rol $15
-D064: A6 14    ldx $14
+D064: A6 14    ldx screen_tile_dest_address_14
 D066: A4 15    ldy $15
-D068: A5 14    lda $14
+D068: A5 14    lda screen_tile_dest_address_14
 D06A: 38       sec
-D06B: E5 12    sbc $12
-D06D: 85 14    sta $14
+D06B: E5 12    sbc tile_lsb_value_to_write_12
+D06D: 85 14    sta screen_tile_dest_address_14
 D06F: A5 15    lda $15
-D071: E5 13    sbc $13
+D071: E5 13    sbc tile_msb_to_write_13
 D073: 85 15    sta $15
 D075: B0 06    bcs $d07d
-D077: 86 14    stx $14
+D077: 86 14    stx screen_tile_dest_address_14
 D079: 84 15    sty $15
-D07B: C6 10    dec $10
+D07B: C6 10    dec screen_source_pointer_0010
 D07D: C6 00    dec $00
 D07F: D0 DA    bne $d05b
 D081: 68       pla
@@ -11982,18 +12020,18 @@ D08A: A9 00    lda #$00
 D08C: 85 03    sta $03
 D08E: 85 04    sta $04
 D090: 85 05    sta $05
-D092: A5 10    lda $10
+D092: A5 10    lda screen_source_pointer_0010
 D094: 05 11    ora $11
 D096: D0 08    bne $d0a0
 D098: 85 00    sta $00
 D09A: 85 01    sta $01
-D09C: 85 02    sta $02
+D09C: 85 02    sta unpack_mode_02
 D09E: F0 59    beq $d0f9
 D0A0: A2 18    ldx #$18
 D0A2: 18       clc
 D0A3: 26 00    rol $00
 D0A5: 26 01    rol $01
-D0A7: 26 02    rol $02
+D0A7: 26 02    rol unpack_mode_02
 D0A9: CA       dex
 D0AA: F0 4D    beq $d0f9
 D0AC: 90 F5    bcc $d0a3
@@ -12006,7 +12044,7 @@ D0B7: B0 07    bcs $d0c0
 D0B9: 38       sec
 D0BA: 26 00    rol $00
 D0BC: 26 01    rol $01
-D0BE: 26 02    rol $02
+D0BE: 26 02    rol unpack_mode_02
 D0C0: 26 03    rol $03
 D0C2: 26 04    rol $04
 D0C4: 26 05    rol $05
@@ -12018,7 +12056,7 @@ D0CE: A5 05    lda $05
 D0D0: 85 08    sta $08
 D0D2: A5 03    lda $03
 D0D4: 38       sec
-D0D5: E5 10    sbc $10
+D0D5: E5 10    sbc screen_source_pointer_0010
 D0D7: 85 03    sta $03
 D0D9: A5 04    lda $04
 D0DB: E5 11    sbc $11
@@ -12050,7 +12088,7 @@ D104: A9 00    lda #$00
 D106: 85 01    sta $01
 D108: A2 10    ldx #$10
 D10A: 18       clc
-D10B: 26 10    rol $10
+D10B: 26 10    rol screen_source_pointer_0010
 D10D: 26 11    rol $11
 D10F: 26 01    rol $01
 D111: A5 01    lda $01
@@ -12058,7 +12096,7 @@ D113: C5 00    cmp $00
 D115: 90 04    bcc $d11b
 D117: E5 00    sbc $00
 D119: 85 01    sta $01
-D11B: 26 10    rol $10
+D11B: 26 10    rol screen_source_pointer_0010
 D11D: 26 11    rol $11
 D11F: CA       dex
 D120: D0 ED    bne $d10f
@@ -12073,24 +12111,24 @@ D12A: 48       pha
 D12B: 98       tya
 D12C: 48       pha
 D12D: A9 00    lda #$00
-D12F: 85 14    sta $14
+D12F: 85 14    sta screen_tile_dest_address_14
 D131: 85 15    sta $15
 D133: A5 11    lda $11
-D135: 05 10    ora $10
+D135: 05 10    ora screen_source_pointer_0010
 D137: F0 21    beq $d15a
 D139: 46 11    lsr $11
-D13B: 66 10    ror $10
+D13B: 66 10    ror screen_source_pointer_0010
 D13D: 90 0F    bcc $d14e
 D13F: 18       clc
-D140: A5 14    lda $14
-D142: 65 12    adc $12
-D144: 85 14    sta $14
+D140: A5 14    lda screen_tile_dest_address_14
+D142: 65 12    adc tile_lsb_value_to_write_12
+D144: 85 14    sta screen_tile_dest_address_14
 D146: A5 15    lda $15
-D148: 65 13    adc $13
+D148: 65 13    adc tile_msb_to_write_13
 D14A: 85 15    sta $15
 D14C: B0 06    bcs $d154
-D14E: 06 12    asl $12
-D150: 26 13    rol $13
+D14E: 06 12    asl tile_lsb_value_to_write_12
+D150: 26 13    rol tile_msb_to_write_13
 D152: 90 DF    bcc $d133
 D154: 68       pla
 D155: A8       tay
@@ -12112,7 +12150,7 @@ D164: A5 00    lda $00
 D166: 85 07    sta $07
 D168: A5 01    lda $01
 D16A: 85 08    sta $08
-D16C: A5 02    lda $02
+D16C: A5 02    lda unpack_mode_02
 D16E: 85 09    sta $09
 D170: A9 00    lda #$00
 D172: 85 04    sta $04
@@ -12149,11 +12187,11 @@ D1A5: 68       pla
 D1A6: AA       tax
 D1A7: 18       clc
 D1A8: 60       rts
-D1A9: 85 10    sta $10
-D1AB: 85 12    sta $12
+D1A9: 85 10    sta screen_source_pointer_0010
+D1AB: 85 12    sta tile_lsb_value_to_write_12
 D1AD: A9 00    lda #$00
 D1AF: 85 11    sta $11
-D1B1: 85 13    sta $13
+D1B1: 85 13    sta tile_msb_to_write_13
 D1B3: 20 29 D1 jsr $d129
 D1B6: 60       rts
 D1B7: AD DB 06 lda $06db
@@ -12772,7 +12810,7 @@ D878: 48       pha
 D879: 98       tya
 D87A: 48       pha
 D87B: A2 7E    ldx #$7e
-D87D: AD 2C 02 lda $022c
+D87D: AD 2C 02 lda scrollx_hi_copy_022c
 D880: 29 01    and #$01
 D882: F0 02    beq $d886
 D884: A2 B0    ldx #$b0
@@ -12784,12 +12822,12 @@ D88B: 68       pla
 D88C: AA       tax
 D88D: 68       pla
 D88E: 60       rts
-D88F: AD 2C 02 lda $022c
+D88F: AD 2C 02 lda scrollx_hi_copy_022c
 D892: 29 FE    and #$fe
 D894: 2C 04 10 bit dsw2_1004
 D897: 70 02    bvs $d89b
 D899: 09 01    ora #$01
-D89B: 8D 2C 02 sta $022c
+D89B: 8D 2C 02 sta scrollx_hi_copy_022c
 D89E: 8D 08 10 sta scrollx_hi_1008
 D8A1: 60       rts
 D8A2: AD F4 07 lda $07f4
@@ -12804,10 +12842,10 @@ D8B1: 05 00    ora $00
 D8B3: 0A       asl a
 D8B4: 0A       asl a
 D8B5: 85 00    sta $00
-D8B7: AD 2C 02 lda $022c
+D8B7: AD 2C 02 lda scrollx_hi_copy_022c
 D8BA: 29 03    and #$03
 D8BC: 05 00    ora $00
-D8BE: 8D 2C 02 sta $022c
+D8BE: 8D 2C 02 sta scrollx_hi_copy_022c
 D8C1: 8D 08 10 sta scrollx_hi_1008
 D8C4: 60       rts
 D8C5: AD F4 07 lda $07f4
@@ -12818,10 +12856,10 @@ D8CC: 0A       asl a
 D8CD: 0A       asl a
 D8CE: 0A       asl a
 D8CF: 85 00    sta $00
-D8D1: AD 2C 02 lda $022c
+D8D1: AD 2C 02 lda scrollx_hi_copy_022c
 D8D4: 29 1F    and #$1f
 D8D6: 05 00    ora $00
-D8D8: 8D 2C 02 sta $022c
+D8D8: 8D 2C 02 sta scrollx_hi_copy_022c
 D8DB: 8D 08 10 sta scrollx_hi_1008
 D8DE: 60       rts
 
@@ -12907,13 +12945,13 @@ D9B1: 38       sec
 D9B2: E5 0C    sbc $0c
 D9B4: A8       tay
 D9B5: B9 47 DA lda $da47, y
-D9B8: 85 10    sta $10
-D9BA: 85 12    sta $12
+D9B8: 85 10    sta screen_source_pointer_0010
+D9BA: 85 12    sta tile_lsb_value_to_write_12
 D9BC: B9 48 DA lda $da48, y
 D9BF: 85 11    sta $11
 D9C1: 18       clc
 D9C2: 69 10    adc #$10
-D9C4: 85 13    sta $13
+D9C4: 85 13    sta tile_msb_to_write_13
 D9C6: B9 49 DA lda $da49, y
 D9C9: 85 0E    sta $0e
 D9CB: C6 0E    dec $0e
@@ -12922,7 +12960,7 @@ D9CE: 08       php
 D9CF: 69 00    adc #$00
 D9D1: 85 0F    sta $0f
 D9D3: B9 4A DA lda $da4a, y
-D9D6: 85 14    sta $14
+D9D6: 85 14    sta screen_tile_dest_address_14
 D9D8: B9 4B DA lda $da4b, y
 D9DB: 85 15    sta $15
 D9DD: B9 4C DA lda $da4c, y
@@ -12973,19 +13011,19 @@ DA2C: D0 02    bne $da30
 DA2E: 69 10    adc #$10
 DA30: 65 0D    adc $0d
 DA32: A0 00    ldy #$00
-DA34: 91 10    sta ($10), y
+DA34: 91 10    sta (screen_source_pointer_0010), y
 DA36: A5 0B    lda $0b
 DA38: 91 12    sta ($12), y
-DA3A: E6 10    inc $10
+DA3A: E6 10    inc screen_source_pointer_0010
 DA3C: D0 02    bne $da40
 DA3E: E6 11    inc $11
-DA40: E6 12    inc $12
+DA40: E6 12    inc tile_lsb_value_to_write_12
 DA42: D0 02    bne $da46
-DA44: E6 13    inc $13
+DA44: E6 13    inc tile_msb_to_write_13
 DA46: 60       rts
 
 DA7F: 85 0F    sta $0f
-DA81: 85 10    sta $10
+DA81: 85 10    sta screen_source_pointer_0010
 DA83: 8A       txa
 DA84: 48       pha
 DA85: 98       tya
@@ -12995,28 +13033,28 @@ DA89: 29 3F    and #$3f
 DA8B: 0A       asl a
 DA8C: AA       tax
 DA8D: BD 51 DB lda $db51, x
-DA90: 85 10    sta $10
+DA90: 85 10    sta screen_source_pointer_0010
 DA92: BD 52 DB lda $db52, x
 DA95: 85 11    sta $11
 DA97: A0 00    ldy #$00
 DA99: 84 0E    sty $0e
-DA9B: B1 10    lda ($10), y
+DA9B: B1 10    lda (screen_source_pointer_0010), y
 DA9D: C8       iny
 DA9E: 85 0D    sta $0d
-DAA0: B1 10    lda ($10), y
+DAA0: B1 10    lda (screen_source_pointer_0010), y
 DAA2: C8       iny
 DAA3: 85 0B    sta $0b
-DAA5: B1 10    lda ($10), y
+DAA5: B1 10    lda (screen_source_pointer_0010), y
 DAA7: C8       iny
-DAA8: 85 12    sta $12
-DAAA: 85 14    sta $14
-DAAC: B1 10    lda ($10), y
+DAA8: 85 12    sta tile_lsb_value_to_write_12
+DAAA: 85 14    sta screen_tile_dest_address_14
+DAAC: B1 10    lda (screen_source_pointer_0010), y
 DAAE: C8       iny
-DAAF: 85 13    sta $13
+DAAF: 85 13    sta tile_msb_to_write_13
 DAB1: 18       clc
 DAB2: 69 10    adc #$10
 DAB4: 85 15    sta $15
-DAB6: B1 10    lda ($10), y
+DAB6: B1 10    lda (screen_source_pointer_0010), y
 DAB8: C8       iny
 DAB9: C9 FF    cmp #$ff
 DABB: D0 03    bne $dac0
@@ -13025,7 +13063,7 @@ DAC0: C9 FE    cmp #$fe
 DAC2: F0 E1    beq $daa5
 DAC4: C9 FD    cmp #$fd
 DAC6: D0 08    bne $dad0
-DAC8: B1 10    lda ($10), y
+DAC8: B1 10    lda (screen_source_pointer_0010), y
 DACA: C8       iny
 DACB: 85 0D    sta $0d
 DACD: 4C B6 DA jmp $dab6
@@ -13033,7 +13071,7 @@ DAD0: C9 FC    cmp #$fc
 DAD2: D0 0C    bne $dae0
 DAD4: A9 80    lda #$80
 DAD6: 85 0E    sta $0e
-DAD8: B1 10    lda ($10), y
+DAD8: B1 10    lda (screen_source_pointer_0010), y
 DADA: C8       iny
 DADB: 85 0C    sta $0c
 DADD: 4C B6 DA jmp $dab6
@@ -13044,14 +13082,14 @@ DAE6: 85 0E    sta $0e
 DAE8: 4C B6 DA jmp $dab6
 DAEB: C9 FA    cmp #$fa
 DAED: D0 13    bne $db02
-DAEF: B1 10    lda ($10), y
+DAEF: B1 10    lda (screen_source_pointer_0010), y
 DAF1: C8       iny
 DAF2: 18       clc
-DAF3: 65 12    adc $12
-DAF5: 85 12    sta $12
-DAF7: 85 14    sta $14
+DAF3: 65 12    adc tile_lsb_value_to_write_12
+DAF5: 85 12    sta tile_lsb_value_to_write_12
+DAF7: 85 14    sta screen_tile_dest_address_14
 DAF9: 90 04    bcc $daff
-DAFB: E6 13    inc $13
+DAFB: E6 13    inc tile_msb_to_write_13
 DAFD: E6 15    inc $15
 DAFF: 4C B6 DA jmp $dab6
 DB02: 24 0F    bit $0f
@@ -13068,10 +13106,10 @@ DB14: 65 0D    adc $0d
 DB16: 81 12    sta ($12, x)	; [unchecked_address]
 DB18: A5 0B    lda $0b
 DB1A: 81 14    sta ($14, x)	; [video_address]
-DB1C: E6 12    inc $12
+DB1C: E6 12    inc tile_lsb_value_to_write_12
 DB1E: D0 02    bne $db22
-DB20: E6 13    inc $13
-DB22: E6 14    inc $14
+DB20: E6 13    inc tile_msb_to_write_13
+DB22: E6 14    inc screen_tile_dest_address_14
 DB24: D0 02    bne $db28
 DB26: E6 15    inc $15
 DB28: 24 0E    bit $0e
@@ -13116,21 +13154,21 @@ E012: B5 73    lda $73, x
 E014: 0A       asl a
 E015: A8       tay
 E016: B1 00    lda ($00), y
-E018: 85 10    sta $10
+E018: 85 10    sta screen_source_pointer_0010
 E01A: C8       iny
 E01B: B1 00    lda ($00), y
 E01D: 85 11    sta $11
 E01F: B5 B9    lda $b9, x
 E021: 18       clc
 E022: 75 E3    adc $e3, x
-E024: 85 02    sta $02
+E024: 85 02    sta unpack_mode_02
 E026: B5 C7    lda $c7, x
 E028: 75 F1    adc $f1, x
 E02A: 85 03    sta $03
-E02C: A5 02    lda $02
+E02C: A5 02    lda unpack_mode_02
 E02E: 38       sec
 E02F: ED E0 07 sbc $07e0
-E032: 85 02    sta $02
+E032: 85 02    sta unpack_mode_02
 E034: A5 03    lda $03
 E036: ED E1 07 sbc $07e1
 E039: 85 03    sta $03
@@ -13150,21 +13188,21 @@ E053: B4 65    ldy $65, x
 E055: B9 84 E1 lda $e184, y
 E058: 85 05    sta $05
 E05A: A0 00    ldy #$00
-E05C: B1 10    lda ($10), y
+E05C: B1 10    lda (screen_source_pointer_0010), y
 E05E: 85 0C    sta $0c
 E060: D0 03    bne $e065
 E062: 4C 7E E1 jmp $e17e
 E065: C8       iny
-E066: B1 10    lda ($10), y
+E066: B1 10    lda (screen_source_pointer_0010), y
 E068: 85 06    sta $06
 E06A: C8       iny
 E06B: 24 06    bit $06
 E06D: 10 05    bpl $e074
-E06F: B1 10    lda ($10), y
+E06F: B1 10    lda (screen_source_pointer_0010), y
 E071: 85 07    sta $07
 E073: C8       iny
 E074: 50 05    bvc $e07b
-E076: B1 10    lda ($10), y
+E076: B1 10    lda (screen_source_pointer_0010), y
 E078: 85 08    sta $08
 E07A: C8       iny
 E07B: A5 06    lda $06
@@ -13172,24 +13210,24 @@ E07D: 29 08    and #$08
 E07F: F0 15    beq $e096
 E081: 2C 3A 02 bit $023a
 E084: 30 0E    bmi $e094
-E086: B1 10    lda ($10), y
+E086: B1 10    lda (screen_source_pointer_0010), y
 E088: 48       pha
 E089: C8       iny
-E08A: B1 10    lda ($10), y
+E08A: B1 10    lda (screen_source_pointer_0010), y
 E08C: 85 11    sta $11
 E08E: 68       pla
-E08F: 85 10    sta $10
+E08F: 85 10    sta screen_source_pointer_0010
 E091: 4C 5A E0 jmp $e05a
 E094: C8       iny
 E095: C8       iny
 E096: A5 06    lda $06
 E098: 29 30    and #$30
 E09A: F0 0E    beq $e0aa
-E09C: B1 10    lda ($10), y
-E09E: 85 12    sta $12
+E09C: B1 10    lda (screen_source_pointer_0010), y
+E09E: 85 12    sta tile_lsb_value_to_write_12
 E0A0: C8       iny
-E0A1: B1 10    lda ($10), y
-E0A3: 85 13    sta $13
+E0A1: B1 10    lda (screen_source_pointer_0010), y
+E0A3: 85 13    sta tile_msb_to_write_13
 E0A5: C8       iny
 E0A6: A9 00    lda #$00
 E0A8: 85 09    sta $09
@@ -13197,7 +13235,7 @@ E0AA: AE DA 06 ldx $06da
 E0AD: A5 07    lda $07
 E0AF: 24 06    bit $06
 E0B1: 30 03    bmi $e0b6
-E0B3: B1 10    lda ($10), y
+E0B3: B1 10    lda (screen_source_pointer_0010), y
 E0B5: C8       iny
 E0B6: 05 05    ora $05
 E0B8: 45 04    eor $04
@@ -13218,17 +13256,17 @@ E0D7: 24 0A    bit $0a
 E0D9: 10 08    bpl $e0e3
 E0DB: E6 08    inc $08
 E0DD: 4C E3 E0 jmp $e0e3
-E0E0: B1 10    lda ($10), y
+E0E0: B1 10    lda (screen_source_pointer_0010), y
 E0E2: C8       iny
 E0E3: 9D DD 06 sta $06dd, x
 E0E6: 84 0D    sty $0d
 E0E8: A5 06    lda $06
 E0EA: 29 20    and #$20
 E0EC: D0 0A    bne $e0f8
-E0EE: A5 10    lda $10
-E0F0: 85 12    sta $12
+E0EE: A5 10    lda screen_source_pointer_0010
+E0F0: 85 12    sta tile_lsb_value_to_write_12
 E0F2: A5 11    lda $11
-E0F4: 85 13    sta $13
+E0F4: 85 13    sta tile_msb_to_write_13
 E0F6: 84 09    sty $09
 E0F8: A4 09    ldy $09
 E0FA: B1 12    lda ($12), y
@@ -13253,7 +13291,7 @@ E11A: B1 12    lda ($12), y
 E11C: 08       php
 E11D: C8       iny
 E11E: 18       clc
-E11F: 65 02    adc $02
+E11F: 65 02    adc unpack_mode_02
 E121: 9D DB 06 sta $06db, x
 E124: A5 03    lda $03
 E126: 69 00    adc #$00
@@ -13317,7 +13355,7 @@ E1C7: 65 01    adc $01
 E1C9: A8       tay
 E1CA: 85 0B    sta $0b
 E1CC: B9 7E E4 lda $e47e, y
-E1CF: 85 14    sta $14
+E1CF: 85 14    sta screen_tile_dest_address_14
 E1D1: B9 7F E4 lda $e47f, y
 E1D4: 85 15    sta $15
 E1D6: BD 3A 02 lda $023a, x
@@ -13380,7 +13418,7 @@ E246: B5 73    lda $73, x
 E248: 0A       asl a
 E249: A8       tay
 E24A: B1 00    lda ($00), y
-E24C: 85 10    sta $10
+E24C: 85 10    sta screen_source_pointer_0010
 E24E: C8       iny
 E24F: B1 00    lda ($00), y
 E251: 85 11    sta $11
@@ -13394,29 +13432,29 @@ E25E: B9 84 E1 lda $e184, y
 E261: 85 05    sta $05
 E263: A9 00    lda #$00
 E265: 85 1B    sta $1b
-E267: A5 14    lda $14
+E267: A5 14    lda screen_tile_dest_address_14
 E269: 18       clc
 E26A: 69 06    adc #$06
-E26C: 85 14    sta $14
+E26C: 85 14    sta screen_tile_dest_address_14
 E26E: A5 15    lda $15
 E270: 69 00    adc #$00
 E272: 85 15    sta $15
 E274: A0 00    ldy #$00
-E276: B1 10    lda ($10), y
+E276: B1 10    lda (screen_source_pointer_0010), y
 E278: 85 0C    sta $0c
 E27A: D0 03    bne $e27f
 E27C: 4C 57 E3 jmp $e357
 E27F: C8       iny
-E280: B1 10    lda ($10), y
+E280: B1 10    lda (screen_source_pointer_0010), y
 E282: 85 06    sta $06
 E284: C8       iny
 E285: 24 06    bit $06
 E287: 10 05    bpl $e28e
-E289: B1 10    lda ($10), y
+E289: B1 10    lda (screen_source_pointer_0010), y
 E28B: 85 07    sta $07
 E28D: C8       iny
 E28E: 50 05    bvc $e295
-E290: B1 10    lda ($10), y
+E290: B1 10    lda (screen_source_pointer_0010), y
 E292: 85 08    sta $08
 E294: C8       iny
 E295: A5 06    lda $06
@@ -13425,31 +13463,31 @@ E299: F0 17    beq $e2b2
 E29B: A6 4C    ldx $4c
 E29D: BD 3A 02 lda $023a, x
 E2A0: 30 0E    bmi $e2b0
-E2A2: B1 10    lda ($10), y
+E2A2: B1 10    lda (screen_source_pointer_0010), y
 E2A4: 48       pha
 E2A5: C8       iny
-E2A6: B1 10    lda ($10), y
+E2A6: B1 10    lda (screen_source_pointer_0010), y
 E2A8: 85 11    sta $11
 E2AA: 68       pla
-E2AB: 85 10    sta $10
+E2AB: 85 10    sta screen_source_pointer_0010
 E2AD: 4C 74 E2 jmp $e274
 E2B0: C8       iny
 E2B1: C8       iny
 E2B2: A5 06    lda $06
 E2B4: 29 30    and #$30
 E2B6: F0 0E    beq $e2c6
-E2B8: B1 10    lda ($10), y
-E2BA: 85 12    sta $12
+E2B8: B1 10    lda (screen_source_pointer_0010), y
+E2BA: 85 12    sta tile_lsb_value_to_write_12
 E2BC: C8       iny
-E2BD: B1 10    lda ($10), y
-E2BF: 85 13    sta $13
+E2BD: B1 10    lda (screen_source_pointer_0010), y
+E2BF: 85 13    sta tile_msb_to_write_13
 E2C1: C8       iny
 E2C2: A9 00    lda #$00
 E2C4: 85 09    sta $09
 E2C6: A5 07    lda $07
 E2C8: 24 06    bit $06
 E2CA: 30 03    bmi $e2cf
-E2CC: B1 10    lda ($10), y
+E2CC: B1 10    lda (screen_source_pointer_0010), y
 E2CE: C8       iny
 E2CF: 05 05    ora $05
 E2D1: 45 04    eor $04
@@ -13470,17 +13508,17 @@ E2ED: 24 0A    bit $0a
 E2EF: 10 08    bpl $e2f9
 E2F1: E6 08    inc $08
 E2F3: 4C F9 E2 jmp $e2f9
-E2F6: B1 10    lda ($10), y
+E2F6: B1 10    lda (screen_source_pointer_0010), y
 E2F8: C8       iny
-E2F9: 85 02    sta $02
+E2F9: 85 02    sta unpack_mode_02
 E2FB: 84 0D    sty $0d
 E2FD: A5 06    lda $06
 E2FF: 29 20    and #$20
 E301: D0 0A    bne $e30d
-E303: A5 10    lda $10
-E305: 85 12    sta $12
+E303: A5 10    lda screen_source_pointer_0010
+E305: 85 12    sta tile_lsb_value_to_write_12
 E307: A5 11    lda $11
-E309: 85 13    sta $13
+E309: 85 13    sta tile_msb_to_write_13
 E30B: 84 09    sty $09
 E30D: A4 09    ldy $09
 E30F: B1 12    lda ($12), y
@@ -13504,10 +13542,10 @@ E32C: E8       inx
 E32D: C8       iny
 E32E: E0 04    cpx #$04
 E330: 90 F6    bcc $e328
-E332: A5 14    lda $14
+E332: A5 14    lda screen_tile_dest_address_14
 E334: 18       clc
 E335: 69 04    adc #$04
-E337: 85 14    sta $14
+E337: 85 14    sta screen_tile_dest_address_14
 E339: A5 15    lda $15
 E33B: 69 00    adc #$00
 E33D: 85 15    sta $15
@@ -13525,7 +13563,7 @@ E351: 4C C6 E2 jmp $e2c6
 E354: 4C 76 E2 jmp $e276
 E357: A6 0B    ldx $0b
 E359: BD 7E E4 lda $e47e, x
-E35C: 85 14    sta $14
+E35C: 85 14    sta screen_tile_dest_address_14
 E35E: BD 7F E4 lda $e47f, x
 E361: 85 15    sta $15
 E363: A2 00    ldx #$00
@@ -13663,13 +13701,13 @@ E45B: 4A       lsr a
 E45C: 4A       lsr a
 E45D: 18       clc
 E45E: 69 FC    adc #$fc
-E460: 85 16    sta $16
+E460: 85 16    sta screen_attribute_dest_address_16
 E462: A9 00    lda #$00
 E464: 69 00    adc #$00
 E466: 85 17    sta $17
 E468: B5 8F    lda $8f, x
 E46A: 38       sec
-E46B: E5 16    sbc $16
+E46B: E5 16    sbc screen_attribute_dest_address_16
 E46D: B5 9D    lda $9d, x
 E46F: E5 17    sbc $17
 E471: 90 04    bcc $e477
@@ -13683,21 +13721,21 @@ E47D: 60       rts
 E4E8: A9 00    lda #$00
 E4EA: 85 1B    sta $1b
 E4EC: 85 1C    sta $1c
-E4EE: 85 1D    sta $1d
+E4EE: 85 1D    sta base_screen_pointer_list_001d
 E4F0: A5 1B    lda $1b
 E4F2: C9 06    cmp #$06
 E4F4: F0 2A    beq $e520
 E4F6: 0A       asl a
 E4F7: A8       tay
 E4F8: B9 7E E4 lda $e47e, y
-E4FB: 85 10    sta $10
+E4FB: 85 10    sta screen_source_pointer_0010
 E4FD: B9 7F E4 lda $e47f, y
 E500: 85 11    sta $11
 E502: A0 00    ldy #$00
-E504: B1 10    lda ($10), y
+E504: B1 10    lda (screen_source_pointer_0010), y
 E506: 10 18    bpl $e520
 E508: A0 05    ldy #$05
-E50A: B1 10    lda ($10), y
+E50A: B1 10    lda (screen_source_pointer_0010), y
 E50C: D0 1B    bne $e529
 E50E: A5 1C    lda $1c
 E510: 0A       asl a
@@ -13705,7 +13743,7 @@ E511: AA       tax
 E512: A5 1B    lda $1b
 E514: 9D 00 02 sta $0200, x
 E517: A0 04    ldy #$04
-E519: B1 10    lda ($10), y
+E519: B1 10    lda (screen_source_pointer_0010), y
 E51B: 9D 01 02 sta $0201, x
 E51E: E6 1C    inc $1c
 E520: E6 1B    inc $1b
@@ -13713,15 +13751,15 @@ E522: A5 1B    lda $1b
 E524: C9 11    cmp #$11
 E526: 90 C8    bcc $e4f0
 E528: 60       rts
-E529: A5 1D    lda $1d
+E529: A5 1D    lda base_screen_pointer_list_001d
 E52B: 0A       asl a
 E52C: AA       tax
 E52D: A5 1B    lda $1b
 E52F: 9D 16 02 sta $0216, x
 E532: A0 04    ldy #$04
-E534: B1 10    lda ($10), y
+E534: B1 10    lda (screen_source_pointer_0010), y
 E536: 9D 17 02 sta $0217, x
-E539: E6 1D    inc $1d
+E539: E6 1D    inc base_screen_pointer_list_001d
 E53B: 4C 20 E5 jmp $e520
 E53E: A5 1C    lda $1c
 E540: F0 0A    beq $e54c
@@ -13731,7 +13769,7 @@ E546: 20 6A E5 jsr $e56a
 E549: 20 BB E5 jsr $e5bb
 E54C: A9 06    lda #$06
 E54E: 20 DB E5 jsr $e5db
-E551: A5 1D    lda $1d
+E551: A5 1D    lda base_screen_pointer_list_001d
 E553: F0 0A    beq $e55f
 E555: C9 02    cmp #$02
 E557: 90 03    bcc $e55c
@@ -13740,7 +13778,7 @@ E55C: 20 B1 E5 jsr $e5b1
 E55F: 60       rts
 E560: A9 16    lda #$16
 E562: 85 1F    sta $1f
-E564: A5 1D    lda $1d
+E564: A5 1D    lda base_screen_pointer_list_001d
 E566: 85 20    sta $20
 E568: D0 08    bne $e572
 E56A: A9 00    lda #$00
@@ -13778,7 +13816,7 @@ E5AC: A5 1B    lda $1b
 E5AE: D0 C2    bne $e572
 E5B0: 60       rts
 E5B1: A2 16    ldx #$16
-E5B3: A5 1D    lda $1d
+E5B3: A5 1D    lda base_screen_pointer_list_001d
 E5B5: 85 1E    sta $1e
 E5B7: D0 0A    bne $e5c3
 E5B9: F0 1F    beq $e5da
@@ -13814,25 +13852,25 @@ E5E9: 4C C6 E6 jmp $e6c6
 E5EC: 0A       asl a
 E5ED: A8       tay
 E5EE: B9 7E E4 lda $e47e, y
-E5F1: 85 10    sta $10
+E5F1: 85 10    sta screen_source_pointer_0010
 E5F3: B9 7F E4 lda $e47f, y
 E5F6: 85 11    sta $11
 E5F8: A0 00    ldy #$00
-E5FA: B1 10    lda ($10), y
+E5FA: B1 10    lda (screen_source_pointer_0010), y
 E5FC: 29 7F    and #$7f
-E5FE: 91 10    sta ($10), y
+E5FE: 91 10    sta (screen_source_pointer_0010), y
 E600: 85 00    sta $00
 E602: C8       iny
-E603: B1 10    lda ($10), y
-E605: 85 12    sta $12
+E603: B1 10    lda (screen_source_pointer_0010), y
+E605: 85 12    sta tile_lsb_value_to_write_12
 E607: C8       iny
-E608: B1 10    lda ($10), y
+E608: B1 10    lda (screen_source_pointer_0010), y
 E60A: 48       pha
 E60B: 29 0F    and #$0f
 E60D: C9 08    cmp #$08
 E60F: 90 02    bcc $e613
 E611: 09 F0    ora #$f0
-E613: 85 13    sta $13
+E613: 85 13    sta tile_msb_to_write_13
 E615: 68       pla
 E616: 4A       lsr a
 E617: 4A       lsr a
@@ -13843,30 +13881,30 @@ E61C: 90 02    bcc $e620
 E61E: 09 F0    ora #$f0
 E620: 85 15    sta $15
 E622: C8       iny
-E623: B1 10    lda ($10), y
-E625: 85 14    sta $14
+E623: B1 10    lda (screen_source_pointer_0010), y
+E625: 85 14    sta screen_tile_dest_address_14
 E627: C8       iny
-E628: A5 12    lda $12
+E628: A5 12    lda tile_lsb_value_to_write_12
 E62A: 38       sec
 E62B: ED DE 07 sbc $07de
-E62E: 85 12    sta $12
-E630: A5 13    lda $13
+E62E: 85 12    sta tile_lsb_value_to_write_12
+E630: A5 13    lda tile_msb_to_write_13
 E632: ED DF 07 sbc $07df
-E635: 85 13    sta $13
-E637: A5 14    lda $14
+E635: 85 13    sta tile_msb_to_write_13
+E637: A5 14    lda screen_tile_dest_address_14
 E639: 38       sec
 E63A: ED E0 07 sbc $07e0
-E63D: 85 14    sta $14
+E63D: 85 14    sta screen_tile_dest_address_14
 E63F: A5 15    lda $15
 E641: ED E1 07 sbc $07e1
 E644: 85 15    sta $15
 E646: C8       iny
 E647: C8       iny
-E648: B1 10    lda ($10), y
+E648: B1 10    lda (screen_source_pointer_0010), y
 E64A: 18       clc
 E64B: 08       php
 E64C: C8       iny
-E64D: 65 14    adc $14
+E64D: 65 14    adc screen_tile_dest_address_14
 E64F: 9D DB 06 sta $06db, x
 E652: A5 15    lda $15
 E654: 69 00    adc #$00
@@ -13874,26 +13912,26 @@ E656: 28       plp
 E657: 10 02    bpl $e65b
 E659: 69 FF    adc #$ff
 E65B: 85 01    sta $01
-E65D: B1 10    lda ($10), y
+E65D: B1 10    lda (screen_source_pointer_0010), y
 E65F: C8       iny
 E660: 9D DC 06 sta $06dc, x
-E663: B1 10    lda ($10), y
+E663: B1 10    lda (screen_source_pointer_0010), y
 E665: C8       iny
 E666: 9D DD 06 sta $06dd, x
-E669: B1 10    lda ($10), y
+E669: B1 10    lda (screen_source_pointer_0010), y
 E66B: 18       clc
 E66C: 08       php
 E66D: C8       iny
-E66E: 65 12    adc $12
+E66E: 65 12    adc tile_lsb_value_to_write_12
 E670: 9D DE 06 sta $06de, x
-E673: A5 13    lda $13
+E673: A5 13    lda tile_msb_to_write_13
 E675: 69 00    adc #$00
 E677: 28       plp
 E678: 10 02    bpl $e67c
 E67A: 69 FF    adc #$ff
-E67C: 85 02    sta $02
+E67C: 85 02    sta unpack_mode_02
 E67E: A5 01    lda $01
-E680: 05 02    ora $02
+E680: 05 02    ora unpack_mode_02
 E682: D0 3B    bne $e6bf
 E684: 24 03    bit $03
 E686: 10 0B    bpl $e693
@@ -14230,7 +14268,7 @@ E9DD: A0 00    ldy #$00
 E9DF: AD DE 07 lda $07de
 E9E2: 38       sec
 E9E3: ED E2 07 sbc $07e2
-E9E6: 85 10    sta $10
+E9E6: 85 10    sta screen_source_pointer_0010
 E9E8: AD DF 07 lda $07df
 E9EB: ED E3 07 sbc $07e3
 E9EE: 85 11    sta $11
@@ -14239,7 +14277,7 @@ E9F2: A0 02    ldy #$02
 E9F4: 20 98 CF jsr $cf98
 E9F7: A5 11    lda $11
 E9F9: D0 15    bne $ea10
-E9FB: A5 10    lda $10
+E9FB: A5 10    lda screen_source_pointer_0010
 E9FD: C9 09    cmp #$09
 E9FF: B0 0F    bcs $ea10
 EA01: AD E2 07 lda $07e2
@@ -14299,7 +14337,7 @@ EA7D: 48       pha
 EA7E: AD DB 07 lda $07db
 EA81: C9 02    cmp #$02
 EA83: D0 32    bne $eab7
-EA85: AD 2C 02 lda $022c
+EA85: AD 2C 02 lda scrollx_hi_copy_022c
 EA88: 29 01    and #$01
 EA8A: A8       tay
 EA8B: A5 31    lda $31
@@ -14315,10 +14353,10 @@ EAA1: E9 00    sbc #$00
 EAA3: 29 01    and #$01
 EAA5: 0A       asl a
 EAA6: 8D F8 07 sta $07f8
-EAA9: AD 2C 02 lda $022c
+EAA9: AD 2C 02 lda scrollx_hi_copy_022c
 EAAC: 29 FD    and #$fd
 EAAE: 0D F8 07 ora $07f8
-EAB1: 8D 2C 02 sta $022c
+EAB1: 8D 2C 02 sta scrollx_hi_copy_022c
 EAB4: 8D 08 10 sta scrollx_hi_1008
 EAB7: 68       pla
 EAB8: A8       tay
@@ -14330,21 +14368,21 @@ EAC2: A0 28    ldy #$28
 EAC4: EA       nop
 EAC5: 88       dey
 EAC6: 10 FC    bpl $eac4
-EAC8: AD 2C 02 lda $022c
+EAC8: AD 2C 02 lda scrollx_hi_copy_022c
 EACB: A9 FC    lda #$fc
 EACD: 8D 0C 10 sta scrollx_lo_100c
-EAD0: AD 2C 02 lda $022c
+EAD0: AD 2C 02 lda scrollx_hi_copy_022c
 EAD3: 09 02    ora #$02
-EAD5: 8D 2C 02 sta $022c
+EAD5: 8D 2C 02 sta scrollx_hi_copy_022c
 EAD8: 8D 08 10 sta scrollx_hi_1008
 EADB: 4C B7 EA jmp $eab7
 
-EAE2: AD 2C 02 lda $022c		; [disable] useless lda
+EAE2: AD 2C 02 lda scrollx_hi_copy_022c		; [disable] useless lda
 EAE5: A9 FC    lda #$fc
 EAE7: 8D 0C 10 sta scrollx_lo_100c
-EAEA: AD 2C 02 lda $022c
+EAEA: AD 2C 02 lda scrollx_hi_copy_022c
 EAED: 09 02    ora #$02
-EAEF: 8D 2C 02 sta $022c
+EAEF: 8D 2C 02 sta scrollx_hi_copy_022c
 EAF2: 8D 08 10 sta scrollx_hi_1008
 EAF5: A9 00    lda #$00
 EAF7: 8D 0E 10 sta scrolly_lo_100e
@@ -14362,10 +14400,10 @@ EB12: E9 00    sbc #$00
 EB14: 29 01    and #$01
 EB16: 0A       asl a
 EB17: 8D F8 07 sta $07f8
-EB1A: AD 2C 02 lda $022c
+EB1A: AD 2C 02 lda scrollx_hi_copy_022c
 EB1D: 29 FD    and #$fd
 EB1F: 0D F8 07 ora $07f8
-EB22: 8D 2C 02 sta $022c
+EB22: 8D 2C 02 sta scrollx_hi_copy_022c
 EB25: 8D 08 10 sta scrollx_hi_1008
 EB28: AD E0 07 lda $07e0
 EB2B: F0 14    beq $eb41
@@ -14384,11 +14422,16 @@ EB49: 8D 09 10 sta bankswitch_1009
 EB4C: A9 00    lda #$00
 EB4E: 8D 0E 10 sta scrolly_lo_100e
 EB51: 60       rts
-EB52: 20 5E EB jsr $eb5e
-EB55: 20 9D EC jsr $ec9d
+
+; reads screen_id_07e4 to know which screen to unpack (check on top for details)
+setup_background_screen_eb52:
+EB52: 20 5E EB jsr set_background_screen_scroll_eb5e
+EB55: 20 9D EC jsr unpack_background_screen_ec9d
 EB58: A9 00    lda #$00
 EB5A: 8D DB 07 sta $07db
 EB5D: 60       rts
+
+set_background_screen_scroll_eb5e:
 EB5E: 20 8F D8 jsr $d88f
 EB61: AD DB 07 lda $07db
 EB64: 8D DC 07 sta $07dc
@@ -14398,12 +14441,12 @@ EB6C: AD 2D 02 lda bankswitch_copy_022d
 EB6F: 29 BF    and #$bf
 EB71: 8D 09 10 sta bankswitch_1009
 EB74: 8D 2D 02 sta bankswitch_copy_022d
-EB77: 20 35 CF jsr $cf35
-EB7A: AC E4 07 ldy $07e4
-EB7D: AD 2C 02 lda $022c
+EB77: 20 35 CF jsr clear_screen_cf35
+EB7A: AC E4 07 ldy screen_id_07e4
+EB7D: AD 2C 02 lda scrollx_hi_copy_022c
 EB80: 29 E3    and #$e3
 EB82: 19 CB EB ora $ebcb, y
-EB85: 8D 2C 02 sta $022c
+EB85: 8D 2C 02 sta scrollx_hi_copy_022c
 EB88: 8D 08 10 sta scrollx_hi_1008
 EB8B: AD 2D 02 lda bankswitch_copy_022d
 EB8E: 29 DF    and #$df
@@ -14415,10 +14458,10 @@ EB9A: AC DC 07 ldy $07dc
 EB9D: 8C DB 07 sty $07db
 EBA0: B9 C5 EB lda $ebc5, y
 EBA3: 8D 0C 10 sta scrollx_lo_100c
-EBA6: AD 2C 02 lda $022c
+EBA6: AD 2C 02 lda scrollx_hi_copy_022c
 EBA9: 29 FD    and #$fd
 EBAB: 19 C8 EB ora $ebc8, y
-EBAE: 8D 2C 02 sta $022c
+EBAE: 8D 2C 02 sta scrollx_hi_copy_022c
 EBB1: 8D 08 10 sta scrollx_hi_1008
 EBB4: A9 00    lda #$00
 EBB6: 8D 0E 10 sta scrolly_lo_100e
@@ -14430,9 +14473,9 @@ EBC4: 60       rts
 
 
 EBF1: A9 0A    lda #$0a
-EBF3: 8D E4 07 sta $07e4
-EBF6: 20 5E EB jsr $eb5e
-EBF9: 20 9D EC jsr $ec9d
+EBF3: 8D E4 07 sta screen_id_07e4		; US map
+EBF6: 20 5E EB jsr set_background_screen_scroll_eb5e
+EBF9: 20 9D EC jsr unpack_background_screen_ec9d
 EBFC: 20 2F EC jsr $ec2f
 EBFF: 48       pha
 EC00: C9 00    cmp #$00
@@ -14503,72 +14546,83 @@ EC96: 20 80 EE jsr $ee80
 EC99: EE E7 07 inc $07e7
 EC9C: 60       rts
 
+; RLE encoding or some other unpack stuff, I didn't dig into details
+; it seems to be able to fill with the same value
+; or fill with increasing values. As tiles follow a logic, it works
+unpack_background_screen_ec9d:
 EC9D: A9 01    lda #$01
 EC9F: 20 DF D8 jsr set_bank_d8df
 ECA2: AD 00 60 lda $6000	; from bank #1
-ECA5: 85 1D    sta $1d
+ECA5: 85 1D    sta base_screen_pointer_list_001d
 ECA7: AD 01 60 lda $6001	; from bank #1
-ECAA: 85 1E    sta $1e
+ECAA: 85 1E    sta $1e		; now 1d points to $6006 in bank 1
 ECAC: A9 00    lda #$00
 ECAE: 85 03    sta $03
-ECB0: AD E4 07 lda $07e4
+ECB0: AD E4 07 lda screen_id_07e4
+copy_to_screen_ecb3:
 ECB3: 0A       asl a
 ECB4: A8       tay
+; fetch the proper source depending on background id
 ECB5: B1 1D    lda ($1d), y
-ECB7: 85 10    sta $10
+ECB7: 85 10    sta screen_source_pointer_0010
 ECB9: C8       iny
 ECBA: B1 1D    lda ($1d), y
-ECBC: 85 11    sta $11
+ECBC: 85 11    sta $11		; now points to for ex: 7e4==f => 676C (title)
 ECBE: A0 00    ldy #$00
-ECC0: B1 10    lda ($10), y
+ECC0: B1 10    lda (screen_source_pointer_0010), y	; get first byte, block ident
 ECC2: C8       iny
-ECC3: 85 01    sta $01
+ECC3: 85 01    sta $01		; store it in $1
 ECC5: C9 00    cmp #$00
 ECC7: D0 06    bne $eccf
 ECC9: 20 B5 ED jsr $edb5
 ECCC: 4C C0 EC jmp $ecc0
+
 ECCF: C9 FF    cmp #$ff
 ECD1: D0 03    bne $ecd6
-ECD3: 4C AF ED jmp $edaf
+ECD3: 4C AF ED jmp unpack_end_edaf		; ident==$ff end of sequence
 ECD6: C9 FE    cmp #$fe
 ECD8: D0 0E    bne $ece8
-ECDA: B1 10    lda ($10), y
+; ident==$fe: load a new pointer and continue
+ECDA: B1 10    lda (screen_source_pointer_0010), y
 ECDC: 48       pha
 ECDD: C8       iny
-ECDE: B1 10    lda ($10), y
+ECDE: B1 10    lda (screen_source_pointer_0010), y
 ECE0: 85 11    sta $11
 ECE2: 68       pla
-ECE3: 85 10    sta $10
+ECE3: 85 10    sta screen_source_pointer_0010
 ECE5: 4C BE EC jmp $ecbe
-ECE8: B1 10    lda ($10), y
-ECEA: 85 12    sta $12
+
+; get data
+ECE8: B1 10    lda (screen_source_pointer_0010), y
+ECEA: 85 12    sta tile_lsb_value_to_write_12			; tile code => $2xxx
 ECEC: C8       iny
-ECED: B1 10    lda ($10), y
-ECEF: 85 13    sta $13
+ECED: B1 10    lda (screen_source_pointer_0010), y
+ECEF: 85 13    sta tile_msb_to_write_13		; tile attribute => $3xxx
 ECF1: C8       iny
-ECF2: B1 10    lda ($10), y
+; get data destination (screen address)
+ECF2: B1 10    lda (screen_source_pointer_0010), y
 ECF4: 85 1C    sta $1c
 ECF6: C8       iny
-ECF7: B1 10    lda ($10), y
+ECF7: B1 10    lda (screen_source_pointer_0010), y
 ECF9: C8       iny
-ECFA: 85 1D    sta $1d
+ECFA: 85 1D    sta base_screen_pointer_list_001d
 ECFC: 05 1C    ora $1c
 ECFE: D0 06    bne $ed06
 ED00: 20 B5 ED jsr $edb5
 ED03: 4C F2 EC jmp $ecf2
 ED06: A5 1C    lda $1c
-ED08: 85 14    sta $14
-ED0A: A5 1D    lda $1d
+ED08: 85 14    sta screen_tile_dest_address_14
+ED0A: A5 1D    lda base_screen_pointer_list_001d
 ED0C: 85 15    sta $15
-ED0E: A5 14    lda $14
-ED10: 85 16    sta $16
+ED0E: A5 14    lda screen_tile_dest_address_14
+ED10: 85 16    sta screen_attribute_dest_address_16
 ED12: A5 15    lda $15
 ED14: 18       clc
-ED15: 69 10    adc #$10
+ED15: 69 10    adc #$10		; ($16) = ($14)+$1000 (attribute)
 ED17: 85 17    sta $17
-ED19: B1 10    lda ($10), y
+ED19: B1 10    lda (screen_source_pointer_0010), y
 ED1B: C8       iny
-ED1C: 85 02    sta $02
+ED1C: 85 02    sta unpack_mode_02
 ED1E: 29 7F    and #$7f
 ED20: AA       tax
 ED21: 84 00    sty $00
@@ -14577,29 +14631,32 @@ ED25: D0 06    bne $ed2d
 ED27: 20 B5 ED jsr $edb5
 ED2A: 4C 19 ED jmp $ed19
 ED2D: A0 00    ldy #$00
-ED2F: A5 12    lda $12
+ED2F: A5 12    lda tile_lsb_value_to_write_12
+; now copy tile & attribute
 ED31: 91 14    sta ($14), y		; [unchecked_address]
-ED33: A5 13    lda $13
+ED33: A5 13    lda tile_msb_to_write_13
 ED35: 91 16    sta ($16), y		; [video_address]
 ED37: C8       iny
-ED38: 24 02    bit $02
-ED3A: 30 06    bmi $ed42
-ED3C: E6 12    inc $12
+ED38: 24 02    bit unpack_mode_02		; test command
+ED3A: 30 06    bmi $ed42				; negative: RLE: X is the number of repeats
+; positive: increase tile value X times
+ED3C: E6 12    inc tile_lsb_value_to_write_12
 ED3E: D0 02    bne $ed42
-ED40: E6 13    inc $13
+; wrap: increase attribute (which is actually tile MSB)
+ED40: E6 13    inc tile_msb_to_write_13
 ED42: CA       dex
 ED43: D0 EA    bne $ed2f
 ED45: A9 20    lda #$20
 ED47: 85 1B    sta $1b
 ED49: A4 00    ldy $00
-ED4B: B1 10    lda ($10), y
+ED4B: B1 10    lda (screen_source_pointer_0010), y
 ED4D: C8       iny
 ED4E: AA       tax
 ED4F: C9 80    cmp #$80
 ED51: D0 0F    bne $ed62
-ED53: A5 14    lda $14
+ED53: A5 14    lda screen_tile_dest_address_14
 ED55: 29 E0    and #$e0
-ED57: 85 14    sta $14
+ED57: 85 14    sta screen_tile_dest_address_14
 ED59: A5 15    lda $15
 ED5B: 49 04    eor #$04
 ED5D: 85 15    sta $15
@@ -14610,8 +14667,8 @@ ED66: D0 0B    bne $ed73
 ED68: 8A       txa
 ED69: 29 0F    and #$0f
 ED6B: 18       clc
-ED6C: 65 14    adc $14
-ED6E: 85 14    sta $14
+ED6C: 65 14    adc screen_tile_dest_address_14
+ED6E: 85 14    sta screen_tile_dest_address_14
 ED70: 4C 0E ED jmp $ed0e
 ED73: 8A       txa
 ED74: 18       clc
@@ -14621,9 +14678,9 @@ ED79: 29 1F    and #$1f
 ED7B: 18       clc
 ED7C: 65 1C    adc $1c
 ED7E: 85 1C    sta $1c
-ED80: A5 1D    lda $1d
+ED80: A5 1D    lda base_screen_pointer_list_001d
 ED82: 69 00    adc #$00
-ED84: 85 1D    sta $1d
+ED84: 85 1D    sta base_screen_pointer_list_001d
 ED86: C6 01    dec $01
 ED88: F0 03    beq $ed8d
 ED8A: 4C 06 ED jmp $ed06
@@ -14632,46 +14689,50 @@ ED8F: F0 0F    beq $eda0
 ED91: A5 0C    lda $0c
 ED93: A8       tay
 ED94: A5 04    lda $04
-ED96: 85 10    sta $10
+ED96: 85 10    sta screen_source_pointer_0010
 ED98: A5 05    lda $05
 ED9A: 85 11    sta $11
 ED9C: A9 00    lda #$00
 ED9E: 85 03    sta $03
 EDA0: 98       tya
 EDA1: 18       clc
-EDA2: 65 10    adc $10
-EDA4: 85 10    sta $10
+EDA2: 65 10    adc screen_source_pointer_0010
+EDA4: 85 10    sta screen_source_pointer_0010
 EDA6: A5 11    lda $11
 EDA8: 69 00    adc #$00
 EDAA: 85 11    sta $11
 EDAC: 4C BE EC jmp $ecbe
+
+unpack_end_edaf:
 EDAF: A9 00    lda #$00
 EDB1: 20 DF D8 jsr set_bank_d8df
 EDB4: 60       rts
+
 EDB5: 98       tya
 EDB6: 48       pha
 EDB7: A5 03    lda $03
 EDB9: 0A       asl a
 EDBA: A8       tay
 EDBB: A6 03    ldx $03
-EDBD: A5 10    lda $10
+EDBD: A5 10    lda screen_source_pointer_0010
 EDBF: 99 04 00 sta $0004, y
 EDC2: A5 11    lda $11
 EDC4: 99 05 00 sta $0005, y
 EDC7: 68       pla
 EDC8: A8       tay
-EDC9: B1 10    lda ($10), y
+EDC9: B1 10    lda (screen_source_pointer_0010), y
 EDCB: C8       iny
 EDCC: 48       pha
-EDCD: B1 10    lda ($10), y
+EDCD: B1 10    lda (screen_source_pointer_0010), y
 EDCF: C8       iny
 EDD0: 85 11    sta $11
 EDD2: 68       pla
-EDD3: 85 10    sta $10
+EDD3: 85 10    sta screen_source_pointer_0010
 EDD5: 94 0C    sty $0c, x
 EDD7: E6 03    inc $03
 EDD9: A0 00    ldy #$00
 EDDB: 60       rts
+
 EDDC: 48       pha
 EDDD: A9 01    lda #$01
 EDDF: 20 DF D8 jsr set_bank_d8df
@@ -14679,81 +14740,81 @@ EDE2: 68       pla
 EDE3: 0A       asl a
 EDE4: A8       tay
 EDE5: AD 02 60 lda $6002
-EDE8: 85 10    sta $10
+EDE8: 85 10    sta screen_source_pointer_0010
 EDEA: AD 03 60 lda $6003
 EDED: 85 11    sta $11
-EDEF: B1 10    lda ($10), y
+EDEF: B1 10    lda (screen_source_pointer_0010), y
 EDF1: 48       pha
 EDF2: C8       iny
-EDF3: B1 10    lda ($10), y
+EDF3: B1 10    lda (screen_source_pointer_0010), y
 EDF5: 85 11    sta $11
 EDF7: 68       pla
-EDF8: 85 10    sta $10
+EDF8: 85 10    sta screen_source_pointer_0010
 EDFA: A0 00    ldy #$00
-EDFC: B1 10    lda ($10), y
+EDFC: B1 10    lda (screen_source_pointer_0010), y
 EDFE: C8       iny
 EDFF: 85 01    sta $01
 EE01: C9 00    cmp #$00
 EE03: D0 0E    bne $ee13
-EE05: B1 10    lda ($10), y
+EE05: B1 10    lda (screen_source_pointer_0010), y
 EE07: 48       pha
 EE08: C8       iny
-EE09: B1 10    lda ($10), y
+EE09: B1 10    lda (screen_source_pointer_0010), y
 EE0B: 85 11    sta $11
 EE0D: 68       pla
-EE0E: 85 10    sta $10
+EE0E: 85 10    sta screen_source_pointer_0010
 EE10: 4C FA ED jmp $edfa
 EE13: C9 FF    cmp #$ff
 EE15: D0 06    bne $ee1d
 EE17: A9 00    lda #$00
 EE19: 20 DF D8 jsr set_bank_d8df
 EE1C: 60       rts
-EE1D: B1 10    lda ($10), y
+EE1D: B1 10    lda (screen_source_pointer_0010), y
 EE1F: C8       iny
-EE20: 85 02    sta $02
-EE22: B1 10    lda ($10), y
+EE20: 85 02    sta unpack_mode_02
+EE22: B1 10    lda (screen_source_pointer_0010), y
 EE24: C8       iny
-EE25: 85 14    sta $14
-EE27: B1 10    lda ($10), y
+EE25: 85 14    sta screen_tile_dest_address_14
+EE27: B1 10    lda (screen_source_pointer_0010), y
 EE29: C8       iny
 EE2A: 85 15    sta $15
-EE2C: B1 10    lda ($10), y
-EE2E: 85 13    sta $13
+EE2C: B1 10    lda (screen_source_pointer_0010), y
+EE2E: 85 13    sta tile_msb_to_write_13
 EE30: C8       iny
 EE31: 84 00    sty $00
 EE33: A9 00    lda #$00
 EE35: 85 1B    sta $1b
-EE37: A5 14    lda $14
-EE39: 85 16    sta $16
+EE37: A5 14    lda screen_tile_dest_address_14
+EE39: 85 16    sta screen_attribute_dest_address_16
 EE3B: A5 15    lda $15
 EE3D: 18       clc
 EE3E: 69 10    adc #$10
 EE40: 85 17    sta $17
-EE42: A6 02    ldx $02
+EE42: A6 02    ldx unpack_mode_02
 EE44: A4 00    ldy $00
-EE46: B1 10    lda ($10), y
+EE46: B1 10    lda (screen_source_pointer_0010), y
 EE48: C9 FF    cmp #$ff
 EE4A: F0 17    beq $ee63
 EE4C: C9 FE    cmp #$fe
 EE4E: D0 0B    bne $ee5b
 EE50: C8       iny
-EE51: B1 10    lda ($10), y
-EE53: 85 13    sta $13
+EE51: B1 10    lda (screen_source_pointer_0010), y
+EE53: 85 13    sta tile_msb_to_write_13
 EE55: E6 00    inc $00
 EE57: E6 00    inc $00
 EE59: D0 E9    bne $ee44
 EE5B: A4 1B    ldy $1b
 EE5D: 91 14    sta ($14), y
-EE5F: A5 13    lda $13
+EE5F: A5 13    lda tile_msb_to_write_13
 EE61: 91 16    sta ($16), y
 EE63: E6 00    inc $00
 EE65: E6 1B    inc $1b
 EE67: CA       dex
 EE68: D0 DA    bne $ee44
-EE6A: A5 14    lda $14
+EE6A: A5 14    lda screen_tile_dest_address_14
 EE6C: 18       clc
 EE6D: 69 20    adc #$20
-EE6F: 85 14    sta $14
+EE6F: 85 14    sta screen_tile_dest_address_14
 EE71: A5 15    lda $15
 EE73: 69 00    adc #$00
 EE75: 85 15    sta $15
@@ -14765,13 +14826,14 @@ EE80: 48       pha
 EE81: A9 01    lda #$01
 EE83: 20 DF D8 jsr set_bank_d8df
 EE86: AD 04 60 lda $6004
-EE89: 85 1D    sta $1d
+EE89: 85 1D    sta base_screen_pointer_list_001d
 EE8B: AD 05 60 lda $6005
 EE8E: 85 1E    sta $1e
 EE90: A9 00    lda #$00
 EE92: 85 03    sta $03
 EE94: 68       pla
-EE95: 20 B3 EC jsr $ecb3
+; fill the rest of the screen with blue sky
+EE95: 20 B3 EC jsr copy_to_screen_ecb3
 EE98: A9 00    lda #$00
 EE9A: 20 DF D8 jsr set_bank_d8df
 EE9D: 60       rts
@@ -14855,7 +14917,7 @@ EF14: 8D 09 10 sta bankswitch_1009	; bank 0
 EF17: 20 0C CF jsr $cf0c
 EF1A: A9 08    lda #$08
 EF1C: 20 16 CF jsr $cf16
-EF1F: 20 35 CF jsr $cf35
+EF1F: 20 35 CF jsr clear_screen_cf35
 EF22: 20 73 CF jsr $cf73
 EF25: A9 FF    lda #$ff
 EF27: 85 42    sta $42
@@ -14884,8 +14946,8 @@ EF5C: 8D DB 07 sta $07db
 EF5F: 20 73 CF jsr $cf73
 EF62: 20 8F D8 jsr $d88f
 EF65: A9 0F    lda #$0f
-EF67: 8D E4 07 sta $07e4
-EF6A: 20 52 EB jsr $eb52
+EF67: 8D E4 07 sta screen_id_07e4
+EF6A: 20 52 EB jsr setup_background_screen_eb52
 EF6D: A9 01    lda #$01
 EF6F: 20 7F DA jsr $da7f
 EF72: 20 9A EB jsr $eb9a
@@ -14906,8 +14968,8 @@ EF94: A9 00    lda #$00
 EF96: 8D DB 07 sta $07db
 EF99: 20 E2 EA jsr $eae2
 EF9C: A9 06    lda #$06
-EF9E: 8D E4 07 sta $07e4
-EFA1: 20 52 EB jsr $eb52
+EF9E: 8D E4 07 sta screen_id_07e4
+EFA1: 20 52 EB jsr setup_background_screen_eb52
 EFA4: A9 19    lda #$19
 EFA6: 20 80 EE jsr $ee80
 EFA9: A9 06    lda #$06
@@ -14917,8 +14979,8 @@ EFB1: A9 F0    lda #$f0
 EFB3: 20 2B D8 jsr $d82b
 EFB6: A9 80    lda #$80
 EFB8: 20 2B D8 jsr $d82b
-EFBB: EE E4 07 inc $07e4
-EFBE: 20 52 EB jsr $eb52
+EFBB: EE E4 07 inc screen_id_07e4
+EFBE: 20 52 EB jsr setup_background_screen_eb52
 EFC1: A9 19    lda #$19
 EFC3: 20 80 EE jsr $ee80
 EFC6: A9 07    lda #$07
@@ -14928,8 +14990,8 @@ EFCE: A9 F0    lda #$f0
 EFD0: 20 2B D8 jsr $d82b
 EFD3: A9 80    lda #$80
 EFD5: 20 2B D8 jsr $d82b
-EFD8: EE E4 07 inc $07e4
-EFDB: 20 52 EB jsr $eb52
+EFD8: EE E4 07 inc screen_id_07e4
+EFDB: 20 52 EB jsr setup_background_screen_eb52
 EFDE: 20 9A EB jsr $eb9a
 EFE1: A9 F0    lda #$f0
 EFE3: 20 2B D8 jsr $d82b
@@ -14960,10 +15022,10 @@ F01F: A9 02    lda #$02
 F021: 20 B8 D7 jsr $d7b8
 F024: 20 8F D8 jsr $d88f
 F027: A9 12    lda #$12
-F029: 8D E4 07 sta $07e4
+F029: 8D E4 07 sta screen_id_07e4
 F02C: A9 00    lda #$00
 F02E: 8D DB 07 sta $07db
-F031: 20 52 EB jsr $eb52
+F031: 20 52 EB jsr setup_background_screen_eb52
 F034: A9 05    lda #$05
 F036: 20 7F DA jsr $da7f
 F039: 20 9A EB jsr $eb9a
@@ -15181,13 +15243,13 @@ F20C: C6 00    dec $00
 F20E: 10 A9    bpl $f1b9
 F210: 4C 3D F1 jmp $f13d
 F213: 20 8F D8 jsr $d88f
-F216: 20 35 CF jsr $cf35
+F216: 20 35 CF jsr clear_screen_cf35
 F219: 20 73 CF jsr $cf73
 F21C: A9 07    lda #$07
 F21E: 20 16 CF jsr $cf16
 F221: A2 4C    ldx #$4c
 F223: 20 0E CF jsr $cf0e
-F226: 20 35 CF jsr $cf35
+F226: 20 35 CF jsr clear_screen_cf35
 F229: 20 73 CF jsr $cf73
 F22C: A9 00    lda #$00
 F22E: 85 46    sta $46
@@ -15252,8 +15314,10 @@ F2B6: A9 40    lda #$40
 F2B8: 20 3F D8 jsr $d83f
 F2BB: 20 2F EC jsr $ec2f
 F2BE: 48       pha
-F2BF: 8D E4 07 sta $07e4
-F2C2: 20 52 EB jsr $eb52
+F2BF: 8D E4 07 sta screen_id_07e4
+; display volley field
+F2C2: 20 52 EB jsr setup_background_screen_eb52
+; volley field is now displayed
 F2C5: 20 D3 E6 jsr $e6d3
 F2C8: 68       pla
 F2C9: 48       pha
@@ -15281,7 +15345,7 @@ F2FE: A9 00    lda #$00
 F300: 8D F5 07 sta $07f5
 F303: A5 36    lda $36
 F305: F0 68    beq $f36f
-F307: AD E4 07 lda $07e4
+F307: AD E4 07 lda screen_id_07e4
 F30A: 29 0F    and #$0f
 F30C: A8       tay
 F30D: B9 6A F3 lda $f36a, y
@@ -15585,12 +15649,12 @@ F5A2: 29 0F    and #$0f
 F5A4: C9 04    cmp #$04
 F5A6: D0 46    bne $f5ee
 F5A8: 20 73 CF jsr $cf73
-F5AB: 20 35 CF jsr $cf35
+F5AB: 20 35 CF jsr clear_screen_cf35
 F5AE: A9 00    lda #$00
 F5B0: 8D DB 07 sta $07db
 F5B3: A9 11    lda #$11
-F5B5: 8D E4 07 sta $07e4
-F5B8: 20 52 EB jsr $eb52
+F5B5: 8D E4 07 sta screen_id_07e4
+F5B8: 20 52 EB jsr setup_background_screen_eb52
 F5BB: A4 38    ldy $38
 F5BD: A9 0E    lda #$0e
 F5BF: C0 10    cpy #$10
@@ -15731,11 +15795,11 @@ F6E3: 8D DB 07 sta $07db
 F6E6: A5 46    lda $46
 F6E8: 29 BF    and #$bf
 F6EA: 85 46    sta $46
-F6EC: 20 9D EC jsr $ec9d
+F6EC: 20 9D EC jsr unpack_background_screen_ec9d
 F6EF: 20 C8 F7 jsr $f7c8
 F6F2: 20 16 F3 jsr $f316
 F6F5: 20 D3 E6 jsr $e6d3
-F6F8: AD E4 07 lda $07e4
+F6F8: AD E4 07 lda screen_id_07e4
 F6FB: 29 0F    and #$0f
 F6FD: A8       tay
 F6FE: B9 6A F3 lda $f36a, y
