@@ -1,0 +1,18 @@
+- X scrolling doesn't work properly
+- log and then display sprites
+
+- should detect bank1 in jsr fffxx if fffxx is logged!!
+- empty video memory after intro, bank screen: log memory writes after intro
+
+- detect screen switches (color prom switch) and create as many graphics data files for tiles
+  as there are proms, like BadDudes. Include sprites or not??
+  
+- implement scrollx with OCS setup ATM (scroll table = 16): doesn't work
+- DB16: write blank char doesn't work in 2BA9: debug
+
+- fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
+
+
+
+- cli/sei: interruptions not enabled
+- better bank switching if too frequent
