@@ -1,7 +1,7 @@
 - intro screen: missing "technos japan" logo & copyright (used to work!)
 - X scrolling doesn't work properly
 - log and then display sprites
-
+- reduce global colors, reduce tile colors
 - updates seem slow
 
 - convert_graphics: separate tile/sprite files but computed together, separate palette file
