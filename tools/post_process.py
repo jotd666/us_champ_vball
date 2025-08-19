@@ -91,6 +91,10 @@ with open(source_dir / "conv.s") as f:
             # remove ERROR directive, false alarm
             lines[i+1] = remove_error(lines[i+1])
 
+        if line_address == 0xd88f:
+            # disable flip screen code
+            line = change_instruction("rts",lines,i)
+
         if line_address == 0xeefe:
             line = remove_instruction(lines,i)
         if line_address == 0xf12d:

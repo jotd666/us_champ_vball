@@ -255,7 +255,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
 dump_it = True
 
-def gen_file(context_name):
+def gen_context_files(context_name):
     tile_sheet_dict = {i:Image.open(sheets_path / context_name / "tiles" / f"pal_{i:02x}.png") for i in range(8)}
 
     tile_palette = set()
@@ -353,15 +353,10 @@ def gen_file(context_name):
 
     out_asm_file = gen_dir / f"tiles_{context_name}.s"
     with open(out_asm_file,"w") as f:
-        f.write("_base:\n")
-        write_ptr(f,"tile_table")
-        #write_ptr(f,"bob_table")
-        write_ptr(f,"palette")
-
-        f.write("palette:\n")
-        f.write(f"{decl_word}{len(full_palette)}   ; nb colors\n")
-
-        bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMMOT)
+##        f.write("palette:\n")
+##        f.write(f"{decl_word}{len(full_palette)}   ; nb colors\n")
+##
+##        bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMMOT)
 
 ##gs_array = [0]*0x100
 ##for i in group_sprite_pairs:
@@ -426,7 +421,7 @@ def gen_file(context_name):
             f.write(f"tile_plane_{v:02d}:")
             dump_asm_bytes(k,f)
 
-    out_bin_file = data_dir / f"{context_name}_tiles"
+    out_bin_file = data_dir / f"tiles_{context_name}"
     asm2bin(out_asm_file,out_bin_file)
 ##        f.write("bob_table:\n")
 ##        for i,tile_entry in enumerate(sprite_table):
@@ -537,4 +532,4 @@ def gen_file(context_name):
 ##                            dump_asm_bytes(d,f)
 ##                        f.write("\n")
 
-gen_file("intro")
+gen_context_files("intro")

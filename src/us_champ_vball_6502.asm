@@ -135,6 +135,8 @@ nb_credits_0035 = $35
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 screen_id_07e4 = $7e4
+sprite_prom_bank_07f4 = $7f4
+tile_prom_bank_07f3 = $7f3
 p1_1000 = $1000
 p2_1001 = $1001
 system_1002 = $1002
@@ -158,9 +160,9 @@ scrolly_lo_100e = $100e
 ; $03: Honolulu? volley playfield
 ; $04: Navy volley playfield
 ; $05: title screen
-; $06: Catroonish screen with team backstory
-; $07: Catroonish screen with team backstory 2
-; $08: Catroonish screen with team backstory 3 (tournament ad)
+; $06: Cartoonish screen with team backstory
+; $07: Cartoonish screen with team backstory 2
+; $08: Cartoonish screen with team backstory 3 (tournament ad)
 ; $09: US map
 ; $0A: US map
 ; $0B: US map (trashed)
@@ -11828,7 +11830,7 @@ CF29: E6 01    inc $01
 CF2B: A5 01    lda $01
 CF2D: C5 02    cmp unpack_mode_02
 CF2F: 90 F1    bcc $cf22
-CF31: 20 8F D8 jsr $d88f
+CF31: 20 8F D8 jsr handle_cocktail_mode_d88f
 CF34: 60       rts
 
 clear_screen_cf35:
@@ -12824,33 +12826,39 @@ D88B: 68       pla
 D88C: AA       tax
 D88D: 68       pla
 D88E: 60       rts
+
+handle_cocktail_mode_d88f:
 D88F: AD 2C 02 lda scrollx_hi_copy_022c
 D892: 29 FE    and #$fe
 D894: 2C 04 10 bit dsw2_1004
 D897: 70 02    bvs $d89b
-D899: 09 01    ora #$01
+D899: 09 01    ora #$01		; enable flip screen
 D89B: 8D 2C 02 sta scrollx_hi_copy_022c
 D89E: 8D 08 10 sta scrollx_hi_1008
 D8A1: 60       rts
-D8A2: AD F4 07 lda $07f4
+
+update_prom_banks_d8a2:
+D8A2: AD F4 07 lda sprite_prom_bank_07f4
 D8A5: 29 07    and #$07
 D8A7: 0A       asl a
 D8A8: 0A       asl a
 D8A9: 0A       asl a
 D8AA: 85 00    sta $00
-D8AC: AD F3 07 lda $07f3
+D8AC: AD F3 07 lda tile_prom_bank_07f3
 D8AF: 29 07    and #$07
 D8B1: 05 00    ora $00
 D8B3: 0A       asl a
 D8B4: 0A       asl a
 D8B5: 85 00    sta $00
 D8B7: AD 2C 02 lda scrollx_hi_copy_022c
-D8BA: 29 03    and #$03
+D8BA: 29 03    and #$03		; keep lower bits (flip screen, scroll)
 D8BC: 05 00    ora $00
 D8BE: 8D 2C 02 sta scrollx_hi_copy_022c
 D8C1: 8D 08 10 sta scrollx_hi_1008
 D8C4: 60       rts
-D8C5: AD F4 07 lda $07f4
+
+update_sprite_prom_bank_d8c5:
+D8C5: AD F4 07 lda sprite_prom_bank_07f4
 D8C8: 29 07    and #$07
 D8CA: 0A       asl a
 D8CB: 0A       asl a
@@ -12859,7 +12867,7 @@ D8CD: 0A       asl a
 D8CE: 0A       asl a
 D8CF: 85 00    sta $00
 D8D1: AD 2C 02 lda scrollx_hi_copy_022c
-D8D4: 29 1F    and #$1f
+D8D4: 29 1F    and #$1f		; keep lower bits (flip screen, scroll, tile prom bank)
 D8D6: 05 00    ora $00
 D8D8: 8D 2C 02 sta scrollx_hi_copy_022c
 D8DB: 8D 08 10 sta scrollx_hi_1008
@@ -14427,14 +14435,17 @@ EB51: 60       rts
 
 ; reads screen_id_07e4 to know which screen to unpack (check on top for details)
 setup_background_screen_eb52:
-EB52: 20 5E EB jsr set_background_screen_scroll_eb5e
+EB52: 20 5E EB jsr set_context_scroll_and_prom_banks_eb5e
 EB55: 20 9D EC jsr unpack_background_screen_ec9d
 EB58: A9 00    lda #$00
 EB5A: 8D DB 07 sta $07db
 EB5D: 60       rts
 
-set_background_screen_scroll_eb5e:
-EB5E: 20 8F D8 jsr $d88f
+; before setting up a background picture, setup scrolling X/Y
+; and tiles and sprites prom bank
+
+set_context_scroll_and_prom_banks_eb5e:
+EB5E: 20 8F D8 jsr handle_cocktail_mode_d88f
 EB61: AD DB 07 lda $07db
 EB64: 8D DC 07 sta $07dc
 EB67: A9 FF    lda #$ff
@@ -14456,6 +14467,7 @@ EB90: 19 DE EB ora $ebde, y
 EB93: 8D 2D 02 sta bankswitch_copy_022d
 EB96: 8D 09 10 sta bankswitch_1009
 EB99: 60       rts
+
 EB9A: AC DC 07 ldy $07dc
 EB9D: 8C DB 07 sty $07db
 EBA0: B9 C5 EB lda $ebc5, y
@@ -14476,7 +14488,7 @@ EBC4: 60       rts
 
 EBF1: A9 0A    lda #$0a
 EBF3: 8D E4 07 sta screen_id_07e4		; US map
-EBF6: 20 5E EB jsr set_background_screen_scroll_eb5e
+EBF6: 20 5E EB jsr set_context_scroll_and_prom_banks_eb5e
 EBF9: 20 9D EC jsr unpack_background_screen_ec9d
 EBFC: 20 2F EC jsr $ec2f
 EBFF: 48       pha
@@ -14931,11 +14943,11 @@ EF2F: 58       cli
 EF30: 8D 0A 10 sta irq_ack_100a
 EF33: 8D 0B 10 sta irq_ack_100b
 EF36: A9 02    lda #$02
-EF38: 8D F3 07 sta $07f3
+EF38: 8D F3 07 sta tile_prom_bank_07f3
 EF3B: A9 00    lda #$00
-EF3D: 8D F4 07 sta $07f4
-EF40: 20 A2 D8 jsr $d8a2
-EF43: 20 8F D8 jsr $d88f
+EF3D: 8D F4 07 sta sprite_prom_bank_07f4
+EF40: 20 A2 D8 jsr update_prom_banks_d8a2
+EF43: 20 8F D8 jsr handle_cocktail_mode_d88f
 EF46: 20 E2 EA jsr $eae2
 EF49: A9 00    lda #$00
 EF4B: 8D 0D 10 sta sound_100d
@@ -14947,7 +14959,7 @@ EF58: A9 00    lda #$00
 EF5A: 85 36    sta $36
 EF5C: 8D DB 07 sta $07db
 EF5F: 20 73 CF jsr $cf73
-EF62: 20 8F D8 jsr $d88f
+EF62: 20 8F D8 jsr handle_cocktail_mode_d88f
 EF65: A9 0F    lda #$0f
 EF67: 8D E4 07 sta screen_id_07e4
 EF6A: 20 52 EB jsr setup_background_screen_eb52
@@ -15023,7 +15035,7 @@ F019: 8D F9 07 sta $07f9
 F01C: 20 73 CF jsr $cf73
 F01F: A9 02    lda #$02
 F021: 20 B8 D7 jsr $d7b8
-F024: 20 8F D8 jsr $d88f
+F024: 20 8F D8 jsr handle_cocktail_mode_d88f
 F027: A9 12    lda #$12
 F029: 8D E4 07 sta screen_id_07e4
 F02C: A9 00    lda #$00
@@ -15064,8 +15076,8 @@ F07A: 85 69    sta $69
 F07C: A9 89    lda #$89
 F07E: 85 77    sta $77
 F080: A9 00    lda #$00
-F082: 8D F4 07 sta $07f4
-F085: 20 C5 D8 jsr $d8c5
+F082: 8D F4 07 sta sprite_prom_bank_07f4
+F085: 20 C5 D8 jsr update_sprite_prom_bank_d8c5
 F088: A2 03    ldx #$03
 F08A: 8A       txa
 F08B: 4A       lsr a
@@ -15245,7 +15257,7 @@ F209: 99 42 00 sta $0042, y
 F20C: C6 00    dec $00
 F20E: 10 A9    bpl $f1b9
 F210: 4C 3D F1 jmp $f13d
-F213: 20 8F D8 jsr $d88f
+F213: 20 8F D8 jsr handle_cocktail_mode_d88f
 F216: 20 35 CF jsr clear_screen_cf35
 F219: 20 73 CF jsr $cf73
 F21C: A9 07    lda #$07
@@ -15324,8 +15336,8 @@ F2C2: 20 52 EB jsr setup_background_screen_eb52
 F2C5: 20 D3 E6 jsr $e6d3
 F2C8: 68       pla
 F2C9: 48       pha
-F2CA: 8D F4 07 sta $07f4
-F2CD: 20 C5 D8 jsr $d8c5
+F2CA: 8D F4 07 sta sprite_prom_bank_07f4
+F2CD: 20 C5 D8 jsr update_sprite_prom_bank_d8c5
 F2D0: 20 9A EB jsr $eb9a
 F2D3: 20 C8 F7 jsr $f7c8
 F2D6: 20 64 AF jsr $af64

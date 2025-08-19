@@ -1,6 +1,6 @@
 PROGNAME = us_champ_vball
-MAIN_000 = ..\$(PROGNAME)_000
-MAIN_020 = ..\$(PROGNAME)_020
+MAIN_000 = ..\data\$(PROGNAME)_000
+MAIN_020 = ..\data\$(PROGNAME)_020
 
 
 ifdef RELEASE_BUILD
@@ -41,9 +41,6 @@ all : $(MAIN_000) $(AMIGA_SHELL) $(WHDLOADER) $(WHDLOADER_CHIP) $(AMIGASRC)/grap
 clean:
 	del $(OBJS) $(PROGNAME)_000.o $(PROGNAME)_020.o "$(MAIN_000)" "$(MAIN_020)"
 	
-$(AMIGASRC)/graphics.68k: $(ASSETS)/convert_graphics.py
-	cmd /c $(ASSETS)\convert_graphics.py
-
 shell.o: $(AMIGASRC)/shell.68k
 	$(ASM) -Iamiga $(AMIGASRC)/shell.68k -o shell.o
 
