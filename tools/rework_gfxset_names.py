@@ -1,6 +1,6 @@
 import glob,os,re,pathlib
 
-gfx_dir = "../assets/sheets/intro"
+gfx_dir = "../assets/sheets/level_2"
 
 for sn,ttype in ((1,"sprites"),(0,"tiles")):
     outdir = pathlib.Path(gfx_dir) / ttype

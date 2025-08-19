@@ -5,7 +5,7 @@ from shared import *
 
 nb_cluts = 8
 
-def merge(context_name,used_name,nb_items):
+def merge(context_name,used_name,nb_items,overwrite):
     merged_path_file = used_graphics_dir
 
 
@@ -16,7 +16,7 @@ def merge(context_name,used_name,nb_items):
 
 
     old_used = merged_path_file / used_name
-    if old_used.exists():
+    if not overwrite and old_used.exists():
         with open(old_used,"rb") as f:
             old_contents = f.read()
     else:
@@ -31,8 +31,9 @@ def merge(context_name,used_name,nb_items):
             if a!=b:
                 code,clut = divmod(i,nb_cluts)
                 print(f"{used_name}: New: code={code:02x}, clut={clut:02x}")
+        (merged_path_file / context_name).mkdir(exist_ok=True)
         with open(merged_path_file / context_name / used_name,"wb") as f:
             f.write(contents)
 
-#merge("used_sprites",256)
-merge("intro","used_tiles",0x4000)
+merge("intro","used_tiles",0x4000,overwrite=True)
+#merge("level_1","used_tiles",0x4000)

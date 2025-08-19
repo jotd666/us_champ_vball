@@ -353,10 +353,6 @@ def gen_context_files(context_name):
 
     out_asm_file = gen_dir / f"tiles_{context_name}.s"
     with open(out_asm_file,"w") as f:
-##        f.write("palette:\n")
-##        f.write(f"{decl_word}{len(full_palette)}   ; nb colors\n")
-##
-##        bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMMOT)
 
 ##gs_array = [0]*0x100
 ##for i in group_sprite_pairs:
@@ -423,6 +419,13 @@ def gen_context_files(context_name):
 
     out_bin_file = data_dir / f"tiles_{context_name}"
     asm2bin(out_asm_file,out_bin_file)
+
+    out_bin_file = data_dir / f"palette_{context_name}"
+    out_asm_file = gen_dir / f"palette_{context_name}.s"
+    with open(out_asm_file,"w") as f:
+        bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMMOT)
+    asm2bin(out_asm_file,out_bin_file)
+
 ##        f.write("bob_table:\n")
 ##        for i,tile_entry in enumerate(sprite_table):
 ##            f.write(decl_ptr)
@@ -533,3 +536,4 @@ def gen_context_files(context_name):
 ##                        f.write("\n")
 
 gen_context_files("intro")
+gen_context_files("level_1")
