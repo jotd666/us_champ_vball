@@ -182,8 +182,8 @@ BIT_FIRE = 4
 	.global	osd_dump_logs
 	.global	osd_log_cpu
 	.global	osd_cpu_logging_control
+	.global	osd_set_irq_return_address
 		
-	.global	is_game_playing
 		
 	.include	"ReadJoypad.i"
 	.include	"whdload_funcs.i"
@@ -680,8 +680,8 @@ _vblank:
 
 	* we're going to ack copper & software/level 5 interrupt now
 	* do it twice (040/pistorm bug)
-	move.w	#0x14+1<<11,(intreq,a5)
-	move.w	#0x14+1<<11,(intreq,a5)
+	move.w	#0x14+(1<<11),(intreq,a5)
+	move.w	#0x14+(1<<11),(intreq,a5)
 
 	tst.b	pause_flag
 	jne	23f
@@ -741,6 +741,11 @@ _vblank:
 	.endif
 3:
     movem.l (a7)+,d0-d7/a0-a6
+ 	tst.l	return_address
+	beq.b	4f
+	move.l	return_address,(2,a7)		| change return address
+	clr.l	return_address				| just for this time
+4:
     rte
 	
 	
@@ -1725,6 +1730,11 @@ load_palette:
 	rts
 	
 
+* change return address from vblank
+* D0: return address (0: no change)
+osd_set_irq_return_address:
+	move.l	d0,return_address
+	rts
 
 	
 	
@@ -2686,9 +2696,6 @@ log_used_tiles:
 	dbf		d7,0b
 	rts
 	
-fakeshit:
-	.long	0xB146F168
-	.skip	0x100
 	
 log_used_sprites:
 
@@ -3385,6 +3392,8 @@ cpu_log_enable:
 looped_sound_enabled:
 	.long	0
 
+return_address:
+	.long	0
 * game sets prom bank 2 then switches to 7 at bootup
 * prom bank 2 is not used at this moment, let's skip
 current_tile_prom_bank:
@@ -3700,7 +3709,7 @@ public_memory_block:
 
 	* copper interrupt plus interrupt level 5
 	.macro	DECL_IRQ
-	.word	intreq,0x8010+1<<11
+	*.word	intreq,0x8010+(1<<11)
 	.endm
 	
 	.macro	WAIT_AND_DECL_IRQ	nrep

@@ -84,6 +84,16 @@ with open(source_dir / "conv.s") as f:
             # remove those confusing labels
             line = ""
 
+        if line_address == 0xeed1:
+            line = change_instruction("jbsr\tescape_from_irq",lines,i)
+            # remove rest of escape interrupt code, return to normal irq return
+            for j in range(i+1,len(lines)):
+                if lines[j].startswith("l_eedb:"):
+                    break
+                lines[j] = remove_instruction(lines,j)
+                if "_SR" in lines[j]:
+                    lines[j]=""
+
         if line_address in {0x603e,0x606f,0x618e,0x60f4,0x61de,0x60ea,0x62a3}:
             # cmp + rts
             line = "\tINVERT_XC_FLAGS\n"+line
@@ -245,6 +255,12 @@ callback_0000:
     CB_CASE     92,37
     BREAKPOINT    "callback 0000 unknown"
     rts
+
+escape_from_irq:
+    lea stack_top,a7
+    move.l #l_eff5,d0
+    jbra osd_set_irq_return_address
+
 """
 
 for i,line in enumerate(lines,header.count("\n")):

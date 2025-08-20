@@ -120,6 +120,9 @@
 	POP_SR
 	.endm
 
+	.macro	TXS
+	lea		stack_top,a7
+	.endm
 * useful to recall C from X (add then move then bcx)
 	.macro	SET_C_FROM_X
 	PUSH_SR

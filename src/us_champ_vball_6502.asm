@@ -132,6 +132,9 @@ screen_source_pointer_0010 = $10
 screen_tile_dest_address_14 = $14
 screen_attribute_dest_address_16 = $16
 nb_credits_0035 = $35
+; seem to have only 0 and $5A as values
+toggle_timer_2f = $2f
+irq_07_counter_31 = $31
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 screen_id_07e4 = $7e4
@@ -12198,6 +12201,7 @@ D1AF: 85 11    sta $11
 D1B1: 85 13    sta tile_msb_to_write_13
 D1B3: 20 29 D1 jsr $d129
 D1B6: 60       rts
+set_sprites_without_loop_d1b7:
 D1B7: AD DB 06 lda $06db
 D1BA: 8D 00 08 sta $0800
 D1BD: AD DC 06 lda $06dc
@@ -12763,9 +12767,10 @@ D81B: 95 3C    sta $3c, x
 D81D: 95 3D    sta $3d, x
 D81F: 95 3E    sta $3e, x
 D821: 60       rts
+sync_d822:
 D822: A9 5A    lda #$5a
-D824: 85 2F    sta $2f
-D826: A5 2F    lda $2f
+D824: 85 2F    sta toggle_timer_2f
+D826: A5 2F    lda toggle_timer_2f
 D828: D0 FC    bne $d826
 D82A: 60       rts
 D82B: 8D F6 07 sta $07f6
@@ -12773,7 +12778,7 @@ D82E: 8A       txa
 D82F: 48       pha
 D830: 98       tya
 D831: 48       pha
-D832: 20 22 D8 jsr $d822
+D832: 20 22 D8 jsr sync_d822
 D835: CE F6 07 dec $07f6
 D838: D0 F8    bne $d832
 D83A: 68       pla
@@ -12786,7 +12791,7 @@ D842: 8A       txa
 D843: 48       pha
 D844: 98       tya
 D845: 48       pha
-D846: 20 22 D8 jsr $d822
+D846: 20 22 D8 jsr sync_d822
 D849: AD 01 10 lda p2_1001
 D84C: 2D 00 10 and p1_1000
 D84F: 2C 03 10 bit dsw1_1003
@@ -12804,7 +12809,7 @@ D867: 68       pla
 D868: AA       tax
 D869: 60       rts
 D86A: 8D F6 07 sta $07f6
-D86D: 20 22 D8 jsr $d822
+D86D: 20 22 D8 jsr sync_d822
 D870: CE F6 07 dec $07f6
 D873: D0 F8    bne $d86d
 D875: 60       rts
@@ -14342,6 +14347,8 @@ EA74: 20 E2 EA jsr $eae2
 EA77: 60       rts
 EA78: 20 06 EB jsr $eb06
 EA7B: 60       rts
+; done super frequently (1/1000th of second)
+update_scrolling_ea7c:
 EA7C: 98       tya
 EA7D: 48       pha
 EA7E: AD DB 07 lda $07db
@@ -14350,7 +14357,7 @@ EA83: D0 32    bne $eab7
 EA85: AD 2C 02 lda scrollx_hi_copy_022c
 EA88: 29 01    and #$01
 EA8A: A8       tay
-EA8B: A5 31    lda $31
+EA8B: A5 31    lda irq_07_counter_31
 EA8D: D9 DE EA cmp $eade, y
 EA90: D0 28    bne $eaba
 EA92: 20 76 D8 jsr $d876
@@ -14860,14 +14867,16 @@ reset_eea1:
 EEA1: 4C 0D EF jmp reset_ef0d
 
 irq_eea4:
-EEA4: 4C A7 EE jmp $eea7
+EEA4: 4C A7 EE jmp $eea7		; [disabled] useless, really!
 EEA7: D8       cld
 EEA8: 48       pha
-EEA9: E6 31    inc $31
-EEAB: 20 7C EA jsr $ea7c
-EEAE: A5 31    lda $31
+; super fast loop (around 1ms), only thing done is scrolling update
+EEA9: E6 31    inc irq_07_counter_31		; fine tick (0-7)
+EEAB: 20 7C EA jsr update_scrolling_ea7c
+EEAE: A5 31    lda irq_07_counter_31
 EEB0: 29 07    and #$07
 EEB2: D0 27    bne $eedb
+; do things slightly less often: once every 8 irqs (around each 8 ms)
 EEB4: A5 35    lda nb_credits_0035
 EEB6: 48       pha
 EEB7: 8A       txa
@@ -14886,11 +14895,14 @@ EEC8: F0 11    beq $eedb
 EECA: A5 36    lda $36
 EECC: 0D F9 07 ora $07f9
 EECF: D0 0A    bne $eedb
-EED1: A2 FF    ldx #$ff
+; number of credits > 0: branch on player select screen
+; recovering from interrupts and escaping from the irq
+EED1: A2 FF    ldx #$ff		; set top of the stack
 EED3: 9A       txs
-EED4: 58       cli
-EED5: 8D 0B 10 sta irq_ack_100b
-EED8: 4C F5 EF jmp $eff5
+EED4: 58       cli			; enable interrupts
+EED5: 8D 0B 10 sta irq_ack_100b	; ack interrupt
+EED8: 4C F5 EF jmp $eff5		; and jump!
+; ack interrupt
 EEDB: 8D 0B 10 sta irq_ack_100b
 EEDE: 68       pla
 EEDF: 40       rti
@@ -14900,20 +14912,23 @@ EEE2: 48       pha
 EEE3: 98       tya
 EEE4: 48       pha
 EEE5: E6 30    inc $30
-EEE7: A5 2F    lda $2f
+EEE7: A5 2F    lda toggle_timer_2f
 EEE9: C9 5A    cmp #$5a
-EEEB: D0 0C    bne $eef9
-EEED: 20 B7 D1 jsr $d1b7
+EEEB: D0 0C    bne wait_for_vblank_eef9
+; probably a delay?? WTF???
+EEED: 20 B7 D1 jsr set_sprites_without_loop_d1b7
 EEF0: A9 00    lda #$00
-EEF2: 85 2F    sta $2f
+EEF2: 85 2F    sta toggle_timer_2f
 EEF4: 85 30    sta $30
 EEF6: 20 6B EA jsr $ea6b
 * wait for vblank sync
+wait_for_vblank_eef9:
 EEF9: AD 02 10 lda system_1002
 EEFC: 29 08    and #$08
-EEFE: D0 F9    bne $eef9
+EEFE: D0 F9    bne wait_for_vblank_eef9
+; end of interrupt
 EF00: A9 00    lda #$00
-EF02: 85 31    sta $31
+EF02: 85 31    sta irq_07_counter_31
 EF04: 8D 0A 10 sta irq_ack_100a
 EF07: 68       pla
 EF08: A8       tay
@@ -14975,7 +14990,7 @@ EF81: D0 02    bne $ef85
 EF83: A0 80    ldy #$80
 EF85: 98       tya
 EF86: 20 7F DA jsr $da7f
-EF89: 20 22 D8 jsr $d822
+EF89: 20 22 D8 jsr sync_d822
 EF8C: EE F5 07 inc $07f5
 EF8F: D0 E9    bne $ef7a
 EF91: 4C EB EF jmp $efeb
@@ -15108,8 +15123,8 @@ F0C1: 86 4C    stx $4c
 F0C3: 20 F3 DF jsr $dff3
 F0C6: 20 59 CF jsr $cf59
 F0C9: A9 5A    lda #$5a
-F0CB: 85 2F    sta $2f
-F0CD: A5 2F    lda $2f
+F0CB: 85 2F    sta toggle_timer_2f
+F0CD: A5 2F    lda toggle_timer_2f
 F0CF: D0 FC    bne $f0cd
 F0D1: EE F5 07 inc $07f5
 F0D4: 20 EF D8 jsr $d8ef
@@ -15200,7 +15215,7 @@ F190: A2 04    ldx #$04
 F192: 86 4C    stx $4c
 F194: 20 F3 DF jsr $dff3
 F197: 20 59 CF jsr $cf59
-F19A: 20 22 D8 jsr $d822
+F19A: 20 22 D8 jsr sync_d822
 F19D: A9 07    lda #$07
 F19F: 20 A6 D9 jsr $d9a6
 F1A2: A9 50    lda #$50
@@ -15293,7 +15308,7 @@ F25D: 69 05    adc #$05
 F25F: A8       tay
 F260: 98       tya
 F261: 20 DC ED jsr $eddc
-F264: 20 22 D8 jsr $d822
+F264: 20 22 D8 jsr sync_d822
 F267: AD 00 10 lda p1_1000
 F26A: 2D 01 10 and p2_1001
 F26D: 2C 03 10 bit dsw1_1003
@@ -15310,7 +15325,7 @@ F286: 90 C4    bcc $f24c
 F288: A9 00    lda #$00
 F28A: 8D F5 07 sta $07f5
 F28D: EE F5 07 inc $07f5
-F290: 20 22 D8 jsr $d822
+F290: 20 22 D8 jsr sync_d822
 F293: AD 00 10 lda p1_1000
 F296: 2D 01 10 and p2_1001
 F299: 2C 03 10 bit dsw1_1003
@@ -15599,8 +15614,8 @@ F51F: 85 46    sta $46
 F521: A5 30    lda $30
 F523: F0 FC    beq $f521
 F525: A9 5A    lda #$5a
-F527: 85 2F    sta $2f
-F529: A5 2F    lda $2f
+F527: 85 2F    sta toggle_timer_2f
+F529: A5 2F    lda toggle_timer_2f
 F52B: D0 FC    bne $f529
 F52D: EE F5 07 inc $07f5
 F530: A5 46    lda $46
