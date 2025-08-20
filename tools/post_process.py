@@ -257,10 +257,12 @@ callback_0000:
     rts
 
 escape_from_irq:
-    lea stack_top,a7
-    move.l #l_eff5,d0
+    move.l #jump_eff5,d0
     jbra osd_set_irq_return_address
 
+jump_eff5:
+    lea stack_top,a7
+    jra l_eff5
 """
 
 for i,line in enumerate(lines,header.count("\n")):
