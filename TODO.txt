@@ -1,10 +1,13 @@
 - IRQ: irq_eea4 each 15 lines (on 288 lines) using copper int
-- then test insert coin!!
-- intro screen: missing "technos japan" logo & copyright (used to work!)
+- then test insert coin!!: locks up:
+
+EEF2 should set to 0 $2F but does not?
+infinite loop at D826
+
 - X scrolling doesn't work properly
-- log and then display sprites
+- display sprites properly
 - reduce global colors, reduce tile colors
-- updates seem slow
+- more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
 - convert_graphics: separate tile/sprite files but computed together, separate palette file
 

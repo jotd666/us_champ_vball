@@ -680,15 +680,23 @@ _vblank:
 
 	* we're going to ack copper & software/level 5 interrupt now
 	* do it twice (040/pistorm bug)
-	move.w	#0x14,(intreq,a5)
-	move.w	#0x14,(intreq,a5)
+	move.w	#0x14+1<<11,(intreq,a5)
+	move.w	#0x14+1<<11,(intreq,a5)
 
 	tst.b	pause_flag
 	jne	23f
 
-
 	* set base for RAM
 	GET_RAM_START_IN_A6
+	btst	#11,d0
+	beq.b	300f
+	* fast irq
+	move.w	d0,-(a7)
+	jbsr	irq_eea4
+	move.w	(a7)+,d0
+	jra		23f	| no need to update sprites we're in the middle of a frame
+300:
+
 	* declare that we're in interrupt mode so osd_disable_interrupts/osd_enable_interrupts
 	* is level 1 interrupt set? that would mean that mid-screen interrupt
 	* is the source of the interrupt
@@ -1624,7 +1632,7 @@ platform_init:
 	st.b	ntsc_flag
 	* disable extra mid-screen interrupt, as it would be too fast (NTSC)
 	move.w	#0x1FE,pal_intreq_block_game
-	move.w	#0x1FE,pal_wait			| else intreq never happens
+	*move.w	#0x1FE,pal_wait			| else intreq never happens
 0:
     move.w #0x0210+BORDERBLANK,bplcon0(a5) | 8 bitplanes, borderblank
     move.w #0x0024,bplcon2(a5)
@@ -3012,6 +3020,8 @@ force_sound_stop:
 	rts
 	
 osd_sound_start:
+	rts
+	
 	movem.l	d0/d1/d2/a0/a1/a6,-(a7)
 	lea		_custom,a6
 
@@ -3654,14 +3664,15 @@ public_memory_block:
 	.section	.datachip
 
 
-.macro	DECL_32_COLORS
+	.macro	DECL_32_COLORS
 	.set	colidx,0
 	.rept	32
 	dc.w	color+(colidx*2),0
 	.set	colidx,colidx+1
 	.endr
 	.endm
-.macro	DECL_BITPLANES	bpoff_start,nb_planes
+	
+	.macro	DECL_BITPLANES	bpoff_start,nb_planes
 	.set	bpoff,\bpoff_start
 	.rept	\nb_planes
 	dc.w  0xe0+bpoff,0
@@ -3670,9 +3681,7 @@ public_memory_block:
 	.endr
 	.endm
 	
-
-	
-.macro	DECL_COLORS	offset,nb_colors
+	.macro	DECL_COLORS	offset,nb_colors
 	.set	colidx,\offset
 	.rept	\nb_colors
 	dc.w	color+(colidx*2),0
@@ -3680,7 +3689,7 @@ public_memory_block:
 	.endr
 	.endm
 
-.macro	DECL_SPRITES
+	.macro	DECL_SPRITES
 	.set	sprite_start,sprpt+0
 	.rept	16
 	* 2 slots
@@ -3689,6 +3698,19 @@ public_memory_block:
     .endr
 	.endm
 
+	* copper interrupt plus interrupt level 5
+	.macro	DECL_IRQ
+	.word	intreq,0x8010+1<<11
+	.endm
+	
+	.macro	WAIT_AND_DECL_IRQ	nrep
+	.rept	\nrep
+	.word	current_line<<8+1,0xFFFE
+	.set	current_line,current_line+15
+	DECL_IRQ
+	.endr
+	.endm
+	
 blank_sprite:
 	.long	0,0
 	
@@ -3717,10 +3739,11 @@ game_copperlist:
 	* all sprites have the same palette no need to specify odd or even
 	
 	* black color background plane
-
 	* enable sprite colors now
 	.word	0x0801,0xFFFE
-
+	.set	current_line,8
+	
+		
 bobs_bitplanes:
 	DECL_BITPLANES	0,NB_PLAYFIELD_PLANES
 
@@ -3735,22 +3758,32 @@ copperlist_colors:
 	.set	bpl_count,bpl_count+1
 	DECL_32_COLORS
 	.endr
-
-
+	
+	* we'll issue 19 interrupts for 1/50th second, which can roughly
+	* simulate 0.00105 seconds for the fast irq
+	WAIT_AND_DECL_IRQ	8
 
 	* mid-line wait & extra interrupt
 	.word	0x8001,0xFFFE
 pal_intreq_block_game:
 	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
+	.set	current_line,128
 
+	WAIT_AND_DECL_IRQ	9
+	
 
 	*.word	0xF001,0xFFFE	| if we don't add an extra wait, NTSC version locks up
 	
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait
 	* extra wait for PAL (NTSC can't afford this)
-pal_wait:
-	.word	0x0C01,0xFFFE
+	.set	current_line,0
+
+	*WAIT_AND_DECL_IRQ	1
+	
+	
+*pal_wait:
+	*.word	0x0C01,0xFFFE
 	.word	 intreq,0x8010
 
 
