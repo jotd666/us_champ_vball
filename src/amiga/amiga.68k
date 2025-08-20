@@ -120,6 +120,8 @@ SPRITE_CODE = 0
 SPRITE_ATTRIBUTES = 1
 SPRITE_SIZEOF = 4
 
+BIT_COIN1 = 0
+BIT_COIN2 = 1
 
 BIT_START_1P = 0
 BIT_START_2P = 1
@@ -1163,7 +1165,9 @@ update_one_bob:
 	and.b	#7,d2
 	lsl.w	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
-	BREAKPOINT	"unregistered sprite clut (D2=code)"
+	move.w	#(BORDERBLANK<<5),_custom+bplcon3
+	move.w	#0xF00,_custom+color
+	*BREAKPOINT	"unregistered sprite clut (D2=code)"
 	jra		2f
 100:
 	.endif
@@ -1198,7 +1202,6 @@ update_one_bob:
 	move.l	(NB_PLAYFIELD_PLANES*4,a0),d2
 	beq.b	2f		| mask is zero: blank tile => skip
 	
-	jra		2f
 	
 	move.l	d2,a3
 	moveq	#0,d2	| no y-clip
@@ -2582,31 +2585,32 @@ osd_read_dsw1:
 	rts
 	
 osd_read_system:
-	move.b	#0x3F,d0
+	move.b	#0,0x102
+	st.b	d0
 	movem.l	a0/d1,-(a7)
 	lea		keyboard_table(pc),a0
-	tst.b	(1,a0)		| "1" key like in MAME
+	tst.b	(5,a0)		| "5" key like in MAME
 	beq.b	0f
-	bclr	#BIT_START_1P,d0
+	bclr	#BIT_COIN1,d0
 0:
-	tst.b	(2,a0)		| "2" key like in MAME
+	tst.b	(6,a0)		| "6" key like in MAME
 	beq.b	0f
-	bclr	#BIT_START_2P,d0
+	bclr	#BIT_COIN2,d0
 0:	
 
-	jbsr		is_game_playing
-	jeq	1f
-	move.l	_joypad_state,d1
-	* game not playing, we can start with joypad
-	btst	#JPB_BTN_UP,d1		| "1" key like in MAME
-	beq.b	0f
-	bclr	#BIT_START_1P,d0
-0:
-	btst	#JPB_BTN_DOWN,d1		| "2" key like in MAME
-	beq.b	0f
-	bclr	#BIT_START_2P,d0
-0:	
-1:	
+*	jbsr		is_game_playing
+*	jeq	1f
+*	move.l	_joypad_state,d1
+*	* game not playing, we can start with joypad
+*	btst	#JPB_BTN_UP,d1		| "1" key like in MAME
+*	beq.b	0f
+*	bclr	#BIT_START_1P,d0
+*0:
+*	btst	#JPB_BTN_DOWN,d1		| "2" key like in MAME
+*	beq.b	0f
+*	bclr	#BIT_START_2P,d0
+*0:	
+*1:	
 	movem.l	(a7)+,a0/d1
 	rts
 

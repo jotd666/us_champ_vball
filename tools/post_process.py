@@ -79,6 +79,7 @@ with open(source_dir / "conv.s") as f:
             # jumping to bank 1!
             line = line.replace("l_7","b1_7")
 
+
         if line.startswith("l_7ff0:") or line.startswith("l_7ff3:"):
             # remove those confusing labels
             line = ""
@@ -95,7 +96,7 @@ with open(source_dir / "conv.s") as f:
             # disable flip screen code
             line = change_instruction("rts",lines,i)
 
-        if line_address == 0xeefe:
+        if line_address in {0xeefe,0xeef9,0xeefc,0xeea4}:
             line = remove_instruction(lines,i)
         if line_address == 0xf12d:
             lines[i-2] = remove_error(lines[i-2])

@@ -1,3 +1,5 @@
+- IRQ: irq_eea4 each 15 lines (on 288 lines) using copper int
+- then test insert coin!!
 - intro screen: missing "technos japan" logo & copyright (used to work!)
 - X scrolling doesn't work properly
 - log and then display sprites

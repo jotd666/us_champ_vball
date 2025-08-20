@@ -14875,7 +14875,7 @@ EEB8: 48       pha
 EEB9: 98       tya
 EEBA: 48       pha
 EEBB: 20 D0 D7 jsr $d7d0
-EEBE: 20 15 F7 jsr $f715
+EEBE: 20 15 F7 jsr check_coin_inserted_f715
 EEC1: 68       pla
 EEC2: A8       tay
 EEC3: 68       pla
@@ -15827,6 +15827,9 @@ F70B: 90 02    bcc $f70f
 F70D: A9 03    lda #$03
 F70F: 20 B8 D7 jsr $d7b8
 F712: 4C E2 F4 jmp $f4e2
+
+; also checks service mode (bit 2)
+check_coin_inserted_f715:
 F715: A5 32    lda $32
 F717: D0 19    bne $f732
 F719: A5 3B    lda $3b
@@ -15834,22 +15837,26 @@ F71B: F0 04    beq $f721
 F71D: C6 3B    dec $3b
 F71F: D0 10    bne $f731
 F721: AD 02 10 lda system_1002
-F724: 49 FF    eor #$ff
+F724: 49 FF    eor #$ff			; inverted logic
 F726: 29 07    and #$07
 F728: F0 07    beq $f731
+; coin inserted, store value
 F72A: 85 32    sta $32
 F72C: A9 00    lda #$00
 F72E: 8D F7 07 sta $07f7
 F731: 60       rts
+
 F732: A5 32    lda $32
 F734: 29 04    and #$04
 F736: F0 0E    beq $f746
+; service mode?
 F738: AD 02 10 lda system_1002
 F73B: 49 FF    eor #$ff
 F73D: 29 04    and #$04
 F73F: D0 F0    bne $f731
 F741: A0 00    ldy #$00
 F743: 4C 93 F7 jmp $f793
+
 F746: AD 02 10 lda system_1002
 F749: 49 FF    eor #$ff
 F74B: 29 07    and #$07
@@ -15889,18 +15896,22 @@ F78B: 90 1D    bcc $f7aa
 F78D: A9 00    lda #$00
 F78F: 95 33    sta $33, x
 F791: A0 00    ldy #$00
+; add one/several credits depending on coinage DSW
 F793: A5 35    lda nb_credits_0035
 F795: F8       sed
 F796: 18       clc
 F797: 79 B2 F7 adc $f7b2, y
 F79A: D8       cld
 F79B: 90 02    bcc $f79f
+; max 99 credits
 F79D: A9 99    lda #$99
 F79F: 85 35    sta nb_credits_0035
+; credit sound playing
 F7A1: A9 34    lda #$34
 F7A3: 8D 0D 10 sta sound_100d
 F7A6: A9 04    lda #$04
 F7A8: 85 3B    sta $3b
+; ack press
 F7AA: A9 00    lda #$00
 F7AC: 85 32    sta $32
 F7AE: 60       rts
