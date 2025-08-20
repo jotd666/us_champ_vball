@@ -5,7 +5,7 @@ from shared import *
 
 sprite_names = {}
 
-
+possible_hw_sprites = set()
 
 def asm2bin(source,dest):
     subprocess.run(["vasmm68k_mot","-nosym","-pic","-Fbin",source,"-o",dest],check=True,stdout=subprocess.DEVNULL)
@@ -84,20 +84,20 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
         # rework tiles which are grouped
         for tile_number,wtile in enumerate(tileset_1):
 
-            if wtile and tile_number in group_sprite_pairs:
-                # change wtile, fetch code +0x100
-                other_tile_index = tile_number+1
-                other_tile = tileset_1[other_tile_index]
-                if not other_tile:
-                    raise Exception(f"other tile index 0x{other_tile_index:02x} not found")
-                new_tile = Image.new("RGB",(wtile.size[0]*2,wtile.size[1]))
-
-                new_tile.paste(wtile)
-
-                new_tile.paste(other_tile,(wtile.size[0],0))
-                tileset_1[tile_number] = new_tile
-                tileset_1[tile_number+1] = None  # discatd
-                wtile = new_tile
+##            if wtile and tile_number in group_sprite_pairs:
+##                # change wtile, fetch code +0x100
+##                other_tile_index = tile_number+1
+##                other_tile = tileset_1[other_tile_index]
+##                if not other_tile:
+##                    raise Exception(f"other tile index 0x{other_tile_index:02x} not found")
+##                new_tile = Image.new("RGB",(wtile.size[0]*2,wtile.size[1]))
+##
+##                new_tile.paste(wtile)
+##
+##                new_tile.paste(other_tile,(wtile.size[0],0))
+##                tileset_1[tile_number] = new_tile
+##                tileset_1[tile_number+1] = None  # discatd
+##                wtile = new_tile
             if dump_it and wtile:
                 img = ImageOps.scale(wtile,5,resample=Image.Resampling.NEAREST)
                 if sprite_names:
@@ -128,21 +128,6 @@ def add_tile(table,index,cluts=[0]):
     for idx in index:
         table[idx] = cluts
 
-sprite_cluts = {}
-
-
-try:
-    with open(used_graphics_dir / "used_sprites","rb") as f:
-        for index in range(NB_SPRITES):
-            d = f.read(nb_cluts)
-            cluts = [i for i,c in enumerate(d) if c]
-            if cluts:
-                add_tile(sprite_cluts,index,cluts=cluts)
-except OSError:
-    print("Cannot find used_sprites")
-
-
-
 
 # now gather all cluts used by letter/digit tiles, logging probably
 # missed some
@@ -168,7 +153,6 @@ def add_hw_sprite(index,name,cluts=[0]):
         hw_sprite_cluts[idx] = cluts
 
 
-#sprite_sheet_dict = {i:Image.open(sheets_path / "sprites" / f"pal_{i:02x}.png") for i in range(8)}
 
 plane_orientations = [("standard",lambda x:x),
 ("flip",ImageOps.flip),
@@ -190,9 +174,9 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
                         actual_nb_planes = nb_planes
 
-                        # most sprites aren't mirrored. Save a lot of memory!
-                        if plane_func == ImageOps.mirror and i not in mirror_sprites:
-                            continue
+
+##                        if plane_func == ImageOps.mirror and i not in mirror_sprites:
+##                            continue
 
                         wtile = plane_func(tile)
 
@@ -255,8 +239,12 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
 dump_it = True
 
-def gen_context_files(context_name):
-    tile_sheet_dict = {i:Image.open(sheets_path / context_name / "tiles" / f"pal_{i:02x}.png") for i in range(8)}
+def gen_context_files(context_name,with_sprites=True):
+    tile_sheet_dict = {i:Image.open(sheets_path / context_name / "tiles" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
+    if with_sprites:
+        sprite_sheet_dict = {i:Image.open(sheets_path / context_name / "sprites" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
+    else:
+        sprite_sheet_dict = {}
 
     tile_palette = set()
     tile_set_list = []
@@ -275,6 +263,21 @@ def gen_context_files(context_name):
     except OSError:
         pass
 
+    sprite_cluts = {}
+
+
+    try:
+        with open(used_graphics_dir / context_name / "used_sprites","rb") as f:
+            for index in range(NB_SPRITES):
+                d = f.read(nb_cluts)   # lower part: no Y double size, upper part: Y double size
+                cluts = [i for i,c in enumerate(d) if c]
+                if cluts:
+                    add_tile(sprite_cluts,index,cluts=cluts)
+    except OSError:
+        print("Cannot find used_sprites")
+
+
+
     if dump_it:
         with open(sdump_dir / "used_sprites.json","w") as f:
             sprite_cluts_dict = {hex(k):[hex(x) for x in v] for k,v in sprite_cluts.items() if v}
@@ -292,29 +295,34 @@ def gen_context_files(context_name):
         tile_palette.update(tp)
 
     # pad
-    tile_palette = sorted(tile_palette)
-    tile_palette += (nb_colors-len(tile_palette)) * [(0x10,0x20,0x30)]
+##    tile_palette = sorted(tile_palette)
+##    tile_palette += (nb_colors//2-len(tile_palette)) * [(0x10,0x20,0x30)]
 
-    sprite_palette = set()
+    sprite_palette = set(tile_palette)  # try to reuse tile palette
     sprite_set_list = [[] for _ in range(nb_cluts)]
     hw_sprite_set_list = []
 
 
 
     cluts = sprite_cluts
+    sprite_dump_dir = sdump_dir / "sprites"
 
-    ##for clut_index,tsd in sprite_sheet_dict.items():
-    ##    # BOBs
-    ##
-    ##    sp,sprite_set = load_tileset(tsd,clut_index,16,16,"sprites",dump_dir,dump=dump_it,
-    ##    name_dict=sprite_names,cluts=sprite_cluts,is_bob=True)
-    ##    sprite_set_list[clut_index] = sprite_set
-    ##    sprite_palette.update(sp)
-    ##
-    ##
-    ##sprite_palette = sorted(sprite_palette)
-    ##sprite_palette += (16-len(sprite_palette)) * [(0x10,0x20,0x30)]
-    sprite_palette = []
+    for p in sprite_dump_dir.glob("*"):
+        p.unlink()
+    sprite_dump_dir.mkdir(exist_ok=True)
+
+    for clut_index,tsd in sprite_sheet_dict.items():
+        # BOBs
+
+        sp,sprite_set = load_tileset(tsd,clut_index,16,16,"sprites",sdump_dir,dump=dump_it,
+        name_dict=sprite_names,cluts=sprite_cluts,is_bob=True)
+        sprite_set_list[clut_index] = sprite_set
+        sprite_palette.update(sp)
+
+
+    full_palette = sorted(sprite_palette)
+    full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
+
 
     # sprite_set_list is now a 16x512 matrix of sprite tiles
 
@@ -324,29 +332,15 @@ def gen_context_files(context_name):
     ##    hw_sprite_set_list.append(hw_sprite_set)
 
 
-    full_palette = tile_palette+sprite_palette
-
     tile_plane_cache = {}
     tile_table = read_tileset(tile_set_list,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
 
-##    bob_plane_cache = {}
-##
-##    sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
+    bob_plane_cache = {}
 
-    sprite_dump_dir = sdump_dir / "sprites"
-
-##    for p in sprite_dump_dir.glob("*"):
-##        p.unlink()
-##    sprite_dump_dir.mkdir(exist_ok=True)
+    sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
 
 
-    #full_palette_rgb4 = {(x>>4,y>>4,z>>4) for x,y,z in full_palette}
-    #actually_used_colors_rgb4 = {(x>>4,y>>4,z>>4) for x,y,z in actually_used_colors}
-    #unused_colors = full_palette_rgb4 - actually_used_colors_rgb4
-    #print([(hex(x<<4),hex(y<<4),hex(z<<4)) for x,y,z in unused_colors])
 
-    # pad just in case we don't have 16+16 colors (but we have)
-    full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
 
     def write_ptr(f,ptr_name):
         f.write(f"{decl_word}{ptr_name}-_base\n")
@@ -426,15 +420,19 @@ def gen_context_files(context_name):
         bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMMOT)
     asm2bin(out_asm_file,out_bin_file)
 
-##        f.write("bob_table:\n")
-##        for i,tile_entry in enumerate(sprite_table):
-##            f.write(decl_ptr)
-##            if any(tile_entry):
-##                prefix = sprite_names.get(i,"bob")
-##                f.write(f"{prefix}_{i:02x}")
-##            else:
-##                f.write("0")
-##            f.write("\n")
+    out_asm_file = gen_dir / f"bobs_{context_name}.s"
+    out_bin_file = data_dir / f"bobs_{context_name}"
+    with open(out_asm_file,"w") as f:
+
+        f.write("bob_table:\n")
+        for i,tile_entry in enumerate(sprite_table):
+            f.write(decl_ptr)
+            if any(tile_entry):
+                prefix = sprite_names.get(i,"bob")
+                f.write(f"{prefix}_{i:02x}-bob_table")
+            else:
+                f.write("0")
+            f.write("\n")
 
 ##        f.write("hws_table:\n")
 ##        for i,tile_entry in enumerate(sprite_table):
@@ -446,7 +444,7 @@ def gen_context_files(context_name):
 ##            else:
 ##                f.write("0")
 ##            f.write("\n")
-##
+
 ##        # HW sprites clut declaration
 ##        for i,tile_entry in enumerate(sprite_table):
 ##            if any(t and "sprdat" in t['standard'] for t in tile_entry):
@@ -460,80 +458,82 @@ def gen_context_files(context_name):
 ##                    else:
 ##                        f.write("0,0")
 ##                    f.write("\n")
-##
-##
-##        # BObs clut declaration
-##        for i,tile_entry in enumerate(sprite_table):
-##            if any(tile_entry):
-##                prefix = sprite_names.get(i,"bob")
-##                f.write(f"{prefix}_{i:02x}:\n")
-##                for j,t in enumerate(tile_entry):
-##                    f.write(decl_ptr)
-##                    if t:
-##                        f.write(f"{prefix}_{i:02x}_{j:02x}")
-##                    else:
-##                        f.write("0")
-##                    f.write("\n")
-##
-##
-##        for i,tile_entry in enumerate(sprite_table):
-##            if tile_entry:
-##                prefix = sprite_names.get(i,"bob")
-##                for j,t in enumerate(tile_entry):
-##                    if t:
-##                        name = f"{prefix}_{i:02x}_{j:02x}"
-##
-##                        f.write(f"{name}:\n")
-##                        height = 0
-##
-##                        offset = 0
-##                        for orientation,_ in plane_orientations:
-##                            if orientation in t:
-##                                width = t[orientation]["width"]
-##                                height = t[orientation]["height"]
-##                                offset = t[orientation]["y_start"]
-##                                break
-##                        else:
-##                            raise Exception(f"height not found for {name}!!")
-##                        for orientation,_ in plane_orientations:
-##                            if orientation in t:
-##                                f.write("* {}\n".format(orientation))
-##                                active_planes = 0
-##                                bitplanes = t[orientation]["bitplanes"]
-##
-##                                for j,bitplane_id in enumerate(bitplanes):
-##                                    if bitplane_id:
-##                                        active_planes |= 1<<j
-##
-##                                f.write(f"\t.word\t{height},{width},{offset},0x{active_planes:x}\n")
-##                                for bitplane_id in bitplanes:
-##                                    f.write(decl_ptr)
-##                                    if bitplane_id:
-##                                        f.write(f"bob_plane_{bitplane_id:02d}")
-##                                    else:
-##                                        f.write("0")
-##                                    f.write("\n")
-##                                if len(t)==1:
-##                                    # optim: only standard
-##                                    break
-##
-##
-##        for k,v in bob_plane_cache.items():
-##            f.write(f"bob_plane_{v:02d}:")
-##            dump_asm_bytes(k,f)
-##
-##        # HW sprites bitplane data
-##        for i,tile_entry in enumerate(sprite_table):
-##            if any(t and "sprdat" in t['standard'] for t in tile_entry):
-##                prefix = sprite_names.get(i,"bob")
-##                for j,t in enumerate(tile_entry):
-##
-##                    if t:
-##                        data = t["standard"]["sprdat"]
-##                        for k,d in enumerate(data):
-##                            f.write(f"hws_{prefix}_{i:02x}_{j:02x}_{k}:")
-##                            dump_asm_bytes(d,f)
-##                        f.write("\n")
 
-gen_context_files("intro")
+
+        # BObs clut declaration
+        for i,tile_entry in enumerate(sprite_table):
+            if any(tile_entry):
+                prefix = sprite_names.get(i,"bob")
+                p = f"{prefix}_{i:02x}"
+                f.write(f"{p}:\n")
+                for j,t in enumerate(tile_entry):
+                    f.write(decl_ptr)
+                    if t:
+                        f.write(f"{p}_{j:02x}-{p}")
+                    else:
+                        f.write("0")
+                    f.write("\n")
+
+
+        for i,tile_entry in enumerate(sprite_table):
+            if tile_entry:
+                prefix = sprite_names.get(i,"bob")
+                for j,t in enumerate(tile_entry):
+                    if t:
+                        name = f"{prefix}_{i:02x}_{j:02x}"
+
+                        f.write(f"{name}:\n")
+                        height = 0
+
+                        offset = 0
+                        for orientation,_ in plane_orientations:
+                            if orientation in t:
+                                width = t[orientation]["width"]
+                                height = t[orientation]["height"]
+                                offset = t[orientation]["y_start"]
+                                break
+                        else:
+                            raise Exception(f"height not found for {name}!!")
+                        for orientation,_ in plane_orientations:
+                            if orientation in t:
+                                f.write("* {}\n".format(orientation))
+                                active_planes = 0
+                                bitplanes = t[orientation]["bitplanes"]
+
+                                for j,bitplane_id in enumerate(bitplanes):
+                                    if bitplane_id:
+                                        active_planes |= 1<<j
+
+                                f.write(f"\t{decl_word}\t{height},{width},{offset},${active_planes:x}\n")
+                                for bitplane_id in bitplanes:
+                                    f.write(decl_ptr)
+                                    if bitplane_id:
+                                        f.write(f"bob_plane_{bitplane_id:02d}-{name}")
+                                    else:
+                                        f.write("0")
+                                    f.write("\n")
+                                if len(t)==1:
+                                    # optim: only standard
+                                    break
+
+
+        for k,v in bob_plane_cache.items():
+            f.write(f"bob_plane_{v:02d}:")
+            dump_asm_bytes(k,f)
+
+        # HW sprites bitplane data
+        for i,tile_entry in enumerate(sprite_table):
+            if any(t and "sprdat" in t['standard'] for t in tile_entry):
+                prefix = sprite_names.get(i,"bob")
+                for j,t in enumerate(tile_entry):
+
+                    if t:
+                        data = t["standard"]["sprdat"]
+                        for k,d in enumerate(data):
+                            f.write(f"hws_{prefix}_{i:02x}_{j:02x}_{k}:")
+                            dump_asm_bytes(d,f)
+                        f.write("\n")
+    asm2bin(out_asm_file,out_bin_file)
+
+#gen_context_files("intro",with_sprites=False)
 gen_context_files("level_1")

@@ -37,6 +37,9 @@ BORDERBLANK = 0
 PREVIOUS_SPRITE_SIZE = 8
 CURRENT_SPRITE_SIZE = 4
 
+SPRITE_LOG_LENGTH = NB_CLUTS*NB_SPRITES*2
+TILE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
+
 SCORE_FILE_SIZE = 0x23		| wrong
 
 LOG_BUFFER_SIZE = 0x20000
@@ -44,6 +47,7 @@ LOG_BUFFER_SIZE = 0x20000
 NB_CLUTS_POW = 3
 NB_CLUTS = 1<<NB_CLUTS_POW
 NB_TILES = 0x4000
+NB_SPRITES = 0x2000
 
 SPRITE_X_CORRECTION = -1
 SPRITE_Y_CORRECTION = -8
@@ -70,10 +74,10 @@ SPRITE_ADDRESS = 0x800
 * RAMs have 4 bytes per sprite, only the order
 * and some bits differ
 
-TARGET_SPRITE_Y = 3
-TARGET_SPRITE_X = 2
-TARGET_SPRITE_ATTRIBUTES = 0
-TARGET_SPRITE_CODE = 1
+TARGET_SPRITE_Y = 2
+TARGET_SPRITE_X = 3
+TARGET_SPRITE_ATTRIBUTES = 1
+TARGET_SPRITE_CODE = 2
 
 
 	.ifdef	RELEASE
@@ -767,6 +771,7 @@ _vblank:
 23:
 	.ifne	OPT_ENABLE_LOGGING
 	jbsr	log_used_tiles
+	jbsr	log_used_sprites
 	.endif
 3:
     movem.l (a7)+,d0-d7/a0-a6
@@ -2266,8 +2271,9 @@ osd_set_scrolly_lo:
 load_tile_data:
 	movem.l	d0-a6,-(a7)
 	.ifndef	RELEASE
-	* purge tile log data
+	* purge log data
 	jbsr	purge_tile_log_data
+	jbsr	purge_sprite_log_data
 	.endif
 	and.w	#0xFF,d0
 	add.w	d0,d0
@@ -2591,6 +2597,43 @@ log_used_tiles:
 	lsl.l	#NB_CLUTS_POW,d0			| tile code * NB_CLUTS (long!)
 	add.l	d1,d0			| add clut
 	st.b	(a0,d0.l)
+20:
+	dbf		d7,0b
+	rts
+	
+
+log_used_sprites:
+
+	* scan the whole screen, see what was updated
+	* main screen
+	
+	GET_RAM_START_IN_A6
+	lea		(SPRITE_ADDRESS,a6),a5
+	lea	sprite_log_table,a0
+	move.w	#0x800-1,d7
+0:
+	moveq	#0,d2
+	moveq	#0,d1
+	moveq	#0,d0
+	move.b	(TARGET_SPRITE_CODE,a5,d7.w),d0
+	move.b	(TARGET_SPRITE_ATTRIBUTES,a5,d7.w),d1
+	move.b	d1,d2
+	and.w	#0x7,d2
+	lsl.w	#8,d2
+	add.w	d2,d0			| extended sprite code
+	move.b	d1,d2
+	and.b	#0x38,d2
+	lsr.b	#3,d2			| color
+
+
+	
+	add.l	d2,d0			| add clut
+	st.b	(a0,d0.l)
+	lsl.l	#NB_CLUTS_POW,d0			| sprite code * NB_CLUTS (long!)
+	btst	#7,d1
+	jeq		20f
+	st.b	(1,a0,d0.l)
+
 20:
 	dbf		d7,0b
 	rts
@@ -3190,7 +3233,12 @@ osd_dump_logs:
 	move.l	_resload,a2
 	lea		tile_log_table,a1
 	lea		tile_log_name(pc),a0
-	move.l	#NB_CLUTS*NB_TILES,d0
+	move.l	#TILE_LOG_LENGTH,d0
+	jbsr	resload_SaveFile(a2)
+	
+	lea		sprite_log_table,a1
+	lea		sprite_log_name(pc),a0
+	move.l	#SPRITE_LOG_LENGTH,d0
 	jbsr	resload_SaveFile(a2)
 	
     movem.l (a7)+,d0-a6
@@ -3385,15 +3433,13 @@ scroll_x:
 tile_bank_table:
 	.skip	0x1000
 tile_log_table:
-	* 64 cluts, 256 tiles
 	* a lot of combinations aren't used (fortunately!)
-	.skip	NB_CLUTS*NB_TILES
+	.skip	TILE_LOG_LENGTH
 tile_log_table_end:
 
 sprite_log_table:
-	* 64 cluts, 256 tiles
 	* a lot of combinations aren't used (fortunately!)
-	.skip	NB_CLUTS*NB_TILES
+	.skip	SPRITE_LOG_LENGTH
 sprite_log_table_end:
 	.endif
 

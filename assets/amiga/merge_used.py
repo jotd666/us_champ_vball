@@ -3,9 +3,9 @@ import os,pathlib,shutil,json,itertools
 from shared import *
 
 
-nb_cluts = 8
 
-def merge(context_name,used_name,nb_items,overwrite):
+
+def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
     merged_path_file = used_graphics_dir
 
 
@@ -35,5 +35,5 @@ def merge(context_name,used_name,nb_items,overwrite):
         with open(merged_path_file / context_name / used_name,"wb") as f:
             f.write(contents)
 
-merge("intro","used_tiles",0x4000,overwrite=True)
-#merge("level_1","used_tiles",0x4000)
+#merge("intro","used_tiles",0x4000,nb_cluts = 8,overwrite=True)
+merge("level_1","used_sprites",0x2000,nb_cluts=8,overwrite=True)
