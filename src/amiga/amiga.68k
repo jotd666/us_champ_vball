@@ -20,6 +20,7 @@ start:
 	.include "us_champ_vball.inc"
 	.include "sounds.inc"
 	.include "data.inc"
+	.include "utility_macros.inc"
 	
 AttnFlags = 0x128
 AFB_68010 = 0
@@ -49,10 +50,10 @@ NB_CLUTS = 1<<NB_CLUTS_POW
 NB_TILES = 0x4000
 NB_SPRITES = 0x800
 
-SPRITE_X_CORRECTION = -1
-SPRITE_Y_CORRECTION = -8
+SPRITE_X_CORRECTION = 0
+SPRITE_Y_CORRECTION = 0
 HW_SPRITE_X_CORRECTION = 0
-HW_SPRITE_Y_CORRECTION = 8
+HW_SPRITE_Y_CORRECTION = 0
 
 * start displaying earlier in ntsc mode, allowing
 * full display
@@ -78,7 +79,7 @@ TARGET_SPRITE_Y = 2
 TARGET_SPRITE_X = 3
 TARGET_SPRITE_ATTRIBUTES = 1
 TARGET_SPRITE_CODE = 2
-
+TARGET_SPRITE_SIZEOF = 4
 
 	.ifdef	RELEASE
 OPT_ENABLE_LOGGING = 0           | DO NOT CHANGE THIS
@@ -129,7 +130,7 @@ BIT_UP = 2
 BIT_DOWN = 3
 BIT_FIRE = 4
 
-.macro	GET_RAM_START_IN_A6	
+	.macro	GET_RAM_START_IN_A6	
 	.ifdef	RELEASE
 	lea		ram_buffer,a6
 	.else
@@ -137,52 +138,7 @@ BIT_FIRE = 4
 	.endif
 	.endm
 	
-.macro	WAIT_BLIT
-	.ifndef	RELEASE
-	cmp.l	#_custom,a5
-	jeq		0f
-	BREAKPOINT	"custom should be set in A5"
-0:
-	.endif
-	move.w	#0x8400,(dmacon,a5)		| blitter high priority
-wait\@:
-	BTST	#6,(dmaconr,a5)
-	BNE.S	wait\@
-	move.w	#0x0400,(dmacon,a5)		| blitter normal priority
-.endm
 
-.macro MUL_TABLE value,len
-mul\value\()_table:
-	.set    mulv,0
-	.rept	\len
-	dc.w	mulv
-	.set	mulv,mulv+\value
-	.endr
-.endm
-
-
-* debug macro that colors the screen until LMB pressed
-.macro 	blitz_bypass
-	move.w	d0,-(a7)
-	clr.w	d0
-loop\@:
-	move.w	d0,_custom+color
-	btst	#6,0xbfe001
-	beq.b	out\@
-	addq.w	#1,d0
-	bra.b	loop\@
-out\@:
-	move.w	(a7)+,d0
-	nop
-.endm
-
-* same thing but if LMB is pressed when entering, macro waits for release)
-.macro blitz
-w\@:
-	btst	#6,0xbfe001
-	beq.b	w\@
-	blitz_bypass
-.endm
 
 	
 
@@ -1015,8 +971,7 @@ blit_background:
 *}
 
 really_update_sprites:
-update_bobs_and_hw_sprites:
-	
+
 
 	***********************
 	* erase previous BOBs *
@@ -1092,7 +1047,7 @@ compute_sprite_xy_code:
 	moveq	#0,d2
 	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d2
 	and.b	#7,d2
-	lsl.b	#8,d2
+	lsl.w	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	rts
 	
@@ -1189,12 +1144,11 @@ update_one_sprite:
 *		}
 *	}	
 update_one_bob:
+
 	move.l	A0,-(a7)
-	move.b	#1,0x110
 	* Y/X = 0xF8 (raw): nothing displayed
 	cmp.l	#0xF80000F8,(a0)
 	jeq		2f
-
 	jbsr	compute_sprite_xy_code
 	add.w	d2,d2
 	add.w	d2,d2
@@ -1205,6 +1159,9 @@ update_one_bob:
 	* we have the table (0,1,2) but if we forgot to register a bob
 	* then we could miss out some sprite
 	moveq	#0,d2
+	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d2
+	and.b	#7,d2
+	lsl.w	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	BREAKPOINT	"unregistered sprite clut (D2=code)"
 	jra		2f
@@ -1218,9 +1175,9 @@ update_one_bob:
 	lsr.w	#1,d2		| attribute times 4
 	move.l	d4,a0
 	move.l	(a0,d2.w),d4
-	jeq		100f		| invalid clut: can happen in transition phases
+	jeq		2f		| invalid clut: can happen in transition phases
 	move.l	d4,a0
-	BREAKPOINT	"SPPPPPRR"
+
 *	btst	#1,d3
 *	jeq		101f
 *	* mirror
@@ -1232,11 +1189,17 @@ update_one_bob:
 	* A0 points on the first bitplane of the bob
 	addq 	#2,a0
 	
+	* BOBs must follow screen scroll (TODO: X scroll)
+	add.w	scroll_y,d1
+	
 	move.l		playfield_drawed_screen_ptr(pc),a1
 	
 	* D0 and D1 are already set
 	move.l	(NB_PLAYFIELD_PLANES*4,a0),d2
 	beq.b	2f		| mask is zero: blank tile => skip
+	
+	jra		2f
+	
 	move.l	d2,a3
 	moveq	#0,d2	| no y-clip
 	*sub.w	#16,d0	| move each bob 16 bits to the left
@@ -2286,7 +2249,9 @@ osd_set_scrolly_lo:
 	move.b	d0,scroll_y+1
 	rts
 
+	
 load_tile_data:
+	PUSH_INTERRUPT_STATE
 	movem.l	d0-a6,-(a7)
 	.ifndef	RELEASE
 	* purge log data
@@ -2325,9 +2290,10 @@ load_tile_data:
 	* now allocate memory for it and load/decrunch it
 
 	jbsr	allocate_and_load_public_mem_file
-	move.l	d0,tiles_ptr		| also returns size in d1 but we don't care
+	move.l	d0,work_tiles_ptr		| also returns size in d1 but we don't care
 	* now we need to relocate the tables
 	jbsr	relocate_tile_data
+	move.l	work_tiles_ptr,tiles_ptr
 	
 	move.l	a3,a0
 	lea		bob_file_name_end(pc),a1
@@ -2342,8 +2308,9 @@ load_tile_data:
 	tst.l	d0
 	jeq		0f
 	jbsr	allocate_and_load_chip_mem_file
-	move.l	d0,bobs_ptr		| also returns size in d1 but we don't care
+	move.l	d0,work_bobs_ptr		| also returns size in d1 but we don't care
 	jbsr	relocate_sprite_data
+	move.l	work_bobs_ptr,bobs_ptr
 0:
 	
 	* set palette
@@ -2359,13 +2326,14 @@ load_tile_data:
 	dbf		d0,0b
 	
 	movem.l	(a7)+,d0-a6
+	PULL_INTERRUPT_STATE
 	rts
 	
 relocate_tile_data:
 	*
 	* main tile table
 	*
-	move.l	tiles_ptr,a0
+	move.l	work_tiles_ptr,a0
 	move.l	a0,d1
 	move.w	#NB_TILES-1,d0
 0:
@@ -2381,7 +2349,7 @@ relocate_tile_data:
 	* then cluts (we could have done it at the same time
 	* but it's simpler as we don't have to "nest" registers)
 	*
-	move.l	tiles_ptr,a0
+	move.l	work_tiles_ptr,a0
 	move.w	#NB_TILES-1,d0
 0:
 	move.l	(a0)+,d2
@@ -2402,7 +2370,7 @@ relocate_tile_data:
 	*
 	* then tile planes
 	*
-	move.l	tiles_ptr,a0
+	move.l	work_tiles_ptr,a0
 	move.w	#NB_TILES-1,d0
 0:
 	move.l	(a0)+,d2
@@ -2432,7 +2400,7 @@ relocate_sprite_data:
 	*
 	* main sprite table
 	*
-	move.l	bobs_ptr,a0
+	move.l	work_bobs_ptr,a0
 	move.l	a0,d1
 	move.w	#NB_SPRITES-1,d0
 0:
@@ -2449,7 +2417,7 @@ relocate_sprite_data:
 	* but it's simpler as we don't have to "nest" registers)
 	*
 
-	move.l	bobs_ptr,a0
+	move.l	work_bobs_ptr,a0
 	move.w	#NB_SPRITES-1,d0
 0:
 	move.l	(a0)+,d2
@@ -2472,7 +2440,7 @@ relocate_sprite_data:
 	*
 	* then sprite planes
 	*
-	move.l	bobs_ptr,a0
+	move.l	work_bobs_ptr,a0
 	move.w	#NB_SPRITES-1,d0
 
 0:
@@ -2697,15 +2665,8 @@ log_used_tiles:
 	add.w	#NB_TILES/2,d0		| upper half
 12:
 	lsr.w	#5,d1
-	and.w	#7,d1	| useful?
-*		tst.b	d0
-*		jeq		444f
-*	cmp.w	#0x841,d7
-*	jne	444f
-*	BREAKPOINT	"logging 841!! nonzero"
-*444:
 
-	and.b	#7,d1		| remove flip/mirror
+	and.w	#7,d1		| remove flip/mirror
 	lsl.l	#NB_CLUTS_POW,d0			| tile code * NB_CLUTS (long!)
 	add.l	d1,d0			| add clut
 	st.b	(a0,d0.l)
@@ -2713,7 +2674,10 @@ log_used_tiles:
 	dbf		d7,0b
 	rts
 	
-
+fakeshit:
+	.long	0xB146F168
+	.skip	0x100
+	
 log_used_sprites:
 
 	* scan the whole screen, see what was updated
@@ -2722,7 +2686,7 @@ log_used_sprites:
 	GET_RAM_START_IN_A6
 	lea		(SPRITE_ADDRESS,a6),a5
 	lea	sprite_log_table,a0
-	move.w	#0x800-1,d7
+	moveq	#0,d7
 0:
 	moveq	#0,d2
 	moveq	#0,d1
@@ -2730,24 +2694,27 @@ log_used_sprites:
 	move.b	(TARGET_SPRITE_CODE,a5,d7.w),d0
 	move.b	(TARGET_SPRITE_ATTRIBUTES,a5,d7.w),d1
 	move.b	d1,d2
-	and.w	#0x7,d2
+	and.b	#0x7,d2
 	lsl.w	#8,d2
 	add.w	d2,d0			| extended sprite code
+	moveq	#0,d2
 	move.b	d1,d2
 	and.b	#0x38,d2
 	lsr.b	#3,d2			| color
 
 
 	
+	lsl.l	#NB_CLUTS_POW,d0			| sprite code * NB_CLUTS (long!)
 	add.l	d2,d0			| add clut
 	st.b	(a0,d0.l)
-	lsl.l	#NB_CLUTS_POW,d0			| sprite code * NB_CLUTS (long!)
 	btst	#7,d1
 	jeq		20f
-	st.b	(1,a0,d0.l)
+	st.b	(1,a0,d0.l)		| Y double size with next sprite
 
 20:
-	dbf		d7,0b
+	addq	#TARGET_SPRITE_SIZEOF,d7
+	cmp.w	#NB_TARGET_SPRITES*4,d7
+	jne		0b
 	rts
 	.endif
 	
@@ -3631,6 +3598,10 @@ palette_ptr:
 tiles_ptr:
 	.long	0
 bobs_ptr:
+	.long	0
+work_tiles_ptr:
+	.long	0
+work_bobs_ptr:
 	.long	0
 	
 *sprites_table:

@@ -6,8 +6,9 @@ from shared import *
 
 
 def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
-    merged_path_file = used_graphics_dir
-
+    merged_path_file = used_graphics_dir / context_name
+    merged_path_file.mkdir(exist_ok=True)
+    bin_file = merged_path_file / used_name
 
     # merge sprites with existing file + moves from level 1
     used_dump = data_dir / used_name
@@ -31,9 +32,9 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
             if a!=b:
                 code,clut = divmod(i,nb_cluts)
                 print(f"{used_name}: New: code={code:02x}, clut={clut:02x}")
-        (merged_path_file / context_name).mkdir(exist_ok=True)
-        with open(merged_path_file / context_name / used_name,"wb") as f:
+
+        with open(bin_file,"wb") as f:
             f.write(contents)
 
 #merge("intro","used_tiles",0x4000,nb_cluts = 8,overwrite=True)
-merge("level_1","used_sprites",0x2000,nb_cluts=8,overwrite=True)
+merge("level_1","used_sprites",0x800,nb_cluts=8,overwrite=False)
