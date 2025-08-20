@@ -15,7 +15,7 @@ used_sprite_cluts_file = this_dir / "used_sprite_cluts.json"
 used_tile_cluts_file = this_dir / "used_tile_cluts.json"
 used_graphics_dir = this_dir / "used_graphics"
 
-NB_SPRITES = 0x2000
+NB_SPRITES = 0x800
 NB_TILES = 0x4000
 
 gen_dir.mkdir(exist_ok=True)

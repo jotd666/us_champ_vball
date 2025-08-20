@@ -47,7 +47,7 @@ LOG_BUFFER_SIZE = 0x20000
 NB_CLUTS_POW = 3
 NB_CLUTS = 1<<NB_CLUTS_POW
 NB_TILES = 0x4000
-NB_SPRITES = 0x2000
+NB_SPRITES = 0x800
 
 SPRITE_X_CORRECTION = -1
 SPRITE_Y_CORRECTION = -8
@@ -111,7 +111,7 @@ SCREEN_PLANE_SIZE = NB_BYTES_PER_ROW*NB_PLAYFIELD_LINES
 SCREEN_SIZE = SCREEN_PLANE_SIZE*NB_PLAYFIELD_PLANES
 NB_HOST_SPRITES = 8
 
-NB_TARGET_SPRITES = 8
+NB_TARGET_SPRITES = 64
 
 SPRITE_X = 2
 SPRITE_Y = 3
@@ -759,7 +759,7 @@ _vblank:
 	jeq		23f
 0:
 
-	**jbsr		really_update_sprites
+	jbsr		really_update_sprites
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
@@ -1072,11 +1072,16 @@ update_bobs_and_hw_sprites:
 
 compute_sprite_xy_code:
 	moveq	#0,d0
+	* sx = ((m_spriteram[i + 3] + 8) & 0xff) - 7;
 	move.b	(TARGET_SPRITE_X,a0),d0
-	neg.w	d0
-	add.w	#240,d0
+	addq	#8,d0
+	and.w	#0xFF,d0
+	subq	#7,d0
+	* sy = 240 - m_spriteram[i];
 	moveq	#0,d1
 	move.b	(TARGET_SPRITE_Y,a0),d1
+	neg.w	d1
+	add.w	#240,d1
 
 	.ifne	SPRITE_Y_CORRECTION
 	add.w	#SPRITE_Y_CORRECTION,d1
@@ -1084,8 +1089,10 @@ compute_sprite_xy_code:
 	.ifne	SPRITE_X_CORRECTION
 	add.w	#SPRITE_X_CORRECTION,d0
 	.endif
-	
 	moveq	#0,d2
+	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d2
+	and.b	#7,d2
+	lsl.b	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	rts
 	
@@ -1183,12 +1190,10 @@ update_one_sprite:
 *	}	
 update_one_bob:
 	move.l	A0,-(a7)
-
-	* code = 0 and clut = 0 => disabled ?? to check
-	
-	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d3
-	btst	#0,d3
-	jeq	2f			| bit not set: not shown
+	move.b	#1,0x110
+	* Y/X = 0xF8 (raw): nothing displayed
+	cmp.l	#0xF80000F8,(a0)
+	jeq		2f
 
 	jbsr	compute_sprite_xy_code
 	add.w	d2,d2
@@ -1205,17 +1210,28 @@ update_one_bob:
 	jra		2f
 100:
 	.endif
+	* now select proper clut
+	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d3
+	moveq	#0,d2
+	move.b	d3,d2
+	and.b	#0x38,d2
+	lsr.w	#1,d2		| attribute times 4
 	move.l	d4,a0
-	btst	#1,d3
-	jeq		101f
-	* mirror
-	add.w	#((NB_PLAYFIELD_PLANES+1)*4+6)*2,a0
-101:
+	move.l	(a0,d2.w),d4
+	jeq		100f		| invalid clut: can happen in transition phases
+	move.l	d4,a0
+	BREAKPOINT	"SPPPPPRR"
+*	btst	#1,d3
+*	jeq		101f
+*	* mirror
+*	add.w	#((NB_PLAYFIELD_PLANES+1)*4+6)*2,a0
+*101:
 	move.w	(a0)+,d4		| height
 	move.w	(a0)+,d5		| width
 	add.w	(a0)+,d1		| add offset to Y
 	* A0 points on the first bitplane of the bob
-
+	addq 	#2,a0
+	
 	move.l		playfield_drawed_screen_ptr(pc),a1
 	
 	* D0 and D1 are already set
@@ -1239,7 +1255,7 @@ update_one_bob:
 101:
 
 
-	moveq	#NB_PLAYFIELD_PLANES,d3		| 3 planes
+	moveq	#NB_PLAYFIELD_PLANES,d3
 
 	jbsr		blit_planes_any_internal_cookie_cut
 2:
@@ -1650,7 +1666,7 @@ platform_init:
 
  	*         VVHH
     move.w #0x2489,d0
-    move.w #0x2479,d1
+    move.w #0x2489,d1
 	cmp.l	#NTSC_MONITOR_ID,monitor
 	jne		0f
 	sub.w	#NTSC_Y_SHIFT<<8,d0
@@ -1662,8 +1678,7 @@ platform_init:
     move.w #0x0038,ddfstrt(a5)
     move.w #0x00D0,ddfstop(a5)		| C0 for fmode=3
 
-
-   
+  
 	
 	# 0 modulo (OCS)
 	move	#NB_BYTES_PER_ROW-40,d0
@@ -2254,7 +2269,10 @@ osd_set_scrollx_hi:
 	* this is sprites prom bank number
 	cmp.b	current_sprite_prom_bank,d0
 	jeq		0f
-	BREAKPOINT	"sprites prom shift"
+	* ATM we're trying to avoid separate sprite palette, let's see
+	* if we can pull it off given that there are only sprites on 4
+	* different tilesets (4 fields) so coupling is probably OK
+*	BREAKPOINT	"sprites prom shift"
 	move.b	d0,current_sprite_prom_bank
 0:
 	
@@ -2425,7 +2443,7 @@ relocate_sprite_data:
 	move.l	d2,(-4,a0)
 1:
 	dbf		d0,0b
-	
+
 	*
 	* then cluts (we could have done it at the same time
 	* but it's simpler as we don't have to "nest" registers)
@@ -2433,13 +2451,13 @@ relocate_sprite_data:
 
 	move.l	bobs_ptr,a0
 	move.w	#NB_SPRITES-1,d0
-	BREAKPOINT	"flllfll"
 0:
 	move.l	(a0)+,d2
 	jeq		1f
 	* something there: get it
 	move.l	d2,a1
 	move.w	#NB_CLUTS-1,d1
+
 10:
 	move.l	(a1)+,d3
 	jeq		11f
@@ -2450,11 +2468,13 @@ relocate_sprite_data:
 1:
 	dbf		d0,0b
 	
+	
 	*
 	* then sprite planes
 	*
 	move.l	bobs_ptr,a0
 	move.w	#NB_SPRITES-1,d0
+
 0:
 	move.l	(a0)+,d2
 	jeq		1f
@@ -2466,7 +2486,6 @@ relocate_sprite_data:
 	jeq		11f
 	* clut exists: get it (skip 8 byte header)
 	move.l	d2,a2
-	BREAKPOINT	"check!!"
 	addq	#8,a2
 	move.w	#NB_PLAYFIELD_PLANES-1+1,d3  | mask!!
 100:
