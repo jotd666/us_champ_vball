@@ -30,14 +30,14 @@ AFB_68020 = 1
 
 TOTAL_PUBLIC_MEMORY_SIZE = 400000
 * this is the minimum memory required for level 5
-TOTAL_CHIP_MEMORY_SIZE = 200000	
+TOTAL_CHIP_MEMORY_SIZE = 800000	
 
 BORDERBLANK = 0
 
 PREVIOUS_SPRITE_SIZE = 8
 CURRENT_SPRITE_SIZE = 4
 
-SPRITE_LOG_LENGTH = NB_CLUTS*NB_SPRITES*2
+SPRITE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
 TILE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
 
 SCORE_FILE_SIZE = 0x23		| wrong
@@ -2309,8 +2309,43 @@ load_tile_data:
 	jbsr	allocate_and_load_public_mem_file
 	move.l	d0,tiles_ptr		| also returns size in d1 but we don't care
 	* now we need to relocate the tables
+	jbsr	relocate_tile_data
+	
+	move.l	a3,a0
+	lea		bob_file_name_end(pc),a1
+0:
+	move.b	(a0)+,(a1)+
+	jne	0b
+	* now get file size (decrunched)
+	lea		bob_file_name(pc),a0
+	* now allocate memory for it and load/decrunch it
+
+	jbsr	get_file_size
+	tst.l	d0
+	jeq		0f
+	jbsr	allocate_and_load_chip_mem_file
+	move.l	d0,bobs_ptr		| also returns size in d1 but we don't care
+	jbsr	relocate_sprite_data
+0:
+	
+	* set palette
+	
+	* load palette there
+	move.l		palette_ptr,a0
+	lea		color_copper_pointers,a1
+	move.w	#TOTAL_NB_COLORS-1,d0
+
+0:
+	move.l	(a1)+,a2
+	move.w	(a0)+,(a2)
+	dbf		d0,0b
+	
+	movem.l	(a7)+,d0-a6
+	rts
+	
+relocate_tile_data:
 	*
-	* first main tile table
+	* main tile table
 	*
 	move.l	tiles_ptr,a0
 	move.l	a0,d1
@@ -2373,21 +2408,79 @@ load_tile_data:
 	dbf		d1,10b
 1:
 	dbf		d0,0b
+	rts
 	
-	* set palette
-	
-	* load palette there
-	move.l		palette_ptr,a0
-	lea		color_copper_pointers,a1
-	move.w	#TOTAL_NB_COLORS-1,d0
-
+relocate_sprite_data:
+	*
+	* main sprite table
+	*
+	move.l	bobs_ptr,a0
+	move.l	a0,d1
+	move.w	#NB_SPRITES-1,d0
 0:
-	move.l	(a1)+,a2
-	move.w	(a0)+,(a2)
+	move.l	(a0)+,d2
+	jeq		1f
+	* something there: relocate
+	add.l	d1,d2
+	move.l	d2,(-4,a0)
+1:
 	dbf		d0,0b
 	
-	movem.l	(a7)+,d0-a6
+	*
+	* then cluts (we could have done it at the same time
+	* but it's simpler as we don't have to "nest" registers)
+	*
+
+	move.l	bobs_ptr,a0
+	move.w	#NB_SPRITES-1,d0
+	BREAKPOINT	"flllfll"
+0:
+	move.l	(a0)+,d2
+	jeq		1f
+	* something there: get it
+	move.l	d2,a1
+	move.w	#NB_CLUTS-1,d1
+10:
+	move.l	(a1)+,d3
+	jeq		11f
+	* clut exists: relocate
+	add.l	d2,(-4,a1)
+11:
+	dbf		d1,10b
+1:
+	dbf		d0,0b
+	
+	*
+	* then sprite planes
+	*
+	move.l	bobs_ptr,a0
+	move.w	#NB_SPRITES-1,d0
+0:
+	move.l	(a0)+,d2
+	jeq		1f
+	* something there: get it
+	move.l	d2,a1
+	move.w	#NB_CLUTS-1,d1
+10:
+	move.l	(a1)+,d2
+	jeq		11f
+	* clut exists: get it (skip 8 byte header)
+	move.l	d2,a2
+	BREAKPOINT	"check!!"
+	addq	#8,a2
+	move.w	#NB_PLAYFIELD_PLANES-1+1,d3  | mask!!
+100:
+	move.l	(a2)+,d4
+	jeq		101f
+	add.l	d2,(-4,a2)
+101:
+	dbf		d3,100b
+11:
+	dbf		d1,10b
+1:
+	dbf		d0,0b
 	rts
+	
 	
 	.ifne	OPT_ENABLE_LOGGING
 purge_tile_log_data:
@@ -3335,9 +3428,9 @@ tile_file_name:
 	.ascii	"tiles_"
 tile_file_name_end:
 	.skip	30
-sprite_file_name:
-	.ascii	"sprites_"
-sprite_file_name_end:
+bob_file_name:
+	.ascii	"bobs_"
+bob_file_name_end:
 	.skip	30
 palette_file_name:
 	.ascii	"palette_"
