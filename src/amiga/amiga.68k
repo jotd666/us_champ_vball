@@ -694,7 +694,7 @@ _vblank:
 	move.w	d0,-(a7)
 	jbsr	irq_eea4
 	move.w	(a7)+,d0
-	jra		23f	| no need to update sprites we're in the middle of a frame
+	jra		3f	| no need to update sprites we're in the middle of a frame
 300:
 
 	* declare that we're in interrupt mode so osd_disable_interrupts/osd_enable_interrupts
@@ -712,7 +712,7 @@ _vblank:
 	clr.b	d0
 1:
 	move.b	d0,mid_screen_interrupt_count
-	jra		23f	| no need to update sprites we're in the middle of a frame
+	jra		3f	| no need to update sprites we're in the middle of a frame
 2:
 
 	subq.w	#1,delay_timer
@@ -3709,12 +3709,12 @@ public_memory_block:
 
 	* copper interrupt plus interrupt level 5
 	.macro	DECL_IRQ
-	*.word	intreq,0x8010+(1<<11)
+	.word	intreq,0x8010+(1<<11)
 	.endm
 	
 	.macro	WAIT_AND_DECL_IRQ	nrep
 	.rept	\nrep
-	.word	current_line<<8+1,0xFFFE
+	.word	(current_line<<8)+1,0xFFFE
 	.set	current_line,current_line+15
 	DECL_IRQ
 	.endr
@@ -3786,13 +3786,12 @@ pal_intreq_block_game:
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait
 	* extra wait for PAL (NTSC can't afford this)
-	.set	current_line,0
-
+	*.set	current_line,8
 	*WAIT_AND_DECL_IRQ	1
+	DECL_IRQ
 	
-	
-*pal_wait:
-	*.word	0x0C01,0xFFFE
+pal_wait:
+	.word	0x0C01,0xFFFE
 	.word	 intreq,0x8010
 
 
