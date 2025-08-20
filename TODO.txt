@@ -1,8 +1,6 @@
-- IRQ: irq_eea4 each 15 lines (on 288 lines) using copper int
+- IRQ: irq_eea4 each 15 lines (on 288 lines) using copper int: now locks up???
 - then test insert coin!!: locks up:
-
-EEF2 should set to 0 $2F but does not?
-infinite loop at D826
+- sprite update crashing randomly (anyway: not correct)
 
 - X scrolling doesn't work properly
 - display sprites properly
