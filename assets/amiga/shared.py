@@ -46,7 +46,28 @@ sr2 = lambda a,b : set(range(a,b,2))
 
 def get_sprite_names():
 
-    rval = {}
+    rval = {0x2D6:"P",
+    0x2D7:"L",
+    0x2D8:"A",
+    0x2D9:"Y",
+    0x2DA:"E",
+    0x2DB:"R",
+    0x2DC:"S",
+    0x2DD:"C",
+    0x2DE:"T",
+    0x2E8:"pole",
+    0x2E9:"pole",
+    0x440:"net",
+    0x442:"net",
+    0x7e0:"player_head_1",
+    0x7e1:"player_torso_1",
+    0x7e2:"player_tigh_1",
+    0x7e3:"player_calf",
+    0x7e4:"player_head_2",
+    0x7e5:"player_torso_2",
+    0x7e6:"player_tigh_2",
+    0x7e7:"player_leg"
+    }
     return rval
 
 

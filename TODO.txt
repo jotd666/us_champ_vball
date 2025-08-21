@@ -1,9 +1,8 @@
-- IRQ: irq_eea4 each 15 lines (on 288 lines) using copper int: now locks up???
-- then test insert coin!!: locks up:
+- debug sprites using player select screen
+
 - sprite update crashing randomly (anyway: not correct)
 
 - X scrolling doesn't work properly
-- display sprites properly
 - reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
@@ -13,9 +12,6 @@
   hopefully it's enough
 
 
-- should detect bank1 in jsr fffxx if fffxx is logged!!
-
-  
 - implement scrollx with OCS setup ATM (scroll table = 16): doesn't work
 - DB16: write blank char doesn't work in 2BA9: debug
 
@@ -34,3 +30,34 @@ wpset 1009,1,W,wpdata!=b@22D
 * eaff writes 60 continuously, not interesting:
 
 wpset 1009,1,W,pc!=$eaff
+
+
+log sound:
+
+wpset 100D,1,W,,{print A,g}
+
+2: select/start music
+5: intro music
+
+9: level 1 music
+8: unknown music
+7: unknown music
+6: level 2 music
+4: unknown??
+3: stressful level end music (finish)
+
+A: unknown blues???
+B: unknown blues??? the same???
+c: short tune
+D: unknown???
+E: lost!
+F: ominous very short tune
+10: game over???
+11: credit inserted
+12: another upbeat music
+13: short upbeat
+14: won!
+15: unknown ???
+16: sfx....
+
+$34/$1F ?: credit inserted
