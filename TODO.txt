@@ -1,4 +1,7 @@
-- debug sprites using player select screen
+- debug sprites using player select screen;: mockup ok but amiga sprites
+  not right (half players)
+
+e66b: CLR_XC_FLAGS changes Z/N => fuck!!
 
 - sprite update crashing randomly (anyway: not correct)
 
@@ -13,7 +16,7 @@
 
 
 - implement scrollx with OCS setup ATM (scroll table = 16): doesn't work
-- DB16: write blank char doesn't work in 2BA9: debug
+- DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
 
@@ -40,8 +43,8 @@ wpset 100D,1,W,,{print A,g}
 5: intro music
 
 9: level 1 music
-8: unknown music
-7: unknown music
+8: level 4 music
+7: level 3 music
 6: level 2 music
 4: unknown??
 3: stressful level end music (finish)
@@ -49,7 +52,7 @@ wpset 100D,1,W,,{print A,g}
 A: unknown blues???
 B: unknown blues??? the same???
 c: short tune
-D: unknown???
+D: naval base last level music
 E: lost!
 F: ominous very short tune
 10: game over???

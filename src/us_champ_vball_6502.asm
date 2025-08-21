@@ -137,6 +137,7 @@ toggle_timer_2f = $2f
 irq_07_counter_31 = $31
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
+sprite_shadow_ram_06db = $6db
 screen_id_07e4 = $7e4
 sprite_prom_bank_07f4 = $7f4
 tile_prom_bank_07f3 = $7f3
@@ -11859,7 +11860,7 @@ CF56: 90 ED    bcc $cf45
 CF58: 60       rts
 CF59: AE DA 06 ldx $06da
 CF5C: A9 F8    lda #$f8
-CF5E: 9D DB 06 sta $06db, x
+CF5E: 9D DB 06 sta sprite_shadow_ram_06db, x
 CF61: 9D DE 06 sta $06de, x
 CF64: A9 00    lda #$00
 CF66: 9D DC 06 sta $06dc, x
@@ -11878,7 +11879,7 @@ CF7D: 9D 02 08 sta $0802, x
 CF80: 9D DD 06 sta $06dd, x
 CF83: A9 F8    lda #$f8
 CF85: 9D 00 08 sta $0800, x
-CF88: 9D DB 06 sta $06db, x
+CF88: 9D DB 06 sta sprite_shadow_ram_06db, x
 CF8B: 9D 03 08 sta $0803, x
 CF8E: 9D DE 06 sta $06de, x
 CF91: E8       inx
@@ -12201,8 +12202,8 @@ D1AF: 85 11    sta $11
 D1B1: 85 13    sta tile_msb_to_write_13
 D1B3: 20 29 D1 jsr $d129
 D1B6: 60       rts
-set_sprites_without_loop_d1b7:
-D1B7: AD DB 06 lda $06db
+copy_shadow_sprites_d1b7:
+D1B7: AD DB 06 lda sprite_shadow_ram_06db
 D1BA: 8D 00 08 sta $0800
 D1BD: AD DC 06 lda $06dc
 D1C0: 8D 01 08 sta $0801
@@ -13307,7 +13308,7 @@ E11C: 08       php
 E11D: C8       iny
 E11E: 18       clc
 E11F: 65 02    adc unpack_mode_02
-E121: 9D DB 06 sta $06db, x
+E121: 9D DB 06 sta sprite_shadow_ram_06db, x
 E124: A5 03    lda $03
 E126: 69 00    adc #$00
 E128: 28       plp
@@ -13319,7 +13320,7 @@ E131: 05 0F    ora $0f
 E133: D0 35    bne $e16a
 E135: 24 0A    bit $0a
 E137: 10 0B    bpl $e144
-E139: BD DB 06 lda $06db, x
+E139: BD DB 06 lda sprite_shadow_ram_06db, x
 E13C: C9 08    cmp #$08
 E13E: 90 2A    bcc $e16a
 E140: C9 F9    cmp #$f9
@@ -13328,14 +13329,14 @@ E144: BD DE 06 lda $06de, x
 E147: 38       sec
 E148: E9 08    sbc #$08
 E14A: 9D DE 06 sta $06de, x
-E14D: BD DB 06 lda $06db, x
+E14D: BD DB 06 lda sprite_shadow_ram_06db, x
 E150: 38       sec
 E151: E9 07    sbc #$07
 E153: 24 0A    bit $0a
 E155: 10 03    bpl $e15a
 E157: 38       sec
 E158: E9 08    sbc #$08
-E15A: 9D DB 06 sta $06db, x
+E15A: 9D DB 06 sta sprite_shadow_ram_06db, x
 E15D: AD DA 06 lda $06da
 E160: 18       clc
 E161: 69 04    adc #$04
@@ -13783,7 +13784,7 @@ E544: 90 03    bcc $e549
 E546: 20 6A E5 jsr $e56a
 E549: 20 BB E5 jsr $e5bb
 E54C: A9 06    lda #$06
-E54E: 20 DB E5 jsr $e5db
+E54E: 20 DB E5 jsr update_players_and_net_sprites_e5db
 E551: A5 1D    lda base_screen_pointer_list_001d
 E553: F0 0A    beq $e55f
 E555: C9 02    cmp #$02
@@ -13845,7 +13846,7 @@ E5C6: 48       pha
 E5C7: 98       tya
 E5C8: 48       pha
 E5C9: BD 00 02 lda $0200, x
-E5CC: 20 DB E5 jsr $e5db
+E5CC: 20 DB E5 jsr update_players_and_net_sprites_e5db
 E5CF: 68       pla
 E5D0: A8       tay
 E5D1: 68       pla
@@ -13856,6 +13857,8 @@ E5D5: C8       iny
 E5D6: C4 1E    cpy $1e
 E5D8: 90 EB    bcc $e5c5
 E5DA: 60       rts
+
+update_players_and_net_sprites_e5db:
 E5DB: 48       pha
 E5DC: A9 01    lda #$01
 E5DE: 20 DF D8 jsr set_bank_d8df
@@ -13920,7 +13923,7 @@ E64A: 18       clc
 E64B: 08       php
 E64C: C8       iny
 E64D: 65 14    adc screen_tile_dest_address_14
-E64F: 9D DB 06 sta $06db, x
+E64F: 9D DB 06 sta sprite_shadow_ram_06db, x
 E652: A5 15    lda $15
 E654: 69 00    adc #$00
 E656: 28       plp
@@ -13950,7 +13953,7 @@ E680: 05 02    ora unpack_mode_02
 E682: D0 3B    bne $e6bf
 E684: 24 03    bit $03
 E686: 10 0B    bpl $e693
-E688: BD DB 06 lda $06db, x
+E688: BD DB 06 lda sprite_shadow_ram_06db, x
 E68B: C9 08    cmp #$08
 E68D: 90 30    bcc $e6bf
 E68F: C9 F9    cmp #$f9
@@ -13961,14 +13964,14 @@ E697: E9 08    sbc #$08
 E699: 9D DE 06 sta $06de, x
 E69C: BD DC 06 lda $06dc, x
 E69F: 85 03    sta $03
-E6A1: BD DB 06 lda $06db, x
+E6A1: BD DB 06 lda sprite_shadow_ram_06db, x
 E6A4: 38       sec
 E6A5: E9 07    sbc #$07
 E6A7: 24 03    bit $03
 E6A9: 10 03    bpl $e6ae
 E6AB: 38       sec
 E6AC: E9 08    sbc #$08
-E6AE: 9D DB 06 sta $06db, x
+E6AE: 9D DB 06 sta sprite_shadow_ram_06db, x
 E6B1: AD DA 06 lda $06da
 E6B4: 18       clc
 E6B5: 69 04    adc #$04
@@ -14916,7 +14919,7 @@ EEE7: A5 2F    lda toggle_timer_2f
 EEE9: C9 5A    cmp #$5a
 EEEB: D0 0C    bne wait_for_vblank_eef9
 ; probably a delay?? WTF???
-EEED: 20 B7 D1 jsr set_sprites_without_loop_d1b7
+EEED: 20 B7 D1 jsr copy_shadow_sprites_d1b7
 EEF0: A9 00    lda #$00
 EEF2: 85 2F    sta toggle_timer_2f
 EEF4: 85 30    sta $30

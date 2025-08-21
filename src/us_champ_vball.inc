@@ -170,28 +170,41 @@ b6\@:
 	.endm
 
 	.macro CLR_XC_FLAGS
-	moveq	#0,d7
-	roxl.b	#1,d7
+	PUSH_SR
+	move.w	(sp),d3
+	and.b	#0xEE,d3		| bit 4 = X, bit 0 = C
+	move.w	d3,(sp)	
+	POP_SR
 	.endm
+	
 	.macro SET_XC_FLAGS
-	st	d7
-	roxl.b	#1,d7
+	PUSH_SR
+	move.w	(sp),d3
+	or.b	#0x11,d3		| bit 4 = X, bit 0 = C
+	move.w	d3,(sp)	
+	POP_SR
 	.endm
 
 	.macro CLR_V_FLAG
-	moveq	#0,d3
-	add.b	d3,d3
+	PUSH_SR
+	move.w	(sp),d3
+	and.b	#0xFD,d3		| bit 1 = V
+	move.w	d3,(sp)	
+	POP_SR
 	.endm
 	
 	.macro SET_V_FLAG
-	move.b	#0x70,d3
-	add.b	d3,d3
+	PUSH_SR
+	move.w	(sp),d3
+	or.b	#0x2,d3		| bit 1 = V
+	move.w	d3,(sp)	
+	POP_SR
 	.endm
 	
 	.macro	SET_NV_FLAGS 
 	PUSH_SR
 	move.w	(sp),d3
-	or.w	#0xA,d3		| bit 1 = V, bit 3 = N
+	or.b	#0xA,d3		| bit 1 = V, bit 3 = N
 	move.w	d3,(sp)	
 	POP_SR
 	.endm

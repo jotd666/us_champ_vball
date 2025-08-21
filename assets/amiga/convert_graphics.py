@@ -535,6 +535,6 @@ def gen_context_files(context_name,with_sprites=True):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
-gen_context_files("intro",with_sprites=False)
+#gen_context_files("intro",with_sprites=False)
 #gen_context_files("level_1")
-#gen_context_files("select")
+gen_context_files("select")

@@ -76,7 +76,7 @@ SPRITE_ADDRESS = 0x800
 * RAMs have 4 bytes per sprite, only the order
 * and some bits differ
 
-TARGET_SPRITE_Y = 2
+TARGET_SPRITE_Y = 0
 TARGET_SPRITE_X = 3
 TARGET_SPRITE_ATTRIBUTES = 1
 TARGET_SPRITE_CODE = 2
@@ -694,6 +694,10 @@ _vblank:
 	beq.b	300f
 	* fast irq
 	move.w	d0,-(a7)
+	* init registers, make sure no remaining bits in msb
+	moveq	#0,d0
+	moveq	#0,d1
+	moveq	#0,d2
 	jbsr	irq_eea4
 	move.w	(a7)+,d0
 	jra		3f	| no need to update sprites we're in the middle of a frame
@@ -2706,7 +2710,7 @@ log_used_tiles:
 	dbf		d7,0b
 	rts
 	
-	
+* sprite_log, log_sprites
 log_used_sprites:
 
 	* scan the whole screen, see what was updated
@@ -2738,7 +2742,7 @@ log_used_sprites:
 	st.b	(a0,d0.l)
 	btst	#7,d1
 	jeq		20f
-	st.b	(1,a0,d0.l)		| Y double size with next sprite
+	st.b	(NB_CLUTS,a0,d0.l)		| Y double size with next sprite
 
 20:
 	addq	#TARGET_SPRITE_SIZEOF,d7

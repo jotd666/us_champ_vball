@@ -10,6 +10,7 @@ toggle_timer_2f = 0x2f
 irq_07_counter_31 = 0x31
 bankswitch_copy_022d = 0x022d
 scrollx_hi_copy_022c = 0x022c
+sprite_shadow_ram_06db = 0x6db
 screen_id_07e4 = 0x7e4
 sprite_prom_bank_07f4 = 0x7f4
 tile_prom_bank_07f3 = 0x7f3

@@ -2,7 +2,7 @@ import os,struct,re
 
 # log has the registers, then "DEAD" in hex then ram and rom base addresses
 
-with open(r"..\cpu_log","rb") as f:
+with open(r"..\data\cpu_log","rb") as f:
     contents = f.read()
     contents = contents[:-8]
     dead_marker, = struct.unpack(">H",contents[-2:])
@@ -103,8 +103,13 @@ with open(r"K:\Emulation\MAME\mame.tr","r") as f:
                 rest = ", ".join(regstr)
                 lst.append(f"{pc}: {rest}\n")
 
+
 if sorted_cmp:
     lst.sort()
 print("writing filtered MAME trace file...")
 with open("mame.tr","w") as fw:
-    fw.writelines(lst)
+    prev_line = None
+    for line in lst:
+        if line != prev_line:
+            fw.write(line)
+        prev_line = line

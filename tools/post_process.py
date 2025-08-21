@@ -106,6 +106,21 @@ with open(source_dir / "conv.s") as f:
             # disable flip screen code
             line = change_instruction("rts",lines,i)
 
+        if line_address == 0xe707:
+            line = change_instruction("subq.b\t#1,d0",lines,i)
+            lines[i+1]=""
+            lines[i+3]=""
+            lines[i-3]=""
+            lines[i-2] = remove_instruction(lines,i-2)
+
+        if line_address in {0xe66b,0xe64a}:
+            # we changed addx to add, no need for CLEAR_XC_FLAGS
+            line = remove_instruction(lines,i)
+
+        if line_address in {0xe64d,0xe66e}:
+            # just in case X is set by addq above
+            lines[i+2] = lines[i+2].replace("addx","add")
+
         if line_address in {0xeefe,0xeef9,0xeefc,0xeea4}:
             line = remove_instruction(lines,i)
         if line_address == 0xf12d:
