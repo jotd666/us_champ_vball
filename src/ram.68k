@@ -6,7 +6,7 @@
 	.global		break_at_startup_flag
 	.global		current_bank
 	.ifndef		RELEASE
-
+	.global		disable_bank_0_check
 	.endif
 
 * ram also includes video & sprite ram, with ROM and 1 banked ROM
@@ -18,6 +18,10 @@ ram_buffer:
 	.skip	0x20000
 ram_start_0000:
 	.long	0
+disable_bank_0_check:
+	.byte	0
+	
+	.align	2
 	.endif
 
 

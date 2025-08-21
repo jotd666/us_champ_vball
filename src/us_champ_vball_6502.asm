@@ -13026,9 +13026,9 @@ DA2C: D0 02    bne $da30
 DA2E: 69 10    adc #$10
 DA30: 65 0D    adc $0d
 DA32: A0 00    ldy #$00
-DA34: 91 10    sta (screen_source_pointer_0010), y
+DA34: 91 10    sta (screen_source_pointer_0010), y   ;  [unchecked_address] write to video
 DA36: A5 0B    lda $0b
-DA38: 91 12    sta ($12), y
+DA38: 91 12    sta ($12), y				; [video_address] attrib
 DA3A: E6 10    inc screen_source_pointer_0010
 DA3C: D0 02    bne $da40
 DA3E: E6 11    inc $11

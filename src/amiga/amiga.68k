@@ -38,8 +38,6 @@ BORDERBLANK = 0
 PREVIOUS_SPRITE_SIZE = 8
 CURRENT_SPRITE_SIZE = 4
 
-SPRITE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
-TILE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
 
 SCORE_FILE_SIZE = 0x23		| wrong
 
@@ -49,6 +47,9 @@ NB_CLUTS_POW = 3
 NB_CLUTS = 1<<NB_CLUTS_POW
 NB_TILES = 0x4000
 NB_SPRITES = 0x800
+
+SPRITE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
+TILE_LOG_LENGTH = NB_CLUTS*NB_TILES
 
 SPRITE_X_CORRECTION = 0
 SPRITE_Y_CORRECTION = 0
@@ -83,9 +84,10 @@ TARGET_SPRITE_SIZEOF = 4
 
 	.ifdef	RELEASE
 OPT_ENABLE_LOGGING = 0           | DO NOT CHANGE THIS
-
+OPT_DEBUG_BANKSWITCH = 0          | DO NOT CHANGE THIS
 	.else
 OPT_ENABLE_LOGGING = 1
+OPT_DEBUG_BANKSWITCH = 0
 
 
 
@@ -1826,6 +1828,25 @@ sound_indirection_table:
     .byte    -1   | 62
     .byte    -1   | 63
 	
+	.macro		SET_BANK	arg
+	move.b	d4,bank_value
+	cmp.b	#\arg,current_rom_bank
+	jeq		0f
+	.ifne	OPT_DEBUG_BANKSWITCH
+	moveq.l	#\arg,d3
+	move.w	last_bankswitch_pc,d4
+	move.w	last_known_m6502_pc,d5
+	BREAKPOINT	"setting bank \arg, prev bspc in d4, curpc in d5"
+	.endif
+	jbsr	copy_bank_\arg
+	move.b	#\arg,current_rom_bank
+	.ifndef	RELEASE
+	move.w	last_known_m6502_pc,last_bankswitch_pc
+	.endif
+0:
+	rts	
+	.endm
+	
 	
 osd_set_bank:
 	move.b	d0,d4
@@ -1833,36 +1854,19 @@ osd_set_bank:
 	btst	#5,d0
 	seq		higher_gfxset		| inverted logic
 	
+	move.w	d0,-(a7)
 	rol.b	#2,d0
 	and.b	#3,d0
 	move.b	d0,scroll_y			| set scroll high value
+	move.w	(a7)+,d0
 	
 	* now memory bank (bit 1 of the input)
 	bclr	#0,d4
 	jne		set_bank_1
-	move.b	d4,bank_value
-	cmp.b	#0,current_rom_bank
-	jeq		0f
 	* set bank 0
-	*BREAKPOINT	"setting bank 0"
-	jbsr	copy_bank_0
-	move.b	#0,current_rom_bank
-	.ifndef	RELEASE
-	move.w	last_known_m6502_pc,last_bankswitch_pc
-	.endif
-	rts
+	SET_BANK	0
 set_bank_1:
-	move.b	d4,bank_value
-	cmp.b	#1,current_rom_bank
-	jeq		0f
-	* set bank 1
-	*BREAKPOINT	"setting bank 1"
-	jbsr	copy_bank_1
-	move.b	#1,current_rom_bank
-	.ifndef	RELEASE
-	move.w	last_known_m6502_pc,last_bankswitch_pc
-	.endif
-0:
+	SET_BANK	1
 	rts
 
 * a0=screen address (preserved)
@@ -3304,6 +3308,9 @@ osd_log_cpu:
 	jeq		0f
 	* we could have missed one bankswitch
 	move.w	last_bankswitch_pc,d5
+	move.w  last_known_m6502_pc,d4
+	tst.b	disable_bank_0_check
+	jne		0f
 	BREAKPOINT		"running code in 4000-8000 when bank doesn't match"
 	ILLEGAL
 0:
@@ -3462,12 +3469,14 @@ level4_context:
 	.asciz	"level_4"
 intro_context:
 	.asciz	"intro"
+select_context:
+	.asciz	"select"
 
 	.align	2
 
 * there are 8 possible contexts (prom banks)
 context_table:
-	.long	0     | 0  select
+	.long	select_context     | 0
 	.long	0     | 1
 	.long	0     | 2
 	.long	level1_context     | 3

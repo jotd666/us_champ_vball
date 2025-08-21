@@ -2,8 +2,12 @@
 *
 
 
-
-
+	.include	"bank0_wrap.inc"
+	* wrappers to be able to call shared ROM from bank 1 without triggering
+	* a sanity check (non-release mode only)
+	BANK1_WRAP	ff80
+	BANK1_WRAP	ff83
+	
 b1_79b9:
 	GET_ADDRESS	0x65                       	| [$79b9: lda $65, x]
 	move.b	(a0,d1.w),d0                    	| [...]
@@ -28,8 +32,8 @@ b1_79b9:
 	move.b	(a0,d2.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x11,d0 |  [$79d4: sta $11]
 	jbsr	b1_79dd                            	| [$79d6: jsr $79dd]
-	jbsr	b1_7a5c                            	| [$79d9: jsr $7a5c]
-	rts                                    	| [$79dc: rts]
+	jbra	b1_7a5c                            	| [$79d9: jsr $7a5c]
+	                                   	| [$79dc: rts]
 b1_79dd:
 	GET_ADDRESS	0x9d                       	| [$79dd: lda $9d, x]
 	move.b	(a0,d1.w),d0                    	| [...]
@@ -121,9 +125,7 @@ b1_7a33:
 	                           	| [$7a46: clc]
 	add.b	#0xff,d0                        	| [$7a47: adc #$ff]
 b1_7a49:
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x08,d0 |  [$7a49: sta $08]
-	POP_SR
 	move.b	#0x03,d2                        	| [$7a4b: ldy #$03]
 	GET_INDIRECT_ADDRESS	0x10              	| [$7a4d: lda ($10), y]
 	move.b	(a0,d2.w),d0                    	| [...]
@@ -352,11 +354,11 @@ b1_7b81:
 	move.b	#0x01,d2                        	| [$7b83: ldy #$01]
 	GET_INDIRECT_ADDRESS	0x10              	| [$7b85: lda ($10), y]
 	move.b	(a0,d2.w),d0                    	| [...]
-	CLR_XC_FLAGS                           	| [$7b87: clc]
+	                           	| [$7b87: clc]
 	PUSH_SR                                	| [$7b88: php]
 	GET_ADDRESS	0xe3                       	| [$7b89: adc $e3, x]
 	move.b	(a0,d1.w),d4	| [...]
-	addx.b	d4,d0                    	| [...]
+	add.b	d4,d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x07,d0 |  [$7b8b: sta $07]
 	GET_ADDRESS	0xf1                       	| [$7b8d: lda $f1, x]
 	move.b	(a0,d1.w),d0                    	| [...]
@@ -389,9 +391,7 @@ b1_7ba9:
 	GET_ADDRESS	0x0d                       	| [$7bb0: lda $0d, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	SBC_X	0x07                             	| [$7bb2: sbc $07, x]
-	PUSH_SR    | required!
 	OP_W_ON_ZP_ADDRESS	move,0x03,d0 |  [$7bb4: sta $03]
-	POP_SR    | required!
 	bpl	b1_7bd4                             	| [$7bb6: bpl $7bd4]
 	move.b	d2,d0                           	| [$7bb8: tya]
 	                           	| [$7bb9: clc]
@@ -471,7 +471,7 @@ b1_7c03:
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	move,0x4c,d1 |  [$7c27: ldx $4c]
 	move.b	#0x30,d0                        	| [$7c29: lda #$30]
-	jbsr	l_ff83                            	| [$7c2b: jsr $ff83]
+	jbsr	rom_ff83                            	| [$7c2b: jsr $ff83]
 	GET_ADDRESS	0x7ce9                     	| [$7c2e: lda $7ce9, y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	GET_ADDRESS	0x0333                     	| [$7c31: sta $0333, x]
@@ -482,13 +482,13 @@ b1_7c03:
 	OP_W_ON_ZP_ADDRESS	move,0x4c,d1 |  [$7c38: stx $4c]
 	GET_ADDRESS	0x7cea                     	| [$7c3a: lda $7cea, y]
 	move.b	(a0,d2.w),d0                    	| [...]
-	jbsr	l_ff80                            	| [$7c3d: jsr $ff80]
+	jbsr	rom_ff80                            	| [$7c3d: jsr $ff80]
 	move.w	(sp)+,d0                        	| [$7c40: pla]
 	OP_W_ON_ZP_ADDRESS	move,0x4c,d0 |  [$7c41: sta $4c]
 	move.b	d0,d1                           	| [$7c43: tax]
 	GET_ADDRESS	0x7ceb                     	| [$7c44: lda $7ceb, y]
 	move.b	(a0,d2.w),d0                    	| [...]
-	jbsr	l_ff83                            	| [$7c47: jsr $ff83]
+	jbsr	rom_ff83                            	| [$7c47: jsr $ff83]
 	GET_ADDRESS	0x0258                     	| [$7c4a: lda $0258]
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	0x0254                     	| [$7c4d: sta $0254, x]

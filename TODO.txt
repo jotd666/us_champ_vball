@@ -25,3 +25,12 @@
 
 - cli/sei: interruptions not enabled
 - better bank switching if too frequent
+
+debug bankswitch change on MAME (22D is the copy in readable memory):
+doesn't work as 22D is sometimes updated BEFORE bankswitch
+
+wpset 1009,1,W,wpdata!=b@22D
+
+* eaff writes 60 continuously, not interesting:
+
+wpset 1009,1,W,pc!=$eaff
