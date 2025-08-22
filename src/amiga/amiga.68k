@@ -1232,9 +1232,12 @@ update_one_bob:
 	* A0 points on the first bitplane of the bob
 	addq 	#2,a0
 	
-	* BOBs must follow screen scroll (TODO: X scroll)
+	* BOBs must follow screen scroll
+	* Y is not considered here
 	*add.w	scroll_y,d1
-	
+	add.w	scroll_x_lo,d0
+	add.w	scroll_x_hi,d0
+	and.w	#0x1FF,d0
 	
 	* D0 and D1 are already set
 	move.l	(NB_PLAYFIELD_PLANES*4,a0),d2
@@ -2217,10 +2220,15 @@ set_bobs_bitplanes:
 	*lea		mulNB_BYTES_PER_ROW_table,a2
 	*move.w	(a2,d0.w),d0		| compute Y offset
 	
+	* at start, lo=0xFC, hi=0x100
+	* m_scrollx = (m_scrollx_hi + m_scrollx_lo + 4)
 	moveq	#4,d2
-	*move.b	scroll_x,d2
-	*add.b	scroll_x+1,d2
+		move.b	#0,0x102
 
+	add.w	scroll_x_lo,d2
+	add.w	scroll_x_hi,d2
+	and.w	#0x1FF,d2			| wraps at 0x200!
+	
 	add.w	d2,d2
 	add.w	d2,d2
 	lea		scroll_table,a2
@@ -2272,9 +2280,9 @@ osd_read_p2_inputs:
 osd_set_scrollx_hi:
 	movem.w	d0/d1,-(a7)
 	move.b	d0,d1
-	and.b	#2,d0
-	lsl.b	#7,d0
-	move.b	d0,scroll_x
+	and.w	#2,d0
+	lsl.w	#7,d0
+	move.w	d0,scroll_x_hi
 	move.b	d1,d0
 	lsr.b	#2,d0
 	and.b	#7,d0
@@ -2302,7 +2310,7 @@ osd_set_scrollx_hi:
 	
 	rts
 osd_set_scrollx_lo:
-	move.b	d0,scroll_x+1
+	move.b	d0,scroll_x_lo+1
 	rts
 osd_set_scrolly_lo:
 	*move.b	d0,scroll_y+1
@@ -3594,8 +3602,11 @@ system_vbr:
 
 scroll_y:
 	.word	0
-scroll_x:
+scroll_x_hi:
 	.word	0
+scroll_x_lo:
+	.word	0
+
 
 	.ifne	OPT_ENABLE_LOGGING
 tile_bank_table:

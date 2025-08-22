@@ -1,12 +1,14 @@
-- debug sprites using player select screen;: mockup ok but amiga sprites
-  not right (half players)
-- log double height flag (use bits)
+- converter: if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 
-- X scrolling doesn't work properly
+- at start players not positioned properly: right side: player with green trunks is too far
+  (player with blue trunks looks ok!)
 - reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
 - convert_graphics: separate tile/sprite files but computed together, separate palette file
+- convert_graphics: group horizontally if possible for better performance, maybe using
+  hardware sprites would be possible for players?
+- graphics: black color should be converted too!
 
 - create one gfx set per level/context like Dragonninja based on palette setup
   hopefully it's enough
@@ -36,6 +38,7 @@ log sound:
 
 wpset 100D,1,W,,{print A,g}
 
+identify each music as there are cut-scenes & other stuff removed from US version!!!
 2: select/start music
 5: intro music
 

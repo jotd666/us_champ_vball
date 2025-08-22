@@ -84,6 +84,11 @@ with open(source_dir / "conv.s") as f:
             # remove those confusing labels
             line = ""
 
+        if line_address in {0xeb09,0x88ac,0x8f51,0xac9a,0xbb78,0xbca3,0xbcbc,0xc6a9,0xe3f3,0xea98}:
+            # restore SBC
+            line = change_instruction("SET_XC_FLAGS",lines,i)
+            lines[i+1] = lines[i+1].replace("sub.b\t#","SBC_IMM\t").replace(",d0","").rstrip()+" [do not optimize sub!]\n"
+
         if line_address == 0xeed1:
             line = change_instruction("jbsr\tescape_from_irq",lines,i)
             # remove rest of escape interrupt code, return to normal irq return
