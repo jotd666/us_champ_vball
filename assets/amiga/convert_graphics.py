@@ -272,6 +272,11 @@ def gen_context_files(context_name,with_sprites=True):
                 d = f.read(nb_cluts)   # lower part: no Y double size, upper part: Y double size
                 cluts = [i for i,c in enumerate(d) if c]
                 if cluts:
+                    if all(c==1 for c in d if c) or all(c==2 for c in d if c):
+                        pass # ok!!
+                    else:
+                        raise Exception(f"{context_name}: Sprite {index:02x} has simple & double heights!")
+
                     add_tile(sprite_cluts,index,cluts=cluts)
     except OSError:
         print("Cannot find used_sprites")
@@ -324,7 +329,7 @@ def gen_context_files(context_name,with_sprites=True):
     remaining = (nb_colors-used_nb_colors)
     if remaining < 0:
         raise Exception(f"Not enough colors: {nb_colors} < {used_nb_colors}")
-    print(f"{context_name}: Used number of colors {used_nb_colors}")
+    print(f"{context_name}: Used number of colors {used_nb_colors}, tiles number of colors {len(tile_palette)}")
     full_palette += remaining * [(0x10,0x20,0x30)]
 
 

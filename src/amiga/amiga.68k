@@ -60,7 +60,6 @@ HW_SPRITE_Y_CORRECTION = 0
 * full display
 NTSC_Y_SHIFT = 12
 
-Y_MAX = 512
 
 
 BASE_BPLCON2_VALUE = 0x0064		| sprites above all playfields
@@ -104,8 +103,11 @@ NB_PLAYFIELD_PLANES = 7
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 80
 
-
-NB_LINES = 512
+* game originally runs on a 512*512 screen, but only uses the lower half
+* so we just ignore the upper half which saves a lot of chipmem!
+NB_TARGET_LINES = 512
+NB_LINES = 256
+Y_MAX = NB_LINES
 NB_PLAYFIELD_LINES = NB_LINES
 
 
@@ -926,8 +928,8 @@ blit_background:
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
 	
 	.rept	NB_PLAYFIELD_PLANES-1
-	add.l	#SCREEN_PLANE_SIZE,a0
-	add.l	#SCREEN_PLANE_SIZE,a1
+	add.w	#SCREEN_PLANE_SIZE,a0
+	add.w	#SCREEN_PLANE_SIZE,a1
 	WAIT_BLIT
 	* second bitplane
 	move.l a0,bltapt(a5)	|source graphic top left corner
@@ -1002,8 +1004,10 @@ really_update_sprites:
 	lea		_custom,a5
 	
 
-	* clear previous positions
 
+	* clear previous positions
+	lea	background_restore_buffer,a0
+	move.l	playfield_drawed_screen_ptr(pc),a1
 	move.w	#NB_TARGET_SPRITES-1,d7
 1:
 	move.w	(2,a4),d1
@@ -1015,9 +1019,7 @@ really_update_sprites:
 	move.w	(a4),d4			| height
 	move.w	(2,a4),d2		| width
 	clr.l	(a4)+			| ack deletion
-	move.w	#NB_PLAYFIELD_PLANES,d3
-	move.l	playfield_drawed_screen_ptr(pc),a1
-	jbsr		clear_planes_any_blitter_internal
+	bsr		blit_background
 	dbf		d7,1b	
 	bra.b	12f
 11:
@@ -1213,7 +1215,7 @@ update_one_bob:
 	addq 	#2,a0
 	
 	* BOBs must follow screen scroll (TODO: X scroll)
-	add.w	scroll_y,d1
+	*add.w	scroll_y,d1
 	
 	move.l		playfield_drawed_screen_ptr(pc),a1
 	
@@ -1311,7 +1313,7 @@ clear_planes_any_blitter_internal:
 	move.l a1,bltdpt(a5)	|destination top left corner
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
 32:
-	add.l	#SCREEN_PLANE_SIZE,a1
+	add.w	#SCREEN_PLANE_SIZE,a1
 	dbf		d3,3b
 4:
 	rts
@@ -1426,7 +1428,7 @@ blit_planes_any_internal_cookie_cut:
 	move.l	a1,bltcpt(a5)	|pristine background top (bottom) left corner
 	move.l	a1,bltdpt(a5)	|destination top (bottom) left corner
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
-	add.l		#SCREEN_PLANE_SIZE,a1
+	add.w		#SCREEN_PLANE_SIZE,a1
 	WAIT_BLIT
 	dbf		d3,6b
 7:
@@ -1857,18 +1859,19 @@ sound_indirection_table:
 	rts	
 	.endm
 	
-	
+* set bank and y scroll (y scroll is useless here we deactivated it)
+
 osd_set_bank:
 	move.b	d0,d4
 	* graphics set (there are 0x4000 tiles, activate upper 0x2000-0x3FFF half)
 	btst	#5,d0
 	seq		higher_gfxset		| inverted logic
 	
-	move.w	d0,-(a7)
-	rol.b	#2,d0
-	and.b	#3,d0
-	move.b	d0,scroll_y			| set scroll high value
-	move.w	(a7)+,d0
+	*move.w	d0,-(a7)
+	*rol.b	#2,d0
+	*and.b	#3,d0
+	*move.b	d0,scroll_y			| set scroll high value
+	*move.w	(a7)+,d0
 	
 	* now memory bank (bit 1 of the input)
 	bclr	#0,d4
@@ -1930,18 +1933,30 @@ osd_w_videoram_out:
 	
 	.macro	COPY_TILE8_PLANE_ROW
 	move.b	d0,(offset,a1)  | buffer
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	move.b	d0,(offset,a2)  | buffer
+	.endif
+	move.b	d0,(offset,a3)  | background buffer
 	.endm
 	
 	.macro	CLEAR_TILE8_PLANE
 	.set	offset,0
 	.rept	8
 	clr.b	(offset,a1)
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	clr.b	(offset,a2)  | buffer
+	.endif
+	clr.b	(offset,a3)  | background buffer
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr	
 	.endm
 	
 	.macro	TILE8_NEXT_PLANE
-	add.l	d5,a1			| needs LONG
+	add.l	d5,a1			| needed LONG but not anymore
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	add.l	d5,a2			| needed LONG
+	.endif
+	add.l	d5,a3			| needed LONG
 	.endm
 
 	
@@ -2027,13 +2042,20 @@ update_bg_tile:
 12:
 	
 	bsr		compute_tile_xy
+	sub.w	#NB_TARGET_LINES/2,d1
+	jpl		20f
+	* first half of the screen is never displayed!
+	rts
+20:
 
 	
 	* updating bitplanes
 	move.l	#SCREEN_PLANE_SIZE,d5
 	move.w	#NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
-
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	move.l	playfield_displayed_screen_ptr,a2
+	.endif
 
 	lea		mulNB_BYTES_PER_ROW_table,A2
 	add.w	d1,d1
@@ -2043,6 +2065,11 @@ update_bg_tile:
 	swap	d0
 	add.w	d1,d0
 	add.l	d0,a1		| long!
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	add.l	d0,a2
+	.endif
+	lea		background_restore_buffer,a3
+	add.l	d0,a3
 	
 	add.w	d2,d2
 	jeq		11f				| optimize
@@ -2169,11 +2196,15 @@ set_bobs_bitplanes:
 	
 	* set bitplanes
 	moveq	#0,d0
-	move.w	scroll_y,d0
+	
+	* the game doesn't use scroll y at all. It stays stuck to the
+	* bottom of the screen, and even some tiles aren't shown because
+	* they're too high
+	*move.w	scroll_y,d0
 	*add.b	scroll_y+1,d0
-	add.w	d0,d0
-	lea		mulNB_BYTES_PER_ROW_table,a2
-	move.w	(a2,d0.w),d0		| compute Y offset
+	*add.w	d0,d0
+	*lea		mulNB_BYTES_PER_ROW_table,a2
+	*move.w	(a2,d0.w),d0		| compute Y offset
 	
 	moveq	#4,d2
 	*move.b	scroll_x,d2
@@ -2186,7 +2217,14 @@ set_bobs_bitplanes:
 	add.w	(2,a2,d2.w),d0
 	
     moveq #NB_PLAYFIELD_PLANES-1,d1
- 	move.l	#SCREEN_PLANE_SIZE,d2
+ 	move.w	#SCREEN_PLANE_SIZE,d2
+	.ifndef	RELEASE
+	* quick check just in case someone uses that with plane size > 0x7FFF
+	jpl		10f
+	BREAKPOINT	"negative plane size!"
+10:
+	.endif
+	
     move.l	playfield_displayed_screen_ptr(pc),a0
 	add.l	d0,a0		| X/Y scroll offset (long!)
 	move.l	a0,d0		| first bitplane screen pointer
@@ -2206,31 +2244,6 @@ set_bitplanes:
 scroll_table:
 	.include	"scroll_table_16.68k"
 	
-
-set_bobs_bitplanes_old:
-	movem.l	a0-a1/d0-d2,-(a7)
- 	lea	bobs_bitplanes+2,a0
-    moveq #NB_PLAYFIELD_PLANES-1,d1
- 	move.l	#SCREEN_PLANE_SIZE,d2
-
-	move.w	scroll_y,d0
-	add.w	d0,d0
-	lea		mulNB_BYTES_PER_ROW_table,a2
-	move.w	(a2,d0.w),d0		| compute Y offset
-    add.l	playfield_displayed_screen_ptr(pc),d0
-	* TODO X offset
-	
-set_bitplanes_old:
-1:
-    swap d0
-    move.w d0,(a0)
-    swap d0
-    move.w d0,(4,a0)    
-    addq.w  #8,a0
-    add.l d2,d0
-    dbf d1,1b
-	movem.l	(a7)+,a0-a1/d0-d2
-    rts
 
 	
 osd_debug_hook:
@@ -2281,7 +2294,7 @@ osd_set_scrollx_lo:
 	move.b	d0,scroll_x+1
 	rts
 osd_set_scrolly_lo:
-	move.b	d0,scroll_y+1
+	*move.b	d0,scroll_y+1
 	rts
 
 	
@@ -2692,6 +2705,11 @@ log_used_tiles:
 	lea	tile_log_table,a0
 	move.w	#0x1000-1,d7
 0:
+	jbsr	compute_tile_xy
+	cmp.w	#NB_TARGET_LINES/2,d1
+	jmi		20f			| we don't care about upper tiles
+
+	
 	move.b	(a3,d7.w),d3	| bank
 	jmi		20f
 	moveq	#0,d1
@@ -3829,8 +3847,9 @@ pal_wait:
 	.align	8
 	
 		.section .bsschip
-		
-
+	
+background_restore_buffer:
+	.skip	SCREEN_SIZE
 		
 bobs_screen_buffer_1:
 	.skip	SCREEN_SIZE

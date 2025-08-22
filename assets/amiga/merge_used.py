@@ -31,11 +31,18 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
         for i,(a,b) in enumerate(itertools.zip_longest(old_contents,contents,fillvalue=0)):
             if a!=b:
                 code,clut = divmod(i,nb_cluts)
-                print(f"{used_name}: New: code={code:02x}, clut={clut:02x}")
+                print(f"{used_name}: New: code={code:02x}, clut={clut:02x}, size={b}")
+            if b==3:
+                # should not happen
+                print("*** warning ***: simple & double height found for sprite {code:02x}")
 
         with open(bin_file,"wb") as f:
             f.write(contents)
 
+
+
 #merge("intro","used_tiles",0x4000,nb_cluts = 8,overwrite=False)
 #merge("select","used_tiles",0x4000,nb_cluts = 8,overwrite=True)
+#merge("select","used_tiles",0x4000,nb_cluts = 8,overwrite=True)
 merge("level_1","used_sprites",0x800,nb_cluts=8,overwrite=True)
+#merge("select","used_sprites",0x800,nb_cluts=8,overwrite=True)
