@@ -1,9 +1,6 @@
 - debug sprites using player select screen;: mockup ok but amiga sprites
   not right (half players)
-
-e66b: CLR_XC_FLAGS changes Z/N => fuck!!
-
-- sprite update crashing randomly (anyway: not correct)
+- log double height flag (use bits)
 
 - X scrolling doesn't work properly
 - reduce global colors, reduce tile colors

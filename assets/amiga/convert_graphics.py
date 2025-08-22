@@ -114,7 +114,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 all_tile_cluts = False
 
 
-nb_planes = 8
+nb_planes = 7
 nb_colors = 1<<nb_planes
 nb_cluts = 8
 
@@ -287,7 +287,6 @@ def gen_context_files(context_name,with_sprites=True):
             json.dump(tile_cluts_dict,f,indent=2)
 
     for i,tsd in tile_sheet_dict.items():
-        print(f"loading {context_name}:{i}")
         tp,tile_set = load_tileset(tsd,i,8,8,"tiles",sdump_dir,dump=dump_it,
         cluts=tile_cluts,
         name_dict=None)
@@ -321,7 +320,12 @@ def gen_context_files(context_name,with_sprites=True):
 
 
     full_palette = sorted(sprite_palette)
-    full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
+    used_nb_colors = len(full_palette)
+    remaining = (nb_colors-used_nb_colors)
+    if remaining < 0:
+        raise Exception(f"Not enough colors: {nb_colors} < {used_nb_colors}")
+    print(f"{context_name}: Used number of colors {used_nb_colors}")
+    full_palette += remaining * [(0x10,0x20,0x30)]
 
 
     # sprite_set_list is now a 16x512 matrix of sprite tiles
@@ -535,6 +539,6 @@ def gen_context_files(context_name,with_sprites=True):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
-#gen_context_files("intro",with_sprites=False)
+gen_context_files("intro",with_sprites=False)
 gen_context_files("level_1")
-#gen_context_files("select")
+gen_context_files("select")

@@ -100,7 +100,7 @@ _custom = 0xDFF000
 
 OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
-NB_PLAYFIELD_PLANES = 8
+NB_PLAYFIELD_PLANES = 7
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 80
 
@@ -1647,7 +1647,11 @@ platform_init:
 	move.w	#0x1FE,pal_intreq_block_game
 	*move.w	#0x1FE,pal_wait			| else intreq never happens
 0:
+	.if		NB_PLAYFIELD_PLANES==8
     move.w #0x0210+BORDERBLANK,bplcon0(a5) | 8 bitplanes, borderblank
+	.else
+    move.w #0x200+BORDERBLANK+(NB_PLAYFIELD_PLANES<<12),bplcon0(a5) | 8 > nb bitplanes, borderblank
+	.endif
     move.w #0x0024,bplcon2(a5)
     move.w #0x0C00+BORDERBLANK<<5,bplcon3(a5)     | no AGA specificities, default ECS
 
@@ -2741,10 +2745,10 @@ log_used_sprites:
 	
 	lsl.l	#NB_CLUTS_POW,d0			| sprite code * NB_CLUTS (long!)
 	add.l	d2,d0			| add clut
-	st.b	(a0,d0.l)
+	bset.b	#0,(a0,d0.l)
 	btst	#7,d1
 	jeq		20f
-	st.b	(NB_CLUTS,a0,d0.l)		| Y double size with next sprite
+	bset.b	#1,(NB_CLUTS,a0,d0.l)		| Y double size with next sprite
 
 20:
 	addq	#TARGET_SPRITE_SIZEOF,d7
