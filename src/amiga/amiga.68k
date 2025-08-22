@@ -896,7 +896,7 @@ blit_background:
 	lsr.w	#3,d0
 	lea		mulNB_BYTES_PER_ROW_table(pc),a4
 	add.w	d1,d1
-	* add Y offset: Y*40
+	* add Y offset: Y*NB_BYTES_PER_ROW
 	add.w	(a4,d1.w),d0
 	* same offset for source and destination
 	add.w	d0,a1
@@ -928,8 +928,13 @@ blit_background:
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
 	
 	.rept	NB_PLAYFIELD_PLANES-1
+	.if	SCREEN_PLANE_SIZE>0x7FFF
+	add.l	#SCREEN_PLANE_SIZE,a0
+	add.l	#SCREEN_PLANE_SIZE,a1
+	.else
 	add.w	#SCREEN_PLANE_SIZE,a0
 	add.w	#SCREEN_PLANE_SIZE,a1
+	.endif
 	WAIT_BLIT
 	* second bitplane
 	move.l a0,bltapt(a5)	|source graphic top left corner
@@ -1009,6 +1014,8 @@ really_update_sprites:
 	lea	background_restore_buffer,a0
 	move.l	playfield_drawed_screen_ptr(pc),a1
 	move.w	#NB_TARGET_SPRITES-1,d7
+	WAIT_BLIT
+	move.l	#-1,bltalwm(a5)
 1:
 	move.w	(2,a4),d1
 	beq.b	11f		| y=0: inactive
@@ -1173,6 +1180,17 @@ update_one_bob:
 	cmp.l	#0xF80000F8,(a0)
 	jeq		2f
 	jbsr	compute_sprite_xy_code
+
+
+	lea		sprite_size_table(pc),a3
+	move.b	(a3,d2.w),d4
+	cmp.b	#2,d4
+	jeq		2f			| don't draw second part
+	cmp.b	#1,d4
+	jne		10f
+	* double size: sub 16 from y
+	sub.w	#0x10,d1
+10:
 	add.w	d2,d2
 	add.w	d2,d2
 	move.l	(a4,d2.w),d4		| get pointer from bob table
@@ -1203,11 +1221,11 @@ update_one_bob:
 	jeq		2f		| invalid clut: can happen in transition phases
 	move.l	d4,a0
 
-*	btst	#1,d3
-*	jeq		101f
-*	* mirror
-*	add.w	#((NB_PLAYFIELD_PLANES+1)*4+6)*2,a0
-*101:
+	btst	#6,d3
+	jne		101f
+	* mirror
+	add.w	#((NB_PLAYFIELD_PLANES+1)*4+8),a0
+101:
 	move.w	(a0)+,d4		| height
 	move.w	(a0)+,d5		| width
 	add.w	(a0)+,d1		| add offset to Y
@@ -1217,16 +1235,15 @@ update_one_bob:
 	* BOBs must follow screen scroll (TODO: X scroll)
 	*add.w	scroll_y,d1
 	
-	move.l		playfield_drawed_screen_ptr(pc),a1
 	
 	* D0 and D1 are already set
 	move.l	(NB_PLAYFIELD_PLANES*4,a0),d2
 	beq.b	2f		| mask is zero: blank tile => skip
 	
+	move.l		playfield_drawed_screen_ptr(pc),a1
 	
 	move.l	d2,a3
 	moveq	#0,d2	| no y-clip
-	*sub.w	#16,d0	| move each bob 16 bits to the left
 	* note down that this bob will have to be erased
 	move.w	d0,(a6)+			| store current sprite attributes to previous ones
 	move.w	d1,(a6)+			| store current sprite attributes to previous ones
@@ -1234,12 +1251,6 @@ update_one_bob:
 	move.w	d5,(a6)+			| store width in bytes
 	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
 	moveq	#0,d5			| Y-offset
-
-	btst	#2,d3
-	jeq		101f
-	* flip
-	neg.w	d4
-101:
 
 
 	moveq	#NB_PLAYFIELD_PLANES,d3
@@ -2516,6 +2527,18 @@ relocate_sprite_data:
 	add.l	d2,(-4,a2)
 101:
 	dbf		d3,100b
+	tst.w	(a2)
+	jmi		11f
+	* mirror exists: must relocate it too
+	addq	#8,a2
+	move.w	#NB_PLAYFIELD_PLANES-1+1,d3  | mask!!
+100:
+	move.l	(a2)+,d4
+	jeq		101f
+	add.l	d2,(-4,a2)
+101:
+	dbf		d3,100b
+
 11:
 	dbf		d1,10b
 1:
@@ -2636,7 +2659,6 @@ osd_read_dsw1:
 	rts
 	
 osd_read_system:
-	move.b	#0,0x102
 	st.b	d0
 	movem.l	a0/d1,-(a7)
 	lea		keyboard_table(pc),a0
@@ -2763,12 +2785,13 @@ log_used_sprites:
 	
 	lsl.l	#NB_CLUTS_POW,d0			| sprite code * NB_CLUTS (long!)
 	add.l	d2,d0			| add clut
-	bset.b	#0,(a0,d0.l)
 	btst	#7,d1
 	jeq		20f
-	bset.b	#1,(NB_CLUTS,a0,d0.l)		| Y double size with next sprite
-
+	bset.b	#1,(a0,d0.l)		| Y double size
+	jra		21f
 20:
+	bset.b	#0,(a0,d0.l)
+21:
 	addq	#TARGET_SPRITE_SIZEOF,d7
 	cmp.w	#NB_TARGET_SPRITES*4,d7
 	jne		0b
@@ -3670,9 +3693,10 @@ work_tiles_ptr:
 work_bobs_ptr:
 	.long	0
 	
-*sprites_table:
 
-
+sprite_size_table:
+	.include	"sprite_size.68k"
+	
 	.include	"sound_entries.68k"
 
 _keyexit:

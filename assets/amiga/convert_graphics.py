@@ -84,6 +84,18 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
         # rework tiles which are grouped
         for tile_number,wtile in enumerate(tileset_1):
 
+            if wtile and double_size_sprites[tile_number]==1:
+                # append the next tile
+                dstile = Image.new("RGB",(wtile.size[0],wtile.size[1]*2))
+                dstile.paste(wtile)
+                nwtile = tileset_1[tile_number+1]
+
+                dstile.paste(nwtile,(0,wtile.size[1]))
+                wtile = dstile
+                tileset_1[tile_number] = wtile
+                tileset_1[tile_number+1] = None  # discatd
+
+
 ##            if wtile and tile_number in group_sprite_pairs:
 ##                # change wtile, fetch code +0x100
 ##                other_tile_index = tile_number+1
@@ -118,16 +130,20 @@ nb_planes = 7
 nb_colors = 1<<nb_planes
 nb_cluts = 8
 
+double_size_sprites = [0]*NB_SPRITES
 
-
-def add_tile(table,index,cluts=[0]):
+def add_tile(table,index,cluts=[0],is_bob=False,double_size=False):
     if isinstance(index,range):
         pass
     elif not isinstance(index,(list,tuple)):
         index = [index]
     for idx in index:
         table[idx] = cluts
-
+        # done for each context but the sprites are the same
+        if is_bob and double_size:
+            double_size_sprites[idx] = 1
+            double_size_sprites[idx+1] = 2
+            table[idx+1] = cluts
 
 # now gather all cluts used by letter/digit tiles, logging probably
 # missed some
@@ -166,7 +182,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
         tile_entry = []
         for i,tile in enumerate(img_set):
             entry = dict()
-            if tile:
+            if tile and (not is_bob or double_size_sprites[i]!=2):
 
                 for b,(plane_name,plane_func) in zip(plane_orientation_flags,plane_orientations):
                     bitplane_sprite_data = None
@@ -182,7 +198,6 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
                         if is_bob:
                             actual_nb_planes += 1
-
 
                             # only 4 planes + mask => 5 planes
                             y_start,wtilec = bitplanelib.autocrop_y(wtile)
@@ -259,27 +274,30 @@ def gen_context_files(context_name,with_sprites=True):
                 d = f.read(nb_cluts)
                 cluts = [i for i,c in enumerate(d) if c]
                 if cluts:
-                    add_tile(tile_cluts,index,cluts=cluts)
+                    add_tile(tile_cluts,index,cluts=cluts,is_bob=False)
     except OSError:
         pass
 
     sprite_cluts = {}
 
+    if with_sprites:
+        try:
+            with open(used_graphics_dir / context_name / "used_sprites","rb") as f:
+                for index in range(NB_SPRITES):
+                    d = f.read(nb_cluts)   # lower part: no Y double size, upper part: Y double size
+                    cluts = [i for i,c in enumerate(d) if c]
+                    if cluts:
+                        simple_size = all(c==1 for c in d if c)
+                        double_size = all(c==2 for c in d if c)
+                        if simple_size or double_size:
+                            pass # ok!!
+                        else:
+                            raise Exception(f"{context_name}: Sprite {index:02x} has simple & double heights!")
 
-    try:
-        with open(used_graphics_dir / context_name / "used_sprites","rb") as f:
-            for index in range(NB_SPRITES):
-                d = f.read(nb_cluts)   # lower part: no Y double size, upper part: Y double size
-                cluts = [i for i,c in enumerate(d) if c]
-                if cluts:
-                    if all(c==1 for c in d if c) or all(c==2 for c in d if c):
-                        pass # ok!!
-                    else:
-                        raise Exception(f"{context_name}: Sprite {index:02x} has simple & double heights!")
 
-                    add_tile(sprite_cluts,index,cluts=cluts)
-    except OSError:
-        print("Cannot find used_sprites")
+                        add_tile(sprite_cluts,index,cluts=cluts,double_size=double_size,is_bob=True)
+        except OSError:
+            print("Cannot find used_sprites")
 
 
 
@@ -544,6 +562,10 @@ def gen_context_files(context_name,with_sprites=True):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
-gen_context_files("intro",with_sprites=False)
-gen_context_files("level_1")
+
+#gen_context_files("intro",with_sprites=False)
+#gen_context_files("level_1")
 gen_context_files("select")
+
+with open(src_dir / "sprite_size.68k","w") as f:
+    bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)

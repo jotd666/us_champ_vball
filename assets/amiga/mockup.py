@@ -65,7 +65,7 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
         which = m_spriteram[i + 2]+ ((attr & 0x07) << 8);
         sx = ((m_spriteram[i + 3] + 8) & 0xff) - 7;
         sy = 240 - m_spriteram[i];
-        size = (attr & 0x80) >> 7;
+        size = bool((attr & 0x80) >> 7)
         color = (attr & 0x38) >> 3;
         flipx = ~attr & 0x40;
         flipy = 0;
@@ -82,12 +82,12 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
         name = sprite_names.get(which,"unknown")
 
         if not size:
-            print(f"offs:{i:02x}, name: {name}, size: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
+            print(f"offs:{i:02x}, name: {name}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
             result.paste(im,(sx,sy))
         else:
             # double height: tile is drawn 16 pixels above, and next tile is drawn at the original y
             sy -= 16
-            print(f"offs:{i:02x}, name: {name}, size: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
+            print(f"offs:{i:02x}, name: {name}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
             result.paste(im,(sx,sy))
             sy += 16
             which += 1
@@ -98,7 +98,7 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
             if flipx:
                 im = ImageOps.mirror(im)
 
-            print(f"following: offs:{i:02x}, name: {name}, size: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
+            print(f"following: offs:{i:02x}, name: {name}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
             result.paste(im,(sx,sy))
         nb_active += 1
 
@@ -106,6 +106,6 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     print(f"nb active: {nb_active}")
 
 
-process(r"sprites_mame")
+#process(r"sprites_mame")
 process(r"sprites_amiga")
 
