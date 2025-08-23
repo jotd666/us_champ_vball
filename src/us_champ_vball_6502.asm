@@ -123,13 +123,14 @@
 ; tried to name a few variables when reversing some bits. It's possible that
 ; the variables (specially zero page ones) are used for other purposes
 unpack_mode_02 = $02
-tile_lsb_value_to_write_12 = $12
+multipurpose_12 = $12
+multipurpose_13 = $13
 tile_msb_to_write_13 = $13
 ; probably used for other pointers
 base_screen_pointer_list_001d = $1d
 ; as zero page pointers are precious
 screen_source_pointer_0010 = $10
-screen_tile_dest_address_14 = $14
+multipurpose_14 = $14
 screen_attribute_dest_address_16 = $16
 nb_credits_0035 = $35
 ; seem to have only 0 and $5A as values
@@ -137,10 +138,12 @@ toggle_timer_2f = $2f
 irq_07_counter_31 = $31
 game_playing_flag_36 = $36
 game_state_bits_46 = $46
+player_x_8f = $8f
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 player_1_controls_022e = $022e
 player_2_controls_022f = $022f
+player_direction_032b = $32b
 sprite_shadow_ram_06db = $6db
 sound_to_queue_07f2 = $7f2
 timer_07f5 = $7f5
@@ -168,6 +171,7 @@ sound_100d = $100d
 scrolly_lo_100e = $100e
 
 scroll_values_table_ea5d = $ea5d
+directions_table_b3dc = $b3dc
 
 ; screen_id_07e4 contains the identification of the background screen
 ; to be displayed. Some ids seem corrupt or repeated
@@ -337,7 +341,7 @@ scroll_values_table_ea5d = $ea5d
 5D1C: B0 FE    bcs $5d1c
 5D1E: 0A       asl a
 5D1F: A8       tay
-5D20: B9 2D 5D lda table_5d2d, y
+5D20: B9 2D 5D lda jump_table_5d2d, y
 5D23: 85 1B    sta $1b
 5D25: B9 2E 5D lda $5d2e, y
 5D28: 85 1C    sta $1c
@@ -493,7 +497,7 @@ scroll_values_table_ea5d = $ea5d
 5E9F: B0 FE    bcs $5e9f
 5EA1: 0A       asl a
 5EA2: A8       tay
-5EA3: B9 B0 5E lda table_5eb0, y
+5EA3: B9 B0 5E lda jump_table_5eb0, y
 5EA6: 85 1B    sta $1b
 5EA8: B9 B1 5E lda $5eb1, y
 5EAB: 85 1C    sta $1c
@@ -611,17 +615,17 @@ scroll_values_table_ea5d = $ea5d
 5FD1: 48       pha
 5FD2: A5 01    lda $01
 5FD4: 48       pha
-5FD5: BD 2B 03 lda $032b, x
+5FD5: BD 2B 03 lda player_direction_032b, x
 5FD8: 48       pha
 5FD9: 8A       txa
 5FDA: 85 4C    sta $4c
 5FDC: A9 0D    lda #$0d
 5FDE: 20 4A B4 jsr $b44a
-5FE1: 9D 2B 03 sta $032b, x
+5FE1: 9D 2B 03 sta player_direction_032b, x
 5FE4: A9 00    lda #$00
 5FE6: 20 49 85 jsr $8549
 5FE9: 68       pla
-5FEA: 9D 2B 03 sta $032b, x
+5FEA: 9D 2B 03 sta player_direction_032b, x
 5FED: 68       pla
 5FEE: 85 01    sta $01
 5FF0: 68       pla
@@ -808,17 +812,17 @@ scroll_values_table_ea5d = $ea5d
 6156: 48       pha
 6157: A5 01    lda $01
 6159: 48       pha
-615A: BD 2B 03 lda $032b, x
+615A: BD 2B 03 lda player_direction_032b, x
 615D: 48       pha
 615E: 8A       txa
 615F: 85 4C    sta $4c
 6161: A9 0D    lda #$0d
 6163: 20 4A B4 jsr $b44a
-6166: 9D 2B 03 sta $032b, x
+6166: 9D 2B 03 sta player_direction_032b, x
 6169: A9 00    lda #$00
 616B: 20 49 85 jsr $8549
 616E: 68       pla
-616F: 9D 2B 03 sta $032b, x
+616F: 9D 2B 03 sta player_direction_032b, x
 6172: 68       pla
 6173: 85 01    sta $01
 6175: 68       pla
@@ -1041,7 +1045,7 @@ scroll_values_table_ea5d = $ea5d
 6328: B9 54 00 lda $0054, y
 632B: 0A       asl a
 632C: A8       tay
-632D: B9 3A 63 lda table_633a, y
+632D: B9 3A 63 lda jump_table_633a, y
 6330: 85 1B    sta $1b
 6332: B9 3B 63 lda $633b, y
 6335: 85 1C    sta $1c
@@ -1253,7 +1257,7 @@ scroll_values_table_ea5d = $ea5d
 6520: 48       pha
 6521: A5 1B    lda $1b
 6523: 48       pha
-6524: BD 2B 03 lda $032b, x
+6524: BD 2B 03 lda player_direction_032b, x
 6527: 48       pha
 6528: A0 0D    ldy #$0d
 652A: AD F0 03 lda $03f0
@@ -1272,7 +1276,7 @@ scroll_values_table_ea5d = $ea5d
 654E: 85 4C    sta $4c
 6550: A9 0D    lda #$0d
 6552: 20 4A B4 jsr $b44a
-6555: 9D 2B 03 sta $032b, x
+6555: 9D 2B 03 sta player_direction_032b, x
 6558: A9 01    lda #$01
 655A: 20 49 85 jsr $8549
 655D: AD F4 03 lda $03f4
@@ -1280,7 +1284,7 @@ scroll_values_table_ea5d = $ea5d
 6561: E9 04    sbc #$04
 6563: C5 1B    cmp $1b
 6565: 68       pla
-6566: 9D 2B 03 sta $032b, x
+6566: 9D 2B 03 sta player_direction_032b, x
 6569: 68       pla
 656A: 85 1B    sta $1b
 656C: 68       pla
@@ -1440,7 +1444,7 @@ scroll_values_table_ea5d = $ea5d
 66DD: A5 1B    lda $1b
 66DF: 0A       asl a
 66E0: A8       tay
-66E1: B9 EE 66 lda table_66ee, y
+66E1: B9 EE 66 lda jump_table_66ee, y
 66E4: 85 1B    sta $1b
 66E6: B9 EF 66 lda $66ef, y
 66E9: 85 1C    sta $1c
@@ -1696,7 +1700,7 @@ scroll_values_table_ea5d = $ea5d
 6928: A6 1B    ldx $1b
 692A: A4 1C    ldy $1c
 692C: 38       sec
-692D: B5 8F    lda $8f, x
+692D: B5 8F    lda player_x_8f, x
 692F: F9 8F 00 sbc $008f, y
 6932: 85 1B    sta $1b
 6934: B5 9D    lda $9d, x
@@ -1750,12 +1754,12 @@ scroll_values_table_ea5d = $ea5d
 6997: C9 FF    cmp #$ff
 6999: F0 38    beq $69d3
 699B: 85 10    sta screen_source_pointer_0010
-699D: 85 12    sta tile_lsb_value_to_write_12
+699D: 85 12    sta multipurpose_12
 699F: A9 00    lda #$00
 69A1: 85 11    sta $11
-69A3: 85 13    sta tile_msb_to_write_13
+69A3: 85 13    sta multipurpose_13
 69A5: 20 29 D1 jsr $d129
-69A8: A5 14    lda screen_tile_dest_address_14
+69A8: A5 14    lda multipurpose_14
 69AA: 85 1E    sta $1e
 69AC: A5 15    lda $15
 69AE: 85 1F    sta $1f
@@ -1763,13 +1767,13 @@ scroll_values_table_ea5d = $ea5d
 69B2: C9 FF    cmp #$ff
 69B4: F0 1D    beq $69d3
 69B6: 85 10    sta screen_source_pointer_0010
-69B8: 85 12    sta tile_lsb_value_to_write_12
+69B8: 85 12    sta multipurpose_12
 69BA: A9 00    lda #$00
 69BC: 85 11    sta $11
-69BE: 85 13    sta tile_msb_to_write_13
+69BE: 85 13    sta multipurpose_13
 69C0: 20 29 D1 jsr $d129
 69C3: 18       clc
-69C4: A5 14    lda screen_tile_dest_address_14
+69C4: A5 14    lda multipurpose_14
 69C6: 65 1E    adc $1e
 69C8: 85 1E    sta $1e
 69CA: A5 15    lda $15
@@ -1803,7 +1807,7 @@ scroll_values_table_ea5d = $ea5d
 69F2: 49 10    eor #$10
 69F4: 29 10    and #$10
 69F6: 85 00    sta $00
-69F8: B9 05 6A lda table_6a05, y
+69F8: B9 05 6A lda jump_table_6a05, y
 69FB: 85 1B    sta $1b
 69FD: B9 06 6A lda $6a06, y
 6A00: 85 1C    sta $1c
@@ -2020,7 +2024,7 @@ scroll_values_table_ea5d = $ea5d
 6B9C: 6D E0 03 adc $03e0
 6B9F: 0A       asl a
 6BA0: A8       tay
-6BA1: B9 BA 6B lda table_6bba, y
+6BA1: B9 BA 6B lda jump_table_6bba, y
 6BA4: 85 25    sta $25
 6BA6: B9 BB 6B lda $6bbb, y
 6BA9: 85 26    sta $26
@@ -2465,7 +2469,7 @@ scroll_values_table_ea5d = $ea5d
 7053: B0 FE    bcs $7053
 7055: 0A       asl a
 7056: A8       tay
-7057: B9 7A 70 lda table_707a, y
+7057: B9 7A 70 lda jump_table_707a, y
 705A: 85 1B    sta $1b
 705C: B9 7B 70 lda $707b, y
 705F: 85 1C    sta $1c
@@ -2523,7 +2527,7 @@ scroll_values_table_ea5d = $ea5d
 7103: 20 3E 90 jsr $903e
 7106: 9D 78 03 sta $0378, x
 7109: 20 26 90 jsr $9026
-710C: 9D 2B 03 sta $032b, x
+710C: 9D 2B 03 sta player_direction_032b, x
 710F: 20 29 82 jsr $8229
 7112: 90 3E    bcc $7152
 7114: BD B8 03 lda $03b8, x
@@ -2592,7 +2596,7 @@ scroll_values_table_ea5d = $ea5d
 71B0: 20 3E 90 jsr $903e
 71B3: 9D 78 03 sta $0378, x
 71B6: 20 26 90 jsr $9026
-71B9: 9D 2B 03 sta $032b, x
+71B9: 9D 2B 03 sta player_direction_032b, x
 71BC: 20 29 82 jsr $8229
 71BF: 90 2A    bcc $71eb
 71C1: BD B8 03 lda $03b8, x
@@ -2649,7 +2653,7 @@ scroll_values_table_ea5d = $ea5d
 7241: 20 3E 90 jsr $903e
 7244: 9D 78 03 sta $0378, x
 7247: 20 26 90 jsr $9026
-724A: 9D 2B 03 sta $032b, x
+724A: 9D 2B 03 sta player_direction_032b, x
 724D: 20 29 82 jsr $8229
 7250: 90 28    bcc $727a
 7252: BD B8 03 lda $03b8, x
@@ -2695,7 +2699,7 @@ scroll_values_table_ea5d = $ea5d
 72BA: AD E9 03 lda $03e9
 72BD: 9D 78 03 sta $0378, x
 72C0: 20 26 90 jsr $9026
-72C3: 9D 2B 03 sta $032b, x
+72C3: 9D 2B 03 sta player_direction_032b, x
 72C6: 20 29 84 jsr $8429
 72C9: 90 39    bcc $7304
 72CB: A9 0B    lda #$0b
@@ -2743,7 +2747,7 @@ scroll_values_table_ea5d = $ea5d
 7334: F0 7D    beq $73b3
 7336: 0A       asl a
 7337: A8       tay
-7338: B9 45 73 lda table_7345, y
+7338: B9 45 73 lda jump_table_7345, y
 733B: 85 1B    sta $1b
 733D: B9 46 73 lda $7346, y
 7340: 85 1C    sta $1c
@@ -2765,7 +2769,7 @@ scroll_values_table_ea5d = $ea5d
 7371: 20 3E 90 jsr $903e
 7374: 9D 78 03 sta $0378, x
 7377: 20 26 90 jsr $9026
-737A: 9D 2B 03 sta $032b, x
+737A: 9D 2B 03 sta player_direction_032b, x
 737D: A9 00    lda #$00
 737F: 85 2A    sta $2a
 7381: AD 04 04 lda $0404
@@ -2834,7 +2838,7 @@ scroll_values_table_ea5d = $ea5d
 741E: 4C C6 74 jmp $74c6
 7421: 0A       asl a
 7422: A8       tay
-7423: B9 30 74 lda table_7430, y
+7423: B9 30 74 lda jump_table_7430, y
 7426: 85 1B    sta $1b
 7428: B9 31 74 lda $7431, y
 742B: 85 1C    sta $1c
@@ -2872,7 +2876,7 @@ scroll_values_table_ea5d = $ea5d
 7484: 20 3E 90 jsr $903e
 7487: 9D 78 03 sta $0378, x
 748A: 20 26 90 jsr $9026
-748D: 9D 2B 03 sta $032b, x
+748D: 9D 2B 03 sta player_direction_032b, x
 7490: A9 00    lda #$00
 7492: 85 2A    sta $2a
 7494: AD 0D 04 lda $040d
@@ -2940,7 +2944,7 @@ scroll_values_table_ea5d = $ea5d
 752C: 20 3E 90 jsr $903e
 752F: 9D 78 03 sta $0378, x
 7532: 20 26 90 jsr $9026
-7535: 9D 2B 03 sta $032b, x
+7535: 9D 2B 03 sta player_direction_032b, x
 7538: A9 08    lda #$08
 753A: 09 80    ora #$80
 753C: 9D 27 03 sta $0327, x
@@ -2958,7 +2962,7 @@ scroll_values_table_ea5d = $ea5d
 755B: 4C 32 76 jmp $7632
 755E: 0A       asl a
 755F: A8       tay
-7560: B9 6D 75 lda table_756d, y
+7560: B9 6D 75 lda jump_table_756d, y
 7563: 85 1B    sta $1b
 7565: B9 6E 75 lda $756e, y
 7568: 85 1C    sta $1c
@@ -2980,7 +2984,7 @@ scroll_values_table_ea5d = $ea5d
 759A: 20 3E 90 jsr $903e
 759D: 9D 78 03 sta $0378, x
 75A0: 20 26 90 jsr $9026
-75A3: 9D 2B 03 sta $032b, x
+75A3: 9D 2B 03 sta player_direction_032b, x
 75A6: 20 29 82 jsr $8229
 75A9: B0 6F    bcs $761a
 75AB: A9 01    lda #$01
@@ -2999,7 +3003,7 @@ scroll_values_table_ea5d = $ea5d
 75CF: 20 3E 90 jsr $903e
 75D2: 9D 78 03 sta $0378, x
 75D5: 20 26 90 jsr $9026
-75D8: 9D 2B 03 sta $032b, x
+75D8: 9D 2B 03 sta player_direction_032b, x
 75DB: A9 01    lda #$01
 75DD: 85 2A    sta $2a
 75DF: AD FE 03 lda $03fe
@@ -3097,7 +3101,7 @@ scroll_values_table_ea5d = $ea5d
 76C4: 4C A7 77 jmp $77a7
 76C7: 0A       asl a
 76C8: A8       tay
-76C9: B9 D6 76 lda table_76d6, y
+76C9: B9 D6 76 lda jump_table_76d6, y
 76CC: 85 1B    sta $1b
 76CE: B9 D7 76 lda $76d7, y
 76D1: 85 1C    sta $1c
@@ -3130,7 +3134,7 @@ scroll_values_table_ea5d = $ea5d
 771B: 20 3E 90 jsr $903e
 771E: 9D 78 03 sta $0378, x
 7721: 20 26 90 jsr $9026
-7724: 9D 2B 03 sta $032b, x
+7724: 9D 2B 03 sta player_direction_032b, x
 7727: 20 29 82 jsr $8229
 772A: B0 7E    bcs $77aa
 772C: 20 23 83 jsr $8323
@@ -3152,7 +3156,7 @@ scroll_values_table_ea5d = $ea5d
 7758: 20 3E 90 jsr $903e
 775B: 9D 78 03 sta $0378, x
 775E: 20 26 90 jsr $9026
-7761: 9D 2B 03 sta $032b, x
+7761: 9D 2B 03 sta player_direction_032b, x
 7764: A9 00    lda #$00
 7766: 20 49 85 jsr $8549
 7769: A5 1B    lda $1b
@@ -3240,7 +3244,7 @@ scroll_values_table_ea5d = $ea5d
 7834: 20 3E 90 jsr $903e
 7837: 9D 78 03 sta $0378, x
 783A: 20 26 90 jsr $9026
-783D: 9D 2B 03 sta $032b, x
+783D: 9D 2B 03 sta player_direction_032b, x
 7840: AD F9 03 lda $03f9
 7843: 85 1B    sta $1b
 7845: A9 0B    lda #$0b
@@ -3268,7 +3272,7 @@ scroll_values_table_ea5d = $ea5d
 787C: F0 EC    beq $786a
 787E: 0A       asl a
 787F: A8       tay
-7880: B9 8D 78 lda table_788d, y
+7880: B9 8D 78 lda jump_table_788d, y
 7883: 85 1B    sta $1b
 7885: B9 8E 78 lda $788e, y
 7888: 85 1C    sta $1c
@@ -3300,7 +3304,7 @@ scroll_values_table_ea5d = $ea5d
 78C6: 20 3E 90 jsr $903e
 78C9: 9D 78 03 sta $0378, x
 78CC: 20 26 90 jsr $9026
-78CF: 9D 2B 03 sta $032b, x
+78CF: 9D 2B 03 sta player_direction_032b, x
 78D2: 8A       txa
 78D3: 29 02    and #$02
 78D5: 4A       lsr a
@@ -3405,7 +3409,7 @@ scroll_values_table_ea5d = $ea5d
 79C8: 4C 90 7B jmp $7b90
 79CB: 0A       asl a
 79CC: A8       tay
-79CD: B9 DA 79 lda table_79da, y
+79CD: B9 DA 79 lda jump_table_79da, y
 79D0: 85 1B    sta $1b
 79D2: B9 DB 79 lda $79db, y
 79D5: 85 1C    sta $1c
@@ -3447,7 +3451,7 @@ scroll_values_table_ea5d = $ea5d
 7A3B: 20 3E 90 jsr $903e
 7A3E: 9D 78 03 sta $0378, x
 7A41: 20 26 90 jsr $9026
-7A44: 9D 2B 03 sta $032b, x
+7A44: 9D 2B 03 sta player_direction_032b, x
 7A47: A9 00    lda #$00
 7A49: 20 49 85 jsr $8549
 7A4C: A5 1B    lda $1b
@@ -3473,7 +3477,7 @@ scroll_values_table_ea5d = $ea5d
 7A83: 20 3E 90 jsr $903e
 7A86: 9D 78 03 sta $0378, x
 7A89: 20 26 90 jsr $9026
-7A8C: 9D 2B 03 sta $032b, x
+7A8C: 9D 2B 03 sta player_direction_032b, x
 7A8F: A9 01    lda #$01
 7A91: 20 3E 84 jsr $843e
 7A94: B0 03    bcs $7a99
@@ -3636,10 +3640,10 @@ scroll_values_table_ea5d = $ea5d
 7C18: 29 02    and #$02
 7C1A: F0 08    beq $7c24
 7C1C: A9 C0    lda #$c0
-7C1E: 9D 2B 03 sta $032b, x
+7C1E: 9D 2B 03 sta player_direction_032b, x
 7C21: 4C 6C 70 jmp $706c
 7C24: A9 40    lda #$40
-7C26: 9D 2B 03 sta $032b, x
+7C26: 9D 2B 03 sta player_direction_032b, x
 7C29: 4C 6C 70 jmp $706c
 7C2C: BD B8 03 lda $03b8, x
 7C2F: C9 05    cmp #$05
@@ -3672,10 +3676,10 @@ scroll_values_table_ea5d = $ea5d
 7C6E: 29 02    and #$02
 7C70: F0 08    beq $7c7a
 7C72: A9 C0    lda #$c0
-7C74: 9D 2B 03 sta $032b, x
+7C74: 9D 2B 03 sta player_direction_032b, x
 7C77: 4C 6C 70 jmp $706c
 7C7A: A9 40    lda #$40
-7C7C: 9D 2B 03 sta $032b, x
+7C7C: 9D 2B 03 sta player_direction_032b, x
 7C7F: 4C 6C 70 jmp $706c
 7C82: BD B8 03 lda $03b8, x
 7C85: C9 04    cmp #$04
@@ -3752,7 +3756,7 @@ scroll_values_table_ea5d = $ea5d
 7D39: 20 3E 90 jsr $903e
 7D3C: 9D 78 03 sta $0378, x
 7D3F: 20 26 90 jsr $9026
-7D42: 9D 2B 03 sta $032b, x
+7D42: 9D 2B 03 sta player_direction_032b, x
 7D45: 20 29 84 jsr $8429
 7D48: 90 B2    bcc $7cfc
 7D4A: BD B8 03 lda $03b8, x
@@ -3791,7 +3795,7 @@ scroll_values_table_ea5d = $ea5d
 7D9D: 20 3E 90 jsr $903e
 7DA0: 9D 78 03 sta $0378, x
 7DA3: 20 26 90 jsr $9026
-7DA6: 9D 2B 03 sta $032b, x
+7DA6: 9D 2B 03 sta player_direction_032b, x
 7DA9: 20 A0 83 jsr $83a0
 7DAC: 90 08    bcc $7db6
 7DAE: 20 29 82 jsr $8229
@@ -3849,7 +3853,7 @@ scroll_values_table_ea5d = $ea5d
 7E2D: 20 3E 90 jsr $903e
 7E30: 9D 78 03 sta $0378, x
 7E33: 20 26 90 jsr $9026
-7E36: 9D 2B 03 sta $032b, x
+7E36: 9D 2B 03 sta player_direction_032b, x
 7E39: 20 29 82 jsr $8229
 7E3C: B0 16    bcs $7e54
 7E3E: 8A       txa
@@ -3884,7 +3888,7 @@ scroll_values_table_ea5d = $ea5d
 7E7E: 20 3E 90 jsr $903e
 7E81: 9D 78 03 sta $0378, x
 7E84: 20 26 90 jsr $9026
-7E87: 9D 2B 03 sta $032b, x
+7E87: 9D 2B 03 sta player_direction_032b, x
 7E8A: 20 29 82 jsr $8229
 7E8D: 90 03    bcc $7e92
 7E8F: 4C D5 7E jmp $7ed5
@@ -3956,7 +3960,7 @@ scroll_values_table_ea5d = $ea5d
 7F33: F0 68    beq $7f9d
 7F35: 0A       asl a
 7F36: A8       tay
-7F37: B9 44 7F lda table_7f44, y
+7F37: B9 44 7F lda jump_table_7f44, y
 7F3A: 85 1B    sta $1b
 7F3C: B9 45 7F lda $7f45, y
 7F3F: 85 1C    sta $1c
@@ -4096,7 +4100,7 @@ scroll_values_table_ea5d = $ea5d
 8098: 20 3E 90 jsr $903e
 809B: 9D 78 03 sta $0378, x
 809E: 20 26 90 jsr $9026
-80A1: 9D 2B 03 sta $032b, x
+80A1: 9D 2B 03 sta player_direction_032b, x
 80A4: 20 29 82 jsr $8229
 80A7: 90 03    bcc $80ac
 80A9: 4C 42 81 jmp $8142
@@ -4118,7 +4122,7 @@ scroll_values_table_ea5d = $ea5d
 80D4: BD 78 03 lda $0378, x
 80D7: 9D 7C 03 sta $037c, x
 80DA: 20 26 90 jsr $9026
-80DD: 9D 2B 03 sta $032b, x
+80DD: 9D 2B 03 sta player_direction_032b, x
 80E0: 20 29 82 jsr $8229
 80E3: 90 4E    bcc $8133
 80E5: BD 78 03 lda $0378, x
@@ -4225,7 +4229,7 @@ scroll_values_table_ea5d = $ea5d
 81D5: 20 3E 90 jsr $903e
 81D8: 9D 78 03 sta $0378, x
 81DB: 20 26 90 jsr $9026
-81DE: 9D 2B 03 sta $032b, x
+81DE: 9D 2B 03 sta player_direction_032b, x
 81E1: 20 29 82 jsr $8229
 81E4: 90 16    bcc $81fc
 81E6: BD B8 03 lda $03b8, x
@@ -4263,7 +4267,7 @@ scroll_values_table_ea5d = $ea5d
 8236: C9 14    cmp #$14
 8238: F0 06    beq $8240
 823A: 20 26 90 jsr $9026
-823D: 9D 2B 03 sta $032b, x
+823D: 9D 2B 03 sta player_direction_032b, x
 8240: 86 1B    stx $1b
 8242: A9 0D    lda #$0d
 8244: 85 1C    sta $1c
@@ -4333,7 +4337,7 @@ scroll_values_table_ea5d = $ea5d
 82CF: 90 09    bcc $82da
 82D1: 4C DC 82 jmp $82dc
 82D4: A5 1E    lda $1e
-82D6: C5 14    cmp screen_tile_dest_address_14
+82D6: C5 14    cmp multipurpose_14
 82D8: B0 02    bcs $82dc
 82DA: 38       sec
 82DB: 60       rts
@@ -4417,7 +4421,7 @@ scroll_values_table_ea5d = $ea5d
 8375: 60       rts
 8376: 18       clc
 8377: 60       rts
-8378: BD 2B 03 lda $032b, x
+8378: BD 2B 03 lda player_direction_032b, x
 837B: C9 50    cmp #$50
 837D: 90 0B    bcc $838a
 837F: C9 B0    cmp #$b0
@@ -4595,7 +4599,7 @@ scroll_values_table_ea5d = $ea5d
 84E8: BD 88 03 lda $0388, x
 84EB: 99 B9 00 sta $00b9, y
 84EE: 20 23 69 jsr $6923
-84F1: BD 2B 03 lda $032b, x
+84F1: BD 2B 03 lda player_direction_032b, x
 84F4: 18       clc
 84F5: 69 10    adc #$10
 84F7: 29 E0    and #$e0
@@ -4606,7 +4610,7 @@ scroll_values_table_ea5d = $ea5d
 84FD: A8       tay
 84FE: B9 92 93 lda $9392, y
 8501: 85 01    sta $01
-8503: BD 2B 03 lda $032b, x
+8503: BD 2B 03 lda player_direction_032b, x
 8506: 85 00    sta $00
 8508: 20 7C B6 jsr $b67c
 850B: 20 5E 90 jsr $905e
@@ -4620,9 +4624,9 @@ scroll_values_table_ea5d = $ea5d
 851D: B9 E6 94 lda $94e6, y
 8520: 85 11    sta $11
 8522: BD B0 03 lda $03b0, x
-8525: 85 12    sta tile_lsb_value_to_write_12
+8525: 85 12    sta multipurpose_12
 8527: A9 00    lda #$00
-8529: 85 13    sta tile_msb_to_write_13
+8529: 85 13    sta multipurpose_13
 852B: 20 29 D1 jsr $d129
 852E: A5 1B    lda $1b
 8530: 38       sec
@@ -4631,9 +4635,9 @@ scroll_values_table_ea5d = $ea5d
 8535: A9 00    lda #$00
 8537: 85 10    sta screen_source_pointer_0010
 8539: A5 16    lda screen_attribute_dest_address_16
-853B: 85 12    sta tile_lsb_value_to_write_12
+853B: 85 12    sta multipurpose_12
 853D: A5 17    lda $17
-853F: 85 13    sta tile_msb_to_write_13
+853F: 85 13    sta multipurpose_13
 8541: 20 2E D0 jsr $d02e
 8544: A5 10    lda screen_source_pointer_0010
 8546: 85 1B    sta $1b
@@ -4657,7 +4661,7 @@ scroll_values_table_ea5d = $ea5d
 8572: 20 23 69 jsr $6923
 8575: A5 23    lda $23
 8577: D0 14    bne $858d
-8579: BD 2B 03 lda $032b, x
+8579: BD 2B 03 lda player_direction_032b, x
 857C: 18       clc
 857D: 69 10    adc #$10
 857F: 29 E0    and #$e0
@@ -4669,7 +4673,7 @@ scroll_values_table_ea5d = $ea5d
 8586: A8       tay
 8587: B9 E2 92 lda $92e2, y
 858A: 4C 9D 85 jmp $859d
-858D: BD 2B 03 lda $032b, x
+858D: BD 2B 03 lda player_direction_032b, x
 8590: 18       clc
 8591: 69 10    adc #$10
 8593: 29 E0    and #$e0
@@ -4680,11 +4684,11 @@ scroll_values_table_ea5d = $ea5d
 8599: A8       tay
 859A: B9 92 93 lda $9392, y
 859D: 85 01    sta $01
-859F: BD 2B 03 lda $032b, x
+859F: BD 2B 03 lda player_direction_032b, x
 85A2: 85 00    sta $00
 85A4: 20 7C B6 jsr $b67c
 85A7: 20 5E 90 jsr $905e
-85AA: BD 2B 03 lda $032b, x
+85AA: BD 2B 03 lda player_direction_032b, x
 85AD: C9 20    cmp #$20
 85AF: 90 0C    bcc $85bd
 85B1: C9 60    cmp #$60
@@ -4699,9 +4703,9 @@ scroll_values_table_ea5d = $ea5d
 85C3: 85 10    sta screen_source_pointer_0010
 85C5: 4C D8 85 jmp $85d8
 85C8: A5 10    lda screen_source_pointer_0010
-85CA: 85 12    sta tile_lsb_value_to_write_12
+85CA: 85 12    sta multipurpose_12
 85CC: A5 11    lda $11
-85CE: 85 13    sta tile_msb_to_write_13
+85CE: 85 13    sta multipurpose_13
 85D0: A5 1B    lda $1b
 85D2: 85 11    sta $11
 85D4: A9 00    lda #$00
@@ -4810,7 +4814,7 @@ scroll_values_table_ea5d = $ea5d
 870C: 29 0F    and #$0f
 870E: 0A       asl a
 870F: A8       tay
-8710: B9 1D 87 lda table_871d, y
+8710: B9 1D 87 lda jump_table_871d, y
 8713: 85 1B    sta $1b
 8715: B9 1E 87 lda $871e, y
 8718: 85 1C    sta $1c
@@ -4958,14 +4962,14 @@ scroll_values_table_ea5d = $ea5d
 88D4: A8       tay
 88D5: B9 E5 94 lda $94e5, y
 88D8: 85 10    sta screen_source_pointer_0010
-88DA: 85 12    sta tile_lsb_value_to_write_12
+88DA: 85 12    sta multipurpose_12
 88DC: B9 E6 94 lda $94e6, y
 88DF: 85 11    sta $11
-88E1: 85 13    sta tile_msb_to_write_13
+88E1: 85 13    sta multipurpose_13
 88E3: C8       iny
 88E4: C8       iny
 88E5: B9 E5 94 lda $94e5, y
-88E8: 85 14    sta screen_tile_dest_address_14
+88E8: 85 14    sta multipurpose_14
 88EA: B9 E6 94 lda $94e6, y
 88ED: 85 15    sta $15
 88EF: A9 00    lda #$00
@@ -4975,18 +4979,18 @@ scroll_values_table_ea5d = $ea5d
 88F7: C5 1C    cmp $1c
 88F9: B0 1D    bcs $8918
 88FB: 38       sec
-88FC: A5 12    lda tile_lsb_value_to_write_12
-88FE: E5 14    sbc screen_tile_dest_address_14
-8900: 85 12    sta tile_lsb_value_to_write_12
-8902: A5 13    lda tile_msb_to_write_13
+88FC: A5 12    lda multipurpose_12
+88FE: E5 14    sbc multipurpose_14
+8900: 85 12    sta multipurpose_12
+8902: A5 13    lda multipurpose_13
 8904: E5 15    sbc $15
-8906: 85 13    sta tile_msb_to_write_13
+8906: 85 13    sta multipurpose_13
 8908: 18       clc
 8909: A5 10    lda screen_source_pointer_0010
-890B: 65 12    adc tile_lsb_value_to_write_12
+890B: 65 12    adc multipurpose_12
 890D: 85 10    sta screen_source_pointer_0010
 890F: A5 11    lda $11
-8911: 65 13    adc tile_msb_to_write_13
+8911: 65 13    adc multipurpose_13
 8913: 85 11    sta $11
 8915: 4C F3 88 jmp $88f3
 8918: 60       rts
@@ -4996,11 +5000,11 @@ scroll_values_table_ea5d = $ea5d
 891D: BD 73 03 lda $0373, x
 8920: 29 F0    and #$f0
 8922: D0 0A    bne $892e
-8924: B5 8F    lda $8f, x
+8924: B5 8F    lda player_x_8f, x
 8926: D9 8F 00 cmp $008f, y
 8929: 90 17    bcc $8942
 892B: 4C 35 89 jmp $8935
-892E: B5 8F    lda $8f, x
+892E: B5 8F    lda player_x_8f, x
 8930: D9 8F 00 cmp $008f, y
 8933: B0 0D    bcs $8942
 8935: 85 1C    sta $1c
@@ -5083,7 +5087,7 @@ scroll_values_table_ea5d = $ea5d
 89E0: AD EB 03 lda $03eb
 89E3: 95 9D    sta $9d, x
 89E5: AD EA 03 lda $03ea
-89E8: 95 8F    sta $8f, x
+89E8: 95 8F    sta player_x_8f, x
 89EA: AD ED 03 lda $03ed
 89ED: 95 C7    sta $c7, x
 89EF: AD EC 03 lda $03ec
@@ -5127,12 +5131,12 @@ scroll_values_table_ea5d = $ea5d
 8A3C: 8A       txa
 8A3D: 29 02    and #$02
 8A3F: F0 0A    beq $8a4b
-8A41: B5 8F    lda $8f, x
+8A41: B5 8F    lda player_x_8f, x
 8A43: 18       clc
 8A44: 69 18    adc #$18
 8A46: 85 1C    sta $1c
 8A48: 4C 52 8A jmp $8a52
-8A4B: B5 8F    lda $8f, x
+8A4B: B5 8F    lda player_x_8f, x
 8A4D: 38       sec
 8A4E: E9 18    sbc #$18
 8A50: 85 1C    sta $1c
@@ -5215,10 +5219,10 @@ scroll_values_table_ea5d = $ea5d
 8AF5: 29 02    and #$02
 8AF7: F0 06    beq $8aff
 8AF9: A9 C0    lda #$c0
-8AFB: 9D 2B 03 sta $032b, x
+8AFB: 9D 2B 03 sta player_direction_032b, x
 8AFE: 60       rts
 8AFF: A9 40    lda #$40
-8B01: 9D 2B 03 sta $032b, x
+8B01: 9D 2B 03 sta player_direction_032b, x
 8B04: 60       rts
 8B05: 8A       txa
 8B06: 48       pha
@@ -5411,7 +5415,7 @@ scroll_values_table_ea5d = $ea5d
 8CE9: B9 DA 8D lda $8dda, y
 8CEC: 95 9D    sta $9d, x
 8CEE: B9 DB 8D lda $8ddb, y
-8CF1: 95 8F    sta $8f, x
+8CF1: 95 8F    sta player_x_8f, x
 8CF3: B9 DC 8D lda $8ddc, y
 8CF6: 95 B9    sta $b9, x
 8CF8: B9 DD 8D lda $8ddd, y
@@ -5430,7 +5434,7 @@ scroll_values_table_ea5d = $ea5d
 8D10: B9 2A 8E lda $8e2a, y
 8D13: 95 9D    sta $9d, x
 8D15: B9 2B 8E lda $8e2b, y
-8D18: 95 8F    sta $8f, x
+8D18: 95 8F    sta player_x_8f, x
 8D1A: B9 2C 8E lda $8e2c, y
 8D1D: 95 B9    sta $b9, x
 8D1F: B9 2D 8E lda $8e2d, y
@@ -5442,7 +5446,7 @@ scroll_values_table_ea5d = $ea5d
 8D2A: B9 4A 8E lda $8e4a, y
 8D2D: 95 9D    sta $9d, x
 8D2F: B9 4B 8E lda $8e4b, y
-8D32: 95 8F    sta $8f, x
+8D32: 95 8F    sta player_x_8f, x
 8D34: B9 4C 8E lda $8e4c, y
 8D37: 95 B9    sta $b9, x
 8D39: B9 4D 8E lda $8e4d, y
@@ -5466,7 +5470,7 @@ scroll_values_table_ea5d = $ea5d
 8D57: B9 52 8E lda $8e52, y
 8D5A: 95 9D    sta $9d, x
 8D5C: B9 53 8E lda $8e53, y
-8D5F: 95 8F    sta $8f, x
+8D5F: 95 8F    sta player_x_8f, x
 8D61: B9 54 8E lda $8e54, y
 8D64: 95 B9    sta $b9, x
 8D66: B9 55 8E lda $8e55, y
@@ -5481,7 +5485,7 @@ scroll_values_table_ea5d = $ea5d
 8D76: B9 62 8E lda $8e62, y
 8D79: 95 9D    sta $9d, x
 8D7B: B9 63 8E lda $8e63, y
-8D7E: 95 8F    sta $8f, x
+8D7E: 95 8F    sta player_x_8f, x
 8D80: B9 64 8E lda $8e64, y
 8D83: 95 B9    sta $b9, x
 8D85: B9 65 8E lda $8e65, y
@@ -5493,7 +5497,7 @@ scroll_values_table_ea5d = $ea5d
 8D90: B9 6A 8E lda $8e6a, y
 8D93: 95 9D    sta $9d, x
 8D95: B9 6B 8E lda $8e6b, y
-8D98: 95 8F    sta $8f, x
+8D98: 95 8F    sta player_x_8f, x
 8D9A: B9 6C 8E lda $8e6c, y
 8D9D: 95 B9    sta $b9, x
 8D9F: B9 6D 8E lda $8e6d, y
@@ -5506,7 +5510,7 @@ scroll_values_table_ea5d = $ea5d
 8DAA: B9 72 8E lda $8e72, y
 8DAD: 95 9D    sta $9d, x
 8DAF: B9 73 8E lda $8e73, y
-8DB2: 95 8F    sta $8f, x
+8DB2: 95 8F    sta player_x_8f, x
 8DB4: B9 74 8E lda $8e74, y
 8DB7: 95 B9    sta $b9, x
 8DB9: B9 75 8E lda $8e75, y
@@ -5519,7 +5523,7 @@ scroll_values_table_ea5d = $ea5d
 8DC4: B9 82 8E lda $8e82, y
 8DC7: 95 9D    sta $9d, x
 8DC9: B9 83 8E lda $8e83, y
-8DCC: 95 8F    sta $8f, x
+8DCC: 95 8F    sta player_x_8f, x
 8DCE: B9 84 8E lda $8e84, y
 8DD1: 95 B9    sta $b9, x
 8DD3: B9 85 8E lda $8e85, y
@@ -5705,9 +5709,9 @@ scroll_values_table_ea5d = $ea5d
 902B: BD 80 03 lda $0380, x
 902E: 85 10    sta screen_source_pointer_0010
 9030: BD 88 03 lda $0388, x
-9033: 85 12    sta tile_lsb_value_to_write_12
+9033: 85 12    sta multipurpose_12
 9035: BD 8C 03 lda $038c, x
-9038: 85 13    sta tile_msb_to_write_13
+9038: 85 13    sta multipurpose_13
 903A: 20 6A B4 jsr $b46a
 903D: 60       rts
 903E: A0 0D    ldy #$0d
@@ -5736,20 +5740,20 @@ scroll_values_table_ea5d = $ea5d
 9073: A5 11    lda $11
 9075: 69 00    adc #$00
 9077: 85 11    sta $11
-9079: A5 13    lda tile_msb_to_write_13
+9079: A5 13    lda multipurpose_13
 907B: 10 17    bpl $9094
 907D: 49 FF    eor #$ff
-907F: 85 13    sta tile_msb_to_write_13
-9081: A5 12    lda tile_lsb_value_to_write_12
+907F: 85 13    sta multipurpose_13
+9081: A5 12    lda multipurpose_12
 9083: 49 FF    eor #$ff
-9085: 85 12    sta tile_lsb_value_to_write_12
+9085: 85 12    sta multipurpose_12
 9087: 18       clc
-9088: A5 12    lda tile_lsb_value_to_write_12
+9088: A5 12    lda multipurpose_12
 908A: 69 01    adc #$01
-908C: 85 12    sta tile_lsb_value_to_write_12
-908E: A5 13    lda tile_msb_to_write_13
+908C: 85 12    sta multipurpose_12
+908E: A5 13    lda multipurpose_13
 9090: 69 00    adc #$00
-9092: 85 13    sta tile_msb_to_write_13
+9092: 85 13    sta multipurpose_13
 9094: 60       rts
 9095: 8A       txa
 9096: 29 02    and #$02
@@ -5862,7 +5866,7 @@ scroll_values_table_ea5d = $ea5d
 9178: 29 7F    and #$7f
 917A: 0A       asl a
 917B: A8       tay
-917C: B9 8A 91 lda table_918a, y
+917C: B9 8A 91 lda jump_table_918a, y
 917F: 85 10    sta screen_source_pointer_0010
 9181: B9 8B 91 lda $918b, y
 9184: 85 11    sta $11
@@ -5888,7 +5892,7 @@ scroll_values_table_ea5d = $ea5d
 91F8: B0 15    bcs $920f
 91FA: C9 0F    cmp #$0f
 91FC: 90 11    bcc $920f
-91FE: BD 2B 03 lda $032b, x
+91FE: BD 2B 03 lda player_direction_032b, x
 9201: 9D 54 02 sta $0254, x
 9204: 9D C4 03 sta $03c4, x
 9207: BD 0E 03 lda $030e, x
@@ -5903,7 +5907,7 @@ scroll_values_table_ea5d = $ea5d
 921E: 29 7F    and #$7f
 9220: 0A       asl a
 9221: A8       tay
-9222: B9 EA 92 lda table_92ea, y
+9222: B9 EA 92 lda jump_table_92ea, y
 9225: 85 1B    sta $1b
 9227: B9 EB 92 lda $92eb, y
 922A: 85 1C    sta $1c
@@ -5935,7 +5939,7 @@ callback_9237:
 9267: E9 03    sbc #$03
 9269: 0A       asl a
 926A: A8       tay
-926B: B9 EA 92 lda table_92ea, y
+926B: B9 EA 92 lda jump_table_92ea, y
 926E: 85 1B    sta $1b
 9270: B9 EB 92 lda $92eb, y
 9273: 85 1C    sta $1c
@@ -5956,7 +5960,7 @@ callback_9280:
 9296: BD 0E 03 lda $030e, x
 9299: 29 10    and #$10
 929B: F0 00    beq $929d
-929D: BD 2B 03 lda $032b, x
+929D: BD 2B 03 lda player_direction_032b, x
 92A0: 9D 54 02 sta $0254, x
 92A3: 18       clc
 92A4: 69 10    adc #$10
@@ -5974,7 +5978,7 @@ callback_9280:
 92B8: E9 06    sbc #$06
 92BA: 0A       asl a
 92BB: A8       tay
-92BC: B9 EA 92 lda table_92ea, y
+92BC: B9 EA 92 lda jump_table_92ea, y
 92BF: 85 1B    sta $1b
 92C1: B9 EB 92 lda $92eb, y
 92C4: 85 1C    sta $1c
@@ -6031,7 +6035,7 @@ callback_92d1:
 933F: BD 0E 03 lda $030e, x
 9342: 29 EF    and #$ef
 9344: 9D 0E 03 sta $030e, x
-9347: BD 2B 03 lda $032b, x
+9347: BD 2B 03 lda player_direction_032b, x
 934A: 9D C4 03 sta $03c4, x
 934D: 9D 54 02 sta $0254, x
 9350: 18       clc
@@ -6068,7 +6072,7 @@ callback_92d1:
 93A2: BD 1A 03 lda $031a, x
 93A5: 30 48    bmi $93ef
 93A7: 20 95 A1 jsr $a195
-93AA: BD 2B 03 lda $032b, x
+93AA: BD 2B 03 lda player_direction_032b, x
 93AD: 9D 54 02 sta $0254, x
 93B0: A9 40    lda #$40
 93B2: 9D C0 03 sta $03c0, x
@@ -6338,7 +6342,7 @@ callback_92d1:
 960F: BD 1A 03 lda $031a, x
 9612: 30 09    bmi $961d
 9614: 20 95 A1 jsr $a195
-9617: BD 2B 03 lda $032b, x
+9617: BD 2B 03 lda player_direction_032b, x
 961A: 9D C4 03 sta $03c4, x
 961D: BD C0 03 lda $03c0, x
 9620: 29 01    and #$01
@@ -6360,7 +6364,7 @@ callback_92d1:
 964A: BD 1A 03 lda $031a, x
 964D: 30 09    bmi $9658
 964F: 20 95 A1 jsr $a195
-9652: BD 2B 03 lda $032b, x
+9652: BD 2B 03 lda player_direction_032b, x
 9655: 9D 54 02 sta $0254, x
 9658: BD F0 02 lda $02f0, x
 965B: C9 03    cmp #$03
@@ -6423,7 +6427,7 @@ callback_92d1:
 96EC: 30 3F    bmi $972d
 96EE: 20 95 A1 jsr $a195
 96F1: 20 E6 97 jsr $97e6
-96F4: BD 2B 03 lda $032b, x
+96F4: BD 2B 03 lda player_direction_032b, x
 96F7: 9D 54 02 sta $0254, x
 96FA: 18       clc
 96FB: 69 10    adc #$10
@@ -6574,7 +6578,7 @@ callback_92d1:
 987D: 29 EF    and #$ef
 987F: 9D 0E 03 sta $030e, x
 9882: 20 E6 97 jsr $97e6
-9885: BD 2B 03 lda $032b, x
+9885: BD 2B 03 lda player_direction_032b, x
 9888: 9D 54 02 sta $0254, x
 988B: 18       clc
 988C: 69 10    adc #$10
@@ -6701,7 +6705,7 @@ callback_92d1:
 99B7: A9 99    lda #$99
 99B9: 85 01    sta $01
 99BB: 4C 0E 93 jmp $930e
-99BE: BD 2B 03 lda $032b, x
+99BE: BD 2B 03 lda player_direction_032b, x
 99C1: 9D 54 02 sta $0254, x
 99C4: A9 10    lda #$10
 99C6: 9D 61 02 sta $0261, x
@@ -7172,7 +7176,7 @@ A1E8: 09 10    ora #$10
 A1EA: 9D 0E 03 sta $030e, x
 A1ED: 60       rts
 
-A215: B5 8F    lda $8f, x
+A215: B5 8F    lda player_x_8f, x
 A217: 48       pha
 A218: B5 9D    lda $9d, x
 A21A: 48       pha
@@ -7192,8 +7196,8 @@ A22D: A8       tay
 A22E: B9 9C A2 lda $a29c, y
 A231: 08       php
 A232: 18       clc
-A233: 75 8F    adc $8f, x
-A235: 95 8F    sta $8f, x
+A233: 75 8F    adc player_x_8f, x
+A235: 95 8F    sta player_x_8f, x
 A237: B5 9D    lda $9d, x
 A239: 69 00    adc #$00
 A23B: 28       plp
@@ -7223,7 +7227,7 @@ A263: 95 B9    sta $b9, x
 A265: 68       pla
 A266: 95 9D    sta $9d, x
 A268: 68       pla
-A269: 95 8F    sta $8f, x
+A269: 95 8F    sta player_x_8f, x
 A26B: E0 02    cpx #$02
 A26D: B0 08    bcs $a277
 A26F: A5 1B    lda $1b
@@ -7288,7 +7292,7 @@ A2F1: BD 1A 03 lda $031a, x
 A2F4: 29 3F    and #$3f
 A2F6: 0A       asl a
 A2F7: A8       tay
-A2F8: B9 0E A3 lda table_a30e, y
+A2F8: B9 0E A3 lda jump_table_a30e, y
 A2FB: 85 00    sta $00
 A2FD: B9 0F A3 lda $a30f, y
 A300: 85 01    sta $01
@@ -7307,7 +7311,7 @@ A32E: BD 1A 03 lda $031a, x
 A331: 29 3F    and #$3f
 A333: 0A       asl a
 A334: AA       tax
-A335: BD D3 A3 lda table_a3d3, x
+A335: BD D3 A3 lda jump_table_a3d3, x
 A338: 85 1B    sta $1b
 A33A: BD D4 A3 lda $a3d4, x
 A33D: 85 1C    sta $1c
@@ -7431,8 +7435,8 @@ A44F: A8       tay
 A450: A5 1B    lda $1b
 A452: 08       php
 A453: 18       clc
-A454: 75 8F    adc $8f, x
-A456: 95 8F    sta $8f, x
+A454: 75 8F    adc player_x_8f, x
+A456: 95 8F    sta player_x_8f, x
 A458: B5 9D    lda $9d, x
 A45A: 69 00    adc #$00
 A45C: 28       plp
@@ -7471,10 +7475,10 @@ A4B5: 29 40    and #$40
 A4B7: D0 03    bne $a4bc
 A4B9: 20 E6 A5 jsr $a5e6
 A4BC: 20 03 A6 jsr $a603
-A4BF: B5 8F    lda $8f, x
+A4BF: B5 8F    lda player_x_8f, x
 A4C1: 18       clc
 A4C2: 69 04    adc #$04
-A4C4: 95 8F    sta $8f, x
+A4C4: 95 8F    sta player_x_8f, x
 A4C6: B5 9D    lda $9d, x
 A4C8: 69 00    adc #$00
 A4CA: 95 9D    sta $9d, x
@@ -7662,7 +7666,7 @@ A649: BD 1A 03 lda $031a, x
 A64C: 29 7F    and #$7f
 A64E: 0A       asl a
 A64F: A8       tay
-A650: B9 5E A6 lda table_a65e, y
+A650: B9 5E A6 lda jump_table_a65e, y
 A653: 85 1B    sta $1b
 A655: B9 5F A6 lda $a65f, y
 A658: 85 1C    sta $1c
@@ -7675,7 +7679,7 @@ A66D: 20 1F A7 jsr $a71f
 A670: A9 18    lda #$18
 A672: 95 65    sta $65, x
 A674: A9 00    lda #$00
-A676: 95 8F    sta $8f, x
+A676: 95 8F    sta player_x_8f, x
 A678: A9 01    lda #$01
 A67A: 95 9D    sta $9d, x
 A67C: A9 58    lda #$58
@@ -7755,7 +7759,7 @@ A734: BD 1A 03 lda $031a, x
 A737: 29 7F    and #$7f
 A739: 0A       asl a
 A73A: A8       tay
-A73B: B9 49 A7 lda table_a749, y
+A73B: B9 49 A7 lda jump_table_a749, y
 A73E: 85 00    sta $00
 A740: B9 4A A7 lda $a74a, y
 A743: 85 01    sta $01
@@ -7934,7 +7938,7 @@ A8CF: A8       tay
 A8D0: B9 62 A9 lda $a962, y
 A8D3: 85 73    sta $73
 A8D5: B9 63 A9 lda $a963, y
-A8D8: 85 8F    sta $8f
+A8D8: 85 8F    sta player_x_8f
 A8DA: B9 64 A9 lda $a964, y
 A8DD: 85 74    sta $74
 A8DF: B9 65 A9 lda $a965, y
@@ -7987,7 +7991,7 @@ A93E: A2 00    ldx #$00
 A940: A9 05    lda #$05
 A942: 95 73    sta $73, x
 A944: A9 00    lda #$00
-A946: 95 8F    sta $8f, x
+A946: 95 8F    sta player_x_8f, x
 A948: A9 01    lda #$01
 A94A: 95 9D    sta $9d, x
 A94C: A9 78    lda #$78
@@ -8074,7 +8078,7 @@ AA18: 85 1B    sta $1b
 AA1A: A5 1B    lda $1b
 AA1C: 08       php
 AA1D: 18       clc
-AA1E: 75 8F    adc $8f, x
+AA1E: 75 8F    adc player_x_8f, x
 AA20: 85 00    sta $00
 AA22: B5 9D    lda $9d, x
 AA24: 69 00    adc #$00
@@ -8121,7 +8125,7 @@ AA6C: 85 05    sta $05
 AA6E: 68       pla
 AA6F: AA       tax
 AA70: A5 00    lda $00
-AA72: 95 8F    sta $8f, x
+AA72: 95 8F    sta player_x_8f, x
 AA74: A5 01    lda $01
 AA76: 95 9D    sta $9d, x
 AA78: A5 02    lda unpack_mode_02
@@ -8279,10 +8283,10 @@ AC91: B5 E3    lda $e3, x
 AC93: 18       clc
 AC94: 69 40    adc #$40
 AC96: 95 E3    sta $e3, x
-AC98: B5 8F    lda $8f, x
+AC98: B5 8F    lda player_x_8f, x
 AC9A: 38       sec
 AC9B: E9 18    sbc #$18
-AC9D: 95 8F    sta $8f, x
+AC9D: 95 8F    sta player_x_8f, x
 AC9F: B5 9D    lda $9d, x
 ACA1: E9 00    sbc #$00
 ACA3: 95 9D    sta $9d, x
@@ -8422,8 +8426,8 @@ AE0D: 85 1B    sta $1b
 AE0F: A5 1B    lda $1b
 AE11: 08       php
 AE12: 18       clc
-AE13: 75 8F    adc $8f, x
-AE15: 95 8F    sta $8f, x
+AE13: 75 8F    adc player_x_8f, x
+AE15: 95 8F    sta player_x_8f, x
 AE17: B5 9D    lda $9d, x
 AE19: 69 00    adc #$00
 AE1B: 28       plp
@@ -8656,7 +8660,7 @@ AFFE: 60       rts
 B00B: A2 03    ldx #$03
 B00D: A9 40    lda #$40
 B00F: 85 00    sta $00
-B011: B5 8F    lda $8f, x
+B011: B5 8F    lda player_x_8f, x
 B013: 38       sec
 B014: E5 93    sbc $93
 B016: 85 10    sta screen_source_pointer_0010
@@ -8761,7 +8765,7 @@ B0E2: 29 70    and #$70
 B0E4: 85 00    sta $00
 B0E6: B9 2E 02 lda player_1_controls_022e, y
 B0E9: 29 0F    and #$0f
-B0EB: 85 01    sta $01
+B0EB: 85 01    sta $01		; store player 1 directions
 B0ED: E0 01    cpx #$01
 B0EF: 90 02    bcc $b0f3
 B0F1: 09 10    ora #$10
@@ -8936,7 +8940,7 @@ B274: 48       pha
 B275: BD 37 03 lda $0337, x
 B278: 29 80    and #$80
 B27A: 49 C0    eor #$c0
-B27C: 9D 2B 03 sta $032b, x
+B27C: 9D 2B 03 sta player_direction_032b, x
 B27F: 68       pla
 B280: 60       rts
 B281: AD E9 03 lda $03e9
@@ -8958,7 +8962,7 @@ B2A5: 85 D4    sta $d4
 B2A7: A9 0D    lda #$0d
 B2A9: 20 4A B4 jsr $b44a
 B2AC: A6 4C    ldx $4c
-B2AE: 9D 2B 03 sta $032b, x
+B2AE: 9D 2B 03 sta player_direction_032b, x
 B2B1: A0 13    ldy #$13
 B2B3: C9 D0    cmp #$d0
 B2B5: B0 19    bcs $b2d0
@@ -9077,19 +9081,19 @@ B39B: F0 1E    beq $b3bb
 B39D: A4 01    ldy $01
 B39F: B9 CE B3 lda $b3ce, y
 B3A2: F0 28    beq $b3cc
-B3A4: 9D 2B 03 sta $032b, x
+B3A4: 9D 2B 03 sta player_direction_032b, x
 B3A7: E0 02    cpx #$02
 B3A9: 90 0B    bcc $b3b6
-B3AB: BD 2B 03 lda $032b, x
+B3AB: BD 2B 03 lda player_direction_032b, x
 B3AE: 49 FF    eor #$ff
 B3B0: 18       clc
 B3B1: 69 01    adc #$01
-B3B3: 9D 2B 03 sta $032b, x
+B3B3: 9D 2B 03 sta player_direction_032b, x
 B3B6: A9 18    lda #$18
 B3B8: 4C E8 B1 jmp $b1e8
-B3BB: A4 01    ldy $01
-B3BD: B9 DC B3 lda $b3dc, y
-B3C0: 9D 2B 03 sta $032b, x
+B3BB: A4 01    ldy $01		; copy of player 1 directions
+B3BD: B9 DC B3 lda directions_table_b3dc, y
+B3C0: 9D 2B 03 sta player_direction_032b, x
 B3C3: C0 00    cpy #$00
 B3C5: F0 05    beq $b3cc
 B3C7: A9 09    lda #$09
@@ -9151,14 +9155,14 @@ B44F: 98       tya
 B450: 48       pha
 B451: 08       php
 B452: A6 1B    ldx $1b
-B454: B5 8F    lda $8f, x
+B454: B5 8F    lda player_x_8f, x
 B456: 85 10    sta screen_source_pointer_0010
 B458: B5 9D    lda $9d, x
 B45A: 85 11    sta $11
 B45C: B5 B9    lda $b9, x
-B45E: 85 12    sta tile_lsb_value_to_write_12
+B45E: 85 12    sta multipurpose_12
 B460: B5 C7    lda $c7, x
-B462: 85 13    sta tile_msb_to_write_13
+B462: 85 13    sta multipurpose_13
 B464: 4C 70 B4 jmp $b470
 B467: 38       sec
 B468: B0 01    bcs $b46b
@@ -9169,8 +9173,8 @@ B46D: 98       tya
 B46E: 48       pha
 B46F: 08       php
 B470: A6 4C    ldx $4c
-B472: B5 8F    lda $8f, x
-B474: 85 14    sta screen_tile_dest_address_14
+B472: B5 8F    lda player_x_8f, x
+B474: 85 14    sta multipurpose_14
 B476: B5 9D    lda $9d, x
 B478: 85 15    sta $15
 B47A: B5 B9    lda $b9, x
@@ -9190,7 +9194,7 @@ B48E: A9 00    lda #$00
 B490: 85 03    sta $03
 B492: 38       sec
 B493: A5 10    lda screen_source_pointer_0010
-B495: E5 14    sbc screen_tile_dest_address_14
+B495: E5 14    sbc multipurpose_14
 B497: 85 04    sta $04
 B499: A5 11    lda $11
 B49B: E5 15    sbc $15
@@ -9210,10 +9214,10 @@ B4B5: 85 03    sta $03
 B4B7: A9 00    lda #$00
 B4B9: 85 00    sta $00
 B4BB: 38       sec
-B4BC: A5 12    lda tile_lsb_value_to_write_12
+B4BC: A5 12    lda multipurpose_12
 B4BE: E5 16    sbc screen_attribute_dest_address_16
 B4C0: 85 01    sta $01
-B4C2: A5 13    lda tile_msb_to_write_13
+B4C2: A5 13    lda multipurpose_13
 B4C4: E5 17    sbc $17
 B4C6: 85 02    sta unpack_mode_02
 B4C8: 10 16    bpl $b4e0
@@ -9281,9 +9285,9 @@ B53F: A5 10    lda screen_source_pointer_0010
 B541: 48       pha
 B542: A5 11    lda $11
 B544: 48       pha
-B545: A5 12    lda tile_lsb_value_to_write_12
+B545: A5 12    lda multipurpose_12
 B547: 48       pha
-B548: A5 13    lda tile_msb_to_write_13
+B548: A5 13    lda multipurpose_13
 B54A: 48       pha
 B54B: A5 01    lda $01
 B54D: 38       sec
@@ -9292,7 +9296,7 @@ B550: A5 02    lda unpack_mode_02
 B552: E5 05    sbc $05
 B554: 90 0D    bcc $b563
 B556: A5 01    lda $01
-B558: 85 12    sta tile_lsb_value_to_write_12
+B558: 85 12    sta multipurpose_12
 B55A: A5 02    lda unpack_mode_02
 B55C: A6 04    ldx $04
 B55E: A4 05    ldy $05
@@ -9301,11 +9305,11 @@ B563: A9 04    lda #$04
 B565: 05 07    ora $07
 B567: 85 07    sta $07
 B569: A5 04    lda $04
-B56B: 85 12    sta tile_lsb_value_to_write_12
+B56B: 85 12    sta multipurpose_12
 B56D: A5 05    lda $05
 B56F: A6 01    ldx $01
 B571: A4 02    ldy unpack_mode_02
-B573: 85 13    sta tile_msb_to_write_13
+B573: 85 13    sta multipurpose_13
 B575: 86 10    stx screen_source_pointer_0010
 B577: 84 11    sty $11
 B579: A0 04    ldy #$04
@@ -9313,7 +9317,7 @@ B57B: 06 10    asl screen_source_pointer_0010
 B57D: 26 11    rol $11
 B57F: 88       dey
 B580: 10 F9    bpl $b57b
-B582: A5 14    lda screen_tile_dest_address_14
+B582: A5 14    lda multipurpose_14
 B584: 48       pha
 B585: A5 15    lda $15
 B587: 48       pha
@@ -9321,7 +9325,7 @@ B588: 20 2E D0 jsr $d02e
 B58B: 68       pla
 B58C: 85 15    sta $15
 B58E: 68       pla
-B58F: 85 14    sta screen_tile_dest_address_14
+B58F: 85 14    sta multipurpose_14
 B591: A6 07    ldx $07
 B593: A5 10    lda screen_source_pointer_0010
 B595: BC B2 B5 ldy $b5b2, x
@@ -9333,9 +9337,9 @@ B59F: 18       clc
 B5A0: 7D BA B5 adc $b5ba, x
 B5A3: AA       tax
 B5A4: 68       pla
-B5A5: 85 13    sta tile_msb_to_write_13
+B5A5: 85 13    sta multipurpose_13
 B5A7: 68       pla
-B5A8: 85 12    sta tile_lsb_value_to_write_12
+B5A8: 85 12    sta multipurpose_12
 B5AA: 68       pla
 B5AB: 85 11    sta $11
 B5AD: 68       pla
@@ -9357,8 +9361,8 @@ B5D9: 95 81    sta $81, x
 B5DB: A5 11    lda $11
 B5DD: 9D 7B 02 sta $027b, x
 B5E0: 08       php
-B5E1: 75 8F    adc $8f, x
-B5E3: 95 8F    sta $8f, x
+B5E1: 75 8F    adc player_x_8f, x
+B5E3: 95 8F    sta player_x_8f, x
 B5E5: B5 9D    lda $9d, x
 B5E7: 69 00    adc #$00
 B5E9: 28       plp
@@ -9366,12 +9370,12 @@ B5EA: 10 03    bpl $b5ef
 B5EC: 18       clc
 B5ED: 69 FF    adc #$ff
 B5EF: 95 9D    sta $9d, x
-B5F1: A5 12    lda tile_lsb_value_to_write_12
+B5F1: A5 12    lda multipurpose_12
 B5F3: 9D 88 02 sta $0288, x
 B5F6: 18       clc
 B5F7: 75 AB    adc $ab, x
 B5F9: 95 AB    sta $ab, x
-B5FB: A5 13    lda tile_msb_to_write_13
+B5FB: A5 13    lda multipurpose_13
 B5FD: 9D 95 02 sta $0295, x
 B600: 08       php
 B601: 75 B9    adc $b9, x
@@ -9421,8 +9425,8 @@ B650: 75 81    adc $81, x
 B652: 95 81    sta $81, x
 B654: BD 7B 02 lda $027b, x
 B657: 08       php
-B658: 75 8F    adc $8f, x
-B65A: 95 8F    sta $8f, x
+B658: 75 8F    adc player_x_8f, x
+B65A: 95 8F    sta player_x_8f, x
 B65C: B5 9D    lda $9d, x
 B65E: 69 00    adc #$00
 B660: 28       plp
@@ -9481,13 +9485,13 @@ B6BE: A2 00    ldx #$00
 B6C0: A0 00    ldy #$00
 B6C2: A9 00    lda #$00
 B6C4: 85 11    sta $11
-B6C6: 85 13    sta tile_msb_to_write_13
+B6C6: 85 13    sta multipurpose_13
 B6C8: B5 02    lda unpack_mode_02, x
 B6CA: 85 10    sta screen_source_pointer_0010
 B6CC: A5 01    lda $01
-B6CE: 85 12    sta tile_lsb_value_to_write_12
+B6CE: 85 12    sta multipurpose_12
 B6D0: 20 29 D1 jsr $d129
-B6D3: A5 14    lda screen_tile_dest_address_14
+B6D3: A5 14    lda multipurpose_14
 B6D5: 99 04 00 sta $0004, y
 B6D8: A5 15    lda $15
 B6DA: 99 05 00 sta $0005, y
@@ -9538,7 +9542,7 @@ B727: A9 00    lda #$00
 B729: 85 1B    sta $1b
 B72B: 85 1D    sta base_screen_pointer_list_001d
 B72D: 85 24    sta $24
-B72F: B5 8F    lda $8f, x
+B72F: B5 8F    lda player_x_8f, x
 B731: 85 29    sta $29
 B733: B5 9D    lda $9d, x
 B735: 30 5B    bmi $b792
@@ -9546,7 +9550,7 @@ B737: F0 22    beq $b75b
 B739: C9 02    cmp #$02
 B73B: B0 51    bcs $b78e
 B73D: E6 24    inc $24
-B73F: B5 8F    lda $8f, x
+B73F: B5 8F    lda player_x_8f, x
 B741: C9 C0    cmp #$c0
 B743: B0 09    bcs $b74e
 B745: C9 90    cmp #$90
@@ -9581,7 +9585,7 @@ B77C: 84 2A    sty $2a
 B77E: 98       tya
 B77F: 0A       asl a
 B780: A8       tay
-B781: B9 A7 B7 lda table_b7a7, y
+B781: B9 A7 B7 lda jump_table_b7a7, y
 B784: 85 1B    sta $1b
 B786: B9 A8 B7 lda $b7a8, y
 B789: 85 1C    sta $1c
@@ -9685,7 +9689,7 @@ B850: 65 27    adc $27
 B852: A8       tay
 B853: 4C 16 B8 jmp $b816
 B856: 38       sec
-B857: B5 8F    lda $8f, x
+B857: B5 8F    lda player_x_8f, x
 B859: E9 F0    sbc #$f0
 B85B: 85 29    sta $29
 B85D: A5 2A    lda $2a
@@ -9848,7 +9852,7 @@ BA79: 60       rts
 BA7A: AD E0 03 lda $03e0
 BA7D: 0A       asl a
 BA7E: A8       tay
-BA7F: B9 8C BA lda table_ba8c, y
+BA7F: B9 8C BA lda jump_table_ba8c, y
 BA82: 85 10    sta screen_source_pointer_0010
 BA84: B9 8D BA lda $ba8d, y
 BA87: 85 11    sta $11
@@ -10078,7 +10082,7 @@ BC93: B0 00    bcs $bc95
 BC95: D8       cld
 BC96: 60       rts
 BC97: A6 4F    ldx $4f
-BC99: B5 8F    lda $8f, x
+BC99: B5 8F    lda player_x_8f, x
 BC9B: 85 93    sta $93
 BC9D: B5 9D    lda $9d, x
 BC9F: 85 A1    sta $a1
@@ -10246,7 +10250,7 @@ BE04: 38       sec
 BE05: E9 0C    sbc #$0c
 BE07: 0A       asl a
 BE08: A8       tay
-BE09: B9 61 BE lda table_be61, y
+BE09: B9 61 BE lda jump_table_be61, y
 BE0C: 85 10    sta screen_source_pointer_0010
 BE0E: B9 62 BE lda $be62, y
 BE11: 85 11    sta $11
@@ -10682,7 +10686,7 @@ C4F2: 9D 0E 03 sta $030e, x
 C4F5: A9 00    lda #$00
 C4F7: 85 F0    sta $f0
 C4F9: 85 FE    sta $fe
-C4FB: B5 8F    lda $8f, x
+C4FB: B5 8F    lda player_x_8f, x
 C4FD: 85 9C    sta $9c
 C4FF: B5 9D    lda $9d, x
 C501: 85 AA    sta $aa
@@ -10757,11 +10761,11 @@ C58E: 85 11    sta $11
 C590: A5 D9    lda $d9
 C592: 85 00    sta $00
 C594: AD A6 02 lda $02a6
-C597: 85 12    sta tile_lsb_value_to_write_12
+C597: 85 12    sta multipurpose_12
 C599: AD B3 02 lda $02b3
-C59C: 85 13    sta tile_msb_to_write_13
+C59C: 85 13    sta multipurpose_13
 C59E: AD C0 02 lda $02c0
-C5A1: 85 14    sta screen_tile_dest_address_14
+C5A1: 85 14    sta multipurpose_14
 C5A3: AD CD 02 lda $02cd
 C5A6: 85 15    sta $15
 C5A8: A9 00    lda #$00
@@ -10770,11 +10774,11 @@ C5AC: 85 02    sta unpack_mode_02
 C5AE: 85 03    sta $03
 C5B0: 85 04    sta $04
 C5B2: 85 1B    sta $1b
-C5B4: A5 12    lda tile_lsb_value_to_write_12
+C5B4: A5 12    lda multipurpose_12
 C5B6: 18       clc
 C5B7: 65 00    adc $00
 C5B9: 85 00    sta $00
-C5BB: A5 13    lda tile_msb_to_write_13
+C5BB: A5 13    lda multipurpose_13
 C5BD: 08       php
 C5BE: 65 10    adc screen_source_pointer_0010
 C5C0: 85 10    sta screen_source_pointer_0010
@@ -10785,15 +10789,15 @@ C5C7: 10 03    bpl $c5cc
 C5C9: 18       clc
 C5CA: 69 FF    adc #$ff
 C5CC: 85 11    sta $11
-C5CE: A5 12    lda tile_lsb_value_to_write_12
+C5CE: A5 12    lda multipurpose_12
 C5D0: 38       sec
-C5D1: E5 14    sbc screen_tile_dest_address_14
-C5D3: 85 12    sta tile_lsb_value_to_write_12
-C5D5: A5 13    lda tile_msb_to_write_13
+C5D1: E5 14    sbc multipurpose_14
+C5D3: 85 12    sta multipurpose_12
+C5D5: A5 13    lda multipurpose_13
 C5D7: E5 15    sbc $15
-C5D9: 85 13    sta tile_msb_to_write_13
+C5D9: 85 13    sta multipurpose_13
 C5DB: E6 01    inc $01
-C5DD: A5 13    lda tile_msb_to_write_13
+C5DD: A5 13    lda multipurpose_13
 C5DF: 10 D3    bpl $c5b4
 C5E1: A5 11    lda $11
 C5E3: 30 44    bmi $c629
@@ -11026,7 +11030,7 @@ C7D6: B9 D5 C8 lda $c8d5, y
 C7D9: 85 02    sta unpack_mode_02
 C7DB: A6 00    ldx $00
 C7DD: A4 02    ldy unpack_mode_02
-C7DF: B5 8F    lda $8f, x
+C7DF: B5 8F    lda player_x_8f, x
 C7E1: 38       sec
 C7E2: F9 EA 03 sbc $03ea, y
 C7E5: 85 10    sta screen_source_pointer_0010
@@ -11060,23 +11064,23 @@ C81F: A9 FF    lda #$ff
 C821: 91 0A    sta ($0a), y
 C823: B1 08    lda ($08), y
 C825: 85 10    sta screen_source_pointer_0010
-C827: 85 12    sta tile_lsb_value_to_write_12
+C827: 85 12    sta multipurpose_12
 C829: A9 00    lda #$00
 C82B: 85 11    sta $11
-C82D: 85 13    sta tile_msb_to_write_13
+C82D: 85 13    sta multipurpose_13
 C82F: 20 29 D1 jsr $d129
-C832: A5 14    lda screen_tile_dest_address_14
+C832: A5 14    lda multipurpose_14
 C834: 91 0C    sta ($0c), y
 C836: A5 15    lda $15
 C838: 91 0E    sta ($0e), y
 C83A: B1 0A    lda ($0a), y
 C83C: 85 10    sta screen_source_pointer_0010
-C83E: 85 12    sta tile_lsb_value_to_write_12
+C83E: 85 12    sta multipurpose_12
 C840: A9 00    lda #$00
 C842: 85 11    sta $11
-C844: 85 13    sta tile_msb_to_write_13
+C844: 85 13    sta multipurpose_13
 C846: 20 29 D1 jsr $d129
-C849: A5 14    lda screen_tile_dest_address_14
+C849: A5 14    lda multipurpose_14
 C84B: 18       clc
 C84C: 71 0C    adc ($0c), y
 C84E: 91 0C    sta ($0c), y
@@ -11158,7 +11162,7 @@ C8F2: B6 5F    ldx $5f, y
 C8F4: BD 76 C9 lda $c976, x
 C8F7: 18       clc
 C8F8: 08       php
-C8F9: 75 8F    adc $8f, x
+C8F9: 75 8F    adc player_x_8f, x
 C8FB: 8D 00 04 sta $0400
 C8FE: B5 9D    lda $9d, x
 C900: 69 00    adc #$00
@@ -11190,7 +11194,7 @@ C939: 90 23    bcc $c95e
 C93B: A5 00    lda $00
 C93D: 8D 06 04 sta $0406
 C940: 20 7A C9 jsr $c97a
-C943: A5 14    lda screen_tile_dest_address_14
+C943: A5 14    lda multipurpose_14
 C945: 8D 02 04 sta $0402
 C948: A5 15    lda $15
 C94A: 8D 03 04 sta $0403
@@ -11233,7 +11237,7 @@ C9A2: 18       clc
 C9A3: 65 AF    adc $af
 C9A5: A5 05    lda $05
 C9A7: 65 BD    adc $bd
-C9A9: 85 14    sta screen_tile_dest_address_14
+C9A9: 85 14    sta multipurpose_14
 C9AB: A5 06    lda $06
 C9AD: 65 CB    adc $cb
 C9AF: 85 15    sta $15
@@ -11245,14 +11249,14 @@ C9B8: 85 10    sta screen_source_pointer_0010
 C9BA: A5 F5    lda $f5
 C9BC: 85 11    sta $11
 C9BE: AD A6 02 lda $02a6
-C9C1: 85 12    sta tile_lsb_value_to_write_12
+C9C1: 85 12    sta multipurpose_12
 C9C3: AD B3 02 lda $02b3
-C9C6: 85 13    sta tile_msb_to_write_13
-C9C8: A5 12    lda tile_lsb_value_to_write_12
+C9C6: 85 13    sta multipurpose_13
+C9C8: A5 12    lda multipurpose_12
 C9CA: 18       clc
 C9CB: 65 00    adc $00
 C9CD: 85 00    sta $00
-C9CF: A5 13    lda tile_msb_to_write_13
+C9CF: A5 13    lda multipurpose_13
 C9D1: 08       php
 C9D2: 65 10    adc screen_source_pointer_0010
 C9D4: 85 10    sta screen_source_pointer_0010
@@ -11263,13 +11267,13 @@ C9DB: 10 03    bpl $c9e0
 C9DD: 18       clc
 C9DE: 69 FF    adc #$ff
 C9E0: 85 11    sta $11
-C9E2: A5 12    lda tile_lsb_value_to_write_12
+C9E2: A5 12    lda multipurpose_12
 C9E4: 38       sec
 C9E5: ED C0 02 sbc $02c0
-C9E8: 85 12    sta tile_lsb_value_to_write_12
-C9EA: A5 13    lda tile_msb_to_write_13
+C9E8: 85 12    sta multipurpose_12
+C9EA: A5 13    lda multipurpose_13
 C9EC: ED CD 02 sbc $02cd
-C9EF: 85 13    sta tile_msb_to_write_13
+C9EF: 85 13    sta multipurpose_13
 C9F1: 88       dey
 C9F2: D0 D4    bne $c9c8
 C9F4: 60       rts
@@ -11291,7 +11295,7 @@ CA0B: 38       sec
 CA0C: F5 81    sbc $81, x
 CA0E: 85 00    sta $00
 CA10: A5 93    lda $93
-CA12: F5 8F    sbc $8f, x
+CA12: F5 8F    sbc player_x_8f, x
 CA14: 85 01    sta $01
 CA16: A5 A1    lda $a1
 CA18: F5 9D    sbc $9d, x
@@ -11311,7 +11315,7 @@ CA38: 90 30    bcc $ca6a
 CA3A: A5 00    lda $00
 CA3C: 9D A0 03 sta $03a0, x
 CA3F: 20 7A C9 jsr $c97a
-CA42: A5 14    lda screen_tile_dest_address_14
+CA42: A5 14    lda multipurpose_14
 CA44: 9D 90 03 sta $0390, x
 CA47: A5 15    lda $15
 CA49: 9D 94 03 sta $0394, x
@@ -11362,9 +11366,9 @@ CAB4: 10 03    bpl $cab9
 CAB6: 20 D6 CF jsr $cfd6
 CAB9: E0 00    cpx #$00
 CABB: F0 08    beq $cac5
-CABD: A5 12    lda tile_lsb_value_to_write_12
+CABD: A5 12    lda multipurpose_12
 CABF: 85 10    sta screen_source_pointer_0010
-CAC1: A5 13    lda tile_msb_to_write_13
+CAC1: A5 13    lda multipurpose_13
 CAC3: 85 11    sta $11
 CAC5: 24 11    bit $11
 CAC7: 10 03    bpl $cacc
@@ -11569,18 +11573,18 @@ CC82: 85 10    sta screen_source_pointer_0010
 CC84: A9 00    lda #$00
 CC86: 85 11    sta $11
 CC88: A9 40    lda #$40
-CC8A: 85 12    sta tile_lsb_value_to_write_12
+CC8A: 85 12    sta multipurpose_12
 CC8C: A9 00    lda #$00
-CC8E: 85 13    sta tile_msb_to_write_13
+CC8E: 85 13    sta multipurpose_13
 CC90: 20 29 D1 jsr $d129
-CC93: A5 14    lda screen_tile_dest_address_14
+CC93: A5 14    lda multipurpose_14
 CC95: 8D A6 02 sta $02a6
 CC98: A5 15    lda $15
 CC9A: 8D B3 02 sta $02b3
 CC9D: AD 1F 04 lda $041f
-CCA0: 85 12    sta tile_lsb_value_to_write_12
+CCA0: 85 12    sta multipurpose_12
 CCA2: A9 00    lda #$00
-CCA4: 85 13    sta tile_msb_to_write_13
+CCA4: 85 13    sta multipurpose_13
 CCA6: A5 E2    lda $e2
 CCA8: 38       sec
 CCA9: E5 D9    sbc $d9
@@ -11860,11 +11864,11 @@ clear_screen_cf35:
 CF35: A0 00    ldy #$00
 CF37: A9 00    lda #$00
 CF39: 85 10    sta screen_source_pointer_0010
-CF3B: 85 12    sta tile_lsb_value_to_write_12
+CF3B: 85 12    sta multipurpose_12
 CF3D: A9 20    lda #$20
 CF3F: 85 11    sta $11
 CF41: A9 30    lda #$30
-CF43: 85 13    sta tile_msb_to_write_13
+CF43: 85 13    sta multipurpose_13
 CF45: A9 00    lda #$00
 ; clear the screen
 CF47: 91 10    sta (screen_source_pointer_0010), y	; [unchecked_address]
@@ -11872,16 +11876,20 @@ CF49: 91 12    sta ($12), y	; [video_address]
 CF4B: C8       iny
 CF4C: D0 F9    bne $cf47
 CF4E: E6 11    inc $11
-CF50: E6 13    inc tile_msb_to_write_13
+CF50: E6 13    inc multipurpose_13
 CF52: A5 11    lda $11
 CF54: C9 30    cmp #$30
 CF56: 90 ED    bcc $cf45
 CF58: 60       rts
+
+; put the F80000F8 pattern in the last unused
+; sprite shadow ram entries
+clear_rest_of_sprites_cf59:
 CF59: AE DA 06 ldx $06da
-CF5C: A9 F8    lda #$f8
+CF5C: A9 F8    lda #$f8    ; empty sprite
 CF5E: 9D DB 06 sta sprite_shadow_ram_06db, x
 CF61: 9D DE 06 sta $06de, x
-CF64: A9 00    lda #$00
+CF64: A9 00    lda #$00    ; empty sprite
 CF66: 9D DC 06 sta $06dc, x
 CF69: 9D DD 06 sta $06dd, x
 CF6C: E8       inx
@@ -11890,6 +11898,7 @@ CF6E: E8       inx
 CF6F: E8       inx
 CF70: D0 EA    bne $cf5c
 CF72: 60       rts
+
 CF73: A2 00    ldx #$00
 CF75: A9 00    lda #$00
 CF77: 9D 01 08 sta $0801, x
@@ -11917,11 +11926,11 @@ CFA3: 49 FF    eor #$ff
 CFA5: 69 00    adc #$00
 CFA7: 85 11    sta $11
 CFA9: 60       rts
-CFAA: A5 14    lda screen_tile_dest_address_14
+CFAA: A5 14    lda multipurpose_14
 CFAC: 49 FF    eor #$ff
 CFAE: 18       clc
 CFAF: 69 01    adc #$01
-CFB1: 85 14    sta screen_tile_dest_address_14
+CFB1: 85 14    sta multipurpose_14
 CFB3: A5 15    lda $15
 CFB5: 49 FF    eor #$ff
 CFB7: 69 00    adc #$00
@@ -11994,9 +12003,9 @@ D030: 98       tya
 D031: 48       pha
 D032: A9 00    lda #$00
 D034: 85 15    sta $15
-D036: 85 14    sta screen_tile_dest_address_14
-D038: A5 12    lda tile_lsb_value_to_write_12
-D03A: 05 13    ora tile_msb_to_write_13
+D036: 85 14    sta multipurpose_14
+D038: A5 12    lda multipurpose_12
+D03A: 05 13    ora multipurpose_13
 D03C: D0 06    bne $d044
 D03E: 85 10    sta screen_source_pointer_0010
 D040: 85 11    sta $11
@@ -12017,19 +12026,19 @@ D059: B0 05    bcs $d060
 D05B: 38       sec
 D05C: 26 10    rol screen_source_pointer_0010
 D05E: 26 11    rol $11
-D060: 26 14    rol screen_tile_dest_address_14
+D060: 26 14    rol multipurpose_14
 D062: 26 15    rol $15
-D064: A6 14    ldx screen_tile_dest_address_14
+D064: A6 14    ldx multipurpose_14
 D066: A4 15    ldy $15
-D068: A5 14    lda screen_tile_dest_address_14
+D068: A5 14    lda multipurpose_14
 D06A: 38       sec
-D06B: E5 12    sbc tile_lsb_value_to_write_12
-D06D: 85 14    sta screen_tile_dest_address_14
+D06B: E5 12    sbc multipurpose_12
+D06D: 85 14    sta multipurpose_14
 D06F: A5 15    lda $15
-D071: E5 13    sbc tile_msb_to_write_13
+D071: E5 13    sbc multipurpose_13
 D073: 85 15    sta $15
 D075: B0 06    bcs $d07d
-D077: 86 14    stx screen_tile_dest_address_14
+D077: 86 14    stx multipurpose_14
 D079: 84 15    sty $15
 D07B: C6 10    dec screen_source_pointer_0010
 D07D: C6 00    dec $00
@@ -12138,7 +12147,7 @@ D12A: 48       pha
 D12B: 98       tya
 D12C: 48       pha
 D12D: A9 00    lda #$00
-D12F: 85 14    sta screen_tile_dest_address_14
+D12F: 85 14    sta multipurpose_14
 D131: 85 15    sta $15
 D133: A5 11    lda $11
 D135: 05 10    ora screen_source_pointer_0010
@@ -12147,15 +12156,15 @@ D139: 46 11    lsr $11
 D13B: 66 10    ror screen_source_pointer_0010
 D13D: 90 0F    bcc $d14e
 D13F: 18       clc
-D140: A5 14    lda screen_tile_dest_address_14
-D142: 65 12    adc tile_lsb_value_to_write_12
-D144: 85 14    sta screen_tile_dest_address_14
+D140: A5 14    lda multipurpose_14
+D142: 65 12    adc multipurpose_12
+D144: 85 14    sta multipurpose_14
 D146: A5 15    lda $15
-D148: 65 13    adc tile_msb_to_write_13
+D148: 65 13    adc multipurpose_13
 D14A: 85 15    sta $15
 D14C: B0 06    bcs $d154
-D14E: 06 12    asl tile_lsb_value_to_write_12
-D150: 26 13    rol tile_msb_to_write_13
+D14E: 06 12    asl multipurpose_12
+D150: 26 13    rol multipurpose_13
 D152: 90 DF    bcc $d133
 D154: 68       pla
 D155: A8       tay
@@ -12215,10 +12224,10 @@ D1A6: AA       tax
 D1A7: 18       clc
 D1A8: 60       rts
 D1A9: 85 10    sta screen_source_pointer_0010
-D1AB: 85 12    sta tile_lsb_value_to_write_12
+D1AB: 85 12    sta multipurpose_12
 D1AD: A9 00    lda #$00
 D1AF: 85 11    sta $11
-D1B1: 85 13    sta tile_msb_to_write_13
+D1B1: 85 13    sta multipurpose_13
 D1B3: 20 29 D1 jsr $d129
 D1B6: 60       rts
 copy_shadow_sprites_d1b7:
@@ -12986,12 +12995,12 @@ D9B2: E5 0C    sbc $0c
 D9B4: A8       tay
 D9B5: B9 47 DA lda $da47, y
 D9B8: 85 10    sta screen_source_pointer_0010
-D9BA: 85 12    sta tile_lsb_value_to_write_12
+D9BA: 85 12    sta multipurpose_12
 D9BC: B9 48 DA lda $da48, y
 D9BF: 85 11    sta $11
 D9C1: 18       clc
 D9C2: 69 10    adc #$10
-D9C4: 85 13    sta tile_msb_to_write_13
+D9C4: 85 13    sta multipurpose_13
 D9C6: B9 49 DA lda $da49, y
 D9C9: 85 0E    sta $0e
 D9CB: C6 0E    dec $0e
@@ -13000,7 +13009,7 @@ D9CE: 08       php
 D9CF: 69 00    adc #$00
 D9D1: 85 0F    sta $0f
 D9D3: B9 4A DA lda $da4a, y
-D9D6: 85 14    sta screen_tile_dest_address_14
+D9D6: 85 14    sta multipurpose_14
 D9D8: B9 4B DA lda $da4b, y
 D9DB: 85 15    sta $15
 D9DD: B9 4C DA lda $da4c, y
@@ -13057,9 +13066,9 @@ DA38: 91 12    sta ($12), y				; [video_address] attrib
 DA3A: E6 10    inc screen_source_pointer_0010
 DA3C: D0 02    bne $da40
 DA3E: E6 11    inc $11
-DA40: E6 12    inc tile_lsb_value_to_write_12
+DA40: E6 12    inc multipurpose_12
 DA42: D0 02    bne $da46
-DA44: E6 13    inc tile_msb_to_write_13
+DA44: E6 13    inc multipurpose_13
 DA46: 60       rts
 
 DA7F: 85 0F    sta $0f
@@ -13086,11 +13095,11 @@ DAA2: C8       iny
 DAA3: 85 0B    sta $0b
 DAA5: B1 10    lda (screen_source_pointer_0010), y
 DAA7: C8       iny
-DAA8: 85 12    sta tile_lsb_value_to_write_12
-DAAA: 85 14    sta screen_tile_dest_address_14
+DAA8: 85 12    sta multipurpose_12
+DAAA: 85 14    sta multipurpose_14
 DAAC: B1 10    lda (screen_source_pointer_0010), y
 DAAE: C8       iny
-DAAF: 85 13    sta tile_msb_to_write_13
+DAAF: 85 13    sta multipurpose_13
 DAB1: 18       clc
 DAB2: 69 10    adc #$10
 DAB4: 85 15    sta $15
@@ -13125,11 +13134,11 @@ DAED: D0 13    bne $db02
 DAEF: B1 10    lda (screen_source_pointer_0010), y
 DAF1: C8       iny
 DAF2: 18       clc
-DAF3: 65 12    adc tile_lsb_value_to_write_12
-DAF5: 85 12    sta tile_lsb_value_to_write_12
-DAF7: 85 14    sta screen_tile_dest_address_14
+DAF3: 65 12    adc multipurpose_12
+DAF5: 85 12    sta multipurpose_12
+DAF7: 85 14    sta multipurpose_14
 DAF9: 90 04    bcc $daff
-DAFB: E6 13    inc tile_msb_to_write_13
+DAFB: E6 13    inc multipurpose_13
 DAFD: E6 15    inc $15
 DAFF: 4C B6 DA jmp $dab6
 DB02: 24 0F    bit $0f
@@ -13146,10 +13155,10 @@ DB14: 65 0D    adc $0d
 DB16: 81 12    sta ($12, x)	; [unchecked_address]
 DB18: A5 0B    lda $0b
 DB1A: 81 14    sta ($14, x)	; [video_address]
-DB1C: E6 12    inc tile_lsb_value_to_write_12
+DB1C: E6 12    inc multipurpose_12
 DB1E: D0 02    bne $db22
-DB20: E6 13    inc tile_msb_to_write_13
-DB22: E6 14    inc screen_tile_dest_address_14
+DB20: E6 13    inc multipurpose_13
+DB22: E6 14    inc multipurpose_14
 DB24: D0 02    bne $db28
 DB26: E6 15    inc $15
 DB28: 24 0E    bit $0e
@@ -13212,7 +13221,7 @@ E032: 85 02    sta unpack_mode_02
 E034: A5 03    lda $03
 E036: ED E1 07 sbc $07e1
 E039: 85 03    sta $03
-E03B: B5 8F    lda $8f, x
+E03B: B5 8F    lda player_x_8f, x
 E03D: 38       sec
 E03E: ED DE 07 sbc logical_scroll_value_lsb_07de
 E041: 85 00    sta $00
@@ -13264,10 +13273,10 @@ E096: A5 06    lda $06
 E098: 29 30    and #$30
 E09A: F0 0E    beq $e0aa
 E09C: B1 10    lda (screen_source_pointer_0010), y
-E09E: 85 12    sta tile_lsb_value_to_write_12
+E09E: 85 12    sta multipurpose_12
 E0A0: C8       iny
 E0A1: B1 10    lda (screen_source_pointer_0010), y
-E0A3: 85 13    sta tile_msb_to_write_13
+E0A3: 85 13    sta multipurpose_13
 E0A5: C8       iny
 E0A6: A9 00    lda #$00
 E0A8: 85 09    sta $09
@@ -13304,9 +13313,9 @@ E0E8: A5 06    lda $06
 E0EA: 29 20    and #$20
 E0EC: D0 0A    bne $e0f8
 E0EE: A5 10    lda screen_source_pointer_0010
-E0F0: 85 12    sta tile_lsb_value_to_write_12
+E0F0: 85 12    sta multipurpose_12
 E0F2: A5 11    lda $11
-E0F4: 85 13    sta tile_msb_to_write_13
+E0F4: 85 13    sta multipurpose_13
 E0F6: 84 09    sty $09
 E0F8: A4 09    ldy $09
 E0FA: B1 12    lda ($12), y
@@ -13395,7 +13404,7 @@ E1C7: 65 01    adc $01
 E1C9: A8       tay
 E1CA: 85 0B    sta $0b
 E1CC: B9 7E E4 lda $e47e, y
-E1CF: 85 14    sta screen_tile_dest_address_14
+E1CF: 85 14    sta multipurpose_14
 E1D1: B9 7F E4 lda $e47f, y
 E1D4: 85 15    sta $15
 E1D6: BD 3A 02 lda $023a, x
@@ -13405,7 +13414,7 @@ E1DD: A0 00    ldy #$00
 E1DF: B1 14    lda ($14), y
 E1E1: 09 80    ora #$80
 E1E3: 91 14    sta ($14), y
-E1E5: B5 8F    lda $8f, x
+E1E5: B5 8F    lda player_x_8f, x
 E1E7: A0 01    ldy #$01
 E1E9: 91 14    sta ($14), y
 E1EB: B5 9D    lda $9d, x
@@ -13472,10 +13481,10 @@ E25E: B9 84 E1 lda $e184, y
 E261: 85 05    sta $05
 E263: A9 00    lda #$00
 E265: 85 1B    sta $1b
-E267: A5 14    lda screen_tile_dest_address_14
+E267: A5 14    lda multipurpose_14
 E269: 18       clc
 E26A: 69 06    adc #$06
-E26C: 85 14    sta screen_tile_dest_address_14
+E26C: 85 14    sta multipurpose_14
 E26E: A5 15    lda $15
 E270: 69 00    adc #$00
 E272: 85 15    sta $15
@@ -13517,10 +13526,10 @@ E2B2: A5 06    lda $06
 E2B4: 29 30    and #$30
 E2B6: F0 0E    beq $e2c6
 E2B8: B1 10    lda (screen_source_pointer_0010), y
-E2BA: 85 12    sta tile_lsb_value_to_write_12
+E2BA: 85 12    sta multipurpose_12
 E2BC: C8       iny
 E2BD: B1 10    lda (screen_source_pointer_0010), y
-E2BF: 85 13    sta tile_msb_to_write_13
+E2BF: 85 13    sta multipurpose_13
 E2C1: C8       iny
 E2C2: A9 00    lda #$00
 E2C4: 85 09    sta $09
@@ -13556,9 +13565,9 @@ E2FD: A5 06    lda $06
 E2FF: 29 20    and #$20
 E301: D0 0A    bne $e30d
 E303: A5 10    lda screen_source_pointer_0010
-E305: 85 12    sta tile_lsb_value_to_write_12
+E305: 85 12    sta multipurpose_12
 E307: A5 11    lda $11
-E309: 85 13    sta tile_msb_to_write_13
+E309: 85 13    sta multipurpose_13
 E30B: 84 09    sty $09
 E30D: A4 09    ldy $09
 E30F: B1 12    lda ($12), y
@@ -13582,10 +13591,10 @@ E32C: E8       inx
 E32D: C8       iny
 E32E: E0 04    cpx #$04
 E330: 90 F6    bcc $e328
-E332: A5 14    lda screen_tile_dest_address_14
+E332: A5 14    lda multipurpose_14
 E334: 18       clc
 E335: 69 04    adc #$04
-E337: 85 14    sta screen_tile_dest_address_14
+E337: 85 14    sta multipurpose_14
 E339: A5 15    lda $15
 E33B: 69 00    adc #$00
 E33D: 85 15    sta $15
@@ -13603,7 +13612,7 @@ E351: 4C C6 E2 jmp $e2c6
 E354: 4C 76 E2 jmp $e276
 E357: A6 0B    ldx $0b
 E359: BD 7E E4 lda $e47e, x
-E35C: 85 14    sta screen_tile_dest_address_14
+E35C: 85 14    sta multipurpose_14
 E35E: BD 7F E4 lda $e47f, x
 E361: 85 15    sta $15
 E363: A2 00    ldx #$00
@@ -13678,7 +13687,7 @@ E3E1: 18       clc
 E3E2: 69 8A    adc #$8a
 E3E4: 85 80    sta $80
 E3E6: A6 4C    ldx $4c
-E3E8: B5 8F    lda $8f, x
+E3E8: B5 8F    lda player_x_8f, x
 E3EA: 85 9C    sta $9c
 E3EC: B5 9D    lda $9d, x
 E3EE: 85 AA    sta $aa
@@ -13745,7 +13754,7 @@ E460: 85 16    sta screen_attribute_dest_address_16
 E462: A9 00    lda #$00
 E464: 69 00    adc #$00
 E466: 85 17    sta $17
-E468: B5 8F    lda $8f, x
+E468: B5 8F    lda player_x_8f, x
 E46A: 38       sec
 E46B: E5 16    sbc screen_attribute_dest_address_16
 E46D: B5 9D    lda $9d, x
@@ -13904,7 +13913,7 @@ E5FE: 91 10    sta (screen_source_pointer_0010), y
 E600: 85 00    sta $00
 E602: C8       iny
 E603: B1 10    lda (screen_source_pointer_0010), y
-E605: 85 12    sta tile_lsb_value_to_write_12
+E605: 85 12    sta multipurpose_12
 E607: C8       iny
 E608: B1 10    lda (screen_source_pointer_0010), y
 E60A: 48       pha
@@ -13912,7 +13921,7 @@ E60B: 29 0F    and #$0f
 E60D: C9 08    cmp #$08
 E60F: 90 02    bcc $e613
 E611: 09 F0    ora #$f0
-E613: 85 13    sta tile_msb_to_write_13
+E613: 85 13    sta multipurpose_13
 E615: 68       pla
 E616: 4A       lsr a
 E617: 4A       lsr a
@@ -13924,19 +13933,19 @@ E61E: 09 F0    ora #$f0
 E620: 85 15    sta $15
 E622: C8       iny
 E623: B1 10    lda (screen_source_pointer_0010), y
-E625: 85 14    sta screen_tile_dest_address_14
+E625: 85 14    sta multipurpose_14
 E627: C8       iny
-E628: A5 12    lda tile_lsb_value_to_write_12
+E628: A5 12    lda multipurpose_12
 E62A: 38       sec
 E62B: ED DE 07 sbc logical_scroll_value_lsb_07de
-E62E: 85 12    sta tile_lsb_value_to_write_12
-E630: A5 13    lda tile_msb_to_write_13
+E62E: 85 12    sta multipurpose_12
+E630: A5 13    lda multipurpose_13
 E632: ED DF 07 sbc logical_scroll_value_msb_07df
-E635: 85 13    sta tile_msb_to_write_13
-E637: A5 14    lda screen_tile_dest_address_14
+E635: 85 13    sta multipurpose_13
+E637: A5 14    lda multipurpose_14
 E639: 38       sec
 E63A: ED E0 07 sbc $07e0
-E63D: 85 14    sta screen_tile_dest_address_14
+E63D: 85 14    sta multipurpose_14
 E63F: A5 15    lda $15
 E641: ED E1 07 sbc $07e1
 E644: 85 15    sta $15
@@ -13946,7 +13955,7 @@ E648: B1 10    lda (screen_source_pointer_0010), y
 E64A: 18       clc
 E64B: 08       php
 E64C: C8       iny
-E64D: 65 14    adc screen_tile_dest_address_14
+E64D: 65 14    adc multipurpose_14
 E64F: 9D DB 06 sta sprite_shadow_ram_06db, x
 E652: A5 15    lda $15
 E654: 69 00    adc #$00
@@ -13964,9 +13973,9 @@ E669: B1 10    lda (screen_source_pointer_0010), y
 E66B: 18       clc
 E66C: 08       php
 E66D: C8       iny
-E66E: 65 12    adc tile_lsb_value_to_write_12
+E66E: 65 12    adc multipurpose_12
 E670: 9D DE 06 sta $06de, x
-E673: A5 13    lda tile_msb_to_write_13
+E673: A5 13    lda multipurpose_13
 E675: 69 00    adc #$00
 E677: 28       plp
 E678: 10 02    bpl $e67c
@@ -14009,6 +14018,7 @@ E6C3: 4C 48 E6 jmp $e648
 E6C6: A9 00    lda #$00
 E6C8: 20 DF D8 jsr set_bank_d8df
 E6CB: 60       rts
+
 E6CC: 20 E8 E4 jsr $e4e8
 E6CF: 20 3E E5 jsr $e53e
 E6D2: 60       rts
@@ -14298,7 +14308,7 @@ E9BF: AA       tax
 E9C0: B9 69 EA lda $ea69, y
 E9C3: 18       clc
 E9C4: 08       php
-E9C5: 75 8F    adc $8f, x
+E9C5: 75 8F    adc player_x_8f, x
 E9C7: 8D E2 07 sta $07e2
 E9CA: B5 9D    lda $9d, x
 E9CC: 69 00    adc #$00
@@ -14646,10 +14656,10 @@ ECE5: 4C BE EC jmp $ecbe
 
 ; get data
 ECE8: B1 10    lda (screen_source_pointer_0010), y
-ECEA: 85 12    sta tile_lsb_value_to_write_12			; tile code => $2xxx
+ECEA: 85 12    sta multipurpose_12			; tile code => $2xxx
 ECEC: C8       iny
 ECED: B1 10    lda (screen_source_pointer_0010), y
-ECEF: 85 13    sta tile_msb_to_write_13		; tile attribute => $3xxx
+ECEF: 85 13    sta multipurpose_13		; tile attribute => $3xxx
 ECF1: C8       iny
 ; get data destination (screen address)
 ECF2: B1 10    lda (screen_source_pointer_0010), y
@@ -14663,10 +14673,10 @@ ECFE: D0 06    bne $ed06
 ED00: 20 B5 ED jsr $edb5
 ED03: 4C F2 EC jmp $ecf2
 ED06: A5 1C    lda $1c
-ED08: 85 14    sta screen_tile_dest_address_14
+ED08: 85 14    sta multipurpose_14
 ED0A: A5 1D    lda base_screen_pointer_list_001d
 ED0C: 85 15    sta $15
-ED0E: A5 14    lda screen_tile_dest_address_14
+ED0E: A5 14    lda multipurpose_14
 ED10: 85 16    sta screen_attribute_dest_address_16
 ED12: A5 15    lda $15
 ED14: 18       clc
@@ -14684,19 +14694,19 @@ ED25: D0 06    bne $ed2d
 ED27: 20 B5 ED jsr $edb5
 ED2A: 4C 19 ED jmp $ed19
 ED2D: A0 00    ldy #$00
-ED2F: A5 12    lda tile_lsb_value_to_write_12
+ED2F: A5 12    lda multipurpose_12
 ; now copy tile & attribute
 ED31: 91 14    sta ($14), y		; [unchecked_address]
-ED33: A5 13    lda tile_msb_to_write_13
+ED33: A5 13    lda multipurpose_13
 ED35: 91 16    sta ($16), y		; [video_address]
 ED37: C8       iny
 ED38: 24 02    bit unpack_mode_02		; test command
 ED3A: 30 06    bmi $ed42				; negative: RLE: X is the number of repeats
 ; positive: increase tile value X times
-ED3C: E6 12    inc tile_lsb_value_to_write_12
+ED3C: E6 12    inc multipurpose_12
 ED3E: D0 02    bne $ed42
 ; wrap: increase attribute (which is actually tile MSB)
-ED40: E6 13    inc tile_msb_to_write_13
+ED40: E6 13    inc multipurpose_13
 ED42: CA       dex
 ED43: D0 EA    bne $ed2f
 ED45: A9 20    lda #$20
@@ -14707,9 +14717,9 @@ ED4D: C8       iny
 ED4E: AA       tax
 ED4F: C9 80    cmp #$80
 ED51: D0 0F    bne $ed62
-ED53: A5 14    lda screen_tile_dest_address_14
+ED53: A5 14    lda multipurpose_14
 ED55: 29 E0    and #$e0
-ED57: 85 14    sta screen_tile_dest_address_14
+ED57: 85 14    sta multipurpose_14
 ED59: A5 15    lda $15
 ED5B: 49 04    eor #$04
 ED5D: 85 15    sta $15
@@ -14720,8 +14730,8 @@ ED66: D0 0B    bne $ed73
 ED68: 8A       txa
 ED69: 29 0F    and #$0f
 ED6B: 18       clc
-ED6C: 65 14    adc screen_tile_dest_address_14
-ED6E: 85 14    sta screen_tile_dest_address_14
+ED6C: 65 14    adc multipurpose_14
+ED6E: 85 14    sta multipurpose_14
 ED70: 4C 0E ED jmp $ed0e
 ED73: 8A       txa
 ED74: 18       clc
@@ -14827,17 +14837,17 @@ EE1F: C8       iny
 EE20: 85 02    sta unpack_mode_02
 EE22: B1 10    lda (screen_source_pointer_0010), y
 EE24: C8       iny
-EE25: 85 14    sta screen_tile_dest_address_14
+EE25: 85 14    sta multipurpose_14
 EE27: B1 10    lda (screen_source_pointer_0010), y
 EE29: C8       iny
 EE2A: 85 15    sta $15
 EE2C: B1 10    lda (screen_source_pointer_0010), y
-EE2E: 85 13    sta tile_msb_to_write_13
+EE2E: 85 13    sta multipurpose_13
 EE30: C8       iny
 EE31: 84 00    sty $00
 EE33: A9 00    lda #$00
 EE35: 85 1B    sta $1b
-EE37: A5 14    lda screen_tile_dest_address_14
+EE37: A5 14    lda multipurpose_14
 EE39: 85 16    sta screen_attribute_dest_address_16
 EE3B: A5 15    lda $15
 EE3D: 18       clc
@@ -14852,22 +14862,22 @@ EE4C: C9 FE    cmp #$fe
 EE4E: D0 0B    bne $ee5b
 EE50: C8       iny
 EE51: B1 10    lda (screen_source_pointer_0010), y
-EE53: 85 13    sta tile_msb_to_write_13
+EE53: 85 13    sta multipurpose_13
 EE55: E6 00    inc $00
 EE57: E6 00    inc $00
 EE59: D0 E9    bne $ee44
 EE5B: A4 1B    ldy $1b
 EE5D: 91 14    sta ($14), y
-EE5F: A5 13    lda tile_msb_to_write_13
+EE5F: A5 13    lda multipurpose_13
 EE61: 91 16    sta ($16), y
 EE63: E6 00    inc $00
 EE65: E6 1B    inc $1b
 EE67: CA       dex
 EE68: D0 DA    bne $ee44
-EE6A: A5 14    lda screen_tile_dest_address_14
+EE6A: A5 14    lda multipurpose_14
 EE6C: 18       clc
 EE6D: 69 20    adc #$20
-EE6F: 85 14    sta screen_tile_dest_address_14
+EE6F: 85 14    sta multipurpose_14
 EE71: A5 15    lda $15
 EE73: 69 00    adc #$00
 EE75: 85 15    sta $15
@@ -15152,7 +15162,7 @@ F0BC: 20 CC E6 jsr $e6cc
 F0BF: A2 04    ldx #$04
 F0C1: 86 4C    stx $4c
 F0C3: 20 F3 DF jsr $dff3
-F0C6: 20 59 CF jsr $cf59
+F0C6: 20 59 CF jsr clear_rest_of_sprites_cf59
 F0C9: A9 5A    lda #$5a
 F0CB: 85 2F    sta toggle_timer_2f
 F0CD: A5 2F    lda toggle_timer_2f
@@ -15182,6 +15192,7 @@ F102: 8D 0D 03 sta $030d
 F105: A9 02    lda #$02
 F107: 85 37    sta $37
 F109: D0 1F    bne $f12a
+; check for start button
 F10B: AD 2E 02 lda player_1_controls_022e
 F10E: 10 2D    bpl $f13d
 F110: A5 37    lda $37
@@ -15245,7 +15256,7 @@ F18D: 20 CC E6 jsr $e6cc
 F190: A2 04    ldx #$04
 F192: 86 4C    stx $4c
 F194: 20 F3 DF jsr $dff3
-F197: 20 59 CF jsr $cf59
+F197: 20 59 CF jsr clear_rest_of_sprites_cf59
 F19A: 20 22 D8 jsr sync_d822
 F19D: A9 07    lda #$07
 F19F: 20 A6 D9 jsr $d9a6
@@ -15589,7 +15600,7 @@ F489: 20 30 A7 jsr $a730
 F48C: 20 45 A6 jsr $a645
 F48F: 20 A8 AC jsr $aca8
 F492: 20 CC E6 jsr $e6cc
-F495: 20 59 CF jsr $cf59
+F495: 20 59 CF jsr clear_rest_of_sprites_cf59
 F498: A9 12    lda #$12
 F49A: 20 80 EE jsr $ee80
 F49D: A5 4A    lda $4a
@@ -15632,7 +15643,7 @@ F4F1: 20 A7 AC jsr $aca7
 F4F4: 20 A8 AC jsr $aca8
 F4F7: 20 82 AD jsr $ad82
 F4FA: 20 CC E6 jsr $e6cc
-F4FD: 20 59 CF jsr $cf59
+F4FD: 20 59 CF jsr clear_rest_of_sprites_cf59
 F500: A5 46    lda game_state_bits_46
 F502: 29 40    and #$40
 F504: D0 03    bne $f509
@@ -15781,7 +15792,7 @@ F629: 20 30 A7 jsr $a730
 F62C: 20 45 A6 jsr $a645
 F62F: 20 A8 AC jsr $aca8
 F632: 20 CC E6 jsr $e6cc
-F635: 20 59 CF jsr $cf59
+F635: 20 59 CF jsr clear_rest_of_sprites_cf59
 F638: A9 12    lda #$12
 F63A: 20 80 EE jsr $ee80
 F63D: A9 14    lda #$14
@@ -16029,7 +16040,7 @@ l_ff83:
 FF83: 4C B8 D7 jmp queue_sound_d7b8
 FF86: 4C 50 BF jmp $bf50
 
-table_5d2d:
+jump_table_5d2d:
 	dc.w	$5d41	; $5d2d
 	dc.w	$5d41	; $5d2f
 	dc.w	$5d65	; $5d31
@@ -16041,7 +16052,7 @@ table_5d2d:
 	dc.w	$5e1a	; $5d3d
 	dc.w	$5e2d	; $5d3f
 	dc.w	$6820	; $5d41
-table_5eb0:
+jump_table_5eb0:
 	dc.w	$5ee4	; $5eb0
 	dc.w	$5ee4	; $5eb2
 	dc.w	$5ee4	; $5eb4
@@ -16058,7 +16069,7 @@ table_5eb0:
 	dc.w	$5eda	; $5eca
 	dc.w	$5f32	; $5ecc
 	dc.w	$5eda	; $5ece
-table_633a:
+jump_table_633a:
 	dc.w	$6362	; $633a
 	dc.w	$6381	; $633c
 	dc.w	$6388	; $633e
@@ -16079,7 +16090,7 @@ table_633a:
 	dc.w	$649f	; $635c
 	dc.w	$64a6	; $635e
 	dc.w	$64ad	; $6360
-table_66ee:
+jump_table_66ee:
 	dc.w	$67d9	; $66ee
 	dc.w	$67c7	; $66f0
 	dc.w	$67b4	; $66f2
@@ -16100,14 +16111,14 @@ table_66ee:
 	dc.w	$67c7	; $6710
 	dc.w	$67c7	; $6712
 	dc.w	$67c7	; $6714
-table_6a05:
+jump_table_6a05:
 	dc.w	$6a18	; $6a05
 	dc.w	$6af8	; $6a07
 	dc.w	$6a11	; $6a09
 	dc.w	$6a11	; $6a0b
 	dc.w	$6a11	; $6a0d
 	dc.w	$6a2b	; $6a0f
-table_6bba:
+jump_table_6bba:
 	dc.w	$6bb7	; $6bba
 	dc.w	$6bb7	; $6bbc
 	dc.w	$6bfe	; $6bbe
@@ -16143,7 +16154,7 @@ table_6bba:
 	dc.w	$6bb7	; $6bfa
 	dc.w	$6bb7	; $6bfc
 
-table_707a:
+jump_table_707a:
 	dc.w	$70a6	; $707a
 	dc.w	$70a6	; $707c
 	dc.w	$70cb	; $707e
@@ -16166,29 +16177,29 @@ table_707a:
 	dc.w	$7f13	; $70a0
 	dc.w	$8014	; $70a2
 	dc.w	$8167	; $70a4
-table_7345:
-	dc.w	table_7345	; $7345
+jump_table_7345:
+	dc.w	jump_table_7345	; $7345
 	dc.w	$738c	; $7347
 	dc.w	$7391	; $7349
 	dc.w	$7396	; $734b
 	dc.w	$8009	; $734d
-table_7430:
-	dc.w	table_7430	; $7430
+jump_table_7430:
+	dc.w	jump_table_7430	; $7430
 	dc.w	$7444	; $7432
 	dc.w	$74a2	; $7434
 	dc.w	$74a7	; $7436
 	dc.w	$74ae	; $7438
 	dc.w	$8009	; $743a
-table_756d:
-	dc.w	table_756d	; $756d
+jump_table_756d:
+	dc.w	jump_table_756d	; $756d
 	dc.w	$75a6	; $756f
 	dc.w	$75ab	; $7571
 	dc.w	$75fa	; $7573
 	dc.w	$75ff	; $7575
 	dc.w	$760b	; $7577
 	dc.w	$8009	; $7579
-table_76d6:
-	dc.w	table_76d6	; $76d6
+jump_table_76d6:
+	dc.w	jump_table_76d6	; $76d6
 	dc.w	$7727	; $76d8
 	dc.w	$772c	; $76da
 	dc.w	$7785	; $76dc
@@ -16196,15 +16207,15 @@ table_76d6:
 	dc.w	$778f	; $76e0
 	dc.w	$7840	; $76e2
 	dc.w	$8009	; $76e4
-table_788d:
-	dc.w	table_788d	; $788d
+jump_table_788d:
+	dc.w	jump_table_788d	; $788d
 	dc.w	$78e4	; $788f
 	dc.w	$78e4	; $7891
 	dc.w	$7909	; $7893
 	dc.w	$7909	; $7895
 	dc.w	$8009	; $7897
-table_79da:
-	dc.w	table_79da	; $79da
+jump_table_79da:
+	dc.w	jump_table_79da	; $79da
 	dc.w	$7ae5	; $79dc
 	dc.w	$7b16	; $79de
 	dc.w	$7b23	; $79e0
@@ -16214,13 +16225,13 @@ table_79da:
 	dc.w	$7aae	; $79e8
 	dc.w	$7d45	; $79ea
 	dc.w	$8009	; $79ec
-table_7f44:
-	dc.w	table_7f44	; $7f44
+jump_table_7f44:
+	dc.w	jump_table_7f44	; $7f44
 	dc.w	$7f66	; $7f46
 	dc.w	$7f75	; $7f48
 	dc.w	$7f85	; $7f4a
 	dc.w	$8009	; $7f4c
-table_871d:
+jump_table_871d:
 	dc.w	$873d	; $871d
 	dc.w	$876c	; $871f
 	dc.w	$87a6	; $8721
@@ -16237,7 +16248,7 @@ table_871d:
 	dc.w	$87d5	; $8737
 	dc.w	$87d5	; $8739
 	dc.w	$87d5	; $873b
-table_918a:
+jump_table_918a:
 	dc.w	$9210	; $918a
 	dc.w	$9210	; $918c
 	dc.w	$9210	; $918e
@@ -16275,11 +16286,11 @@ table_918a:
 	dc.w	$9b0f	; $91ce
 	dc.w	$9bb2	; $91d0
 	dc.w	$9bda	; $91d2
-table_92ea:
+jump_table_92ea:
 	dc.w	$92f0	; $92ea
 	dc.w	$930e	; $92ec
 	dc.w	$932e	; $92ee
-table_a30e:
+jump_table_a30e:
 	dc.w	$a328	; $a30e
 	dc.w	$a328	; $a310
 	dc.w	$a328	; $a312
@@ -16293,7 +16304,7 @@ table_a30e:
 	dc.w	$a591	; $a322
 	dc.w	$a591	; $a324
 	dc.w	$a591	; $a326
-table_a3d3:
+jump_table_a3d3:
 	dc.w	$a3e1	; $a3d3
 	dc.w	$a3ee	; $a3d5
 	dc.w	$a3fd	; $a3d7
@@ -16301,18 +16312,18 @@ table_a3d3:
 	dc.w	$a403	; $a3db
 	dc.w	$a406	; $a3dd
 	dc.w	$a415	; $a3df
-table_a65e:
+jump_table_a65e:
 	dc.w	$a668	; $a65e
 	dc.w	$a6a8	; $a660
 	dc.w	$a6a8	; $a662
 	dc.w	$a6a8	; $a664
 	dc.w	$a6a8	; $a666
-table_a749:
+jump_table_a749:
 	dc.w	$a751	; $a749
 	dc.w	$a791	; $a74b
 	dc.w	$a7b8	; $a74d
 	dc.w	$a816	; $a74f
-table_b7a7:
+jump_table_b7a7:
 	dc.w	$b7b9	; $b7a7
 	dc.w	$b7b9	; $b7a9
 	dc.w	$b7e7	; $b7ab
@@ -16321,7 +16332,7 @@ table_b7a7:
 	dc.w	$b7b7	; $b7b1
 	dc.w	$b7b7	; $b7b3
 	dc.w	$b884	; $b7b5
-table_ba8c:
+jump_table_ba8c:
 	dc.w	$baae	; $ba8c
 	dc.w	$baae	; $ba8e
 	dc.w	$baae	; $ba90
@@ -16342,7 +16353,7 @@ table_ba8c:
 	dc.w	$e0ad	; $baae
 	dc.w	$c903	; $bab0
 
-table_be61:
+jump_table_be61:
 	dc.w	$c50e	; $be61
 	dc.w	$c466	; $be63
 	dc.w	$be8a	; $be65

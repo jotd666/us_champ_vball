@@ -50,7 +50,7 @@ with open(source_dir / "conv.s") as f:
         if "[jump_to_callback]" in line:
             line = change_instruction("jbsr\tcallback_0000",lines,i)
 
-        if re.search("GET_ADDRESS\t\w*table",line):
+        if re.search("GET_ADDRESS\t\w*jump_table",line):
             index = "X" if ",x" in line else "Y"
             line = line.replace("GET_ADDRESS",f"PUSH_TABLE_{index}_ADDRESS")
 
@@ -118,8 +118,8 @@ with open(source_dir / "conv.s") as f:
             lines[i-3]=""
             lines[i-2] = remove_instruction(lines,i-2)
 
-        if line_address in {0xe66b,0xe64a}:
-            # we changed addx to add, no need for CLEAR_XC_FLAGS
+        if line_address in {0xe66b,0xe64a,0xe9c3}:
+            # we changed addx to add, no need for clc aka CLEAR_XC_FLAGS
             line = remove_instruction(lines,i)
 
         if line_address in {0xe64d,0xe66e}:

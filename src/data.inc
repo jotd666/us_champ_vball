@@ -1,9 +1,10 @@
 unpack_mode_02 = 0x02
-tile_lsb_value_to_write_12 = 0x12
+multipurpose_12 = 0x12
+multipurpose_13 = 0x13
 tile_msb_to_write_13 = 0x13
 base_screen_pointer_list_001d = 0x1d
 screen_source_pointer_0010 = 0x10
-screen_tile_dest_address_14 = 0x14
+multipurpose_14 = 0x14
 screen_attribute_dest_address_16 = 0x16
 nb_credits_0035 = 0x35
 toggle_timer_2f = 0x2f
