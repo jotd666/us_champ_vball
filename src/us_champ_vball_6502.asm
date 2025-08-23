@@ -135,13 +135,14 @@ nb_credits_0035 = $35
 ; seem to have only 0 and $5A as values
 toggle_timer_2f = $2f
 irq_07_counter_31 = $31
+game_playing_flag_36 = $36
 game_state_bits_46 = $46
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 player_1_controls_022e = $022e
 player_2_controls_022f = $022f
 sprite_shadow_ram_06db = $6db
-unknown_07f2 = $7f2
+sound_to_queue_07f2 = $7f2
 timer_07f5 = $7f5
 ; $7de=16 bit scroll value 0-1FF (little endian)
 logical_scroll_value_lsb_07de = $7de
@@ -150,6 +151,9 @@ scroll_hi_copy_07f8 = $07f8
 screen_id_07e4 = $7e4
 sprite_prom_bank_07f4 = $7f4
 tile_prom_bank_07f3 = $7f3
+sound_queue_07ea = $7ea
+nb_queued_sounds_07e9 = $7e9
+
 p1_1000 = $1000
 p2_1001 = $1001
 system_1002 = $1002
@@ -163,6 +167,7 @@ scrollx_lo_100c = $100c
 sound_100d = $100d
 scrolly_lo_100e = $100e
 
+scroll_values_table_ea5d = $ea5d
 
 ; screen_id_07e4 contains the identification of the background screen
 ; to be displayed. Some ids seem corrupt or repeated
@@ -6057,7 +6062,7 @@ callback_92d1:
 9386: 29 01    and #$01
 9388: D0 05    bne $938f
 938A: A9 21    lda #$21
-938C: 20 B8 D7 jsr $d7b8
+938C: 20 B8 D7 jsr queue_sound_d7b8
 938F: 4C 89 91 jmp $9189
 
 93A2: BD 1A 03 lda $031a, x
@@ -6136,7 +6141,7 @@ callback_92d1:
 9445: 69 10    adc #$10
 9447: 95 E3    sta $e3, x
 9449: A9 25    lda #$25
-944B: 20 B8 D7 jsr $d7b8
+944B: 20 B8 D7 jsr queue_sound_d7b8
 944E: BD 0E 03 lda $030e, x
 9451: 09 80    ora #$80
 9453: 9D 0E 03 sta $030e, x
@@ -6216,7 +6221,7 @@ callback_92d1:
 94F8: 30 1B    bmi $9515
 94FA: 20 95 A1 jsr $a195
 94FD: A9 2F    lda #$2f
-94FF: 20 B8 D7 jsr $d7b8
+94FF: 20 B8 D7 jsr queue_sound_d7b8
 9502: BD 0E 03 lda $030e, x
 9505: 09 04    ora #$04
 9507: 9D 0E 03 sta $030e, x
@@ -6233,6 +6238,7 @@ callback_92d1:
 9524: BD F0 02 lda $02f0, x
 9527: C9 02    cmp #$02
 9529: D0 03    bne $952e
+; reached on start of jumped serve
 952B: 20 85 BD jsr $bd85
 952E: 20 E4 A0 jsr $a0e4
 9531: 90 05    bcc $9538
@@ -6368,7 +6374,7 @@ callback_92d1:
 966E: A9 09    lda #$09
 9670: 20 B5 A2 jsr $a2b5
 9673: A9 22    lda #$22
-9675: 20 B8 D7 jsr $d7b8
+9675: 20 B8 D7 jsr queue_sound_d7b8
 9678: BD C0 03 lda $03c0, x
 967B: 09 20    ora #$20
 967D: 9D C0 03 sta $03c0, x
@@ -6460,7 +6466,7 @@ callback_92d1:
 9744: A9 09    lda #$09
 9746: 20 B5 A2 jsr $a2b5
 9749: A9 22    lda #$22
-974B: 20 B8 D7 jsr $d7b8
+974B: 20 B8 D7 jsr queue_sound_d7b8
 974E: BD C0 03 lda $03c0, x
 9751: 09 20    ora #$20
 9753: 9D C0 03 sta $03c0, x
@@ -6616,7 +6622,7 @@ callback_92d1:
 98E0: 69 07    adc #$07
 98E2: 20 B5 A2 jsr $a2b5
 98E5: A9 22    lda #$22
-98E7: 20 B8 D7 jsr $d7b8
+98E7: 20 B8 D7 jsr queue_sound_d7b8
 98EA: BD C0 03 lda $03c0, x
 98ED: 09 20    ora #$20
 98EF: 9D C0 03 sta $03c0, x
@@ -6744,6 +6750,7 @@ callback_92d1:
 9A36: A9 9A    lda #$9a
 9A38: 85 01    sta $01
 9A3A: 4C 0E 93 jmp $930e
+; normal serve sequence
 9A3D: 20 8D 9D jsr $9d8d
 9A40: 20 1C 9C jsr $9c1c
 9A43: 20 87 A1 jsr $a187
@@ -6752,6 +6759,7 @@ callback_92d1:
 9A4B: D0 08    bne $9a55
 9A4D: BD D6 02 lda $02d6, x
 9A50: F0 03    beq $9a55
+; normal non-jumped serve start
 9A52: 20 85 BD jsr $bd85
 9A55: 4C 89 91 jmp $9189
 9A58: BD 1A 03 lda $031a, x
@@ -6893,7 +6901,7 @@ callback_92d1:
 9BB5: 30 08    bmi $9bbf
 9BB7: 20 95 A1 jsr $a195
 9BBA: A9 23    lda #$23
-9BBC: 20 B8 D7 jsr $d7b8
+9BBC: 20 B8 D7 jsr queue_sound_d7b8
 9BBF: 20 8D 9D jsr $9d8d
 9BC2: 20 1C 9C jsr $9c1c
 9BC5: BD D6 02 lda $02d6, x
@@ -9835,7 +9843,7 @@ BA6D: F0 0A    beq $ba79
 BA6F: CE 14 04 dec $0414
 BA72: D0 05    bne $ba79
 BA74: A9 36    lda #$36
-BA76: 20 B8 D7 jsr $d7b8
+BA76: 20 B8 D7 jsr queue_sound_d7b8
 BA79: 60       rts
 BA7A: AD E0 03 lda $03e0
 BA7D: 0A       asl a
@@ -9903,7 +9911,7 @@ BB25: AD 08 04 lda $0408
 BB28: C9 03    cmp #$03
 BB2A: 90 05    bcc $bb31
 BB2C: A9 36    lda #$36
-BB2E: 20 B8 D7 jsr $d7b8
+BB2E: 20 B8 D7 jsr queue_sound_d7b8
 BB31: A9 0B    lda #$0b
 BB33: A2 2C    ldx #$2c
 BB35: AC E0 03 ldy $03e0
@@ -9917,7 +9925,7 @@ BB44: 90 01    bcc $bb47
 BB46: E8       inx
 BB47: 20 B5 A2 jsr $a2b5
 BB4A: 8A       txa
-BB4B: 20 B8 D7 jsr $d7b8
+BB4B: 20 B8 D7 jsr queue_sound_d7b8
 BB4E: A9 0D    lda #$0d
 BB50: 8D E0 03 sta $03e0
 BB53: A5 4C    lda $4c
@@ -9931,7 +9939,7 @@ BB63: D0 0D    bne $bb72
 BB65: A9 01    lda #$01
 BB67: 8D 1F 03 sta $031f
 BB6A: A9 33    lda #$33
-BB6C: 20 B8 D7 jsr $d7b8
+BB6C: 20 B8 D7 jsr queue_sound_d7b8
 BB6F: 4C A9 BB jmp $bba9
 BB72: C9 03    cmp #$03
 BB74: B0 1D    bcs $bb93
@@ -10037,7 +10045,7 @@ BC4E: B5 47    lda $47, x
 BC50: 10 02    bpl $bc54
 BC52: A0 37    ldy #$37
 BC54: 98       tya
-BC55: 20 B8 D7 jsr $d7b8
+BC55: 20 B8 D7 jsr queue_sound_d7b8
 BC58: A9 02    lda #$02
 BC5A: 8D E5 07 sta $07e5
 BC5D: A5 46    lda game_state_bits_46
@@ -10057,7 +10065,7 @@ BC76: CE 1F 03 dec $031f
 BC79: 68       pla
 BC7A: D0 05    bne $bc81
 BC7C: A9 32    lda #$32
-BC7E: 20 B8 D7 jsr $d7b8
+BC7E: 20 B8 D7 jsr queue_sound_d7b8
 BC81: A9 00    lda #$00
 BC83: 8D F5 07 sta timer_07f5
 BC86: A9 00    lda #$00
@@ -10172,6 +10180,7 @@ BD7B: 8D E6 03 sta $03e6
 BD7E: AD 16 04 lda $0416
 BD81: 8D 10 04 sta $0410
 BD84: 60       rts
+
 BD85: 48       pha
 BD86: 8A       txa
 BD87: 48       pha
@@ -10272,7 +10281,7 @@ BE4E: 8D 13 04 sta $0413
 BE51: A9 01    lda #$01
 BE53: 8D 1F 03 sta $031f
 BE56: A9 32    lda #$32
-BE58: 20 B8 D7 jsr $d7b8
+BE58: 20 B8 D7 jsr queue_sound_d7b8
 BE5B: 68       pla
 BE5C: A8       tay
 BE5D: 68       pla
@@ -10412,14 +10421,14 @@ BFA7: AC 09 04 ldy $0409
 BFAA: C0 03    cpy #$03
 BFAC: 90 0E    bcc $bfbc
 BFAE: A9 30    lda #$30
-BFB0: 20 B8 D7 jsr $d7b8
+BFB0: 20 B8 D7 jsr queue_sound_d7b8
 BFB3: A9 10    lda #$10
 BFB5: 8D 14 04 sta $0414
 BFB8: A9 00    lda #$00
 BFBA: A2 28    ldx #$28
 BFBC: 20 A2 A9 jsr $a9a2
 BFBF: 8A       txa
-BFC0: 20 B8 D7 jsr $d7b8
+BFC0: 20 B8 D7 jsr queue_sound_d7b8		; play in-game sfx
 BFC3: A5 4C    lda $4c
 BFC5: 4A       lsr a
 BFC6: A8       tay
@@ -12726,36 +12735,41 @@ D7AE: 8D FE 08 sta $08fe
 D7B1: AD DA 07 lda $07da
 D7B4: 8D FF 08 sta $08ff
 D7B7: 60       rts
-D7B8: 8D F2 07 sta unknown_07f2
+
+queue_sound_d7b8:
+D7B8: 8D F2 07 sta sound_to_queue_07f2
 D7BB: 8A       txa
 D7BC: 48       pha
-D7BD: AE E9 07 ldx $07e9
+D7BD: AE E9 07 ldx nb_queued_sounds_07e9
 D7C0: E0 08    cpx #$08
 D7C2: B0 09    bcs $d7cd
-D7C4: AD F2 07 lda unknown_07f2
-D7C7: 9D EA 07 sta $07ea, x
-D7CA: EE E9 07 inc $07e9
+D7C4: AD F2 07 lda sound_to_queue_07f2
+D7C7: 9D EA 07 sta sound_queue_07ea, x
+D7CA: EE E9 07 inc nb_queued_sounds_07e9
 D7CD: 68       pla
 D7CE: AA       tax
 D7CF: 60       rts
-D7D0: AD E9 07 lda $07e9
+
+
+play_sound_if_needed_d7d0:
+D7D0: AD E9 07 lda nb_queued_sounds_07e9
 D7D3: F0 25    beq $d7fa
-D7D5: A5 36    lda $36
-D7D7: D0 05    bne $d7de
+D7D5: A5 36    lda game_playing_flag_36
+D7D7: D0 05    bne $d7de		; game playing: force play
 D7D9: 2C 04 10 bit dsw2_1004
-D7DC: 10 0C    bpl $d7ea
-D7DE: AD EA 07 lda $07ea
+D7DC: 10 0C    bpl $d7ea		; demo sounds off => skip
+D7DE: AD EA 07 lda sound_queue_07ea
 D7E1: F0 07    beq $d7ea
 D7E3: C9 52    cmp #$52
-D7E5: B0 03    bcs $d7ea
-D7E7: 8D 0D 10 sta sound_100d
+D7E5: B0 03    bcs $d7ea		; out of range!
+D7E7: 8D 0D 10 sta sound_100d	; send sound command
 D7EA: A2 00    ldx #$00
 D7EC: BD EB 07 lda $07eb, x
-D7EF: 9D EA 07 sta $07ea, x
+D7EF: 9D EA 07 sta sound_queue_07ea, x
 D7F2: E8       inx
 D7F3: E0 07    cpx #$07
 D7F5: 90 F5    bcc $d7ec
-D7F7: CE E9 07 dec $07e9
+D7F7: CE E9 07 dec nb_queued_sounds_07e9
 D7FA: 60       rts
 D7FB: 0A       asl a
 D7FC: 65 00    adc $00
@@ -14051,7 +14065,7 @@ E724: A5 4A    lda $4a
 E726: C9 29    cmp #$29
 E728: D0 05    bne $e72f
 E72A: A9 03    lda #$03
-E72C: 20 B8 D7 jsr $d7b8
+E72C: 20 B8 D7 jsr queue_sound_d7b8	; stressful level end music!
 E72F: A9 00    lda #$00
 E731: 8D C0 3C sta $3cc0
 E734: 8D C1 3C sta $3cc1
@@ -14211,21 +14225,24 @@ E926: D0 01    bne $e929
 E928: 60       rts
 E929: A5 46    lda game_state_bits_46
 E92B: 29 0B    and #$0b
-E92D: F0 0D    beq $e93c
+E92D: F0 0D    beq set_scroll_when_serving_e93c
+; center the screen on the net
 E92F: A9 80    lda #$80
 E931: 8D DE 07 sta logical_scroll_value_lsb_07de
 E934: A9 00    lda #$00
 E936: 8D DF 07 sta logical_scroll_value_msb_07df
-E939: 4C 23 EA jmp $ea23
+E939: 4C 23 EA jmp continue_ea23
+set_scroll_when_serving_e93c:
 E93C: A5 4F    lda $4f
 E93E: 30 12    bmi $e952
 E940: 29 02    and #$02
 E942: A8       tay
-E943: B9 5D EA lda $ea5d, y
+; set start scroll values from ROM tables
+E943: B9 5D EA lda scroll_values_table_ea5d, y
 E946: 8D DE 07 sta logical_scroll_value_lsb_07de
 E949: B9 5E EA lda $ea5e, y
 E94C: 8D DF 07 sta logical_scroll_value_msb_07df
-E94F: 4C 23 EA jmp $ea23
+E94F: 4C 23 EA jmp continue_ea23
 E952: AD E0 03 lda $03e0
 E955: C9 0D    cmp #$0d
 E957: 90 03    bcc $e95c
@@ -14263,7 +14280,7 @@ E99A: AD 11 04 lda $0411
 E99D: 30 12    bmi $e9b1
 E99F: 29 02    and #$02
 E9A1: A8       tay
-E9A2: B9 5D EA lda $ea5d, y
+E9A2: B9 5D EA lda scroll_values_table_ea5d, y
 E9A5: 8D E2 07 sta $07e2
 E9A8: B9 5E EA lda $ea5e, y
 E9AB: 8D E3 07 sta $07e3
@@ -14312,7 +14329,7 @@ EA01: AD E2 07 lda $07e2
 EA04: 8D DE 07 sta logical_scroll_value_lsb_07de
 EA07: AD E3 07 lda $07e3
 EA0A: 8D DF 07 sta logical_scroll_value_msb_07df
-EA0D: 4C 23 EA jmp $ea23
+EA0D: 4C 23 EA jmp continue_ea23
 EA10: B9 65 EA lda $ea65, y
 EA13: 18       clc
 EA14: 6D DE 07 adc logical_scroll_value_lsb_07de
@@ -14320,6 +14337,7 @@ EA17: 8D DE 07 sta logical_scroll_value_lsb_07de
 EA1A: B9 66 EA lda $ea66, y
 EA1D: 6D DF 07 adc logical_scroll_value_msb_07df
 EA20: 8D DF 07 sta logical_scroll_value_msb_07df
+continue_ea23:
 EA23: A0 00    ldy #$00
 EA25: AD E0 03 lda $03e0
 EA28: C9 08    cmp #$08
@@ -14896,7 +14914,7 @@ EEB7: 8A       txa
 EEB8: 48       pha
 EEB9: 98       tya
 EEBA: 48       pha
-EEBB: 20 D0 D7 jsr $d7d0
+EEBB: 20 D0 D7 jsr play_sound_if_needed_d7d0
 EEBE: 20 15 F7 jsr check_coin_inserted_f715
 EEC1: 68       pla
 EEC2: A8       tay
@@ -14905,7 +14923,7 @@ EEC4: AA       tax
 EEC5: 68       pla
 EEC6: C5 35    cmp nb_credits_0035
 EEC8: F0 11    beq $eedb
-EECA: A5 36    lda $36
+EECA: A5 36    lda game_playing_flag_36
 EECC: 0D F9 07 ora $07f9
 EECF: D0 0A    bne $eedb
 ; number of credits > 0: branch on player select screen
@@ -14978,13 +14996,13 @@ EF40: 20 A2 D8 jsr update_prom_banks_d8a2
 EF43: 20 8F D8 jsr handle_cocktail_mode_d88f
 EF46: 20 E2 EA jsr $eae2
 EF49: A9 00    lda #$00
-EF4B: 8D 0D 10 sta sound_100d
+EF4B: 8D 0D 10 sta sound_100d		; stop all sounds
 EF4E: A9 02    lda #$02
 EF50: 20 2B D8 jsr $d82b
 EF53: A9 05    lda #$05
-EF55: 20 B8 D7 jsr $d7b8
+EF55: 20 B8 D7 jsr queue_sound_d7b8	; play intro music
 EF58: A9 00    lda #$00
-EF5A: 85 36    sta $36
+EF5A: 85 36    sta game_playing_flag_36	; game not playing
 EF5C: 8D DB 07 sta $07db
 EF5F: 20 73 CF jsr $cf73
 EF62: 20 8F D8 jsr handle_cocktail_mode_d88f
@@ -15044,7 +15062,7 @@ EFEB: 20 16 F3 jsr $f316
 EFEE: A9 03    lda #$03
 EFF0: 85 38    sta $38
 EFF2: 4C A7 F1 jmp $f1a7
-EFF5: A5 36    lda $36
+EFF5: A5 36    lda game_playing_flag_36
 EFF7: D0 07    bne $f000
 EFF9: A9 00    lda #$00
 EFFB: 85 38    sta $38
@@ -15052,7 +15070,7 @@ EFFD: 20 16 F3 jsr $f316
 F000: A9 08    lda #$08
 F002: 20 2B D8 jsr $d82b
 F005: A9 1F    lda #$1f
-F007: 20 B8 D7 jsr $d7b8
+F007: 20 B8 D7 jsr queue_sound_d7b8
 F00A: A9 07    lda #$07
 F00C: 20 16 CF jsr $cf16
 F00F: A2 4C    ldx #$4c
@@ -15062,7 +15080,7 @@ F017: 09 01    ora #$01
 F019: 8D F9 07 sta $07f9
 F01C: 20 73 CF jsr $cf73
 F01F: A9 02    lda #$02
-F021: 20 B8 D7 jsr $d7b8
+F021: 20 B8 D7 jsr queue_sound_d7b8		; select player music
 F024: 20 8F D8 jsr handle_cocktail_mode_d88f
 F027: A9 12    lda #$12
 F029: 8D E4 07 sta screen_id_07e4
@@ -15185,7 +15203,7 @@ F12E: E5 00    sbc $00
 F130: 85 35    sta nb_credits_0035
 F132: D8       cld
 F133: A9 80    lda #$80
-F135: 85 36    sta $36
+F135: 85 36    sta game_playing_flag_36
 F137: 20 16 F3 jsr $f316
 F13A: 4C 71 F1 jmp $f171
 F13D: A5 47    lda $47
@@ -15263,7 +15281,7 @@ F1DF: 85 35    sta nb_credits_0035
 F1E1: D8       cld
 F1E2: E6 37    inc $37
 F1E4: A9 80    lda #$80
-F1E6: 85 36    sta $36
+F1E6: 85 36    sta game_playing_flag_36
 F1E8: 20 16 F3 jsr $f316
 F1EB: 8A       txa
 F1EC: 4A       lsr a
@@ -15296,11 +15314,11 @@ F226: 20 35 CF jsr clear_screen_cf35
 F229: 20 73 CF jsr $cf73
 F22C: A9 00    lda #$00
 F22E: 85 46    sta game_state_bits_46
-F230: A5 36    lda $36
+F230: A5 36    lda game_playing_flag_36
 F232: D0 03    bne $f237
 F234: 4C BB F2 jmp $f2bb
 F237: A9 02    lda #$02
-F239: 20 B8 D7 jsr $d7b8
+F239: 20 B8 D7 jsr queue_sound_d7b8
 F23C: 20 F1 EB jsr $ebf1
 F23F: 20 9A EB jsr $eb9a
 F242: A9 02    lda #$02
@@ -15386,13 +15404,14 @@ F2F9: A9 01    lda #$01
 F2FB: 8D DB 07 sta $07db
 F2FE: A9 00    lda #$00
 F300: 8D F5 07 sta timer_07f5
-F303: A5 36    lda $36
+F303: A5 36    lda game_playing_flag_36
 F305: F0 68    beq game_main_loop_f36f
-F307: AD E4 07 lda screen_id_07e4
+; play music of the current level
+F307: AD E4 07 lda screen_id_07e4		; also level
 F30A: 29 0F    and #$0f
 F30C: A8       tay
 F30D: B9 6A F3 lda $f36a, y
-F310: 20 B8 D7 jsr $d7b8
+F310: 20 B8 D7 jsr queue_sound_d7b8
 F313: 4C 6F F3 jmp game_main_loop_f36f
 F316: AD 03 10 lda dsw1_1003
 F319: 49 FF    eor #$ff
@@ -15471,7 +15490,7 @@ F3C6: B5 47    lda $47, x
 F3C8: 30 02    bmi $f3cc
 F3CA: A0 0E    ldy #$0e
 F3CC: 98       tya
-F3CD: 20 B8 D7 jsr $d7b8
+F3CD: 20 B8 D7 jsr queue_sound_d7b8
 F3D0: 20 82 AF jsr $af82
 F3D3: 4C FD F4 jmp $f4fd
 F3D6: C9 08    cmp #$08
@@ -15483,7 +15502,7 @@ F3DE: B5 57    lda $57, x
 F3E0: C9 08    cmp #$08
 F3E2: B0 05    bcs $f3e9
 F3E4: A9 03    lda #$03
-F3E6: 20 B8 D7 jsr $d7b8
+F3E6: 20 B8 D7 jsr queue_sound_d7b8
 ; start new ball
 F3E9: A5 46    lda game_state_bits_46
 F3EB: 09 04    ora #$04
@@ -15579,7 +15598,7 @@ F4A1: D0 0F    bne $f4b2
 F4A3: A9 17    lda #$17
 F4A5: 20 7F DA jsr $da7f
 F4A8: A9 05    lda #$05
-F4AA: 20 B8 D7 jsr $d7b8
+F4AA: 20 B8 D7 jsr queue_sound_d7b8
 F4AD: A9 80    lda #$80
 F4AF: 20 3F D8 jsr $d83f
 F4B2: A9 00    lda #$00
@@ -15715,7 +15734,7 @@ F5C1: 90 02    bcc $f5c5
 F5C3: A9 0F    lda #$0f
 F5C5: 20 7F DA jsr $da7f
 F5C8: A9 12    lda #$12
-F5CA: 20 B8 D7 jsr $d7b8
+F5CA: 20 B8 D7 jsr queue_sound_d7b8
 F5CD: 20 9A EB jsr $eb9a
 F5D0: A9 FF    lda #$ff
 F5D2: 20 3F D8 jsr $d83f
@@ -15768,7 +15787,7 @@ F63A: 20 80 EE jsr $ee80
 F63D: A9 14    lda #$14
 F63F: 20 7F DA jsr $da7f
 F642: A9 10    lda #$10
-F644: 20 B8 D7 jsr $d7b8
+F644: 20 B8 D7 jsr queue_sound_d7b8
 F647: A9 FF    lda #$ff
 F649: 20 3F D8 jsr $d83f
 F64C: A9 FF    lda #$ff
@@ -15783,7 +15802,7 @@ F65D: 85 43    sta $43
 F65F: 85 44    sta $44
 F661: 85 45    sta $45
 F663: A9 00    lda #$00
-F665: 85 36    sta $36
+F665: 85 36    sta game_playing_flag_36
 F667: A5 35    lda nb_credits_0035
 F669: F0 03    beq $f66e
 F66B: 20 F5 EF jsr $eff5
@@ -15863,7 +15882,7 @@ F707: A4 58    ldy $58
 F709: C0 08    cpy #$08
 F70B: 90 02    bcc $f70f
 F70D: A9 03    lda #$03
-F70F: 20 B8 D7 jsr $d7b8
+F70F: 20 B8 D7 jsr queue_sound_d7b8
 F712: 4C E2 F4 jmp $f4e2
 
 ; also checks service mode (bit 2)
@@ -16007,7 +16026,7 @@ F812: 60       rts
 l_ff80:
 FF80: 4C A2 A9 jmp $a9a2
 l_ff83:
-FF83: 4C B8 D7 jmp $d7b8
+FF83: 4C B8 D7 jmp queue_sound_d7b8
 FF86: 4C 50 BF jmp $bf50
 
 table_5d2d:

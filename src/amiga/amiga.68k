@@ -3816,9 +3816,6 @@ debug_color:
 sprite_colors:
 	DECL_COLORS	16,16
 
-game_sprites:
-	DECL_SPRITES
-game_sprites_end:
 
 	
 	* main copperlist
@@ -3837,6 +3834,10 @@ bobs_bitplanes:
 	.word	bplcon1
 fine_x_scroll_value:
 	.word	0
+	
+game_sprites:
+	DECL_SPRITES
+game_sprites_end:
 
 copperlist_colors:
 	.set	bpl_count,0

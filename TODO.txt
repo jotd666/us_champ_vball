@@ -1,7 +1,8 @@
 - converter: if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 - flashing sprites (no dblbuf) but dblbuf crashes!!
 - sprites not found after scrolling goes left, but logging reveals nothing; debug red color write!
-  
+  => now crashes when returning from ea5c after 0-scroll has been initiated at e94c
+
 - reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
