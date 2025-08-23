@@ -2352,7 +2352,7 @@ load_tile_data:
 
 	jbsr	allocate_and_load_public_mem_file
 	move.l	d0,palette_ptr		| also returns size in d1 but we don't care
-
+	
 	move.l	a3,a0
 	lea		tile_file_name_end(pc),a1
 0:
@@ -2384,8 +2384,8 @@ load_tile_data:
 	move.l	d0,work_bobs_ptr		| also returns size in d1 but we don't care
 	jbsr	relocate_sprite_data
 	move.l	work_bobs_ptr,bobs_ptr
-0:
-	
+	move.l	bobs_ptr,a1
+0:	
 	* set palette
 	
 	* load palette there

@@ -1,7 +1,7 @@
 - converter: if SBC_IMM	0x00 found later, don't optimize sbc into sub!
-
-- at start players not positioned properly: right side: player with green trunks is too far
-  (player with blue trunks looks ok!)
+- flashing sprites (no dblbuf) but dblbuf crashes!!
+- sprites not found after scrolling goes left, but logging reveals nothing; debug red color write!
+  
 - reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 

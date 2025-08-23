@@ -107,5 +107,5 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
 
 
 #process(r"sprites_mame")
-process(r"sprites_amiga")
+process(r"sprites_amiga_2")
 

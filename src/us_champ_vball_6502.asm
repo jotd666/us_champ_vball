@@ -135,9 +135,18 @@ nb_credits_0035 = $35
 ; seem to have only 0 and $5A as values
 toggle_timer_2f = $2f
 irq_07_counter_31 = $31
+game_state_bits_46 = $46
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
+player_1_controls_022e = $022e
+player_2_controls_022f = $022f
 sprite_shadow_ram_06db = $6db
+unknown_07f2 = $7f2
+timer_07f5 = $7f5
+; $7de=16 bit scroll value 0-1FF (little endian)
+logical_scroll_value_lsb_07de = $7de
+logical_scroll_value_msb_07df = $7df
+scroll_hi_copy_07f8 = $07f8
 screen_id_07e4 = $7e4
 sprite_prom_bank_07f4 = $7f4
 tile_prom_bank_07f3 = $7f3
@@ -186,7 +195,7 @@ scrolly_lo_100e = $100e
 5BF8: 48       pha
 5BF9: 98       tya
 5BFA: 48       pha
-5BFB: A5 46    lda $46
+5BFB: A5 46    lda game_state_bits_46
 5BFD: 29 08    and #$08
 5BFF: F0 03    beq $5c04
 5C01: 4C E0 5C jmp $5ce0
@@ -4172,7 +4181,7 @@ scrolly_lo_100e = $100e
 817F: A9 00    lda #$00
 8181: 9D B8 03 sta $03b8, x
 8184: 20 A3 8C jsr $8ca3
-8187: A5 46    lda $46
+8187: A5 46    lda game_state_bits_46
 8189: 29 08    and #$08
 818B: F0 03    beq $8190
 818D: 4C F9 81 jmp $81f9
@@ -5370,7 +5379,7 @@ scrolly_lo_100e = $100e
 8CB2: AD F9 07 lda $07f9
 8CB5: F0 03    beq $8cba
 8CB7: 4C C0 8D jmp $8dc0
-8CBA: A5 46    lda $46
+8CBA: A5 46    lda game_state_bits_46
 8CBC: 29 08    and #$08
 8CBE: F0 03    beq $8cc3
 8CC0: 4C A6 8D jmp $8da6
@@ -8444,7 +8453,7 @@ AE5B: A9 00    lda #$00
 AE5D: 9D F0 02 sta $02f0, x
 AE60: 60       rts
 
-AE6A: A5 46    lda $46
+AE6A: A5 46    lda game_state_bits_46
 AE6C: 29 04    and #$04
 AE6E: F0 6F    beq $aedf
 AE70: A2 00    ldx #$00
@@ -8463,7 +8472,7 @@ AE8A: 9D 0A 03 sta $030a, x
 AE8D: BD 0A 03 lda $030a, x
 AE90: 09 40    ora #$40
 AE92: 9D 0A 03 sta $030a, x
-AE95: A5 46    lda $46
+AE95: A5 46    lda game_state_bits_46
 AE97: 29 10    and #$10
 AE99: 4A       lsr a
 AE9A: 4A       lsr a
@@ -8488,9 +8497,9 @@ AEBE: 8D 14 04 sta $0414
 AEC1: 8D E5 07 sta $07e5
 AEC4: A5 4F    lda $4f
 AEC6: 8D 11 04 sta $0411
-AEC9: A5 46    lda $46
+AEC9: A5 46    lda game_state_bits_46
 AECB: 29 FB    and #$fb
-AECD: 85 46    sta $46
+AECD: 85 46    sta game_state_bits_46
 AECF: A9 00    lda #$00
 AED1: 8D 12 04 sta $0412
 AED4: 8D 13 04 sta $0413
@@ -8499,7 +8508,7 @@ AED9: 8D 10 04 sta $0410
 AEDC: 8D E2 03 sta $03e2
 AEDF: 20 0B B0 jsr $b00b
 AEE2: 20 7D B0 jsr $b07d
-AEE5: A5 46    lda $46
+AEE5: A5 46    lda game_state_bits_46
 AEE7: 29 01    and #$01
 AEE9: D0 06    bne $aef1
 AEEB: 20 F6 5B jsr $5bf6
@@ -8507,14 +8516,14 @@ AEEE: 20 66 66 jsr $6666
 AEF1: A9 00    lda #$00
 AEF3: 85 4C    sta $4c
 AEF5: A6 4C    ldx $4c
-AEF7: A5 46    lda $46
+AEF7: A5 46    lda game_state_bits_46
 AEF9: 29 01    and #$01
 AEFB: D0 3F    bne $af3c
-AEFD: A5 46    lda $46
+AEFD: A5 46    lda game_state_bits_46
 AEFF: 29 08    and #$08
 AF01: F0 28    beq $af2b
 AF03: A0 9D    ldy #$9d
-AF05: A5 46    lda $46
+AF05: A5 46    lda game_state_bits_46
 AF07: 4A       lsr a
 AF08: 4A       lsr a
 AF09: 4A       lsr a
@@ -8742,7 +8751,7 @@ B0DC: 20 B7 F7 jsr $f7b7
 B0DF: B9 32 02 lda $0232, y
 B0E2: 29 70    and #$70
 B0E4: 85 00    sta $00
-B0E6: B9 2E 02 lda $022e, y
+B0E6: B9 2E 02 lda player_1_controls_022e, y
 B0E9: 29 0F    and #$0f
 B0EB: 85 01    sta $01
 B0ED: E0 01    cpx #$01
@@ -9770,7 +9779,7 @@ B97A: A8       tay
 B97B: 60       rts
 
 
-B9FA: A5 46    lda $46
+B9FA: A5 46    lda game_state_bits_46
 B9FC: 29 08    and #$08
 B9FE: D0 79    bne $ba79
 BA00: A9 04    lda #$04
@@ -10031,16 +10040,17 @@ BC54: 98       tya
 BC55: 20 B8 D7 jsr $d7b8
 BC58: A9 02    lda #$02
 BC5A: 8D E5 07 sta $07e5
-BC5D: A5 46    lda $46
+BC5D: A5 46    lda game_state_bits_46
 BC5F: 29 EF    and #$ef
 BC61: 05 00    ora $00
+; ball on ground
 BC63: 09 02    ora #$02
-BC65: 85 46    sta $46
+BC65: 85 46    sta game_state_bits_46
 BC67: AD 1F 03 lda $031f
 BC6A: 48       pha
 BC6B: A9 03    lda #$03
 BC6D: 8D 1F 03 sta $031f
-BC70: A5 46    lda $46
+BC70: A5 46    lda game_state_bits_46
 BC72: 29 10    and #$10
 BC74: F0 03    beq $bc79
 BC76: CE 1F 03 dec $031f
@@ -10049,7 +10059,7 @@ BC7A: D0 05    bne $bc81
 BC7C: A9 32    lda #$32
 BC7E: 20 B8 D7 jsr $d7b8
 BC81: A9 00    lda #$00
-BC83: 8D F5 07 sta $07f5
+BC83: 8D F5 07 sta timer_07f5
 BC86: A9 00    lda #$00
 BC88: 4C E2 BB jmp $bbe2
 BC8B: B5 47    lda $47, x
@@ -10683,7 +10693,7 @@ C51C: A8       tay
 C51D: B9 47 00 lda $0047, y
 C520: 10 0C    bpl $c52e
 C522: 20 B7 F7 jsr $f7b7
-C525: B9 2E 02 lda $022e, y
+C525: B9 2E 02 lda player_1_controls_022e, y
 C528: 29 20    and #$20
 C52A: F0 17    beq $c543
 C52C: D0 05    bne $c533
@@ -11718,7 +11728,7 @@ CE11: F0 03    beq $ce16
 CE13: CE 06 04 dec $0406
 CE16: 60       rts
 CE17: 4C D8 CE jmp $ced8
-CE1A: A5 46    lda $46
+CE1A: A5 46    lda game_state_bits_46
 CE1C: 29 0F    and #$0f
 CE1E: D0 F7    bne $ce17
 CE20: A5 4F    lda $4f
@@ -11803,7 +11813,7 @@ CEBE: A9 19    lda #$19
 CEC0: 85 71    sta $71
 CEC2: A9 02    lda #$02
 CEC4: 85 7F    sta $7f
-CEC6: AD F5 07 lda $07f5
+CEC6: AD F5 07 lda timer_07f5
 CEC9: 29 04    and #$04
 CECB: 4A       lsr a
 CECC: 4A       lsr a
@@ -12716,13 +12726,13 @@ D7AE: 8D FE 08 sta $08fe
 D7B1: AD DA 07 lda $07da
 D7B4: 8D FF 08 sta $08ff
 D7B7: 60       rts
-D7B8: 8D F2 07 sta $07f2
+D7B8: 8D F2 07 sta unknown_07f2
 D7BB: 8A       txa
 D7BC: 48       pha
 D7BD: AE E9 07 ldx $07e9
 D7C0: E0 08    cpx #$08
 D7C2: B0 09    bcs $d7cd
-D7C4: AD F2 07 lda $07f2
+D7C4: AD F2 07 lda unknown_07f2
 D7C7: 9D EA 07 sta $07ea, x
 D7CA: EE E9 07 inc $07e9
 D7CD: 68       pla
@@ -12890,25 +12900,25 @@ D8EE: 60       rts
 
 D8EF: 98       tya
 D8F0: 48       pha
-D8F1: AD 2E 02 lda $022e
+D8F1: AD 2E 02 lda player_1_controls_022e
 D8F4: 8D 36 02 sta $0236
 D8F7: AD 00 10 lda p1_1000
 D8FA: 49 FF    eor #$ff
-D8FC: 8D 2E 02 sta $022e
+D8FC: 8D 2E 02 sta player_1_controls_022e
 D8FF: 2C 03 10 bit dsw1_1003
 D902: 30 10    bmi $d914
 D904: 70 0E    bvs $d914
 D906: 29 0F    and #$0f
 D908: A8       tay
-D909: AD 2E 02 lda $022e
+D909: AD 2E 02 lda player_1_controls_022e
 D90C: 29 F0    and #$f0
 D90E: 19 86 D9 ora $d986, y
-D911: 8D 2E 02 sta $022e
-D914: AD 2F 02 lda $022f
+D911: 8D 2E 02 sta player_1_controls_022e
+D914: AD 2F 02 lda player_2_controls_022f
 D917: 8D 37 02 sta $0237
 D91A: AD 01 10 lda p2_1001
 D91D: 49 FF    eor #$ff
-D91F: 8D 2F 02 sta $022f
+D91F: 8D 2F 02 sta player_2_controls_022f
 D922: AD 30 02 lda $0230
 D925: 8D 38 02 sta $0238
 D928: AD 05 10 lda $1005
@@ -12929,12 +12939,12 @@ D94B: 29 F0    and #$f0
 D94D: 19 96 D9 ora $d996, y
 D950: 8D 31 02 sta $0231
 D953: AD 36 02 lda $0236
-D956: 2D 2E 02 and $022e
-D959: 4D 2E 02 eor $022e
+D956: 2D 2E 02 and player_1_controls_022e
+D959: 4D 2E 02 eor player_1_controls_022e
 D95C: 8D 32 02 sta $0232
 D95F: AD 37 02 lda $0237
-D962: 2D 2F 02 and $022f
-D965: 4D 2F 02 eor $022f
+D962: 2D 2F 02 and player_2_controls_022f
+D965: 4D 2F 02 eor player_2_controls_022f
 D968: 8D 33 02 sta $0233
 D96B: AD 38 02 lda $0238
 D96E: 2D 30 02 and $0230
@@ -13190,10 +13200,10 @@ E036: ED E1 07 sbc $07e1
 E039: 85 03    sta $03
 E03B: B5 8F    lda $8f, x
 E03D: 38       sec
-E03E: ED DE 07 sbc $07de
+E03E: ED DE 07 sbc logical_scroll_value_lsb_07de
 E041: 85 00    sta $00
 E043: B5 9D    lda $9d, x
-E045: ED DF 07 sbc $07df
+E045: ED DF 07 sbc logical_scroll_value_msb_07df
 E048: 85 01    sta $01
 E04A: B5 73    lda $73, x
 E04C: 4A       lsr a
@@ -13675,7 +13685,7 @@ E407: 69 00    adc #$00
 E409: 85 FE    sta $fe
 E40B: A9 01    lda #$01
 E40D: 8D 47 02 sta $0247
-E410: AD F5 07 lda $07f5
+E410: AD F5 07 lda timer_07f5
 E413: 29 08    and #$08
 E415: 0A       asl a
 E416: 0A       asl a
@@ -13904,10 +13914,10 @@ E625: 85 14    sta screen_tile_dest_address_14
 E627: C8       iny
 E628: A5 12    lda tile_lsb_value_to_write_12
 E62A: 38       sec
-E62B: ED DE 07 sbc $07de
+E62B: ED DE 07 sbc logical_scroll_value_lsb_07de
 E62E: 85 12    sta tile_lsb_value_to_write_12
 E630: A5 13    lda tile_msb_to_write_13
-E632: ED DF 07 sbc $07df
+E632: ED DF 07 sbc logical_scroll_value_msb_07df
 E635: 85 13    sta tile_msb_to_write_13
 E637: A5 14    lda screen_tile_dest_address_14
 E639: 38       sec
@@ -14010,7 +14020,7 @@ E6ED: A8       tay
 E6EE: 68       pla
 E6EF: AA       tax
 E6F0: 60       rts
-E6F1: A5 46    lda $46
+E6F1: A5 46    lda game_state_bits_46
 E6F3: 29 0A    and #$0a
 E6F5: D0 6D    bne $e764
 E6F7: E6 49    inc $49
@@ -14199,22 +14209,22 @@ E891: 60       rts
 E923: AD DB 07 lda $07db
 E926: D0 01    bne $e929
 E928: 60       rts
-E929: A5 46    lda $46
+E929: A5 46    lda game_state_bits_46
 E92B: 29 0B    and #$0b
 E92D: F0 0D    beq $e93c
 E92F: A9 80    lda #$80
-E931: 8D DE 07 sta $07de
+E931: 8D DE 07 sta logical_scroll_value_lsb_07de
 E934: A9 00    lda #$00
-E936: 8D DF 07 sta $07df
+E936: 8D DF 07 sta logical_scroll_value_msb_07df
 E939: 4C 23 EA jmp $ea23
 E93C: A5 4F    lda $4f
 E93E: 30 12    bmi $e952
 E940: 29 02    and #$02
 E942: A8       tay
 E943: B9 5D EA lda $ea5d, y
-E946: 8D DE 07 sta $07de
+E946: 8D DE 07 sta logical_scroll_value_lsb_07de
 E949: B9 5E EA lda $ea5e, y
-E94C: 8D DF 07 sta $07df
+E94C: 8D DF 07 sta logical_scroll_value_msb_07df
 E94F: 4C 23 EA jmp $ea23
 E952: AD E0 03 lda $03e0
 E955: C9 0D    cmp #$0d
@@ -14283,11 +14293,11 @@ E9D6: C0 00    cpy #$00
 E9D8: F0 03    beq $e9dd
 E9DA: CE E3 07 dec $07e3
 E9DD: A0 00    ldy #$00
-E9DF: AD DE 07 lda $07de
+E9DF: AD DE 07 lda logical_scroll_value_lsb_07de
 E9E2: 38       sec
 E9E3: ED E2 07 sbc $07e2
 E9E6: 85 10    sta screen_source_pointer_0010
-E9E8: AD DF 07 lda $07df
+E9E8: AD DF 07 lda logical_scroll_value_msb_07df
 E9EB: ED E3 07 sbc $07e3
 E9EE: 85 11    sta $11
 E9F0: 10 05    bpl $e9f7
@@ -14299,22 +14309,22 @@ E9FB: A5 10    lda screen_source_pointer_0010
 E9FD: C9 09    cmp #$09
 E9FF: B0 0F    bcs $ea10
 EA01: AD E2 07 lda $07e2
-EA04: 8D DE 07 sta $07de
+EA04: 8D DE 07 sta logical_scroll_value_lsb_07de
 EA07: AD E3 07 lda $07e3
-EA0A: 8D DF 07 sta $07df
+EA0A: 8D DF 07 sta logical_scroll_value_msb_07df
 EA0D: 4C 23 EA jmp $ea23
 EA10: B9 65 EA lda $ea65, y
 EA13: 18       clc
-EA14: 6D DE 07 adc $07de
-EA17: 8D DE 07 sta $07de
+EA14: 6D DE 07 adc logical_scroll_value_lsb_07de
+EA17: 8D DE 07 sta logical_scroll_value_lsb_07de
 EA1A: B9 66 EA lda $ea66, y
-EA1D: 6D DF 07 adc $07df
-EA20: 8D DF 07 sta $07df
+EA1D: 6D DF 07 adc logical_scroll_value_msb_07df
+EA20: 8D DF 07 sta logical_scroll_value_msb_07df
 EA23: A0 00    ldy #$00
 EA25: AD E0 03 lda $03e0
 EA28: C9 08    cmp #$08
 EA2A: D0 2D    bne $ea59
-EA2C: A5 46    lda $46
+EA2C: A5 46    lda game_state_bits_46
 EA2E: 29 02    and #$02
 EA30: D0 27    bne $ea59
 EA32: A5 E7    lda $e7
@@ -14364,18 +14374,18 @@ EA8B: A5 31    lda irq_07_counter_31
 EA8D: D9 DE EA cmp $eade, y
 EA90: D0 28    bne $eaba
 EA92: 20 76 D8 jsr $d876
-EA95: AD DE 07 lda $07de
+EA95: AD DE 07 lda logical_scroll_value_lsb_07de
 EA98: 38       sec
 EA99: E9 04    sbc #$04
 EA9B: 8D 0C 10 sta scrollx_lo_100c
-EA9E: AD DF 07 lda $07df
+EA9E: AD DF 07 lda logical_scroll_value_msb_07df
 EAA1: E9 00    sbc #$00
 EAA3: 29 01    and #$01
 EAA5: 0A       asl a
-EAA6: 8D F8 07 sta $07f8
+EAA6: 8D F8 07 sta scroll_hi_copy_07f8
 EAA9: AD 2C 02 lda scrollx_hi_copy_022c
 EAAC: 29 FD    and #$fd
-EAAE: 0D F8 07 ora $07f8
+EAAE: 0D F8 07 ora scroll_hi_copy_07f8
 EAB1: 8D 2C 02 sta scrollx_hi_copy_022c
 EAB4: 8D 08 10 sta scrollx_hi_1008
 EAB7: 68       pla
@@ -14411,18 +14421,18 @@ EAFD: 09 40    ora #$40
 EAFF: 8D 09 10 sta bankswitch_1009
 EB02: 8D 2D 02 sta bankswitch_copy_022d
 EB05: 60       rts
-EB06: AD DE 07 lda $07de
+EB06: AD DE 07 lda logical_scroll_value_lsb_07de
 EB09: 38       sec
 EB0A: E9 04    sbc #$04
 EB0C: 8D 0C 10 sta scrollx_lo_100c
-EB0F: AD DF 07 lda $07df
+EB0F: AD DF 07 lda logical_scroll_value_msb_07df
 EB12: E9 00    sbc #$00
 EB14: 29 01    and #$01
 EB16: 0A       asl a
-EB17: 8D F8 07 sta $07f8
+EB17: 8D F8 07 sta scroll_hi_copy_07f8
 EB1A: AD 2C 02 lda scrollx_hi_copy_022c
 EB1D: 29 FD    and #$fd
-EB1F: 0D F8 07 ora $07f8
+EB1F: 0D F8 07 ora scroll_hi_copy_07f8
 EB22: 8D 2C 02 sta scrollx_hi_copy_022c
 EB25: 8D 08 10 sta scrollx_hi_1008
 EB28: AD E0 07 lda $07e0
@@ -14513,9 +14523,9 @@ EC0E: 20 2F EC jsr $ec2f
 EC11: 0A       asl a
 EC12: A8       tay
 EC13: B9 25 EC lda $ec25, y
-EC16: 8D DE 07 sta $07de
+EC16: 8D DE 07 sta logical_scroll_value_lsb_07de
 EC19: B9 26 EC lda $ec26, y
-EC1C: 8D DF 07 sta $07df
+EC1C: 8D DF 07 sta logical_scroll_value_msb_07df
 EC1F: A9 02    lda #$02
 EC21: 8D DB 07 sta $07db
 EC24: 60       rts
@@ -14985,16 +14995,16 @@ EF6D: A9 01    lda #$01
 EF6F: 20 7F DA jsr $da7f
 EF72: 20 9A EB jsr $eb9a
 EF75: A9 00    lda #$00
-EF77: 8D F5 07 sta $07f5
+EF77: 8D F5 07 sta timer_07f5
 EF7A: A0 00    ldy #$00
-EF7C: AD F5 07 lda $07f5
+EF7C: AD F5 07 lda timer_07f5
 EF7F: 29 20    and #$20
 EF81: D0 02    bne $ef85
 EF83: A0 80    ldy #$80
 EF85: 98       tya
 EF86: 20 7F DA jsr $da7f
 EF89: 20 22 D8 jsr sync_d822
-EF8C: EE F5 07 inc $07f5
+EF8C: EE F5 07 inc timer_07f5
 EF8F: D0 E9    bne $ef7a
 EF91: 4C EB EF jmp $efeb
 EF94: A9 00    lda #$00
@@ -15064,7 +15074,7 @@ F036: 20 7F DA jsr $da7f
 F039: 20 9A EB jsr $eb9a
 F03C: 20 E2 EA jsr $eae2
 F03F: A9 01    lda #$01
-F041: 85 46    sta $46
+F041: 85 46    sta game_state_bits_46
 F043: A9 FF    lda #$ff
 F045: 85 4F    sta $4f
 F047: 20 64 AF jsr $af64
@@ -15073,9 +15083,9 @@ F04C: 85 54    sta $54
 F04E: A9 10    lda #$10
 F050: 85 55    sta $55
 F052: A9 80    lda #$80
-F054: 8D DE 07 sta $07de
+F054: 8D DE 07 sta logical_scroll_value_lsb_07de
 F057: A9 00    lda #$00
-F059: 8D DF 07 sta $07df
+F059: 8D DF 07 sta logical_scroll_value_msb_07df
 F05C: A9 D0    lda #$d0
 F05E: 8D E0 07 sta $07e0
 F061: A9 FF    lda #$ff
@@ -15110,7 +15120,7 @@ F09A: 20 EF D8 jsr $d8ef
 F09D: A9 07    lda #$07
 F09F: 20 A6 D9 jsr $d9a6
 F0A2: A0 03    ldy #$03
-F0A4: AD F5 07 lda $07f5
+F0A4: AD F5 07 lda timer_07f5
 F0A7: 29 10    and #$10
 F0A9: D0 02    bne $f0ad
 F0AB: A0 83    ldy #$83
@@ -15129,12 +15139,12 @@ F0C9: A9 5A    lda #$5a
 F0CB: 85 2F    sta toggle_timer_2f
 F0CD: A5 2F    lda toggle_timer_2f
 F0CF: D0 FC    bne $f0cd
-F0D1: EE F5 07 inc $07f5
+F0D1: EE F5 07 inc timer_07f5
 F0D4: 20 EF D8 jsr $d8ef
 F0D7: AD 03 10 lda dsw1_1003
 F0DA: 30 03    bmi $f0df
 F0DC: 4C B5 F1 jmp $f1b5
-F0DF: AD 2F 02 lda $022f
+F0DF: AD 2F 02 lda player_2_controls_022f
 F0E2: 10 27    bpl $f10b
 F0E4: A9 02    lda #$02
 F0E6: 38       sec
@@ -15154,7 +15164,7 @@ F102: 8D 0D 03 sta $030d
 F105: A9 02    lda #$02
 F107: 85 37    sta $37
 F109: D0 1F    bne $f12a
-F10B: AD 2E 02 lda $022e
+F10B: AD 2E 02 lda player_1_controls_022e
 F10E: 10 2D    bpl $f13d
 F110: A5 37    lda $37
 F112: D0 5D    bne $f171
@@ -15210,7 +15220,7 @@ F179: 8D 0C 03 sta $030c
 F17C: 8D 0D 03 sta $030d
 F17F: A9 00    lda #$00
 F181: 8D DA 06 sta $06da
-F184: 8D F5 07 sta $07f5
+F184: 8D F5 07 sta timer_07f5
 F187: 20 45 A6 jsr $a645
 F18A: 20 6A AE jsr $ae6a
 F18D: 20 CC E6 jsr $e6cc
@@ -15238,7 +15248,7 @@ F1C2: F0 04    beq $f1c8
 F1C4: C9 30    cmp #$30
 F1C6: D0 02    bne $f1ca
 F1C8: A9 80    lda #$80
-F1CA: 3D 2E 02 and $022e, x
+F1CA: 3D 2E 02 and player_1_controls_022e, x
 F1CD: F0 3D    beq $f20c
 F1CF: A5 35    lda nb_credits_0035
 F1D1: F0 39    beq $f20c
@@ -15285,7 +15295,7 @@ F223: 20 0E CF jsr $cf0e
 F226: 20 35 CF jsr clear_screen_cf35
 F229: 20 73 CF jsr $cf73
 F22C: A9 00    lda #$00
-F22E: 85 46    sta $46
+F22E: 85 46    sta game_state_bits_46
 F230: A5 36    lda $36
 F232: D0 03    bne $f237
 F234: 4C BB F2 jmp $f2bb
@@ -15296,13 +15306,13 @@ F23F: 20 9A EB jsr $eb9a
 F242: A9 02    lda #$02
 F244: 8D DB 07 sta $07db
 F247: A9 00    lda #$00
-F249: 8D F5 07 sta $07f5
+F249: 8D F5 07 sta timer_07f5
 F24C: 20 2F EC jsr $ec2f
 F24F: 98       tya
 F250: 18       clc
 F251: 69 05    adc #$05
 F253: A8       tay
-F254: AD F5 07 lda $07f5
+F254: AD F5 07 lda timer_07f5
 F257: 29 10    and #$10
 F259: F0 05    beq $f260
 F25B: 98       tya
@@ -15321,13 +15331,13 @@ F275: 2D 06 10 and $1006
 F278: 29 F0    and #$f0
 F27A: C9 F0    cmp #$f0
 F27C: D0 31    bne $f2af
-F27E: EE F5 07 inc $07f5
-F281: AD F5 07 lda $07f5
+F27E: EE F5 07 inc timer_07f5
+F281: AD F5 07 lda timer_07f5
 F284: C9 70    cmp #$70
 F286: 90 C4    bcc $f24c
 F288: A9 00    lda #$00
-F28A: 8D F5 07 sta $07f5
-F28D: EE F5 07 inc $07f5
+F28A: 8D F5 07 sta timer_07f5
+F28D: EE F5 07 inc timer_07f5
 F290: 20 22 D8 jsr sync_d822
 F293: AD 00 10 lda p1_1000
 F296: 2D 01 10 and p2_1001
@@ -15338,7 +15348,7 @@ F2A1: 2D 06 10 and $1006
 F2A4: 29 F0    and #$f0
 F2A6: C9 F0    cmp #$f0
 F2A8: D0 05    bne $f2af
-F2AA: AD F5 07 lda $07f5
+F2AA: AD F5 07 lda timer_07f5
 F2AD: 10 DE    bpl $f28d
 F2AF: 20 2F EC jsr $ec2f
 F2B2: 98       tya
@@ -15363,27 +15373,27 @@ F2D9: A9 10    lda #$10
 F2DB: 8D E0 03 sta $03e0
 F2DE: A9 00    lda #$00
 F2E0: 8D DD 07 sta $07dd
-F2E3: 8D DF 07 sta $07df
+F2E3: 8D DF 07 sta logical_scroll_value_msb_07df
 F2E6: A9 80    lda #$80
-F2E8: 8D DE 07 sta $07de
+F2E8: 8D DE 07 sta logical_scroll_value_lsb_07de
 F2EB: A9 01    lda #$01
-F2ED: 85 46    sta $46
+F2ED: 85 46    sta game_state_bits_46
 F2EF: A9 00    lda #$00
-F2F1: 8D F5 07 sta $07f5
+F2F1: 8D F5 07 sta timer_07f5
 F2F4: A9 80    lda #$80
-F2F6: 8D DE 07 sta $07de
+F2F6: 8D DE 07 sta logical_scroll_value_lsb_07de
 F2F9: A9 01    lda #$01
 F2FB: 8D DB 07 sta $07db
 F2FE: A9 00    lda #$00
-F300: 8D F5 07 sta $07f5
+F300: 8D F5 07 sta timer_07f5
 F303: A5 36    lda $36
-F305: F0 68    beq $f36f
+F305: F0 68    beq game_main_loop_f36f
 F307: AD E4 07 lda screen_id_07e4
 F30A: 29 0F    and #$0f
 F30C: A8       tay
 F30D: B9 6A F3 lda $f36a, y
 F310: 20 B8 D7 jsr $d7b8
-F313: 4C 6F F3 jmp $f36f
+F313: 4C 6F F3 jmp game_main_loop_f36f
 F316: AD 03 10 lda dsw1_1003
 F319: 49 FF    eor #$ff
 F31B: 48       pha
@@ -15417,43 +15427,45 @@ F34C: B9 57 F3 lda $f357, y
 F34F: 85 4B    sta $4b
 F351: 60       rts
 
+game_main_loop_f36f:
 F36F: A9 00    lda #$00
 F371: 85 30    sta $30
 F373: A9 00    lda #$00
 F375: 8D DA 06 sta $06da
 F378: 20 23 E9 jsr $e923
-F37B: A5 46    lda $46
+F37B: A5 46    lda game_state_bits_46
 F37D: 29 02    and #$02
 F37F: D0 03    bne $f384
-F381: 4C CA F4 jmp $f4ca
+F381: 4C CA F4 jmp keep_playing_f4ca
+; ball on ground
 F384: 20 30 A7 jsr $a730
 F387: 20 45 A6 jsr $a645
 F38A: 20 A8 AC jsr $aca8
 F38D: 20 CC E6 jsr $e6cc
 F390: 20 A5 A8 jsr $a8a5
-F393: AD F5 07 lda $07f5
+F393: AD F5 07 lda timer_07f5
 F396: C9 58    cmp #$58
 F398: B0 03    bcs $f39d
 F39A: 4C FD F4 jmp $f4fd
-F39D: A5 46    lda $46
+F39D: A5 46    lda game_state_bits_46
 F39F: 29 FD    and #$fd
-F3A1: 85 46    sta $46
+F3A1: 85 46    sta game_state_bits_46
 F3A3: A9 00    lda #$00
 F3A5: 8D E5 07 sta $07e5
 F3A8: A2 00    ldx #$00
-F3AA: A5 46    lda $46
+F3AA: A5 46    lda game_state_bits_46
 F3AC: 29 10    and #$10
 F3AE: F0 01    beq $f3b1
 F3B0: E8       inx
 F3B1: B5 57    lda $57, x
 F3B3: C9 10    cmp #$10
 F3B5: 90 1F    bcc $f3d6
-F3B7: A5 46    lda $46
+F3B7: A5 46    lda game_state_bits_46
 F3B9: 29 FD    and #$fd
 F3BB: 09 08    ora #$08
-F3BD: 85 46    sta $46
+F3BD: 85 46    sta game_state_bits_46
 F3BF: A9 00    lda #$00
-F3C1: 8D F5 07 sta $07f5
+F3C1: 8D F5 07 sta timer_07f5
 F3C4: A0 14    ldy #$14
 F3C6: B5 47    lda $47, x
 F3C8: 30 02    bmi $f3cc
@@ -15472,10 +15484,11 @@ F3E0: C9 08    cmp #$08
 F3E2: B0 05    bcs $f3e9
 F3E4: A9 03    lda #$03
 F3E6: 20 B8 D7 jsr $d7b8
-F3E9: A5 46    lda $46
+; start new ball
+F3E9: A5 46    lda game_state_bits_46
 F3EB: 09 04    ora #$04
-F3ED: 85 46    sta $46
-F3EF: A5 46    lda $46
+F3ED: 85 46    sta game_state_bits_46
+F3EF: A5 46    lda game_state_bits_46
 F3F1: 49 10    eor #$10
 F3F3: 29 10    and #$10
 F3F5: 4A       lsr a
@@ -15516,7 +15529,7 @@ F436: A9 00    lda #$00
 F438: 9D 0E 03 sta $030e, x
 F43B: CA       dex
 F43C: 10 D1    bpl $f40f
-F43E: A5 46    lda $46
+F43E: A5 46    lda game_state_bits_46
 F440: 29 10    and #$10
 F442: 4A       lsr a
 F443: 4A       lsr a
@@ -15539,7 +15552,7 @@ F461: 90 F8    bcc $f45b
 F463: A5 4A    lda $4a
 F465: 05 4B    ora $4b
 F467: F0 03    beq $f46c
-F469: 4C CA F4 jmp $f4ca
+F469: 4C CA F4 jmp keep_playing_f4ca
 F46C: A5 37    lda $37
 F46E: D0 03    bne $f473
 F470: 4C 53 EF jmp $ef53
@@ -15573,16 +15586,18 @@ F4B2: A9 00    lda #$00
 F4B4: 85 54    sta $54
 F4B6: A9 10    lda #$10
 F4B8: 85 55    sta $55
-F4BA: A5 46    lda $46
+F4BA: A5 46    lda game_state_bits_46
 F4BC: 29 F7    and #$f7
 F4BE: 09 40    ora #$40
-F4C0: 85 46    sta $46
+F4C0: 85 46    sta game_state_bits_46
 F4C2: 20 42 EC jsr $ec42
 F4C5: A9 12    lda #$12
 F4C7: 20 80 EE jsr $ee80
-F4CA: A5 46    lda $46
+keep_playing_f4ca:
+F4CA: A5 46    lda game_state_bits_46
 F4CC: 29 40    and #$40
 F4CE: F0 03    beq $f4d3
+; "continue play" sequence
 F4D0: 4C 71 F6 jmp $f671
 F4D3: 20 EF D8 jsr $d8ef
 F4D6: 20 1A CE jsr $ce1a
@@ -15599,36 +15614,41 @@ F4F4: 20 A8 AC jsr $aca8
 F4F7: 20 82 AD jsr $ad82
 F4FA: 20 CC E6 jsr $e6cc
 F4FD: 20 59 CF jsr $cf59
-F500: A5 46    lda $46
+F500: A5 46    lda game_state_bits_46
 F502: 29 40    and #$40
 F504: D0 03    bne $f509
 F506: 20 E2 E6 jsr $e6e2
 F509: 20 42 EC jsr $ec42
-F50C: A5 46    lda $46
+F50C: A5 46    lda game_state_bits_46
 F50E: 29 01    and #$01
 F510: F0 0F    beq $f521
-F512: AD F5 07 lda $07f5
+F512: AD F5 07 lda timer_07f5
 F515: C9 20    cmp #$20
 F517: 90 08    bcc $f521
-F519: A5 46    lda $46
+; timer >= $20: start first ball (start of the demo or new match)
+; after having waited a small while showing the players in the center
+; of the field
+start_new_game_f519:
+F519: A5 46    lda game_state_bits_46
 F51B: 29 FE    and #$fe
 F51D: 09 04    ora #$04
-F51F: 85 46    sta $46
+; start new ball/first ball (first of the match)
+F51F: 85 46    sta game_state_bits_46
 F521: A5 30    lda $30
 F523: F0 FC    beq $f521
 F525: A9 5A    lda #$5a
 F527: 85 2F    sta toggle_timer_2f
 F529: A5 2F    lda toggle_timer_2f
 F52B: D0 FC    bne $f529
-F52D: EE F5 07 inc $07f5
-F530: A5 46    lda $46
+F52D: EE F5 07 inc timer_07f5
+F530: A5 46    lda game_state_bits_46
 F532: 29 08    and #$08
 F534: F0 07    beq $f53d
-F536: AD F5 07 lda $07f5
+F536: AD F5 07 lda timer_07f5
 F539: C9 C0    cmp #$c0
 F53B: B0 03    bcs $f540
-F53D: 4C 6F F3 jmp $f36f
-F540: A5 46    lda $46
+F53D: 4C 6F F3 jmp game_main_loop_f36f
+F540: A5 46    lda game_state_bits_46
 F542: 29 10    and #$10
 F544: 49 10    eor #$10
 F546: 4A       lsr a
@@ -15825,9 +15845,9 @@ F6DE: 85 35    sta nb_credits_0035
 F6E0: D8       cld
 F6E1: A9 01    lda #$01
 F6E3: 8D DB 07 sta $07db
-F6E6: A5 46    lda $46
+F6E6: A5 46    lda game_state_bits_46
 F6E8: 29 BF    and #$bf
-F6EA: 85 46    sta $46
+F6EA: 85 46    sta game_state_bits_46
 F6EC: 20 9D EC jsr unpack_background_screen_ec9d
 F6EF: 20 C8 F7 jsr $f7c8
 F6F2: 20 16 F3 jsr $f316
@@ -15965,9 +15985,9 @@ F7EC: A0 03    ldy #$03
 F7EE: AD 03 10 lda dsw1_1003
 F7F1: 10 02    bpl $f7f5
 F7F3: A0 01    ldy #$01
-F7F5: B9 2E 02 lda $022e, y
+F7F5: B9 2E 02 lda player_1_controls_022e, y
 F7F8: 88       dey
-F7F9: 39 2E 02 and $022e, y
+F7F9: 39 2E 02 and player_1_controls_022e, y
 F7FC: 88       dey
 F7FD: 10 FA    bpl $f7f9
 F7FF: 29 F0    and #$f0
