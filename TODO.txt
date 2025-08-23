@@ -1,3 +1,9 @@
+- bit dsw in comments => read dsw and BIT (a0): diff D906->D911
+- review all bvc/bvs with PUSH/POP SR
+- E2C8: load 7 => 61 or 3 (amiga)
+  consequence? E282 stores E0 in 6 but 0 in 6 on amiga (the second time)
+  
+  
 - converter: if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 - flashing sprites (no dblbuf) but dblbuf crashes!!
 - sprites not found after scrolling goes left, but logging reveals nothing; debug red color write!
@@ -34,6 +40,9 @@ wpset 1009,1,W,wpdata!=b@22D
 
 wpset 1009,1,W,pc!=$eaff
 
+fix random (demo does exactly the same each time!):
+
+bpset D00A,,{A=0;PC=AFFE;g}
 
 log sound:
 

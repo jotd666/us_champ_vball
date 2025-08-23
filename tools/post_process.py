@@ -99,6 +99,12 @@ with open(source_dir / "conv.s") as f:
                 if "_SR" in lines[j]:
                     lines[j]=""
 
+        if line.startswith("pseudo_random_d00a:"):
+            line += """\t.ifne\tOPT_FIXED_RANDOM\n
+\tmoveq #0,d0
+\trts
+\t.endif
+"""
         if line_address in {0x603e,0x606f,0x618e,0x60f4,0x61de,0x60ea,0x62a3}:
             # cmp + rts
             line = "\tINVERT_XC_FLAGS\n"+line

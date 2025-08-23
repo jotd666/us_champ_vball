@@ -5,7 +5,7 @@
 
 ;CHIP_ONLY
 
-EXPMEM = $300000
+EXPMEM = $400000
 CHIPSIZE = $200000
 
 _base	SLAVE_HEADER					; ws_security + ws_id
