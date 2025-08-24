@@ -127,14 +127,15 @@ SPRITE_SIZEOF = 4
 BIT_COIN1 = 0
 BIT_COIN2 = 1
 
-BIT_START_1P = 0
-BIT_START_2P = 1
+BIT_START_1P = 7
+BIT_START_2P = 7
 
 BIT_LEFT = 1
 BIT_RIGHT = 0
 BIT_UP = 2
 BIT_DOWN = 3
-BIT_FIRE = 4
+BIT_FIRE_1 = 4
+BIT_FIRE_2 = 5
 
 	.macro	GET_RAM_START_IN_A6	
 	.ifdef	RELEASE
@@ -2269,12 +2270,37 @@ osd_debug_hook:
 	rts
 	
 	
+BIT_START_1P = 7
+BIT_START_2P = 7
+
+BIT_LEFT = 1
+BIT_RIGHT = 0
+BIT_UP = 2
+BIT_DOWN = 3
+BIT_FIRE_1 = 4
+BIT_FIRE_2 = 5
+
 osd_read_p1_inputs:
-	move.b	#0xFF,d0
+	move.b	player_1_controls,d0
+	movem.l	d1/A0,-(a7)
+	lea		keyboard_table(pc),a0
+	tst.b	(1,a0)		| "1" key like in MAME
+	beq.b	0f
+	bclr	#BIT_START_1P,d0
+0:
+	movem.l	(a7)+,a0/d1
 	rts
 	
 osd_read_p2_inputs:
 	move.b	#0xFF,d0
+	move.l	A0,-(a7)
+	lea		keyboard_table(pc),a0
+	tst.b	(2,a0)		| "2" key like in MAME
+	beq.b	0f
+	bclr	#BIT_START_2P,d0
+0:	
+	
+	move.l	(a7)+,a0
 	rts
 	
 osd_set_scrollx_hi:
@@ -2612,7 +2638,7 @@ update_controls:
 0:
 	tst.b	(0x63,a0)		| "ctrl" key
 	beq.b	0f
-	bclr	#BIT_FIRE,d0
+	bclr	#BIT_FIRE_1,d0
 0:
 *	tst.b	(0x64,a0)		| left "alt" key
 *	beq.b	0f
@@ -2639,7 +2665,11 @@ update_controls:
 0:
 	btst	#JPB_BTN_RED,d1
 	beq.b	0f
-	bclr	#BIT_FIRE,d0
+	bclr	#BIT_FIRE_1,d0
+0:
+	btst	#JPB_BTN_BLU,d1
+	beq.b	0f
+	bclr	#BIT_FIRE_2,d0
 0:
 	move.b	d0,player_1_controls
 
@@ -3540,7 +3570,7 @@ context_table:
 	.long	0     | 2
 	.long	level3_context     | 3
 	.long	0     | 4
-	.long	0     | 5
+	.long	level1_context     | 5
 	.long	0     | 6
 	.long	intro_context     | 7
 

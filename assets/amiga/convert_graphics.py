@@ -572,7 +572,8 @@ def gen_context_files(context_name,with_sprites=True):
 
 
 #gen_context_files("intro",with_sprites=False)
-gen_context_files("level_3")  # also demo
+gen_context_files("level_1")  # also demo
+#gen_context_files("level_3")  # also demo
 #gen_context_files("select")
 
 with open(src_dir / "sprite_size.68k","w") as f:

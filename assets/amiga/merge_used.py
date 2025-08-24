@@ -40,9 +40,8 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
             f.write(contents)
 
 
+context = "level_1"
 
 #merge("intro","used_tiles",0x4000,nb_cluts = 8,overwrite=False)
-#merge("select","used_tiles",0x4000,nb_cluts = 8,overwrite=True)
-#merge("select","used_sprites",0x800,nb_cluts=8,overwrite=True)
-merge("level_3","used_tiles",0x4000,nb_cluts=8,overwrite=True)
-merge("level_3","used_sprites",0x800,nb_cluts=8,overwrite=False)
+merge(context,"used_tiles",0x4000,nb_cluts = 8,overwrite=True)
+merge(context,"used_sprites",0x800,nb_cluts=8,overwrite=True)

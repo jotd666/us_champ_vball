@@ -14906,9 +14906,9 @@ EE55: E6 00    inc $00
 EE57: E6 00    inc $00
 EE59: D0 E9    bne $ee44
 EE5B: A4 1B    ldy $1b
-EE5D: 91 14    sta ($14), y
+EE5D: 91 14    sta ($14), y		; [unchecked_address]
 EE5F: A5 13    lda multipurpose_13
-EE61: 91 16    sta ($16), y
+EE61: 91 16    sta ($16), y		; [video_address]
 EE63: E6 00    inc $00
 EE65: E6 1B    inc $1b
 EE67: CA       dex

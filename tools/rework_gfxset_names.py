@@ -1,8 +1,8 @@
 import glob,os,re,pathlib
 
-gfx_dir = "../assets/sheets/select"
+gfx_dir = "../assets/sheets/level_1"
 
-for sn,ttype in ((1,"sprites"),(0,"tiles")):
+for sn,ttype in ((1,"sprites_black"),(0,"tiles")):
     outdir = pathlib.Path(gfx_dir) / ttype
     outdir.mkdir(exist_ok=True)
 
