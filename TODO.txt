@@ -1,30 +1,38 @@
-- some sprite sizes are incorrect
-- animated tiles not working (black), debug game check when it's written
 - crashing after a while
+- A.I. is wrong: opponents don't catch the ball
+- time: bcd doesn't seem to work
 
+- converter: turn off optimizations on option:
+  - if SBC_IMM	0x00 found later, don't optimize sbc into sub!
+  - clc+bcc / sec+bcs => no optim
+  - always add INVERT_XC_FLAGS after a cmp
+  - ...
+  (and remove fixes from post process)
+  
+- rip sounds
 
-- converter: if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 - flashing sprites (no dblbuf) but dblbuf crashes!!
 
+- add controls to be able to play to level 1
 
 - reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
 - convert_graphics: separate tile/sprite files but computed together, separate palette file
 - convert_graphics: group horizontally if possible for better performance, maybe using
-  hardware sprites would be possible for players?
-- graphics: black color should be converted too!
+  hardware sprites would be possible for players? difficult given the angle
+
 
 - create one gfx set per level/context like Dragonninja based on palette setup
   hopefully it's enough
 
 
-- implement scrollx with OCS setup ATM (scroll table = 16): doesn't work
+- implement scrollx with OCS setup ATM (scroll table = 16)
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
 
-
+- cheat: level select
 
 - cli/sei: interruptions not enabled
 - better bank switching if too frequent

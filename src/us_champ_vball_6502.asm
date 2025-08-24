@@ -3298,11 +3298,7 @@ compare_player_positions_6923:
 7885: B9 8E 78 lda $788e, y
 7888: 85 1C    sta $1c
 788A: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
-788D: 8D 78 E4 sta $e478
-7890: 78       sei
-7891: E4 78    cpx $78
-7893: 09 79    ora #$79
-7895: 09 79    ora #$79
+
 7897: 09 80    ora #$80
 7899: 9D 16 03 sta $0316, x
 789C: A9 00    lda #$00

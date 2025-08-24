@@ -5,6 +5,7 @@ from shared import *
 # directly (to remove PUSH_SR...) but not too soon. It allows to change generation type, fix conversion bugs
 # until only the optimizations remain (the non-optimized code generated from 6502+post processing is still correct)
 
+routines_to_check_for_carry = set()
 
 input_read_dict = {
 "p1_1000":"read_p1_inputs",
@@ -38,6 +39,10 @@ def get_line_address(line):
         return None
 
 nb_errors = 0
+
+# if code is generated without optimizations, turn this off!!
+optimizer_on = True
+
 # various dirty but at least automatic patches applying on the specific track and field code
 with open(source_dir / "conv.s") as f:
     lines = list(f)
@@ -51,9 +56,12 @@ with open(source_dir / "conv.s") as f:
             equates.append(line.replace("$","0x"))
             line = ""
 
-        if "optimized clc+bcc" in line:
+        if optimizer_on and "optimized clc+bcc" in line:
             # de-optimize clc+bcc as C is tested on return!
             line = "\tCLR_XC_FLAGS   | needed when returning\n"
+        if optimizer_on and "optimized sec+bcs" in line:
+            # de-optimize sec+bcs as C is tested on return!
+            line = "\tSET_XC_FLAGS   | needed when returning\n"
 
         if "[jump_to_callback]" in line:
             line = change_instruction("jra\tcallback_0000",lines,i)
@@ -67,7 +75,7 @@ with open(source_dir / "conv.s") as f:
             else:
                 lines[i+1] = ""
 
-        if line_address == 0xbdd5:
+        if optimizer_on and line_address == 0xbdd5:
             line = "\tSET_X_FROM_CLEARED_C\n"+line
 
         if line_address in {0x6582,0Xbde4}:
@@ -78,7 +86,7 @@ with open(source_dir / "conv.s") as f:
             lines[i-3] = "\tscs\td6\n"+lines[i-3]
         if line_address in {0xd04e,0xd0ac}:
             line = "\ttst.b\td6\n"+line.replace("cc\tl","eq\tl")
-        if line_address in {0xd059,0xd0b7}:
+        if optimizer_on and line_address in {0xd059,0xd0b7}:
             # carry clear tested above, just branch
             line = line.replace("cs\tl","ra\tl")
             lines[i+1] = remove_error(lines[i+1])
@@ -107,7 +115,7 @@ with open(source_dir / "conv.s") as f:
             # remove those confusing labels
             line = ""
 
-        if line_address in {0xeb09,0x88ac,0x8f51,0xac9a,0xbb78,0xbca3,0xbcbc,0xc6a9,0xe3f3,0xea98}:
+        if optimizer_on and line_address in {0xeb09,0x88ac,0x8f51,0xac9a,0xbb78,0xbca3,0xbcbc,0xc6a9,0xe3f3,0xea98}:
             # restore SBC
             line = change_instruction("SET_XC_FLAGS",lines,i)
             lines[i+1] = lines[i+1].replace("sub.b\t#","SBC_IMM\t").replace(",d0","").rstrip()+" [do not optimize sub!]\n"
@@ -128,7 +136,7 @@ with open(source_dir / "conv.s") as f:
 \trts
 \t.endif
 """
-        if line_address in {0x603e,0x606f,0x618e,0x60f4,0x61de,0x60ea,0x62a3}:
+        if optimizer_on and line_address in {0x603e,0x606f,0x618e,0x60f4,0x61de,0x60ea,0x62a3}:
             # cmp + rts
             line = "\tINVERT_XC_FLAGS\n"+line
             lines[i+1] = remove_error(lines[i+1])
@@ -140,6 +148,10 @@ with open(source_dir / "conv.s") as f:
             # disable flip screen code
             line = change_instruction("rts",lines,i)
 
+        if optimizer_on and line_address in {0x5f78,0x5f7f}:
+            # invert flags in l_5f73 as C is used in function return
+            line = "\tINVERT_XC_FLAGS\n"+line.replace("bcs","bcc").replace("jcs","jcc")
+
         if line_address == 0xe707:
             line = change_instruction("subq.b\t#1,d0",lines,i)
             lines[i+1]=""
@@ -147,9 +159,18 @@ with open(source_dir / "conv.s") as f:
             lines[i-3]=""
             lines[i-2] = remove_instruction(lines,i-2)
 
-        if line_address in {0xe66b,0xe64a,0xe9c3}:
+        if optimizer_on and line_address in {0xe66b,0xe64a,0xe9c3}:
             # we changed addx to add, no need for clc aka CLEAR_XC_FLAGS
             line = remove_instruction(lines,i)
+
+        ##################################################
+        # sed removed and addx=>abcd
+        if line_address in {0xf5f6}:
+            line = line.replace("addx.b","abcd")
+        if line_address in {0xf5ee}:
+            line = remove_error(line)
+        #################################################
+
 
         if line_address in {0xe64d,0xe66e}:
             # just in case X is set by addq above
@@ -161,32 +182,96 @@ with open(source_dir / "conv.s") as f:
             lines[i-2] = remove_error(lines[i-2])
             line = change_instruction("moveq\t#1,d4",lines,i)
             lines[i+1] = change_instruction("sbcd\td4,d0",lines,i+1)
+
         if line_address in {0xc8bf,0xc8ca,0Xcab9,0xe964,0xe9d6,
         0xec00,0xb0cd,0xb3c3,0xec52,0xecc5,0xed23,0xee01,0xf773}:
             # remove ERROR directive just after a tst
             lines[i-1] = remove_error(lines[i-1])
 
-        if line_address in {0xb914,0x8f6f}:
+        if optimizer_on and line_address in {0xb914,0x8f6f}:
             # useless cmp #0 => tst
             lines[i-1] = remove_error(lines[i-1])
             line = remove_instruction(lines,i)
 
-        if "insert SET_X_FROM_CLEARED_C" in line:
-            line = "\tSET_X_FROM_CLEARED_C\n"
+##        if "insert SET_X_FROM_CLEARED_C" in line:
+##            line = "\tSET_X_FROM_CLEARED_C\n"
 
         if line_address in {0xb4fd,0xd9ea,0xdaf9,0x8b7d,0x9903,0xa129,0x9689,0Xb4e8,0xd817,0x9767}:
             # X is valid from previous add/sub,asl..: copy X to C just before bcc/bcs
             line = "\tSET_C_FROM_X\n"+line
             lines[i+1] = remove_error(lines[i+1])
 
+        if optimizer_on and line_address == 0xb429:
+            # force clear C flag (cmp+rts)
+            line = "\tCLR_XC_FLAGS\n"+line
+
         if line_address in {0xeedf,0xef0c}:
             # rti => rts
             line = change_instruction("rts",lines,i)
 
-        if "stray bc" in line and "jbsr" in lines[i-2]:
+        if optimizer_on and line_address in {0x5f88,0x5f96,0x6199,0x6263}:
+            # cmp + clc => no need for error
+            lines[i-1] = remove_error(lines[i-1])
+
+        if optimizer_on and line_address in {0xbe25,0xec48}:
+            # cmp+push_sr + pop_sr+bne: ok!
+            lines[i-1] = remove_error(lines[i-1])
+
+        if optimizer_on and line_address in {0x6565,0x8b7b}:
+            # store C in X
+            lines[i-1] = "\tSET_X_FROM_CLEARED_C  | store flag for later\n"
+
+        if optimizer_on and "stray bc" in line and "jbsr" in lines[i-2]:
             # the previous call sets carry, the bcc/bcs is not a problem
             # (well, it was on 9144 when clc+bcc was optimized to bra WITHOUT clc!!)
-            line = remove_error(line)
+            toks = lines[i-2].split()
+            addr = int(toks[1].split("_")[-1],16)
+            # if routine is checked manually / fixed then remove error
+            if addr in {0x5f68,
+            0x5f73,   # fixed as there's an rts that relies on cmp result (uninverted!)
+            0x6274,   # very simple
+            0x6037,   # very simple
+            0x60be,   # inverted flags in the end
+            0x6280,   # inverted flags in the end
+            0x6268,
+            0x60f5,
+            0x60fe,
+            0x610f,
+            0x618f,
+            0x61be,
+            0x625d,
+            0x8229,
+            0x827d,
+            0x8289,
+            0x8296,
+            0x82ea,
+            0x82f9,
+            0x8323,
+            0x832f,
+            0x8350,  # very simple
+            0x835e,  # very simple
+            0x8369,  # very simple
+            0x83a0,  # big but one exit with SET/CLR
+            0x83e0,  # simple
+            0x83fa,  # complex but ok
+            0x8429,  # very simple
+            0x843e,  # big but one exit with SET/CLR
+            0x846b,  # big but one exit with SET/CLR
+            0x90b0,  # simple
+            0x90c9,  # complex but ok
+            0x90f3,  # simple
+            0x91d8,  # fixed to de-optimize clc+bcc
+            0xa0e4,  # fixed to de-optimize sec+bcs
+            0xa215,  # complex but ok
+            0xb17c,  # complex but ok
+            0xb2ed,  # very complex with jump to b1e8 but OK
+            0xb394,  # complex with a jump to b1e8 but OK
+            0xb40f,  # fixed to clear carry after cmp + rts in b429
+            0xb42a,  # fixed to de-optimize sec+bcs
+            }:
+                line = remove_error(line)
+            else:
+                routines_to_check_for_carry.add(addr)
 
         if "unsupported transfer to stack register" in line:
             line = remove_error(line)
@@ -199,7 +284,7 @@ with open(source_dir / "conv.s") as f:
         if "[disable]" in line:
             line = remove_instruction(lines,i)
 
-        elif "nop" in line.split():
+        if "nop" in line.split():
             line = remove_instruction(lines,i)
 
 ##        elif "stray b" in line:
@@ -344,6 +429,10 @@ for i,line in enumerate(lines,header.count("\n")):
 
 print(f"nb_errors: {nb_errors}")
 
+if routines_to_check_for_carry:
+    print(f"Check {len(routines_to_check_for_carry)} routines for proper C return code")
+    for x in sorted(routines_to_check_for_carry):
+        print(f"{x:04x}")
 
 with open(source_dir / "data.inc","w") as fw:
     fw.writelines(equates)
