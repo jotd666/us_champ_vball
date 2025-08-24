@@ -51,6 +51,10 @@ with open(source_dir / "conv.s") as f:
             equates.append(line.replace("$","0x"))
             line = ""
 
+        if "optimized clc+bcc" in line:
+            # de-optimize clc+bcc as C is tested on return!
+            line = "\tCLR_XC_FLAGS   | needed when returning\n"
+
         if "[jump_to_callback]" in line:
             line = change_instruction("jra\tcallback_0000",lines,i)
 
@@ -181,6 +185,7 @@ with open(source_dir / "conv.s") as f:
 
         if "stray bc" in line and "jbsr" in lines[i-2]:
             # the previous call sets carry, the bcc/bcs is not a problem
+            # (well, it was on 9144 when clc+bcc was optimized to bra WITHOUT clc!!)
             line = remove_error(line)
 
         if "unsupported transfer to stack register" in line:
@@ -308,8 +313,18 @@ header = """\t.include "data.inc"
     .endm
 
 callback_0000:
+    CB_CASE     93,e7
+    CB_CASE     92,d1
+    CB_CASE     9a,3d
+    CB_CASE     99,f2
+    CB_CASE     99,9d
     CB_CASE     92,80
     CB_CASE     92,37
+    CB_CASE     95,15
+    CB_CASE     95,8e
+    CB_CASE     99,9d
+    CB_CASE     99,be
+    CB_CASE     9c,16
     BREAKPOINT    "callback 0000 unknown"
     rts
 

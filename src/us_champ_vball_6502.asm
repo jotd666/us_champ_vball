@@ -5913,6 +5913,7 @@ initialize_logical_xy_players_8d26:
 91EF: 90 01    bcc $91f2
 91F1: 38       sec
 91F2: 60       rts
+
 91F3: BD 1A 03 lda $031a, x
 91F6: C9 17    cmp #$17
 91F8: B0 15    bcs $920f
@@ -6127,6 +6128,7 @@ callback_92d1:
 93E0: A9 93    lda #$93
 93E2: 85 01    sta $01
 93E4: 4C 0E 93 jmp $930e
+callback_93e7:
 93E7: BD 54 02 lda $0254, x
 93EA: 10 03    bpl $93ef
 93EC: 20 69 A1 jsr $a169
@@ -6718,6 +6720,7 @@ callback_92d1:
 9996: A9 99    lda #$99
 9998: 85 01    sta $01
 999A: 4C 0E 93 jmp $930e
+callback_999d:
 999D: 20 8D 9D jsr $9d8d
 99A0: BD 3A 02 lda $023a, x
 99A3: 09 80    ora #$80
@@ -6744,13 +6747,14 @@ callback_92d1:
 99D9: 9D 3A 02 sta $023a, x
 99DC: 4C 89 91 jmp $9189
 99DF: BD 1A 03 lda $031a, x
-99E2: 30 0E    bmi $99f2
+99E2: 30 0E    bmi callback_99f2
 99E4: 20 95 A1 jsr $a195
 99E7: A9 F2    lda #$f2
 99E9: 85 00    sta $00
 99EB: A9 99    lda #$99
 99ED: 85 01    sta $01
 99EF: 4C 0E 93 jmp $930e
+callback_99f2:
 99F2: 20 8D 9D jsr $9d8d
 99F5: BD F0 02 lda $02f0, x
 99F8: C9 02    cmp #$02
@@ -6770,7 +6774,7 @@ callback_92d1:
 9A1C: 20 1C 9C jsr $9c1c
 9A1F: 4C 89 91 jmp $9189
 9A22: BD 1A 03 lda $031a, x
-9A25: 30 16    bmi $9a3d
+9A25: 30 16    bmi callback_9a3d
 9A27: 20 95 A1 jsr $a195
 9A2A: BD 0E 03 lda $030e, x
 9A2D: 09 04    ora #$04
@@ -6781,6 +6785,7 @@ callback_92d1:
 9A38: 85 01    sta $01
 9A3A: 4C 0E 93 jmp $930e
 ; normal serve sequence
+callback_9a3d:
 9A3D: 20 8D 9D jsr $9d8d
 9A40: 20 1C 9C jsr $9c1c
 9A43: 20 87 A1 jsr $a187
