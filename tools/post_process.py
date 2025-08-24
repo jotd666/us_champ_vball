@@ -59,7 +59,7 @@ with open(source_dir / "conv.s") as f:
             line = change_instruction("jra\tcallback_0000",lines,i)
 
         if re.search("GET_ADDRESS\t\w*jump_table",line):
-            index = "X" if ",x" in line else "Y"
+            index = "X" if ", x" in line or ",x" in line else "Y"
             line = line.replace("GET_ADDRESS",f"PUSH_TABLE_{index}_ADDRESS")
 
             if line_address in {0xBE09,0xBA7F,0xB781,0xA73B,0XA650,0X8710,0x917c}:
