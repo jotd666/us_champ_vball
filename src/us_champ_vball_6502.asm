@@ -175,6 +175,8 @@ nb_queued_sounds_07e9 = $7e9
 
 p1_1000 = $1000
 p2_1001 = $1001
+p3_1005 = $1005
+p4_1006 = $1006
 system_1002 = $1002
 dsw1_1003 = $1003
 dsw2_1004 = $1004
@@ -12860,8 +12862,8 @@ D849: AD 01 10 lda p2_1001
 D84C: 2D 00 10 and p1_1000
 D84F: 2C 03 10 bit dsw1_1003
 D852: 30 06    bmi $d85a
-D854: 2D 05 10 and $1005
-D857: 2D 06 10 and $1006
+D854: 2D 05 10 and p3_1005
+D857: 2D 06 10 and p4_1006
 D85A: 29 F0    and #$f0
 D85C: C9 F0    cmp #$f0
 D85E: D0 05    bne $d865
@@ -12974,12 +12976,12 @@ D91D: 49 FF    eor #$ff
 D91F: 8D 2F 02 sta player_2_controls_022f
 D922: AD 30 02 lda $0230
 D925: 8D 38 02 sta $0238
-D928: AD 05 10 lda $1005
+D928: AD 05 10 lda p3_1005
 D92B: 49 FF    eor #$ff
 D92D: 8D 30 02 sta $0230
 D930: AD 31 02 lda $0231
 D933: 8D 39 02 sta $0239
-D936: AD 06 10 lda $1006
+D936: AD 06 10 lda p4_1006
 D939: 49 FF    eor #$ff
 D93B: 8D 31 02 sta $0231
 D93E: 2C 03 10 bit dsw1_1003
@@ -15387,8 +15389,8 @@ F267: AD 00 10 lda p1_1000
 F26A: 2D 01 10 and p2_1001
 F26D: 2C 03 10 bit dsw1_1003
 F270: 30 06    bmi $f278
-F272: 2D 05 10 and $1005
-F275: 2D 06 10 and $1006
+F272: 2D 05 10 and p3_1005
+F275: 2D 06 10 and p4_1006
 F278: 29 F0    and #$f0
 F27A: C9 F0    cmp #$f0
 F27C: D0 31    bne $f2af
@@ -15404,8 +15406,8 @@ F293: AD 00 10 lda p1_1000
 F296: 2D 01 10 and p2_1001
 F299: 2C 03 10 bit dsw1_1003
 F29C: 30 06    bmi $f2a4
-F29E: 2D 05 10 and $1005
-F2A1: 2D 06 10 and $1006
+F29E: 2D 05 10 and p3_1005
+F2A1: 2D 06 10 and p4_1006
 F2A4: 29 F0    and #$f0
 F2A6: C9 F0    cmp #$f0
 F2A8: D0 05    bne $f2af

@@ -1,4 +1,4 @@
-; Pooyan OCS slave
+; US Championship V'ball slave
 	INCDIR	Include:
 	INCLUDE	whdload.i
 	INCLUDE	whdmacros.i
