@@ -6250,7 +6250,7 @@ callback_93e7:
 94E4: 60       rts
 
 94F5: BD 1A 03 lda $031a, x
-94F8: 30 1B    bmi $9515
+94F8: 30 1B    bmi callback_9515
 94FA: 20 95 A1 jsr $a195
 94FD: A9 2F    lda #$2f
 94FF: 20 B8 D7 jsr queue_sound_d7b8
@@ -6262,6 +6262,7 @@ callback_93e7:
 950E: A9 95    lda #$95
 9510: 85 01    sta $01
 9512: 4C 0E 93 jmp $930e
+callback_9515:
 9515: 20 15 A2 jsr $a215
 9518: 20 12 B6 jsr $b612
 951B: 20 8B 94 jsr $948b
@@ -6289,7 +6290,7 @@ callback_93e7:
 9554: 20 87 A1 jsr $a187
 9557: 4C 89 91 jmp $9189
 955A: BD 1A 03 lda $031a, x
-955D: 30 2F    bmi $958e
+955D: 30 2F    bmi callback_958e
 955F: 20 95 A1 jsr $a195
 9562: BD 0E 03 lda $030e, x
 9565: 09 04    ora #$04
@@ -6312,6 +6313,7 @@ callback_93e7:
 9587: A9 95    lda #$95
 9589: 85 01    sta $01
 958B: 4C 0E 93 jmp $930e
+callback_958e:
 958E: 20 8D 9D jsr $9d8d
 9591: BD 0E 03 lda $030e, x
 9594: 29 10    and #$10
@@ -6727,13 +6729,14 @@ callback_999d:
 99A5: 9D 3A 02 sta $023a, x
 99A8: 4C 89 91 jmp $9189
 99AB: BD 1A 03 lda $031a, x
-99AE: 30 0E    bmi $99be
+99AE: 30 0E    bmi callback_99be
 99B0: 20 95 A1 jsr $a195
 99B3: A9 BE    lda #$be
 99B5: 85 00    sta $00
 99B7: A9 99    lda #$99
 99B9: 85 01    sta $01
 99BB: 4C 0E 93 jmp $930e
+callback_99be:
 99BE: BD 2B 03 lda player_direction_032b, x
 99C1: 9D 54 02 sta $0254, x
 99C4: A9 10    lda #$10
@@ -6960,7 +6963,7 @@ callback_9a3d:
 9BF5: 9D 0E 03 sta $030e, x
 9BF8: 4C 89 91 jmp $9189
 9BFB: BD 1A 03 lda $031a, x
-9BFE: 30 16    bmi $9c16
+9BFE: 30 16    bmi callback_9c16
 9C00: 20 95 A1 jsr $a195
 9C03: BD 0E 03 lda $030e, x
 9C06: 29 EF    and #$ef
@@ -6970,6 +6973,7 @@ callback_9a3d:
 9C0F: A9 9C    lda #$9c
 9C11: 85 01    sta $01
 9C13: 4C F0 92 jmp $92f0
+callback_9c16:
 9C16: 20 8D 9D jsr $9d8d
 9C19: 4C 89 91 jmp $9189
 9C1C: BD 1A 03 lda $031a, x
