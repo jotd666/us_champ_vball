@@ -80,6 +80,17 @@ with open(source_dir / "conv.s") as f:
             line = line.replace("l_7","b1_7")
 
 
+        ######################################################
+        # those 2 changes are designed to save overflow flag after a bit instruction
+        # as the overflow is checked not immediately after the bit instruction
+        if line_address in [0xe06d,0xe0b1,0xe287,0xe2ca]:
+            line = "\tPUSH_SR   | save overflow flag\n"+line
+
+        if line_address in [0xe074,0xe0d1,0xe28e,0xe2e7]:
+            line = "\tPOP_SR   | from bit, for bvc\n"+line
+            lines[i+1] = remove_error(lines[i+1])
+        ######################################################
+
         if line.startswith("l_7ff0:") or line.startswith("l_7ff3:"):
             # remove those confusing labels
             line = ""
