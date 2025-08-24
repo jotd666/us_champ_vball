@@ -203,7 +203,8 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
                             y_start,wtilec = bitplanelib.autocrop_y(wtile)
                             height = wtilec.size[1]
                             width = wtilec.size[0]//8 + 2
-                            bitplane_data = bitplanelib.palette_image2raw(wtilec,None,palette,generate_mask=True)
+                            bitplane_data = bitplanelib.palette_image2raw(wtilec,None,palette,
+                                            generate_mask=True,mask_color=magenta)
 
                             # add sprite data if eligible: player frame, not mirrored
                             if i in possible_hw_sprites:
@@ -251,6 +252,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
     return new_tile_table
 
+magenta = (254,0,254)
 
 dump_it = True
 
@@ -343,6 +345,11 @@ def gen_context_files(context_name,with_sprites=True):
 
 
     full_palette = sorted(sprite_palette)
+    full_palette.remove(magenta)
+
+    # magenta (transparent) first
+    full_palette.insert(0,magenta)
+
     used_nb_colors = len(full_palette)
     remaining = (nb_colors-used_nb_colors)
     if remaining < 0:
@@ -444,6 +451,7 @@ def gen_context_files(context_name,with_sprites=True):
     out_bin_file = data_dir / f"palette_{context_name}"
     out_asm_file = gen_dir / f"palette_{context_name}.s"
     with open(out_asm_file,"w") as f:
+        full_palette[0] = (0,0,0)  # restore black in first position
         bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMMOT)
     asm2bin(out_asm_file,out_bin_file)
 

@@ -1,13 +1,11 @@
-- bit dsw in comments => read dsw and BIT (a0): diff D906->D911
-- review all bvc/bvs with PUSH/POP SR
-- E2C8: load 7 => 61 or 3 (amiga)
-  consequence? E282 stores E0 in 6 but 0 in 6 on amiga (the second time)
-  
-  
+- some sprite sizes are incorrect
+- animated tiles not working (black), debug game check when it's written
+- crashing after a while
+
+
 - converter: if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 - flashing sprites (no dblbuf) but dblbuf crashes!!
-- sprites not found after scrolling goes left, but logging reveals nothing; debug red color write!
-  => now crashes when returning from ea5c after 0-scroll has been initiated at e94c
+
 
 - reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
