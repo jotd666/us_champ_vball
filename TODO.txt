@@ -1,6 +1,12 @@
 - crashing after a while
-- A.I. is wrong: opponents don't catch the ball
+- A.I. is wrong: opponents don't catch the ball, 62BF never reached!
+  5E60: writes to 30E, 310 but never writes 03 to 310 (with fixed random)
+  on amiga, does that in MAME!
+  
 - time: bcd doesn't seem to work
+- select screen: no timer, game starts immediately!
+- after game starts, context is loaded but no game map, no level 1 background
+- black color still transparent on score big sprites and "ZAP" etc letters
 
 - converter: turn off optimizations on option:
   - if SBC_IMM	0x00 found later, don't optimize sbc into sub!

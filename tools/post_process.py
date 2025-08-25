@@ -227,31 +227,32 @@ with open(source_dir / "conv.s") as f:
             toks = lines[i-2].split()
             addr = int(toks[1].split("_")[-1],16)
             # if routine is checked manually / fixed then remove error
-            if addr in {0x5f68,
+            if addr in {
+            0x5f68,   # very simple
             0x5f73,   # fixed as there's an rts that relies on cmp result (uninverted!)
             0x6274,   # very simple
             0x6037,   # very simple
             0x60be,   # inverted flags in the end
             0x6280,   # inverted flags in the end
-            0x6268,
-            0x60f5,
-            0x60fe,
-            0x610f,
-            0x618f,
-            0x61be,
-            0x625d,
-            0x8229,
-            0x827d,
-            0x8289,
-            0x8296,
-            0x82ea,
-            0x82f9,
-            0x8323,
-            0x832f,
+            0x6268,   # very simple
+            0x60f5,   # very simple
+            0x60fe,   # very simple
+            0x610f,   # inverted flags in the end
+            0x618f,   # very simple
+            0x61be,   # inverted flags in the end
+            0x625d,   # very simple
+            0x8229,   # complex but explict C flag set/clr in the end
+            0x827d,   # very simple
+            0x8289,   # very simple
+            0x8296,   # complex but explict C flag set/clr in the end
+            0x82ea,   # very simple
+            0x82f9,   # very simple
+            0x8323,   # very simple
+            0x832f,   # very simple
             0x8350,  # very simple
             0x835e,  # very simple
             0x8369,  # very simple
-            0x83a0,  # big but one exit with SET/CLR
+            0x83a0,  # big but explict C flag set/clr in the end
             0x83e0,  # simple
             0x83fa,  # complex but ok
             0x8429,  # very simple

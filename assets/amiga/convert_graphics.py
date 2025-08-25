@@ -256,7 +256,7 @@ magenta = (254,0,254)
 
 dump_it = True
 
-def gen_context_files(context_name,with_sprites=True):
+def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
     tile_sheet_dict = {i:Image.open(sheets_path / context_name / "tiles" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
     if with_sprites:
         sprite_sheet_dict = {i:Image.open(sheets_path / context_name / "sprites" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
@@ -570,11 +570,13 @@ def gen_context_files(context_name,with_sprites=True):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
+    # do that only on level context else it's incomplete and it fails!
+    if write_sprite_size:
+        with open(src_dir / "sprite_size.68k","w") as f:
+            bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
+
 
 #gen_context_files("intro",with_sprites=False)
-gen_context_files("level_1")  # also demo
-#gen_context_files("level_3")  # also demo
+#gen_context_files("level_1")  # also demo
+gen_context_files("level_3",write_sprite_size=True)  # also demo
 #gen_context_files("select")
-
-with open(src_dir / "sprite_size.68k","w") as f:
-    bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)

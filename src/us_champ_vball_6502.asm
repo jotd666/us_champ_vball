@@ -216,7 +216,7 @@ directions_table_b3dc = $b3dc
 ; after that, other values crash the code
 
 ; code from bank 0
-
+move_players_on_field_5bf6:
 5BF6: 48       pha
 5BF7: 8A       txa
 5BF8: 48       pha
@@ -226,6 +226,7 @@ directions_table_b3dc = $b3dc
 5BFD: 29 08    and #$08
 5BFF: F0 03    beq $5c04
 5C01: 4C E0 5C jmp $5ce0
+; game in play
 5C04: A5 47    lda $47
 5C06: 30 1F    bmi $5c27
 5C08: A5 56    lda $56
@@ -240,7 +241,7 @@ directions_table_b3dc = $b3dc
 5C1B: A9 00    lda #$00
 5C1D: 85 00    sta $00
 5C1F: 85 01    sta $01
-5C21: 20 AE 62 jsr $62ae
+5C21: 20 AE 62 jsr move_player_62ae
 5C24: 4C 6A 5C jmp $5c6a
 5C27: A5 56    lda $56
 5C29: 30 3F    bmi $5c6a
@@ -289,7 +290,7 @@ directions_table_b3dc = $b3dc
 5C87: 85 00    sta $00
 5C89: A9 02    lda #$02
 5C8B: 85 01    sta $01
-5C8D: 20 AE 62 jsr $62ae
+5C8D: 20 AE 62 jsr move_player_62ae
 5C90: 4C DA 5C jmp $5cda
 5C93: A5 56    lda $56
 5C95: 29 40    and #$40
@@ -483,6 +484,7 @@ directions_table_b3dc = $b3dc
 5E5C: A5 00    lda $00
 5E5E: 0A       asl a
 5E5F: AA       tax
+; reached when player is serving
 5E60: BD 0E 03 lda $030e, x
 5E63: 09 01    ora #$01
 5E65: 9D 0E 03 sta $030e, x
@@ -507,12 +509,12 @@ directions_table_b3dc = $b3dc
 5E8E: A5 53    lda $53
 5E90: C9 01    cmp #$01
 5E92: F0 07    beq $5e9b
-5E94: C9 03    cmp #$03
-5E96: B0 FE    bcs $5e96
+5E94: C9 03    cmp #$03			; [disabled]
+5E96: B0 FE    bcs $5e96		; [bogus infinite loop] [disabled]
 5E98: 4C 4E 5F jmp $5f4e
 5E9B: B5 54    lda $54, x
-5E9D: C9 11    cmp #$11
-5E9F: B0 FE    bcs $5e9f
+5E9D: C9 11    cmp #$11			; [disabled]
+5E9F: B0 FE    bcs $5e9f		; [bogus infinite loop] [disabled]
 5EA1: 0A       asl a
 5EA2: A8       tay
 5EA3: B9 B0 5E lda jump_table_5eb0, y
@@ -582,6 +584,7 @@ directions_table_b3dc = $b3dc
 5F60: 4C 5C 5E jmp $5e5c
 5F63: A9 07    lda #$07
 5F65: 4C 58 5E jmp $5e58
+
 5F68: 18       clc
 5F69: A5 56    lda $56
 5F6B: 45 01    eor $01
@@ -589,6 +592,7 @@ directions_table_b3dc = $b3dc
 5F6F: D0 01    bne $5f72
 5F71: 38       sec
 5F72: 60       rts
+
 5F73: A9 88    lda #$88
 5F75: CD 04 04 cmp $0404
 5F78: 90 1F    bcc $5f99
@@ -780,12 +784,14 @@ directions_table_b3dc = $b3dc
 60F0: B5 57    lda score_array_57, x
 60F2: C9 15    cmp #$15
 60F4: 60       rts
+
 60F5: 18       clc
 60F6: A5 56    lda $56
 60F8: 29 20    and #$20
 60FA: D0 01    bne $60fd
 60FC: 38       sec
 60FD: 60       rts
+
 60FE: 18       clc
 60FF: A6 00    ldx $00
 6101: B5 51    lda $51, x
@@ -796,6 +802,7 @@ directions_table_b3dc = $b3dc
 610B: D0 01    bne $610e
 610D: 38       sec
 610E: 60       rts
+
 610F: 18       clc
 6110: A4 00    ldy $00
 6112: B6 51    ldx $51, y
@@ -857,6 +864,7 @@ directions_table_b3dc = $b3dc
 6189: AD F9 03 lda $03f9
 618C: C5 1B    cmp $1b
 618E: 60       rts
+
 618F: A4 00    ldy $00
 6191: B6 51    ldx $51, y
 6193: BD 78 03 lda $0378, x
@@ -865,6 +873,7 @@ directions_table_b3dc = $b3dc
 619A: D0 01    bne $619d
 619C: 38       sec
 619D: 60       rts
+
 619E: A6 00    ldx $00
 61A0: B5 5F    lda $5f, x
 61A2: AA       tax
@@ -881,6 +890,7 @@ directions_table_b3dc = $b3dc
 61B7: 20 09 66 jsr $6609
 61BA: 9D BC 03 sta $03bc, x
 61BD: 60       rts
+
 61BE: A6 00    ldx $00
 61C0: B5 51    lda $51, x
 61C2: 49 01    eor #$01
@@ -898,6 +908,7 @@ directions_table_b3dc = $b3dc
 61D9: 20 09 66 jsr $6609
 61DC: C9 01    cmp #$01
 61DE: 60       rts
+
 61DF: A6 00    ldx $00
 61E1: B5 47    lda $47, x
 61E3: 0A       asl a
@@ -964,6 +975,7 @@ directions_table_b3dc = $b3dc
 6257: A6 4F    ldx $4f
 6259: 9D AC 03 sta $03ac, x
 625C: 60       rts
+
 625D: A5 56    lda $56
 625F: 29 0F    and #$0f
 6261: C9 02    cmp #$02
@@ -971,6 +983,7 @@ directions_table_b3dc = $b3dc
 6264: D0 01    bne $6267
 6266: 38       sec
 6267: 60       rts
+
 6268: 18       clc
 6269: AD E9 03 lda $03e9
 626C: 29 10    and #$10
@@ -978,6 +991,7 @@ directions_table_b3dc = $b3dc
 6270: D0 01    bne $6273
 6272: 38       sec
 6273: 60       rts
+
 6274: AD FA 03 lda $03fa
 6277: 45 01    eor $01
 6279: 29 10    and #$10
@@ -1006,6 +1020,7 @@ directions_table_b3dc = $b3dc
 62A1: C9 01    cmp #$01
 62A3: 60       rts
 
+move_player_62ae:
 62AE: A6 01    ldx $01
 62B0: BD 0E 03 lda $030e, x
 62B3: 29 01    and #$01
@@ -1014,6 +1029,7 @@ directions_table_b3dc = $b3dc
 62B8: BD 0E 03 lda $030e, x
 62BB: 29 02    and #$02
 62BD: F0 37    beq $62f6
+; opponents are reacting
 62BF: A5 56    lda $56
 62C1: 29 0F    and #$0f
 62C3: F0 20    beq $62e5
@@ -1035,7 +1051,6 @@ directions_table_b3dc = $b3dc
 62E5: AD B3 02 lda $02b3
 62E8: 30 2C    bmi $6316
 62EA: 60       rts
-
 62F6: A5 01    lda $01
 62F8: 0A       asl a
 62F9: 0A       asl a
@@ -1063,7 +1078,7 @@ directions_table_b3dc = $b3dc
 6328: B9 54 00 lda $0054, y
 632B: 0A       asl a
 632C: A8       tay
-632D: B9 3A 63 lda jump_table_633a, y
+632D: B9 3A 63 lda player_behaviour_jump_table_633a, y
 6330: 85 1B    sta $1b
 6332: B9 3B 63 lda $633b, y
 6335: 85 1C    sta $1c
@@ -1096,6 +1111,9 @@ directions_table_b3dc = $b3dc
 6396: A9 44    lda #$44
 6398: 85 1B    sta $1b
 639A: 4C C2 64 jmp $64c2
+; called when the 2nd player passes the ball for spikes
+; disable this and the opponent won't try to block any spikes
+decide_to_block_639d:
 639D: A5 56    lda $56
 639F: 29 0F    and #$0f
 63A1: C9 05    cmp #$05
@@ -1139,6 +1157,9 @@ directions_table_b3dc = $b3dc
 63F7: A9 42    lda #$42
 63F9: 85 1B    sta $1b
 63FB: 4C 94 65 jmp $6594
+; disable this and players don't go to forearm pass
+; to the other player
+move_to_ball_reception_63fe:
 63FE: A5 53    lda $53
 6400: C9 02    cmp #$02
 6402: B0 E7    bcs $63eb
@@ -1208,15 +1229,18 @@ directions_table_b3dc = $b3dc
 6491: A9 24    lda #$24
 6493: 85 1B    sta $1b
 6495: 4C 94 65 jmp $6594
+ball_touched_ground_6498:
 6498: A9 2E    lda #$2e
 649A: 85 1B    sta $1b
 649C: 4C B4 64 jmp $64b4
 649F: A9 30    lda #$30
 64A1: 85 1B    sta $1b
 64A3: 4C B4 64 jmp $64b4
+player_service_64a6:
 64A6: A9 32    lda #$32
 64A8: 85 1B    sta $1b
 64AA: 4C BB 64 jmp $64bb
+player_awaiting_service_64ad:
 64AD: A9 34    lda #$34
 64AF: 85 1B    sta $1b
 64B1: 4C B4 64 jmp $64b4
@@ -4276,6 +4300,7 @@ compare_player_positions_6923:
 8221: A9 FF    lda #$ff
 8223: 9D B8 03 sta $03b8, x
 8226: 4C 6C 70 jmp $706c
+
 8229: BD 73 03 lda $0373, x
 822C: DD 78 03 cmp $0378, x
 822F: D0 0F    bne $8240
@@ -4312,6 +4337,7 @@ compare_player_positions_6923:
 827A: 60       rts
 827B: 18       clc
 827C: 60       rts
+
 827D: AD EE 03 lda $03ee
 8280: DD B4 03 cmp $03b4, x
 8283: B0 02    bcs $8287
@@ -4319,6 +4345,7 @@ compare_player_positions_6923:
 8286: 60       rts
 8287: 18       clc
 8288: 60       rts
+
 8289: BD 73 03 lda $0373, x
 828C: 29 0F    and #$0f
 828E: C9 09    cmp #$09
@@ -4327,6 +4354,7 @@ compare_player_positions_6923:
 8293: 60       rts
 8294: 18       clc
 8295: 60       rts
+
 8296: 48       pha
 8297: 86 1B    stx $1b
 8299: A9 0D    lda #$0d
@@ -4370,6 +4398,7 @@ compare_player_positions_6923:
 82F6: 60       rts
 82F7: 38       sec
 82F8: 60       rts
+
 82F9: C9 03    cmp #$03
 82FB: D0 0D    bne $830a
 82FD: BD B0 03 lda $03b0, x
@@ -4395,6 +4424,7 @@ compare_player_positions_6923:
 832C: 60       rts
 832D: 18       clc
 832E: 60       rts
+
 832F: BD B4 03 lda $03b4, x
 8332: 18       clc
 8333: 7D B0 03 adc $03b0, x
@@ -4405,6 +4435,7 @@ compare_player_positions_6923:
 833E: 60       rts
 833F: 18       clc
 8340: 60       rts
+
 8341: BD B0 03 lda $03b0, x
 8344: 18       clc
 8345: 69 0E    adc #$0e
@@ -8496,6 +8527,7 @@ AE5B: A9 00    lda #$00
 AE5D: 9D F0 02 sta $02f0, x
 AE60: 60       rts
 
+most_of_players_moves_and_draw_ae6a:
 AE6A: A5 46    lda game_state_bits_46
 AE6C: 29 04    and #$04
 AE6E: F0 6F    beq $aedf
@@ -8554,7 +8586,7 @@ AEE2: 20 7D B0 jsr $b07d
 AEE5: A5 46    lda game_state_bits_46
 AEE7: 29 01    and #$01
 AEE9: D0 06    bne $aef1
-AEEB: 20 F6 5B jsr $5bf6
+AEEB: 20 F6 5B jsr move_players_on_field_5bf6
 AEEE: 20 66 66 jsr $6666
 AEF1: A9 00    lda #$00
 AEF3: 85 4C    sta $4c
@@ -8624,7 +8656,7 @@ AF7A: A5 38    lda $38
 AF7C: C9 10    cmp #$10
 AF7E: B0 02    bcs $af82
 AF80: 95 47    sta $47, x
-AF82: 20 F6 5B jsr $5bf6
+AF82: 20 F6 5B jsr move_players_on_field_5bf6
 AF85: A9 03    lda #$03
 AF87: 85 4C    sta $4c
 AF89: A6 4C    ldx $4c
@@ -15196,7 +15228,7 @@ F0AE: 20 7F DA jsr $da7f
 F0B1: A9 00    lda #$00
 F0B3: 8D DA 06 sta $06da
 F0B6: 20 45 A6 jsr $a645
-F0B9: 20 6A AE jsr $ae6a
+F0B9: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F0BC: 20 CC E6 jsr $e6cc
 F0BF: A2 04    ldx #$04
 F0C1: 86 4C    stx $4c
@@ -15290,7 +15322,7 @@ F17F: A9 00    lda #$00
 F181: 8D DA 06 sta $06da
 F184: 8D F5 07 sta timer_07f5
 F187: 20 45 A6 jsr $a645
-F18A: 20 6A AE jsr $ae6a
+F18A: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F18D: 20 CC E6 jsr $e6cc
 F190: A2 04    ldx #$04
 F192: 86 4C    stx $4c
@@ -15672,7 +15704,7 @@ F4CE: F0 03    beq $f4d3
 F4D0: 4C 71 F6 jmp $f671
 F4D3: 20 EF D8 jsr $d8ef
 F4D6: 20 1A CE jsr $ce1a
-F4D9: 20 6A AE jsr $ae6a
+F4D9: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F4DC: 20 FA B9 jsr $b9fa
 F4DF: 20 E1 CD jsr $cde1
 F4E2: 20 45 A6 jsr $a645
@@ -16110,27 +16142,27 @@ jump_table_5eb0:
 	dc.w	$5eda	; $5eca
 	dc.w	$5f32	; $5ecc
 	dc.w	$5eda	; $5ece
-jump_table_633a:
+player_behaviour_jump_table_633a:
 	dc.w	$6362	; $633a
 	dc.w	$6381	; $633c
 	dc.w	$6388	; $633e
 	dc.w	$638f	; $6340
 	dc.w	$6396	; $6342
-	dc.w	$639d	; $6344
+	dc.w	decide_to_block_639d	; $6344
 	dc.w	$63b3	; $6346
 	dc.w	$63c5	; $6348
 	dc.w	$63d4	; $634a
-	dc.w	$63fe	; $634c
+	dc.w	move_to_ball_reception_63fe	; $634c
 	dc.w	$6337	; $634e
 	dc.w	$6422	; $6350
 	dc.w	$6453	; $6352
 	dc.w	$647d	; $6354
 	dc.w	$63d4	; $6356
-	dc.w	$63fe	; $6358
-	dc.w	$6498	; $635a
+	dc.w	move_to_ball_reception_63fe	; $6358
+	dc.w	ball_touched_ground_6498	; $635a
 	dc.w	$649f	; $635c
-	dc.w	$64a6	; $635e
-	dc.w	$64ad	; $6360
+	dc.w	player_service_64a6	; $635e
+	dc.w	player_awaiting_service_64ad	; $6360
 jump_table_66ee:
 	dc.w	$67d9	; $66ee
 	dc.w	$67c7	; $66f0
