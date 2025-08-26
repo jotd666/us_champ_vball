@@ -29,6 +29,49 @@ input_write_dict = {
 "scrolly_lo_100e":"set_scrolly_lo",
 "scrollx_hi_1008":"set_scrollx_hi",
 }
+routines_returning_carry = {
+            0x5f68,   # very simple
+            0x5f73,   # 4x fixed as there's 2 rts that rely on cmp result (uninverted!)
+            0x6274,   # very simple
+            0x6037,   # very simple
+            0x60be,   # inverted flags in the end
+            0x6280,   # inverted flags in the end
+            0x6268,   # very simple
+            0x60f5,   # very simple
+            0x60fe,   # very simple
+            0x610f,   # inverted flags in the end
+            0x618f,   # very simple
+            0x61be,   # inverted flags in the end
+            0x625d,   # very simple
+            0x8229,   # complex but explict C flag set/clr in the end
+            0x827d,   # very simple
+            0x8289,   # very simple
+            0x8296,   # complex but explict C flag set/clr in the end
+            0x82ea,   # very simple
+            0x82f9,   # very simple
+            0x8323,   # very simple
+            0x832f,   # very simple
+            0x8350,  # very simple
+            0x835e,  # very simple
+            0x8369,  # very simple
+            0x83a0,  # big but explict C flag set/clr in the end
+            0x83e0,  # simple
+            0x83fa,  # complex but ok
+            0x8429,  # very simple
+            0x843e,  # big but one exit with SET/CLR
+            0x846b,  # big but one exit with SET/CLR
+            0x90b0,  # simple
+            0x90c9,  # complex but ok
+            0x90f3,  # simple
+            0x91d8,  # fixed to de-optimize clc+bcc
+            0xa0e4,  # fixed to de-optimize sec+bcs
+            0xa215,  # complex but ok
+            0xb17c,  # complex but ok
+            0xb2ed,  # very complex with jump to b1e8 but OK
+            0xb394,  # complex with a jump to b1e8 but OK
+            0xb40f,  # fixed to clear carry after cmp + rts in b429
+            0xb42a,  # fixed to de-optimize sec+bcs
+            }
 
 def get_line_address(line):
     try:
@@ -148,8 +191,9 @@ with open(source_dir / "conv.s") as f:
             # disable flip screen code
             line = change_instruction("rts",lines,i)
 
-        if optimizer_on and line_address in {0x5f78,0x5f7f}:
+        if optimizer_on and line_address in {0x5f78,0x5f7f,0x600b,0x6034}:  # line of bcc
             # invert flags in l_5f73 as C is used in function return
+            lines[i-1] = ""   # remove comment
             line = "\tINVERT_XC_FLAGS\n"+line.replace("bcs","bcc").replace("jcs","jcc")
 
         if line_address == 0xe707:
@@ -227,49 +271,7 @@ with open(source_dir / "conv.s") as f:
             toks = lines[i-2].split()
             addr = int(toks[1].split("_")[-1],16)
             # if routine is checked manually / fixed then remove error
-            if addr in {
-            0x5f68,   # very simple
-            0x5f73,   # fixed as there's an rts that relies on cmp result (uninverted!)
-            0x6274,   # very simple
-            0x6037,   # very simple
-            0x60be,   # inverted flags in the end
-            0x6280,   # inverted flags in the end
-            0x6268,   # very simple
-            0x60f5,   # very simple
-            0x60fe,   # very simple
-            0x610f,   # inverted flags in the end
-            0x618f,   # very simple
-            0x61be,   # inverted flags in the end
-            0x625d,   # very simple
-            0x8229,   # complex but explict C flag set/clr in the end
-            0x827d,   # very simple
-            0x8289,   # very simple
-            0x8296,   # complex but explict C flag set/clr in the end
-            0x82ea,   # very simple
-            0x82f9,   # very simple
-            0x8323,   # very simple
-            0x832f,   # very simple
-            0x8350,  # very simple
-            0x835e,  # very simple
-            0x8369,  # very simple
-            0x83a0,  # big but explict C flag set/clr in the end
-            0x83e0,  # simple
-            0x83fa,  # complex but ok
-            0x8429,  # very simple
-            0x843e,  # big but one exit with SET/CLR
-            0x846b,  # big but one exit with SET/CLR
-            0x90b0,  # simple
-            0x90c9,  # complex but ok
-            0x90f3,  # simple
-            0x91d8,  # fixed to de-optimize clc+bcc
-            0xa0e4,  # fixed to de-optimize sec+bcs
-            0xa215,  # complex but ok
-            0xb17c,  # complex but ok
-            0xb2ed,  # very complex with jump to b1e8 but OK
-            0xb394,  # complex with a jump to b1e8 but OK
-            0xb40f,  # fixed to clear carry after cmp + rts in b429
-            0xb42a,  # fixed to de-optimize sec+bcs
-            }:
+            if addr in routines_returning_carry:
                 line = remove_error(line)
             else:
                 routines_to_check_for_carry.add(addr)

@@ -1,7 +1,6 @@
 - crashing after a while
-- A.I. is wrong: opponents don't catch the ball, 62BF never reached!
-  5E60: writes to 30E, 310 but never writes 03 to 310 (with fixed random)
-  on amiga, does that in MAME!
+- A.I. is wrong: opponents don't catch the ball, 62BF now reached
+- ball position completelg off (too far) after serve
   
 - time: bcd doesn't seem to work
 - select screen: no timer, game starts immediately!
@@ -14,7 +13,8 @@
   - always add INVERT_XC_FLAGS after a cmp
   - ...
   (and remove fixes from post process)
-  
+- alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
+
 - rip sounds
 
 - flashing sprites (no dblbuf) but dblbuf crashes!!
@@ -33,15 +33,13 @@
   hopefully it's enough
 
 
-- implement scrollx with OCS setup ATM (scroll table = 16)
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
 
 - cheat: level select
 
-- cli/sei: interruptions not enabled
-- better bank switching if too frequent
+- better bank switching if too frequent (no copy, special GET_BANK_ADDRESS macro)
 
 debug bankswitch change on MAME (22D is the copy in readable memory):
 doesn't work as 22D is sometimes updated BEFORE bankswitch

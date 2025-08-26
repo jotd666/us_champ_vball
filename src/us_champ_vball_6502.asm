@@ -143,6 +143,11 @@ random_gen_2e = $2e
 random_index_2b = $2b
 random_index_2d = $2d
 score_array_57 = $57
+ball_logical_x_93 = $93
+player_logical_y_b9 = $b9
+ball_side_a1 = $a1
+; != 0 only when going well out of the field
+ball_kind_of_z_cb = $cb
 
 ; seem to have only 0 and $5A as values
 toggle_timer_2f = $2f
@@ -1699,7 +1704,7 @@ player_awaiting_service_64ad:
 68BF: 6A       ror a
 68C0: 85 29    sta $29
 68C2: 38       sec
-68C3: A5 93    lda $93
+68C3: A5 93    lda ball_logical_x_93
 68C5: E9 C8    sbc #$c8
 68C7: 85 28    sta $28
 68C9: 06 1B    asl $1b
@@ -1727,7 +1732,7 @@ player_awaiting_service_64ad:
 68ED: 79 0C 69 adc $690c, y
 68F0: 85 2A    sta $2a
 68F2: 38       sec
-68F3: A5 BD    lda $bd
+68F3: A5 BD    lda ball_logical_y_bd
 68F5: E5 2A    sbc $2a
 68F7: 45 29    eor $29
 68F9: 29 80    and #$80
@@ -6235,7 +6240,7 @@ callback_93e7:
 9497: C9 04    cmp #$04
 9499: 90 49    bcc $94e4
 949B: A0 00    ldy #$00
-949D: A5 BD    lda $bd
+949D: A5 BD    lda ball_logical_y_bd
 949F: D5 B9    cmp player_logical_y_b9, x
 94A1: B0 02    bcs $94a5
 94A3: A0 01    ldy #$01
@@ -7716,7 +7721,7 @@ A639: 8A       txa
 A63A: 48       pha
 A63B: 98       tya
 A63C: 48       pha
-A63D: 20 B5 E1 jsr $e1b5
+A63D: 20 B5 E1 jsr display_sprites_e1b5
 A640: 68       pla
 A641: A8       tay
 A642: 68       pla
@@ -7762,7 +7767,7 @@ A699: 09 01    ora #$01
 A69B: 9D 3A 02 sta $023a, x
 A69E: 8A       txa
 A69F: 48       pha
-A6A0: 20 B5 E1 jsr $e1b5
+A6A0: 20 B5 E1 jsr display_sprites_e1b5
 A6A3: 68       pla
 A6A4: AA       tax
 A6A5: 4C 5D A6 jmp $a65d
@@ -7796,7 +7801,7 @@ A6E2: 09 01    ora #$01
 A6E4: 9D 3A 02 sta $023a, x
 A6E7: 8A       txa
 A6E8: 48       pha
-A6E9: 20 B5 E1 jsr $e1b5
+A6E9: 20 B5 E1 jsr display_sprites_e1b5
 A6EC: 68       pla
 A6ED: AA       tax
 A6EE: FE D6 02 inc $02d6, x
@@ -7835,15 +7840,15 @@ A756: 20 71 A8 jsr $a871
 A759: A9 00    lda #$00
 A75B: 9D 54 02 sta $0254, x
 A75E: A0 84    ldy #$84
-A760: A5 A1    lda $a1
+A760: A5 A1    lda ball_side_a1
 A762: D0 06    bne $a76a
-A764: A5 93    lda $93
+A764: A5 93    lda ball_logical_x_93
 A766: C9 C0    cmp #$c0
 A768: 90 0E    bcc $a778
 A76A: A0 85    ldy #$85
-A76C: A5 A1    lda $a1
+A76C: A5 A1    lda ball_side_a1
 A76E: F0 06    beq $a776
-A770: A5 93    lda $93
+A770: A5 93    lda ball_logical_x_93
 A772: C9 40    cmp #$40
 A774: B0 02    bcs $a778
 A776: A0 80    ldy #$80
@@ -7872,7 +7877,7 @@ A7A8: F0 08    beq $a7b2
 A7AA: BD 3A 02 lda $023a, x
 A7AD: 09 01    ora #$01
 A7AF: 9D 3A 02 sta $023a, x
-A7B2: 20 B5 E1 jsr $e1b5
+A7B2: 20 B5 E1 jsr display_sprites_e1b5
 A7B5: 4C 48 A7 jmp $a748
 A7B8: BD 1A 03 lda $031a, x
 A7BB: 30 03    bmi $a7c0
@@ -7910,7 +7915,7 @@ A803: BD F0 02 lda $02f0, x
 A806: C9 02    cmp #$02
 A808: F0 03    beq $a80d
 A80A: FE F0 02 inc $02f0, x
-A80D: 20 B5 E1 jsr $e1b5
+A80D: 20 B5 E1 jsr display_sprites_e1b5
 A810: 4C 48 A7 jmp $a748
 
 A816: BD 1A 03 lda $031a, x
@@ -7949,7 +7954,7 @@ A861: BD F0 02 lda $02f0, x
 A864: C9 02    cmp #$02
 A866: F0 03    beq $a86b
 A868: FE F0 02 inc $02f0, x
-A86B: 20 B5 E1 jsr $e1b5
+A86B: 20 B5 E1 jsr display_sprites_e1b5
 A86E: 4C 48 A7 jmp $a748
 A871: BD 1A 03 lda $031a, x
 A874: 09 80    ora #$80
@@ -8161,12 +8166,12 @@ AA3C: 10 03    bpl $aa41
 AA3E: 18       clc
 AA3F: 69 FF    adc #$ff
 AA41: 85 03    sta $03
-AA43: A5 BD    lda $bd
+AA43: A5 BD    lda ball_logical_y_bd
 AA45: D5 B9    cmp player_logical_y_b9, x
 AA47: B0 14    bcs $aa5d
 AA49: B5 B9    lda player_logical_y_b9, x
 AA4B: 38       sec
-AA4C: E5 BD    sbc $bd
+AA4C: E5 BD    sbc ball_logical_y_bd
 AA4E: 85 1B    sta $1b
 AA50: A5 02    lda unpack_mode_02
 AA52: 38       sec
@@ -8619,9 +8624,11 @@ AF25: 9D 0E 03 sta $030e, x
 AF28: 4C 39 AF jmp $af39
 AF2B: BD 0A 03 lda $030a, x
 AF2E: 30 06    bmi $af36
+; commenting this freezes the game
 AF30: 20 2D 70 jsr $702d
 AF33: 4C 39 AF jmp $af39
 AF36: 20 D8 B0 jsr $b0d8
+; commenting this freezes the game
 AF39: 20 30 91 jsr $9130
 AF3C: A6 4C    ldx $4c
 AF3E: BD 0A 03 lda $030a, x
@@ -8636,7 +8643,7 @@ AF4E: 30 08    bmi $af58
 AF50: BD 3A 02 lda $023a, x
 AF53: 09 40    ora #$40
 AF55: 9D 3A 02 sta $023a, x
-AF58: 20 B5 E1 jsr $e1b5
+AF58: 20 B5 E1 jsr display_sprites_e1b5
 AF5B: E6 4C    inc $4c
 AF5D: A5 4C    lda $4c
 AF5F: C9 04    cmp #$04
@@ -8725,10 +8732,10 @@ B00D: A9 40    lda #$40
 B00F: 85 00    sta $00
 B011: B5 8F    lda player_logical_x_8f, x
 B013: 38       sec
-B014: E5 93    sbc $93
+B014: E5 93    sbc ball_logical_x_93
 B016: 85 10    sta screen_source_pointer_0010
 B018: B5 9D    lda player_side_9d, x
-B01A: E5 A1    sbc $a1
+B01A: E5 A1    sbc ball_side_a1
 B01C: 85 11    sta $11
 B01E: 10 09    bpl $b029
 B020: A5 00    lda $00
@@ -8742,10 +8749,10 @@ B02F: A9 FF    lda #$ff
 B031: 9D 3B 03 sta $033b, x
 B034: B5 B9    lda player_logical_y_b9, x
 B036: 38       sec
-B037: E5 BD    sbc $bd
+B037: E5 BD    sbc ball_logical_y_bd
 B039: 85 10    sta screen_source_pointer_0010
 B03B: B5 C7    lda $c7, x
-B03D: E5 CB    sbc $cb
+B03D: E5 CB    sbc ball_kind_of_z_cb
 B03F: 85 11    sta $11
 B041: 10 09    bpl $b04c
 B043: A5 00    lda $00
@@ -8759,7 +8766,7 @@ B052: A9 FF    lda #$ff
 B054: 9D 3F 03 sta $033f, x
 B057: B5 E3    lda $e3, x
 B059: 38       sec
-B05A: E5 E7    sbc $e7
+B05A: E5 E7    sbc ball_logical_z_e7
 B05C: 85 10    sta screen_source_pointer_0010
 B05E: B5 F1    lda $f1, x
 B060: E5 F5    sbc $f5
@@ -8928,7 +8935,7 @@ B1D3: 10 27    bpl $b1fc
 B1D5: A5 F5    lda $f5
 B1D7: 30 0C    bmi $b1e5
 B1D9: D0 06    bne $b1e1
-B1DB: A5 E7    lda $e7
+B1DB: A5 E7    lda ball_logical_z_e7
 B1DD: C9 38    cmp #$38
 B1DF: 90 04    bcc $b1e5
 B1E1: A9 0D    lda #$0d
@@ -9853,7 +9860,7 @@ B979: 68       pla
 B97A: A8       tay
 B97B: 60       rts
 
-
+ball_movement_and_draw_b9fa:
 B9FA: A5 46    lda game_state_bits_46
 B9FC: 29 08    and #$08
 B9FE: D0 79    bne $ba79
@@ -9861,7 +9868,7 @@ BA00: A9 04    lda #$04
 BA02: 85 4C    sta $4c
 BA04: A9 16    lda #$16
 BA06: 85 69    sta $69
-BA08: 20 7A BA jsr $ba7a
+BA08: 20 7A BA jsr move_ball_ba7a
 BA0B: A6 4F    ldx $4f
 BA0D: 30 07    bmi $ba16
 BA0F: BD 0E 03 lda $030e, x
@@ -9871,20 +9878,21 @@ BA16: 20 BA BC jsr $bcba
 BA19: BD 3E 02 lda $023e, x
 BA1C: 09 01    ora #$01
 BA1E: 9D 3E 02 sta $023e, x
-BA21: A5 E7    lda $e7
+BA21: A5 E7    lda ball_logical_z_e7
 BA23: 48       pha
 BA24: 18       clc
 BA25: 69 08    adc #$08
-BA27: 85 E7    sta $e7
+BA27: 85 E7    sta ball_logical_z_e7
 BA29: A5 F5    lda $f5
 BA2B: 48       pha
 BA2C: 69 00    adc #$00
 BA2E: 85 F5    sta $f5
-BA30: 20 B5 E1 jsr $e1b5
+; display ball sprite
+BA30: 20 B5 E1 jsr display_sprites_e1b5
 BA33: 68       pla
 BA34: 85 F5    sta $f5
 BA36: 68       pla
-BA37: 85 E7    sta $e7
+BA37: 85 E7    sta ball_logical_z_e7
 BA39: A5 4C    lda $4c
 BA3B: 20 1F B7 jsr $b71f
 BA3E: 8D 77 03 sta $0377
@@ -9912,6 +9920,8 @@ BA72: D0 05    bne $ba79
 BA74: A9 36    lda #$36
 BA76: 20 B8 D7 jsr queue_sound_d7b8
 BA79: 60       rts
+
+move_ball_ba7a:
 BA7A: AD E0 03 lda $03e0
 BA7D: 0A       asl a
 BA7E: A8       tay
@@ -9921,8 +9931,7 @@ BA84: B9 8D BA lda $ba8d, y
 BA87: 85 11    sta $11
 BA89: 6C 10 00 jmp ($0010)        ; [indirect_jump]
 
-BAA8: AE BA 11 ldx $11ba
-BAAB: BC 97 BC ldy $bc97, x
+unknown_ball_behaviour_baae:
 BAAE: AD E0 03 lda $03e0
 BAB1: C9 08    cmp #$08
 BAB3: D0 13    bne $bac8
@@ -9936,23 +9945,23 @@ BAC5: 8D 99 02 sta $0299
 BAC8: 20 12 B6 jsr $b612
 BACB: A5 F5    lda $f5
 BACD: 30 07    bmi $bad6
-BACF: 05 E7    ora $e7
+BACF: 05 E7    ora ball_logical_z_e7
 BAD1: F0 03    beq $bad6
 BAD3: 4C A9 BB jmp $bba9
 BAD6: EE 0F 04 inc $040f
-BAD9: A5 E7    lda $e7
+BAD9: A5 E7    lda ball_logical_z_e7
 BADB: 49 FF    eor #$ff
 BADD: 18       clc
 BADE: 69 01    adc #$01
 BAE0: 18       clc
-BAE1: 65 BD    adc $bd
-BAE3: 85 BD    sta $bd
-BAE5: A5 CB    lda $cb
+BAE1: 65 BD    adc ball_logical_y_bd
+BAE3: 85 BD    sta ball_logical_y_bd
+BAE5: A5 CB    lda ball_kind_of_z_cb
 BAE7: 69 00    adc #$00
-BAE9: 85 CB    sta $cb
+BAE9: 85 CB    sta ball_kind_of_z_cb
 BAEB: A9 00    lda #$00
 BAED: 85 D9    sta $d9
-BAEF: 85 E7    sta $e7
+BAEF: 85 E7    sta ball_logical_z_e7
 BAF1: 85 F5    sta $f5
 BAF3: A9 00    lda #$00
 BAF5: 8D A6 02 sta $02a6
@@ -10010,16 +10019,16 @@ BB6C: 20 B8 D7 jsr queue_sound_d7b8
 BB6F: 4C A9 BB jmp $bba9
 BB72: C9 03    cmp #$03
 BB74: B0 1D    bcs $bb93
-BB76: A5 93    lda $93
+BB76: A5 93    lda ball_logical_x_93
 BB78: 38       sec
 BB79: E9 08    sbc #$08
 BB7B: 85 9C    sta $9c
-BB7D: A5 A1    lda $a1
+BB7D: A5 A1    lda ball_side_a1
 BB7F: E9 00    sbc #$00
 BB81: 85 AA    sta $aa
-BB83: A5 BD    lda $bd
+BB83: A5 BD    lda ball_logical_y_bd
 BB85: 85 C6    sta $c6
-BB87: A5 CB    lda $cb
+BB87: A5 CB    lda ball_kind_of_z_cb
 BB89: 85 D4    sta $d4
 BB8B: A9 0D    lda #$0d
 BB8D: 20 1F B7 jsr $b71f
@@ -10063,10 +10072,11 @@ BBE7: 09 01    ora #$01
 BBE9: 8D 3E 02 sta $023e
 BBEC: 60       rts
 
+ball_in_air_after_spike_bbf5:
 BBF5: 20 12 B6 jsr $b612
 BBF8: A5 F5    lda $f5
 BBFA: 30 04    bmi $bc00
-BBFC: 05 E7    ora $e7
+BBFC: 05 E7    ora ball_logical_z_e7
 BBFE: D0 03    bne $bc03
 BC00: 4C D6 BA jmp $bad6
 
@@ -10076,6 +10086,8 @@ BC08: C9 03    cmp #$03
 BC0A: 90 02    bcc $bc0e
 BC0C: A0 02    ldy #$02
 BC0E: 4C AB BB jmp $bbab
+
+ball_on_ground_bc11:
 BC11: AD 12 04 lda $0412
 BC14: F0 05    beq $bc1b
 BC16: CE 12 04 dec $0412
@@ -10145,35 +10157,39 @@ BC91: C9 02    cmp #$02
 BC93: B0 00    bcs $bc95
 BC95: D8       cld
 BC96: 60       rts
+
+
+ball_before_serve_bc97:
+; steal the coords on the player who serves
 BC97: A6 4F    ldx $4f
 BC99: B5 8F    lda player_logical_x_8f, x
-BC9B: 85 93    sta $93
+BC9B: 85 93    sta ball_logical_x_93
 BC9D: B5 9D    lda player_side_9d, x
-BC9F: 85 A1    sta $a1
+BC9F: 85 A1    sta ball_side_a1
 BCA1: B5 B9    lda player_logical_y_b9, x
 BCA3: 38       sec
 BCA4: E9 01    sbc #$01
-BCA6: 85 BD    sta $bd
+BCA6: 85 BD    sta ball_logical_y_bd
 BCA8: B5 C7    lda $c7, x
 BCAA: E9 00    sbc #$00
-BCAC: 85 CB    sta $cb
+BCAC: 85 CB    sta ball_kind_of_z_cb
 BCAE: B5 E3    lda $e3, x
 BCB0: 18       clc
 BCB1: 69 18    adc #$18
-BCB3: 85 E7    sta $e7
+BCB3: 85 E7    sta ball_logical_z_e7
 BCB5: A9 00    lda #$00
 BCB7: 85 F5    sta $f5
 BCB9: 60       rts
-BCBA: A5 93    lda $93
+BCBA: A5 93    lda ball_logical_x_93
 BCBC: 38       sec
 BCBD: E9 08    sbc #$08
 BCBF: 85 9C    sta $9c
-BCC1: A5 A1    lda $a1
+BCC1: A5 A1    lda ball_side_a1
 BCC3: E9 00    sbc #$00
 BCC5: 85 AA    sta $aa
-BCC7: A5 BD    lda $bd
+BCC7: A5 BD    lda ball_logical_y_bd
 BCC9: 85 C6    sta $c6
-BCCB: A5 CB    lda $cb
+BCCB: A5 CB    lda ball_kind_of_z_cb
 BCCD: 85 D4    sta $d4
 BCCF: A9 0D    lda #$0d
 BCD1: 20 1F B7 jsr $b71f
@@ -10186,7 +10202,7 @@ BCE2: 4D 10 04 eor $0410
 BCE5: 29 10    and #$10
 BCE7: D0 03    bne $bcec
 BCE9: 4C 60 BD jmp $bd60
-BCEC: A5 BD    lda $bd
+BCEC: A5 BD    lda ball_logical_y_bd
 BCEE: C9 18    cmp #$18
 BCF0: 90 F7    bcc $bce9
 BCF2: C9 78    cmp #$78
@@ -10207,13 +10223,13 @@ BD15: A9 00    lda #$00
 BD17: 8D A6 02 sta $02a6
 BD1A: 8D B3 02 sta $02b3
 BD1D: AD E3 03 lda $03e3
-BD20: 85 93    sta $93
+BD20: 85 93    sta ball_logical_x_93
 BD22: AD E4 03 lda $03e4
-BD25: 85 A1    sta $a1
+BD25: 85 A1    sta ball_side_a1
 BD27: AD E5 03 lda $03e5
-BD2A: 85 BD    sta $bd
+BD2A: 85 BD    sta ball_logical_y_bd
 BD2C: AD E6 03 lda $03e6
-BD2F: 85 CB    sta $cb
+BD2F: 85 CB    sta ball_kind_of_z_cb
 BD31: AD 10 04 lda $0410
 BD34: 8D 16 04 sta $0416
 BD37: AD E0 03 lda $03e0
@@ -10233,17 +10249,17 @@ BD55: A9 FF    lda #$ff
 BD57: 8D 11 04 sta $0411
 BD5A: 20 88 C5 jsr $c588
 BD5D: 20 B9 C7 jsr $c7b9
-BD60: A5 E7    lda $e7
+BD60: A5 E7    lda ball_logical_z_e7
 BD62: 8D E7 03 sta $03e7
 BD65: A5 F5    lda $f5
 BD67: 8D E8 03 sta $03e8
-BD6A: A5 93    lda $93
+BD6A: A5 93    lda ball_logical_x_93
 BD6C: 8D E3 03 sta $03e3
-BD6F: A5 A1    lda $a1
+BD6F: A5 A1    lda ball_side_a1
 BD71: 8D E4 03 sta $03e4
-BD74: A5 BD    lda $bd
+BD74: A5 BD    lda ball_logical_y_bd
 BD76: 8D E5 03 sta $03e5
-BD79: A5 CB    lda $cb
+BD79: A5 CB    lda ball_kind_of_z_cb
 BD7B: 8D E6 03 sta $03e6
 BD7E: AD 16 04 lda $0416
 BD81: 8D 10 04 sta $0410
@@ -10372,7 +10388,7 @@ BE9C: 85 56    sta $56
 BE9E: A9 40    lda #$40
 BEA0: 8D C0 02 sta $02c0
 BEA3: A6 4C    ldx $4c
-BEA5: A5 E7    lda $e7
+BEA5: A5 E7    lda ball_logical_z_e7
 BEA7: 38       sec
 BEA8: F5 E3    sbc $e3, x
 BEAA: C9 40    cmp #$40
@@ -10455,7 +10471,7 @@ BF5B: A6 4C    ldx $4c
 BF5D: A5 56    lda $56
 BF5F: 1D 32 C0 ora $c032, x
 BF62: 85 56    sta $56
-BF64: 20 E7 C8 jsr $c8e7
+BF64: 20 E7 C8 jsr ball_trajectory_change_c8e7
 BF67: 20 F5 C9 jsr $c9f5
 BF6A: A6 4C    ldx $4c
 BF6C: BD 0A 03 lda $030a, x
@@ -10796,11 +10812,11 @@ C555: AD E0 03 lda $03e0
 C558: C9 0C    cmp #$0c
 C55A: F0 11    beq $c56d
 C55C: B5 B9    lda player_logical_y_b9, x
-C55E: 85 BD    sta $bd
+C55E: 85 BD    sta ball_logical_y_bd
 C560: B5 E3    lda $e3, x
 C562: 18       clc
 C563: 69 38    adc #$38
-C565: 85 E7    sta $e7
+C565: 85 E7    sta ball_logical_z_e7
 C567: B5 F1    lda $f1, x
 C569: 69 00    adc #$00
 C56B: 85 F5    sta $f5
@@ -10818,7 +10834,7 @@ C57F: 0A       asl a
 C580: 69 3C    adc #$3c
 C582: 8D 65 02 sta $0265
 C585: 4C F3 C0 jmp $c0f3
-C588: A5 E7    lda $e7
+C588: A5 E7    lda ball_logical_z_e7
 C58A: 85 10    sta screen_source_pointer_0010
 C58C: A5 F5    lda $f5
 C58E: 85 11    sta $11
@@ -11035,19 +11051,19 @@ C76C: A5 04    lda $04
 C76E: 18       clc
 C76F: 65 85    adc $85
 C771: A5 05    lda $05
-C773: 65 93    adc $93
+C773: 65 93    adc ball_logical_x_93
 C775: 85 05    sta $05
 C777: A5 06    lda $06
-C779: 65 A1    adc $a1
+C779: 65 A1    adc ball_side_a1
 C77B: 85 06    sta $06
 C77D: 60       rts
 C77E: A5 85    lda $85
 C780: 38       sec
 C781: E5 04    sbc $04
-C783: A5 93    lda $93
+C783: A5 93    lda ball_logical_x_93
 C785: E5 05    sbc $05
 C787: 85 05    sta $05
-C789: A5 A1    lda $a1
+C789: A5 A1    lda ball_side_a1
 C78B: E5 06    sbc $06
 C78D: 85 06    sta $06
 C78F: 60       rts
@@ -11057,19 +11073,19 @@ C795: A5 04    lda $04
 C797: 18       clc
 C798: 65 AF    adc $af
 C79A: A5 05    lda $05
-C79C: 65 BD    adc $bd
+C79C: 65 BD    adc ball_logical_y_bd
 C79E: 85 05    sta $05
 C7A0: A5 06    lda $06
-C7A2: 65 CB    adc $cb
+C7A2: 65 CB    adc ball_kind_of_z_cb
 C7A4: 85 06    sta $06
 C7A6: 60       rts
 C7A7: A5 AF    lda $af
 C7A9: 38       sec
 C7AA: E5 04    sbc $04
-C7AC: A5 BD    lda $bd
+C7AC: A5 BD    lda ball_logical_y_bd
 C7AE: E5 05    sbc $05
 C7B0: 85 05    sta $05
-C7B2: A5 CB    lda $cb
+C7B2: A5 CB    lda ball_kind_of_z_cb
 C7B4: E5 06    sbc $06
 C7B6: 85 06    sta $06
 C7B8: 60       rts
@@ -11215,6 +11231,8 @@ C8D1: 98       tya
 C8D2: 95 63    sta $63, x
 C8D4: 60       rts
 
+; called each time a player launches, serves, blocks, spikes... the ball
+ball_trajectory_change_c8e7:
 C8E7: A5 56    lda $56                                             
 C8E9: 29 10    and #$10                                            
 C8EC: 4A       lsr a
@@ -11236,11 +11254,11 @@ C905: 69 FF    adc #$ff
 C907: 8D 01 04 sta $0401
 C90A: A5 85    lda $85
 C90C: 85 00    sta $00
-C90E: A5 93    lda $93
+C90E: A5 93    lda ball_logical_x_93
 C910: 38       sec
 C911: ED 00 04 sbc $0400
 C914: 85 01    sta $01
-C916: A5 A1    lda $a1
+C916: A5 A1    lda ball_side_a1
 C918: ED 01 04 sbc $0401
 C91B: 85 02    sta unpack_mode_02
 C91D: 10 03    bpl $c922
@@ -11300,15 +11318,15 @@ C9A0: A5 04    lda $04
 C9A2: 18       clc
 C9A3: 65 AF    adc $af
 C9A5: A5 05    lda $05
-C9A7: 65 BD    adc $bd
+C9A7: 65 BD    adc ball_logical_y_bd
 C9A9: 85 14    sta multipurpose_14
 C9AB: A5 06    lda $06
-C9AD: 65 CB    adc $cb
+C9AD: 65 CB    adc ball_kind_of_z_cb
 C9AF: 85 15    sta $15
 C9B1: 60       rts
 C9B2: A5 D9    lda $d9
 C9B4: 85 00    sta $00
-C9B6: A5 E7    lda $e7
+C9B6: A5 E7    lda ball_logical_z_e7
 C9B8: 85 10    sta screen_source_pointer_0010
 C9BA: A5 F5    lda $f5
 C9BC: 85 11    sta $11
@@ -11358,10 +11376,10 @@ CA09: A5 85    lda $85
 CA0B: 38       sec
 CA0C: F5 81    sbc $81, x
 CA0E: 85 00    sta $00
-CA10: A5 93    lda $93
+CA10: A5 93    lda ball_logical_x_93
 CA12: F5 8F    sbc player_logical_x_8f, x
 CA14: 85 01    sta $01
-CA16: A5 A1    lda $a1
+CA16: A5 A1    lda ball_side_a1
 CA18: F5 9D    sbc player_side_9d, x
 CA1A: 85 02    sta unpack_mode_02
 CA1C: 10 03    bpl $ca21
@@ -11519,11 +11537,11 @@ CB8B: 20 60 D1 jsr $d160
 CB8E: 2C 7F 02 bit $027f
 CB91: 10 03    bpl $cb96
 CB93: 20 F0 CF jsr $cff0
-CB96: A5 93    lda $93
+CB96: A5 93    lda ball_logical_x_93
 CB98: 18       clc
 CB99: 65 05    adc $05
 CB9B: 85 05    sta $05
-CB9D: A5 A1    lda $a1
+CB9D: A5 A1    lda ball_side_a1
 CB9F: 65 06    adc $06
 CBA1: 85 06    sta $06
 CBA3: A5 9C    lda $9c
@@ -11533,13 +11551,13 @@ CBA8: 85 05    sta $05
 CBAA: A5 AA    lda $aa
 CBAC: E5 06    sbc $06
 CBAE: 85 06    sta $06
-CBB0: A5 93    lda $93
+CBB0: A5 93    lda ball_logical_x_93
 CBB2: 18       clc
 CBB3: 65 05    adc $05
-CBB5: 85 93    sta $93
-CBB7: A5 A1    lda $a1
+CBB5: 85 93    sta ball_logical_x_93
+CBB7: A5 A1    lda ball_side_a1
 CBB9: 65 06    adc $06
-CBBB: 85 A1    sta $a1
+CBBB: 85 A1    sta ball_side_a1
 CBBD: AD 8C 02 lda $028c
 CBC0: 85 10    sta screen_source_pointer_0010
 CBC2: AD 99 02 lda $0299
@@ -11558,11 +11576,11 @@ CBDD: 20 60 D1 jsr $d160
 CBE0: 2C 99 02 bit $0299
 CBE3: 10 03    bpl $cbe8
 CBE5: 20 F0 CF jsr $cff0
-CBE8: A5 BD    lda $bd
+CBE8: A5 BD    lda ball_logical_y_bd
 CBEA: 18       clc
 CBEB: 65 05    adc $05
 CBED: 85 05    sta $05
-CBEF: A5 CB    lda $cb
+CBEF: A5 CB    lda ball_kind_of_z_cb
 CBF1: 65 06    adc $06
 CBF3: 85 06    sta $06
 CBF5: A5 C6    lda $c6
@@ -11572,13 +11590,13 @@ CBFA: 85 05    sta $05
 CBFC: A5 D4    lda $d4
 CBFE: E5 06    sbc $06
 CC00: 85 06    sta $06
-CC02: A5 BD    lda $bd
+CC02: A5 BD    lda ball_logical_y_bd
 CC04: 18       clc
 CC05: 65 05    adc $05
-CC07: 85 BD    sta $bd
-CC09: A5 CB    lda $cb
+CC07: 85 BD    sta ball_logical_y_bd
+CC09: A5 CB    lda ball_kind_of_z_cb
 CC0B: 65 06    adc $06
-CC0D: 85 CB    sta $cb
+CC0D: 85 CB    sta ball_kind_of_z_cb
 CC0F: AD E0 03 lda $03e0
 CC12: C9 07    cmp #$07
 CC14: F0 08    beq $cc1e
@@ -11604,7 +11622,7 @@ CC3E: 20 60 D1 jsr $d160
 CC41: 2C B3 02 bit $02b3
 CC44: 10 03    bpl $cc49
 CC46: 20 F0 CF jsr $cff0
-CC49: A5 E7    lda $e7
+CC49: A5 E7    lda ball_logical_z_e7
 CC4B: 18       clc
 CC4C: 65 05    adc $05
 CC4E: 85 05    sta $05
@@ -11618,10 +11636,10 @@ CC5B: 85 05    sta $05
 CC5D: A5 FE    lda $fe
 CC5F: E5 06    sbc $06
 CC61: 85 06    sta $06
-CC63: A5 E7    lda $e7
+CC63: A5 E7    lda ball_logical_z_e7
 CC65: 18       clc
 CC66: 65 05    adc $05
-CC68: 85 E7    sta $e7
+CC68: 85 E7    sta ball_logical_z_e7
 CC6A: A5 F5    lda $f5
 CC6C: 65 06    adc $06
 CC6E: 85 F5    sta $f5
@@ -11654,7 +11672,7 @@ CCA8: 38       sec
 CCA9: E5 D9    sbc $d9
 CCAB: 85 10    sta screen_source_pointer_0010
 CCAD: A5 F0    lda $f0
-CCAF: E5 E7    sbc $e7
+CCAF: E5 E7    sbc ball_logical_z_e7
 CCB1: 85 11    sta $11
 CCB3: B0 0C    bcs $ccc1
 CCB5: 20 98 CF jsr $cf98
@@ -11682,27 +11700,27 @@ CCF7: 38       sec
 CCF8: E5 85    sbc $85
 CCFA: 8D 16 04 sta $0416
 CCFD: A5 9C    lda $9c
-CCFF: E5 93    sbc $93
+CCFF: E5 93    sbc ball_logical_x_93
 CD01: 8D 17 04 sta $0417
 CD04: A5 AA    lda $aa
-CD06: E5 A1    sbc $a1
+CD06: E5 A1    sbc ball_side_a1
 CD08: 8D 18 04 sta $0418
 CD0B: A5 B8    lda $b8
 CD0D: 38       sec
 CD0E: E5 AF    sbc $af
 CD10: 8D 19 04 sta $0419
 CD13: A5 C6    lda $c6
-CD15: E5 BD    sbc $bd
+CD15: E5 BD    sbc ball_logical_y_bd
 CD17: 8D 1A 04 sta $041a
 CD1A: A5 D4    lda $d4
-CD1C: E5 CB    sbc $cb
+CD1C: E5 CB    sbc ball_kind_of_z_cb
 CD1E: 8D 1B 04 sta $041b
 CD21: A5 E2    lda $e2
 CD23: 38       sec
 CD24: E5 D9    sbc $d9
 CD26: 8D 1C 04 sta $041c
 CD29: A5 F0    lda $f0
-CD2B: E5 E7    sbc $e7
+CD2B: E5 E7    sbc ball_logical_z_e7
 CD2D: 8D 1D 04 sta $041d
 CD30: A5 FE    lda $fe
 CD32: E5 F5    sbc $f5
@@ -13459,6 +13477,8 @@ E17E: A9 00    lda #$00
 E180: 20 DF D8 jsr set_bank_d8df
 E183: 60       rts
 
+; just display players (movement is handled somewhere else!)
+display_sprites_e1b5:
 E1B5: A9 01    lda #$01
 E1B7: 20 DF D8 jsr set_bank_d8df
 E1BA: A5 4C    lda $4c
@@ -13790,7 +13810,7 @@ E420: 0A       asl a
 E421: 85 01    sta $01
 E423: A9 0D    lda #$0d
 E425: 85 4C    sta $4c
-E427: 20 B5 E1 jsr $e1b5
+E427: 20 B5 E1 jsr display_sprites_e1b5
 E42A: 68       pla
 E42B: 85 4C    sta $4c
 E42D: A6 4C    ldx $4c
@@ -14426,12 +14446,12 @@ EA2A: D0 2D    bne $ea59
 EA2C: A5 46    lda game_state_bits_46
 EA2E: 29 02    and #$02
 EA30: D0 27    bne $ea59
-EA32: A5 E7    lda $e7
+EA32: A5 E7    lda ball_logical_z_e7
 EA34: 18       clc
-EA35: 65 BD    adc $bd
+EA35: 65 BD    adc ball_logical_y_bd
 EA37: 85 00    sta $00
 EA39: A5 F5    lda $f5
-EA3B: 65 CB    adc $cb
+EA3B: 65 CB    adc ball_kind_of_z_cb
 EA3D: 85 01    sta $01
 EA3F: A5 00    lda $00
 EA41: 18       clc
@@ -15190,14 +15210,14 @@ F05E: 8D E0 07 sta $07e0
 F061: A9 FF    lda #$ff
 F063: 8D E1 07 sta $07e1
 F066: A9 00    lda #$00
-F068: 85 CB    sta $cb
-F06A: 85 93    sta $93
-F06C: 85 E7    sta $e7
+F068: 85 CB    sta ball_kind_of_z_cb
+F06A: 85 93    sta ball_logical_x_93
+F06C: 85 E7    sta ball_logical_z_e7
 F06E: 85 F5    sta $f5
 F070: A9 01    lda #$01
-F072: 85 A1    sta $a1
+F072: 85 A1    sta ball_side_a1
 F074: A9 B0    lda #$b0
-F076: 85 BD    sta $bd
+F076: 85 BD    sta ball_logical_y_bd
 F078: A9 30    lda #$30
 F07A: 85 69    sta $69
 F07C: A9 89    lda #$89
@@ -15705,7 +15725,7 @@ F4D0: 4C 71 F6 jmp $f671
 F4D3: 20 EF D8 jsr $d8ef
 F4D6: 20 1A CE jsr $ce1a
 F4D9: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
-F4DC: 20 FA B9 jsr $b9fa
+F4DC: 20 FA B9 jsr ball_movement_and_draw_b9fa
 F4DF: 20 E1 CD jsr $cde1
 F4E2: 20 45 A6 jsr $a645
 F4E5: 20 E0 A2 jsr $a2e0
@@ -16406,25 +16426,23 @@ jump_table_b7a7:
 	dc.w	$b7b7	; $b7b3
 	dc.w	$b884	; $b7b5
 jump_table_ba8c:
-	dc.w	$baae	; $ba8c
-	dc.w	$baae	; $ba8e
-	dc.w	$baae	; $ba90
-	dc.w	$baae	; $ba92
-	dc.w	$baae	; $ba94
-	dc.w	$baae	; $ba96
-	dc.w	$baae	; $ba98
-	dc.w	$baae	; $ba9a
-	dc.w	$baae	; $ba9c
-	dc.w	$baae	; $ba9e
-	dc.w	$bbf5	; $baa0
-	dc.w	$bbf5	; $baa2
-	dc.w	$baae	; $baa4
-	dc.w	$baae	; $baa6
-	dc.w	$baae	; $baa8
-	dc.w	$bc11	; $baaa
-	dc.w	$bc97	; $baac
-	dc.w	$e0ad	; $baae
-	dc.w	$c903	; $bab0
+	dc.w	unknown_ball_behaviour_baae	; $ba8c
+	dc.w	unknown_ball_behaviour_baae	; $ba8e
+	dc.w	unknown_ball_behaviour_baae	; $ba90
+	dc.w	unknown_ball_behaviour_baae	; $ba92
+	dc.w	unknown_ball_behaviour_baae	; $ba94
+	dc.w	unknown_ball_behaviour_baae	; $ba96
+	dc.w	unknown_ball_behaviour_baae	; $ba98
+	dc.w	unknown_ball_behaviour_baae	; $ba9a
+	dc.w	unknown_ball_behaviour_baae	; $ba9c
+	dc.w	unknown_ball_behaviour_baae	; $ba9e
+	dc.w	ball_in_air_after_spike_bbf5	; $baa0
+	dc.w	ball_in_air_after_spike_bbf5	; $baa2
+	dc.w	unknown_ball_behaviour_baae	; $baa4
+	dc.w	unknown_ball_behaviour_baae	; $baa6
+	dc.w	unknown_ball_behaviour_baae	; $baa8
+	dc.w	ball_on_ground_bc11	; $baaa
+	dc.w	ball_before_serve_bc97	; $baac
 
 jump_table_be61:
 	dc.w	$c50e	; $be61
