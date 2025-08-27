@@ -126,7 +126,7 @@ MAX_SCORE = $10
 
 ; tried to name a few variables when reversing some bits. It's possible that
 ; the variables (specially zero page ones) are used for other purposes
-unpack_mode_02 = $02
+unpack_mode_and_misc_02 = $02
 unknown_07 = $07
 multipurpose_12 = $12
 multipurpose_13 = $13
@@ -142,10 +142,12 @@ random_gen_2c = $2c
 random_gen_2e = $2e
 random_index_2b = $2b
 random_index_2d = $2d
+current_object_index_4c = $4c
 score_array_57 = $57
 ball_logical_x_93 = $93
-player_logical_y_b9 = $b9
+ball_logical_y_bd = $bd
 ball_side_a1 = $a1
+ball_logical_z_e7 = $e7
 ; != 0 only when going well out of the field
 ball_kind_of_z_cb = $cb
 
@@ -154,12 +156,15 @@ toggle_timer_2f = $2f
 irq_07_counter_31 = $31
 game_playing_flag_36 = $36
 game_state_bits_46 = $46
-; x/y array of 4 players, not directly the sprites coords, the x/y coords
-; on the ground
-player_logical_x_8f = $8f
-player_logical_y_b9 = $b9
+; x/y/z array of 4 players, not directly the sprites coords, the logical coords
+; as the game uses a kind of isometric projection
+objects_logical_x_array_8f = $8f
+objects_logical_y_array_b9 = $b9
+objects_logical_z_array_e3 = $e3
+objects_x_speed_array_027b = $27b
+ball_x_speed_027f = $27f
 ; 0: left, 1: right, 4 values too
-player_side_9d = $9d
+objects_side_array_9d = $9d
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 player_1_controls_022e = $022e
@@ -628,10 +633,10 @@ move_players_on_field_5bf6:
 5FAA: A0 0D    ldy #$0d
 5FAC: AD 01 04 lda $0401
 5FAF: 9D 84 03 sta $0384, x
-5FB2: 99 9D 00 sta player_side_9d, y
+5FB2: 99 9D 00 sta objects_side_array_9d, y
 5FB5: AD 00 04 lda $0400
 5FB8: 9D 80 03 sta $0380, x
-5FBB: 99 8F 00 sta player_logical_x_8f, y
+5FBB: 99 8F 00 sta objects_logical_x_array_8f, y
 5FBE: A9 00    lda #$00
 5FC0: 9D 8C 03 sta $038c, x
 5FC3: 99 C7 00 sta $00c7, y
@@ -645,7 +650,7 @@ move_players_on_field_5bf6:
 5FD5: BD 2B 03 lda player_direction_032b, x
 5FD8: 48       pha
 5FD9: 8A       txa
-5FDA: 85 4C    sta $4c
+5FDA: 85 4C    sta current_object_index_4c
 5FDC: A9 0D    lda #$0d
 5FDE: 20 4A B4 jsr $b44a
 5FE1: 9D 2B 03 sta player_direction_032b, x
@@ -828,10 +833,10 @@ move_players_on_field_5bf6:
 612F: A0 0D    ldy #$0d
 6131: AD F6 03 lda $03f6
 6134: 9D 84 03 sta $0384, x
-6137: 99 9D 00 sta player_side_9d, y
+6137: 99 9D 00 sta objects_side_array_9d, y
 613A: AD F5 03 lda $03f5
 613D: 9D 80 03 sta $0380, x
-6140: 99 8F 00 sta player_logical_x_8f, y
+6140: 99 8F 00 sta objects_logical_x_array_8f, y
 6143: A9 00    lda #$00
 6145: 9D 8C 03 sta $038c, x
 6148: 99 C7 00 sta $00c7, y
@@ -845,7 +850,7 @@ move_players_on_field_5bf6:
 615A: BD 2B 03 lda player_direction_032b, x
 615D: 48       pha
 615E: 8A       txa
-615F: 85 4C    sta $4c
+615F: 85 4C    sta current_object_index_4c
 6161: A9 0D    lda #$0d
 6163: 20 4A B4 jsr $b44a
 6166: 9D 2B 03 sta player_direction_032b, x
@@ -1309,10 +1314,10 @@ player_awaiting_service_64ad:
 6528: A0 0D    ldy #$0d
 652A: AD F0 03 lda $03f0
 652D: 9D 84 03 sta $0384, x
-6530: 99 9D 00 sta player_side_9d, y
+6530: 99 9D 00 sta objects_side_array_9d, y
 6533: AD EF 03 lda $03ef
 6536: 9D 80 03 sta $0380, x
-6539: 99 8F 00 sta player_logical_x_8f, y
+6539: 99 8F 00 sta objects_logical_x_array_8f, y
 653C: A9 00    lda #$00
 653E: 9D 8C 03 sta $038c, x
 6541: 99 C7 00 sta $00c7, y
@@ -1320,7 +1325,7 @@ player_awaiting_service_64ad:
 6547: 9D 88 03 sta $0388, x
 654A: 99 B9 00 sta $00b9, y
 654D: 8A       txa
-654E: 85 4C    sta $4c
+654E: 85 4C    sta current_object_index_4c
 6550: A9 0D    lda #$0d
 6552: 20 4A B4 jsr $b44a
 6555: 9D 2B 03 sta player_direction_032b, x
@@ -1749,11 +1754,11 @@ compare_player_positions_6923:
 6928: A6 1B    ldx $1b
 692A: A4 1C    ldy $1c
 692C: 38       sec
-692D: B5 8F    lda player_logical_x_8f, x
-692F: F9 8F 00 sbc player_logical_x_8f, y
+692D: B5 8F    lda objects_logical_x_array_8f, x
+692F: F9 8F 00 sbc objects_logical_x_array_8f, y
 6932: 85 1B    sta $1b
-6934: B5 9D    lda player_side_9d, x
-6936: F9 9D 00 sbc player_side_9d, y
+6934: B5 9D    lda objects_side_array_9d, x
+6936: F9 9D 00 sbc objects_side_array_9d, y
 6939: F0 14    beq $694f
 693B: C9 FF    cmp #$ff
 693D: B0 07    bcs $6946
@@ -1766,7 +1771,7 @@ compare_player_positions_6923:
 694B: 69 01    adc #$01
 694D: 85 1B    sta $1b
 694F: 38       sec
-6950: B5 B9    lda player_logical_y_b9, x
+6950: B5 B9    lda objects_logical_y_array_b9, x
 6952: F9 B9 00 sbc $00b9, y
 6955: 85 1C    sta $1c
 6957: B5 C7    lda $c7, x
@@ -1783,7 +1788,7 @@ compare_player_positions_6923:
 696E: 69 01    adc #$01
 6970: 85 1C    sta $1c
 6972: 38       sec
-6973: B5 E3    lda $e3, x
+6973: B5 E3    lda objects_logical_z_array_e3, x
 6975: F9 E3 00 sbc $00e3, y
 6978: 85 1D    sta base_screen_pointer_list_001d
 697A: B5 F1    lda $f1, x
@@ -2154,9 +2159,9 @@ compare_player_positions_6923:
 6C76: A9 78    lda #$78
 6C78: 85 20    sta $20
 6C7A: 4C 54 6E jmp $6e54
-6C7D: B9 9D 00 lda player_side_9d, y
+6C7D: B9 9D 00 lda objects_side_array_9d, y
 6C80: 85 1B    sta $1b
-6C82: B9 8F 00 lda player_logical_x_8f, y
+6C82: B9 8F 00 lda objects_logical_x_array_8f, y
 6C85: 85 1C    sta $1c
 6C87: B9 B9 00 lda $00b9, y
 6C8A: 85 1E    sta $1e
@@ -2501,7 +2506,7 @@ compare_player_positions_6923:
 702F: 48       pha
 7030: 98       tya
 7031: 48       pha
-7032: A6 4C    ldx $4c
+7032: A6 4C    ldx current_object_index_4c
 7034: BD 0E 03 lda $030e, x
 7037: 29 40    and #$40
 7039: D0 29    bne $7064
@@ -4320,9 +4325,9 @@ compare_player_positions_6923:
 8244: 85 1C    sta $1c
 8246: A8       tay
 8247: BD 84 03 lda $0384, x
-824A: 99 9D 00 sta player_side_9d, y
+824A: 99 9D 00 sta objects_side_array_9d, y
 824D: BD 80 03 lda $0380, x
-8250: 99 8F 00 sta player_logical_x_8f, y
+8250: 99 8F 00 sta objects_logical_x_array_8f, y
 8253: BD 8C 03 lda $038c, x
 8256: 99 C7 00 sta $00c7, y
 8259: BD 88 03 lda $0388, x
@@ -4366,9 +4371,9 @@ compare_player_positions_6923:
 829B: 85 1C    sta $1c
 829D: A8       tay
 829E: BD 84 03 lda $0384, x
-82A1: 99 9D 00 sta player_side_9d, y
+82A1: 99 9D 00 sta objects_side_array_9d, y
 82A4: BD 80 03 lda $0380, x
-82A7: 99 8F 00 sta player_logical_x_8f, y
+82A7: 99 8F 00 sta objects_logical_x_array_8f, y
 82AA: BD 8C 03 lda $038c, x
 82AD: 99 C7 00 sta $00c7, y
 82B0: BD 88 03 lda $0388, x
@@ -4546,12 +4551,12 @@ compare_player_positions_6923:
 8405: 4C 0C 84 jmp $840c
 8408: A9 60    lda #$60
 840A: 85 1E    sta $1e
-840C: B5 B9    lda player_logical_y_b9, x
+840C: B5 B9    lda objects_logical_y_array_b9, x
 840E: C5 1E    cmp $1e
 8410: B0 0C    bcs $841e
 8412: A5 1E    lda $1e
 8414: 38       sec
-8415: F5 B9    sbc player_logical_y_b9, x
+8415: F5 B9    sbc objects_logical_y_array_b9, x
 8417: C9 03    cmp #$03
 8419: B0 0C    bcs $8427
 841B: 4C 25 84 jmp $8425
@@ -4644,9 +4649,9 @@ compare_player_positions_6923:
 84D0: 99 F1 00 sta $00f1, y
 84D3: 99 E3 00 sta $00e3, y
 84D6: BD 84 03 lda $0384, x
-84D9: 99 9D 00 sta player_side_9d, y
+84D9: 99 9D 00 sta objects_side_array_9d, y
 84DC: BD 80 03 lda $0380, x
-84DF: 99 8F 00 sta player_logical_x_8f, y
+84DF: 99 8F 00 sta objects_logical_x_array_8f, y
 84E2: BD 8C 03 lda $038c, x
 84E5: 99 C7 00 sta $00c7, y
 84E8: BD 88 03 lda $0388, x
@@ -4704,9 +4709,9 @@ compare_player_positions_6923:
 8554: 99 F1 00 sta $00f1, y
 8557: 99 E3 00 sta $00e3, y
 855A: BD 84 03 lda $0384, x
-855D: 99 9D 00 sta player_side_9d, y
+855D: 99 9D 00 sta objects_side_array_9d, y
 8560: BD 80 03 lda $0380, x
-8563: 99 8F 00 sta player_logical_x_8f, y
+8563: 99 8F 00 sta objects_logical_x_array_8f, y
 8566: BD 8C 03 lda $038c, x
 8569: 99 C7 00 sta $00c7, y
 856C: BD 88 03 lda $0388, x
@@ -4855,9 +4860,9 @@ compare_player_positions_6923:
 86EB: 85 1E    sta $1e
 86ED: A0 0D    ldy #$0d
 86EF: AD EB 03 lda $03eb
-86F2: 99 9D 00 sta player_side_9d, y
+86F2: 99 9D 00 sta objects_side_array_9d, y
 86F5: AD EA 03 lda $03ea
-86F8: 99 8F 00 sta player_logical_x_8f, y
+86F8: 99 8F 00 sta objects_logical_x_array_8f, y
 86FB: AD ED 03 lda $03ed
 86FE: 99 C7 00 sta $00c7, y
 8701: AD EC 03 lda $03ec
@@ -4898,7 +4903,7 @@ compare_player_positions_6923:
 876E: 0A       asl a
 876F: 65 1E    adc $1e
 8771: A8       tay
-8772: B5 B9    lda player_logical_y_b9, x
+8772: B5 B9    lda objects_logical_y_array_b9, x
 8774: C9 48    cmp #$48
 8776: B0 05    bcs $877d
 8778: 98       tya
@@ -5053,24 +5058,24 @@ compare_player_positions_6923:
 891D: BD 73 03 lda $0373, x
 8920: 29 F0    and #$f0
 8922: D0 0A    bne $892e
-8924: B5 8F    lda player_logical_x_8f, x
-8926: D9 8F 00 cmp player_logical_x_8f, y
+8924: B5 8F    lda objects_logical_x_array_8f, x
+8926: D9 8F 00 cmp objects_logical_x_array_8f, y
 8929: 90 17    bcc $8942
 892B: 4C 35 89 jmp $8935
-892E: B5 8F    lda player_logical_x_8f, x
-8930: D9 8F 00 cmp player_logical_x_8f, y
+892E: B5 8F    lda objects_logical_x_array_8f, x
+8930: D9 8F 00 cmp objects_logical_x_array_8f, y
 8933: B0 0D    bcs $8942
 8935: 85 1C    sta $1c
-8937: B5 9D    lda player_side_9d, x
+8937: B5 9D    lda objects_side_array_9d, x
 8939: 85 1B    sta $1b
-893B: B5 B9    lda player_logical_y_b9, x
+893B: B5 B9    lda objects_logical_y_array_b9, x
 893D: 85 1D    sta base_screen_pointer_list_001d
 893F: 4C 78 89 jmp $8978
-8942: B9 9D 00 lda player_side_9d, y
+8942: B9 9D 00 lda objects_side_array_9d, y
 8945: 85 1B    sta $1b
-8947: B9 8F 00 lda player_logical_x_8f, y
+8947: B9 8F 00 lda objects_logical_x_array_8f, y
 894A: 85 1C    sta $1c
-894C: B5 B9    lda player_logical_y_b9, x
+894C: B5 B9    lda objects_logical_y_array_b9, x
 894E: D9 B9 00 cmp $00b9, y
 8951: B0 13    bcs $8966
 8953: B9 B9 00 lda $00b9, y
@@ -5112,7 +5117,7 @@ compare_player_positions_6923:
 8997: 85 1B    sta $1b
 8999: B9 CC 89 lda $89cc, y
 899C: 85 1C    sta $1c
-899E: B5 B9    lda player_logical_y_b9, x
+899E: B5 B9    lda objects_logical_y_array_b9, x
 89A0: 85 1D    sta base_screen_pointer_list_001d
 89A2: 4C C1 89 jmp $89c1
 89A5: 8A       txa
@@ -5138,20 +5143,20 @@ compare_player_positions_6923:
 89DD: 85 1C    sta $1c
 89DF: AA       tax
 89E0: AD EB 03 lda $03eb
-89E3: 95 9D    sta player_side_9d, x
+89E3: 95 9D    sta objects_side_array_9d, x
 89E5: AD EA 03 lda $03ea
-89E8: 95 8F    sta player_logical_x_8f, x
+89E8: 95 8F    sta objects_logical_x_array_8f, x
 89EA: AD ED 03 lda $03ed
 89ED: 95 C7    sta $c7, x
 89EF: AD EC 03 lda $03ec
-89F2: 95 B9    sta player_logical_y_b9, x
+89F2: 95 B9    sta objects_logical_y_array_b9, x
 89F4: 68       pla
 89F5: AA       tax
 89F6: 20 23 69 jsr compare_player_positions_6923
 89F9: A5 1C    lda $1c
 89FB: C9 18    cmp #$18
 89FD: B0 30    bcs $8a2f
-89FF: B5 B9    lda player_logical_y_b9, x
+89FF: B5 B9    lda objects_logical_y_array_b9, x
 8A01: C9 38    cmp #$38
 8A03: 90 0C    bcc $8a11
 8A05: C9 58    cmp #$58
@@ -5166,16 +5171,16 @@ compare_player_positions_6923:
 8A16: 4C 33 8A jmp $8a33
 8A19: CD EC 03 cmp $03ec
 8A1C: B0 07    bcs $8a25
-8A1E: B5 B9    lda player_logical_y_b9, x
+8A1E: B5 B9    lda objects_logical_y_array_b9, x
 8A20: 38       sec
 8A21: E9 10    sbc #$10
 8A23: 85 1D    sta base_screen_pointer_list_001d
-8A25: B5 B9    lda player_logical_y_b9, x
+8A25: B5 B9    lda objects_logical_y_array_b9, x
 8A27: 18       clc
 8A28: 69 10    adc #$10
 8A2A: 85 1D    sta base_screen_pointer_list_001d
 8A2C: 4C 33 8A jmp $8a33
-8A2F: B5 B9    lda player_logical_y_b9, x
+8A2F: B5 B9    lda objects_logical_y_array_b9, x
 8A31: 85 1D    sta base_screen_pointer_list_001d
 8A33: BD 73 03 lda $0373, x
 8A36: 29 0F    and #$0f
@@ -5184,16 +5189,16 @@ compare_player_positions_6923:
 8A3C: 8A       txa
 8A3D: 29 02    and #$02
 8A3F: F0 0A    beq $8a4b
-8A41: B5 8F    lda player_logical_x_8f, x
+8A41: B5 8F    lda objects_logical_x_array_8f, x
 8A43: 18       clc
 8A44: 69 18    adc #$18
 8A46: 85 1C    sta $1c
 8A48: 4C 52 8A jmp $8a52
-8A4B: B5 8F    lda player_logical_x_8f, x
+8A4B: B5 8F    lda objects_logical_x_array_8f, x
 8A4D: 38       sec
 8A4E: E9 18    sbc #$18
 8A50: 85 1C    sta $1c
-8A52: B5 9D    lda player_side_9d, x
+8A52: B5 9D    lda objects_side_array_9d, x
 8A54: 85 1B    sta $1b
 8A56: 60       rts
 8A57: 8A       txa
@@ -5230,12 +5235,12 @@ compare_player_positions_6923:
 8A9A: E6 2A    inc $2a
 8A9C: BD 94 03 lda $0394, x
 8A9F: D0 4F    bne $8af0
-8AA1: B5 B9    lda player_logical_y_b9, x
+8AA1: B5 B9    lda objects_logical_y_array_b9, x
 8AA3: DD 90 03 cmp $0390, x
 8AA6: B0 11    bcs $8ab9
 8AA8: BD 90 03 lda $0390, x
 8AAB: 38       sec
-8AAC: F5 B9    sbc player_logical_y_b9, x
+8AAC: F5 B9    sbc objects_logical_y_array_b9, x
 8AAE: C9 06    cmp #$06
 8AB0: 90 21    bcc $8ad3
 8AB2: C5 23    cmp $23
@@ -5377,7 +5382,7 @@ compare_player_positions_6923:
 8C0C: 8A       txa
 8C0D: 49 01    eor #$01
 8C0F: AA       tax
-8C10: B5 B9    lda player_logical_y_b9, x
+8C10: B5 B9    lda objects_logical_y_array_b9, x
 8C12: A6 29    ldx $29
 8C14: C9 48    cmp #$48
 8C16: B0 03    bcs $8c1b
@@ -5390,7 +5395,7 @@ compare_player_positions_6923:
 8C23: 85 1C    sta $1c
 8C25: A5 2A    lda $2a
 8C27: F0 07    beq $8c30
-8C29: B5 B9    lda player_logical_y_b9, x
+8C29: B5 B9    lda objects_logical_y_array_b9, x
 8C2B: 85 1D    sta base_screen_pointer_list_001d
 8C2D: 4C 35 8C jmp $8c35
 8C30: B9 38 8C lda $8c38, y
@@ -5436,7 +5441,7 @@ compare_player_positions_6923:
 8CA9: A8       tay
 8CAA: A9 00    lda #$00
 8CAC: 95 F1    sta $f1, x
-8CAE: 95 E3    sta $e3, x
+8CAE: 95 E3    sta objects_logical_z_array_e3, x
 8CB0: 95 C7    sta $c7, x
 8CB2: AD F9 07 lda $07f9
 8CB5: F0 03    beq $8cba
@@ -5466,11 +5471,11 @@ compare_player_positions_6923:
 8CE7: 0A       asl a
 8CE8: A8       tay
 8CE9: B9 DA 8D lda $8dda, y
-8CEC: 95 9D    sta player_side_9d, x
+8CEC: 95 9D    sta objects_side_array_9d, x
 8CEE: B9 DB 8D lda $8ddb, y
-8CF1: 95 8F    sta player_logical_x_8f, x
+8CF1: 95 8F    sta objects_logical_x_array_8f, x
 8CF3: B9 DC 8D lda $8ddc, y
-8CF6: 95 B9    sta player_logical_y_b9, x
+8CF6: 95 B9    sta objects_logical_y_array_b9, x
 8CF8: B9 DD 8D lda $8ddd, y
 8CFB: 9D 73 03 sta $0373, x
 8CFE: 60       rts
@@ -5487,11 +5492,11 @@ initialize_logical_xy_players_8cff:
 8D0E: 0A       asl a
 8D0F: A8       tay
 8D10: B9 2A 8E lda $8e2a, y
-8D13: 95 9D    sta player_side_9d, x
+8D13: 95 9D    sta objects_side_array_9d, x
 8D15: B9 2B 8E lda $8e2b, y
-8D18: 95 8F    sta player_logical_x_8f, x
+8D18: 95 8F    sta objects_logical_x_array_8f, x
 8D1A: B9 2C 8E lda $8e2c, y
-8D1D: 95 B9    sta player_logical_y_b9, x
+8D1D: 95 B9    sta objects_logical_y_array_b9, x
 8D1F: B9 2D 8E lda $8e2d, y
 8D22: 9D 73 03 sta $0373, x
 8D25: 60       rts
@@ -5501,11 +5506,11 @@ initialize_logical_xy_players_8d26:
 8D28: 0A       asl a
 8D29: A8       tay
 8D2A: B9 4A 8E lda $8e4a, y
-8D2D: 95 9D    sta player_side_9d, x
+8D2D: 95 9D    sta objects_side_array_9d, x
 8D2F: B9 4B 8E lda $8e4b, y
-8D32: 95 8F    sta player_logical_x_8f, x
+8D32: 95 8F    sta objects_logical_x_array_8f, x
 8D34: B9 4C 8E lda $8e4c, y
-8D37: 95 B9    sta player_logical_y_b9, x
+8D37: 95 B9    sta objects_logical_y_array_b9, x
 8D39: B9 4D 8E lda $8e4d, y
 8D3C: 9D 73 03 sta $0373, x
 8D3F: 60       rts
@@ -5526,11 +5531,11 @@ initialize_logical_xy_players_8d26:
 8D55: 0A       asl a
 8D56: A8       tay
 8D57: B9 52 8E lda $8e52, y
-8D5A: 95 9D    sta player_side_9d, x
+8D5A: 95 9D    sta objects_side_array_9d, x
 8D5C: B9 53 8E lda $8e53, y
-8D5F: 95 8F    sta player_logical_x_8f, x
+8D5F: 95 8F    sta objects_logical_x_array_8f, x
 8D61: B9 54 8E lda $8e54, y
-8D64: 95 B9    sta player_logical_y_b9, x
+8D64: 95 B9    sta objects_logical_y_array_b9, x
 8D66: B9 55 8E lda $8e55, y
 8D69: 9D 73 03 sta $0373, x
 8D6C: 60       rts
@@ -5541,11 +5546,11 @@ initialize_logical_xy_players_8d26:
 8D74: 0A       asl a
 8D75: A8       tay
 8D76: B9 62 8E lda $8e62, y
-8D79: 95 9D    sta player_side_9d, x
+8D79: 95 9D    sta objects_side_array_9d, x
 8D7B: B9 63 8E lda $8e63, y
-8D7E: 95 8F    sta player_logical_x_8f, x
+8D7E: 95 8F    sta objects_logical_x_array_8f, x
 8D80: B9 64 8E lda $8e64, y
-8D83: 95 B9    sta player_logical_y_b9, x
+8D83: 95 B9    sta objects_logical_y_array_b9, x
 8D85: B9 65 8E lda $8e65, y
 8D88: 9D 73 03 sta $0373, x
 8D8B: 60       rts
@@ -5553,11 +5558,11 @@ initialize_logical_xy_players_8d26:
 8D8E: 0A       asl a
 8D8F: A8       tay
 8D90: B9 6A 8E lda $8e6a, y
-8D93: 95 9D    sta player_side_9d, x
+8D93: 95 9D    sta objects_side_array_9d, x
 8D95: B9 6B 8E lda $8e6b, y
-8D98: 95 8F    sta player_logical_x_8f, x
+8D98: 95 8F    sta objects_logical_x_array_8f, x
 8D9A: B9 6C 8E lda $8e6c, y
-8D9D: 95 B9    sta player_logical_y_b9, x
+8D9D: 95 B9    sta objects_logical_y_array_b9, x
 8D9F: B9 6D 8E lda $8e6d, y
 8DA2: 9D 73 03 sta $0373, x
 8DA5: 60       rts
@@ -5566,11 +5571,11 @@ initialize_logical_xy_players_8d26:
 8DA8: 0A       asl a
 8DA9: A8       tay
 8DAA: B9 72 8E lda $8e72, y
-8DAD: 95 9D    sta player_side_9d, x
+8DAD: 95 9D    sta objects_side_array_9d, x
 8DAF: B9 73 8E lda $8e73, y
-8DB2: 95 8F    sta player_logical_x_8f, x
+8DB2: 95 8F    sta objects_logical_x_array_8f, x
 8DB4: B9 74 8E lda $8e74, y
-8DB7: 95 B9    sta player_logical_y_b9, x
+8DB7: 95 B9    sta objects_logical_y_array_b9, x
 8DB9: B9 75 8E lda $8e75, y
 8DBC: 9D 73 03 sta $0373, x
 8DBF: 60       rts
@@ -5579,11 +5584,11 @@ initialize_logical_xy_players_8d26:
 8DC2: 0A       asl a
 8DC3: A8       tay
 8DC4: B9 82 8E lda $8e82, y
-8DC7: 95 9D    sta player_side_9d, x
+8DC7: 95 9D    sta objects_side_array_9d, x
 8DC9: B9 83 8E lda $8e83, y
-8DCC: 95 8F    sta player_logical_x_8f, x
+8DCC: 95 8F    sta objects_logical_x_array_8f, x
 8DCE: B9 84 8E lda $8e84, y
-8DD1: 95 B9    sta player_logical_y_b9, x
+8DD1: 95 B9    sta objects_logical_y_array_b9, x
 8DD3: B9 85 8E lda $8e85, y
 8DD6: 9D 73 03 sta $0373, x
 8DD9: 60       rts
@@ -5674,7 +5679,7 @@ initialize_logical_xy_players_8d26:
 8F60: 8A       txa
 8F61: 49 01    eor #$01
 8F63: A8       tay
-8F64: B5 B9    lda player_logical_y_b9, x
+8F64: B5 B9    lda objects_logical_y_array_b9, x
 8F66: C9 58    cmp #$58
 8F68: 90 0C    bcc $8f76
 8F6A: B9 73 03 lda $0373, y
@@ -5774,9 +5779,9 @@ initialize_logical_xy_players_8d26:
 903D: 60       rts
 903E: A0 0D    ldy #$0d
 9040: BD 84 03 lda $0384, x
-9043: 99 9D 00 sta player_side_9d, y
+9043: 99 9D 00 sta objects_side_array_9d, y
 9046: BD 80 03 lda $0380, x
-9049: 99 8F 00 sta player_logical_x_8f, y
+9049: 99 8F 00 sta objects_logical_x_array_8f, y
 904C: BD 88 03 lda $0388, x
 904F: 99 B9 00 sta $00b9, y
 9052: BD 8C 03 lda $038c, x
@@ -5892,7 +5897,7 @@ initialize_logical_xy_players_8d26:
 912A: A9 09    lda #$09
 912C: 99 16 03 sta $0316, y
 912F: 60       rts
-9130: A6 4C    ldx $4c
+9130: A6 4C    ldx current_object_index_4c
 9132: 20 AC A2 jsr $a2ac
 9135: BD 0E 03 lda $030e, x
 9138: 29 44    and #$44
@@ -6070,14 +6075,14 @@ callback_92d1:
 9308: 9D C4 03 sta $03c4, x
 930B: 6C 00 00 jmp ($0000)        ; [jump_to_callback]        ; [indirect_jump]
 930E: A0 20    ldy #$20
-9310: B5 B9    lda player_logical_y_b9, x
+9310: B5 B9    lda objects_logical_y_array_b9, x
 9312: C9 48    cmp #$48
 9314: 90 02    bcc $9318
 9316: A0 60    ldy #$60
 9318: E0 02    cpx #$02
 931A: 90 0B    bcc $9327
 931C: A0 E0    ldy #$e0
-931E: B5 B9    lda player_logical_y_b9, x
+931E: B5 B9    lda objects_logical_y_array_b9, x
 9320: C9 48    cmp #$48
 9322: 90 03    bcc $9327
 9324: A9 A0    lda #$a0
@@ -6154,7 +6159,7 @@ callback_92d1:
 93D4: A5 00    lda $00
 93D6: C9 08    cmp #$08
 93D8: 90 EC    bcc $93c6
-93DA: A6 4C    ldx $4c
+93DA: A6 4C    ldx current_object_index_4c
 93DC: A9 E7    lda #$e7
 93DE: 85 00    sta $00
 93E0: A9 93    lda #$93
@@ -6169,7 +6174,7 @@ callback_93e7:
 93F4: F0 23    beq $9419
 93F6: BD 6E 02 lda $026e, x
 93F9: 48       pha
-93FA: BD 7B 02 lda $027b, x
+93FA: BD 7B 02 lda objects_x_speed_array_027b, x
 93FD: 48       pha
 93FE: BD 88 02 lda $0288, x
 9401: 48       pha
@@ -6181,15 +6186,15 @@ callback_93e7:
 940D: 68       pla
 940E: 9D 88 02 sta $0288, x
 9411: 68       pla
-9412: 9D 7B 02 sta $027b, x
+9412: 9D 7B 02 sta objects_x_speed_array_027b, x
 9415: 68       pla
 9416: 9D 6E 02 sta $026e, x
-9419: A6 4C    ldx $4c
+9419: A6 4C    ldx current_object_index_4c
 941B: BD C0 03 lda $03c0, x
 941E: 29 40    and #$40
 9420: D0 09    bne $942b
 9422: 20 15 A2 jsr $a215
-9425: 20 12 B6 jsr $b612
+9425: 20 12 B6 jsr parabolic_movement_b612
 9428: 20 8B 94 jsr $948b
 942B: 20 1C 9C jsr $9c1c
 942E: BD F0 02 lda $02f0, x
@@ -6200,10 +6205,10 @@ callback_93e7:
 943A: BD C0 03 lda $03c0, x
 943D: 29 BF    and #$bf
 943F: 9D C0 03 sta $03c0, x
-9442: B5 E3    lda $e3, x
+9442: B5 E3    lda objects_logical_z_array_e3, x
 9444: 18       clc
 9445: 69 10    adc #$10
-9447: 95 E3    sta $e3, x
+9447: 95 E3    sta objects_logical_z_array_e3, x
 9449: A9 25    lda #$25
 944B: 20 B8 D7 jsr queue_sound_d7b8
 944E: BD 0E 03 lda $030e, x
@@ -6241,7 +6246,7 @@ callback_93e7:
 9499: 90 49    bcc $94e4
 949B: A0 00    ldy #$00
 949D: A5 BD    lda ball_logical_y_bd
-949F: D5 B9    cmp player_logical_y_b9, x
+949F: D5 B9    cmp objects_logical_y_array_b9, x
 94A1: B0 02    bcs $94a5
 94A3: A0 01    ldy #$01
 94A5: 84 00    sty $00
@@ -6270,8 +6275,8 @@ callback_93e7:
 94CF: 95 AB    sta $ab, x
 94D1: A5 1C    lda $1c
 94D3: 08       php
-94D4: 75 B9    adc player_logical_y_b9, x
-94D6: 95 B9    sta player_logical_y_b9, x
+94D4: 75 B9    adc objects_logical_y_array_b9, x
+94D6: 95 B9    sta objects_logical_y_array_b9, x
 94D8: B5 C7    lda $c7, x
 94DA: 69 00    adc #$00
 94DC: 28       plp
@@ -6296,7 +6301,7 @@ callback_93e7:
 9512: 4C 0E 93 jmp $930e
 callback_9515:
 9515: 20 15 A2 jsr $a215
-9518: 20 12 B6 jsr $b612
+9518: 20 12 B6 jsr parabolic_movement_b612
 951B: 20 8B 94 jsr $948b
 951E: 20 8D 9D jsr $9d8d
 9521: 20 1C 9C jsr $9c1c
@@ -6339,7 +6344,7 @@ callback_9515:
 957C: AA       tax
 957D: C0 08    cpy #$08
 957F: 90 F0    bcc $9571
-9581: A6 4C    ldx $4c
+9581: A6 4C    ldx current_object_index_4c
 9583: A9 8E    lda #$8e
 9585: 85 00    sta $00
 9587: A9 95    lda #$95
@@ -6352,7 +6357,7 @@ callback_958e:
 9596: F0 23    beq $95bb
 9598: BD 6E 02 lda $026e, x
 959B: 48       pha
-959C: BD 7B 02 lda $027b, x
+959C: BD 7B 02 lda objects_x_speed_array_027b, x
 959F: 48       pha
 95A0: BD 88 02 lda $0288, x
 95A3: 48       pha
@@ -6364,13 +6369,13 @@ callback_958e:
 95AF: 68       pla
 95B0: 9D 88 02 sta $0288, x
 95B3: 68       pla
-95B4: 9D 7B 02 sta $027b, x
+95B4: 9D 7B 02 sta objects_x_speed_array_027b, x
 95B7: 68       pla
 95B8: 9D 6E 02 sta $026e, x
 95BB: BD C0 03 lda $03c0, x
 95BE: 29 40    and #$40
 95C0: D0 03    bne $95c5
-95C2: 20 12 B6 jsr $b612
+95C2: 20 12 B6 jsr parabolic_movement_b612
 95C5: 20 1C 9C jsr $9c1c
 95C8: BD F0 02 lda $02f0, x
 95CB: C9 02    cmp #$02
@@ -6384,10 +6389,10 @@ callback_958e:
 95DE: BD C0 03 lda $03c0, x
 95E1: 29 BF    and #$bf
 95E3: 9D C0 03 sta $03c0, x
-95E6: B5 E3    lda $e3, x
+95E6: B5 E3    lda objects_logical_z_array_e3, x
 95E8: 18       clc
 95E9: 69 10    adc #$10
-95EB: 95 E3    sta $e3, x
+95EB: 95 E3    sta objects_logical_z_array_e3, x
 95ED: BD 0E 03 lda $030e, x
 95F0: 09 80    ora #$80
 95F2: 9D 0E 03 sta $030e, x
@@ -6518,8 +6523,8 @@ callback_958e:
 9726: C8       iny
 9727: C0 04    cpy #$04
 9729: 90 F0    bcc $971b
-972B: A6 4C    ldx $4c
-972D: A6 4C    ldx $4c
+972B: A6 4C    ldx current_object_index_4c
+972D: A6 4C    ldx current_object_index_4c
 972F: BD F0 02 lda $02f0, x
 9732: C9 03    cmp #$03
 9734: D0 72    bne $97a8
@@ -6587,10 +6592,10 @@ callback_958e:
 97D2: D0 0C    bne $97e0
 97D4: BD D6 02 lda $02d6, x
 97D7: D0 07    bne $97e0
-97D9: B5 E3    lda $e3, x
+97D9: B5 E3    lda objects_logical_z_array_e3, x
 97DB: 18       clc
 97DC: 69 10    adc #$10
-97DE: 95 E3    sta $e3, x
+97DE: 95 E3    sta objects_logical_z_array_e3, x
 97E0: 20 8D 9D jsr $9d8d
 97E3: 4C 89 91 jmp $9189
 97E6: A0 01    ldy #$01
@@ -6669,7 +6674,7 @@ callback_958e:
 98B7: C8       iny
 98B8: C0 04    cpy #$04
 98BA: 90 F0    bcc $98ac
-98BC: A6 4C    ldx $4c
+98BC: A6 4C    ldx current_object_index_4c
 98BE: 20 8D 9D jsr $9d8d
 98C1: 20 85 BD jsr $bd85
 98C4: BD F0 02 lda $02f0, x
@@ -6859,8 +6864,8 @@ callback_9a3d:
 9A91: C8       iny
 9A92: C0 08    cpy #$08
 9A94: 90 F0    bcc $9a86
-9A96: A6 4C    ldx $4c
-9A98: 20 12 B6 jsr $b612
+9A96: A6 4C    ldx current_object_index_4c
+9A98: 20 12 B6 jsr parabolic_movement_b612
 9A9B: BD 0E 03 lda $030e, x
 9A9E: 09 80    ora #$80
 9AA0: 9D 0E 03 sta $030e, x
@@ -6934,7 +6939,7 @@ callback_9a3d:
 9B4B: AA       tax
 9B4C: C6 00    dec $00
 9B4E: 10 F0    bpl $9b40
-9B50: A6 4C    ldx $4c
+9B50: A6 4C    ldx current_object_index_4c
 9B52: BD 54 02 lda $0254, x
 9B55: 10 03    bpl $9b5a
 9B57: 20 69 A1 jsr $a169
@@ -7131,7 +7136,7 @@ A0EB: 29 7F    and #$7f
 A0ED: 9D 0E 03 sta $030e, x
 A0F0: A9 00    lda #$00
 A0F2: 95 D5    sta $d5, x
-A0F4: 95 E3    sta $e3, x
+A0F4: 95 E3    sta objects_logical_z_array_e3, x
 A0F6: 95 F1    sta $f1, x
 A0F8: 38       sec
 A0F9: B0 01    bcs $a0fc
@@ -7175,8 +7180,8 @@ A14F: 7D A2 02 adc $02a2, x
 A152: 95 D5    sta $d5, x
 A154: BD AF 02 lda $02af, x
 A157: 08       php
-A158: 75 E3    adc $e3, x
-A15A: 95 E3    sta $e3, x
+A158: 75 E3    adc objects_logical_z_array_e3, x
+A15A: 95 E3    sta objects_logical_z_array_e3, x
 A15C: B5 F1    lda $f1, x
 A15E: 69 00    adc #$00
 A160: 28       plp
@@ -7191,13 +7196,13 @@ A16E: 18       clc
 A16F: 69 01    adc #$01
 A171: 9D 6E 02 sta $026e, x
 A174: 08       php
-A175: BD 7B 02 lda $027b, x
+A175: BD 7B 02 lda objects_x_speed_array_027b, x
 A178: 49 FF    eor #$ff
-A17A: 9D 7B 02 sta $027b, x
+A17A: 9D 7B 02 sta objects_x_speed_array_027b, x
 A17D: 28       plp
-A17E: BD 7B 02 lda $027b, x
+A17E: BD 7B 02 lda objects_x_speed_array_027b, x
 A181: 69 00    adc #$00
-A183: 9D 7B 02 sta $027b, x
+A183: 9D 7B 02 sta objects_x_speed_array_027b, x
 A186: 60       rts
 A187: BD 1A 03 lda $031a, x
 A18A: 30 08    bmi $a194
@@ -7243,11 +7248,11 @@ A1E8: 09 10    ora #$10
 A1EA: 9D 0E 03 sta $030e, x
 A1ED: 60       rts
 
-A215: B5 8F    lda player_logical_x_8f, x
+A215: B5 8F    lda objects_logical_x_array_8f, x
 A217: 48       pha
-A218: B5 9D    lda player_side_9d, x
+A218: B5 9D    lda objects_side_array_9d, x
 A21A: 48       pha
-A21B: B5 B9    lda player_logical_y_b9, x
+A21B: B5 B9    lda objects_logical_y_array_b9, x
 A21D: 48       pha
 A21E: B5 C7    lda $c7, x
 A220: 48       pha
@@ -7263,20 +7268,20 @@ A22D: A8       tay
 A22E: B9 9C A2 lda $a29c, y
 A231: 08       php
 A232: 18       clc
-A233: 75 8F    adc player_logical_x_8f, x
-A235: 95 8F    sta player_logical_x_8f, x
-A237: B5 9D    lda player_side_9d, x
+A233: 75 8F    adc objects_logical_x_array_8f, x
+A235: 95 8F    sta objects_logical_x_array_8f, x
+A237: B5 9D    lda objects_side_array_9d, x
 A239: 69 00    adc #$00
 A23B: 28       plp
 A23C: 10 03    bpl $a241
 A23E: 18       clc
 A23F: 69 FF    adc #$ff
-A241: 95 9D    sta player_side_9d, x
+A241: 95 9D    sta objects_side_array_9d, x
 A243: B9 9D A2 lda $a29d, y
 A246: 08       php
 A247: 18       clc
-A248: 75 B9    adc player_logical_y_b9, x
-A24A: 95 B9    sta player_logical_y_b9, x
+A248: 75 B9    adc objects_logical_y_array_b9, x
+A24A: 95 B9    sta objects_logical_y_array_b9, x
 A24C: B5 C7    lda $c7, x
 A24E: 69 00    adc #$00
 A250: 28       plp
@@ -7284,17 +7289,17 @@ A251: 10 03    bpl $a256
 A253: 18       clc
 A254: 69 FF    adc #$ff
 A256: 95 C7    sta $c7, x
-A258: A5 4C    lda $4c
+A258: A5 4C    lda current_object_index_4c
 A25A: 20 1F B7 jsr $b71f
 A25D: 85 1B    sta $1b
 A25F: 68       pla
 A260: 95 C7    sta $c7, x
 A262: 68       pla
-A263: 95 B9    sta player_logical_y_b9, x
+A263: 95 B9    sta objects_logical_y_array_b9, x
 A265: 68       pla
-A266: 95 9D    sta player_side_9d, x
+A266: 95 9D    sta objects_side_array_9d, x
 A268: 68       pla
-A269: 95 8F    sta player_logical_x_8f, x
+A269: 95 8F    sta objects_logical_x_array_8f, x
 A26B: E0 02    cpx #$02
 A26D: B0 08    bcs $a277
 A26F: A5 1B    lda $1b
@@ -7308,7 +7313,7 @@ A27D: C9 10    cmp #$10
 A27F: B0 19    bcs $a29a
 A281: A9 00    lda #$00
 A283: 9D 6E 02 sta $026e, x
-A286: 9D 7B 02 sta $027b, x
+A286: 9D 7B 02 sta objects_x_speed_array_027b, x
 A289: 9D 88 02 sta $0288, x
 A28C: 9D 95 02 sta $0295, x
 A28F: BD 0A 03 lda $030a, x
@@ -7319,14 +7324,14 @@ A298: B0 01    bcs $a29b
 A29A: 18       clc
 A29B: 60       rts
 
-A2AC: A5 4C    lda $4c
+A2AC: A5 4C    lda current_object_index_4c
 A2AE: 20 1F B7 jsr $b71f
 A2B1: 9D 73 03 sta $0373, x
 A2B4: 60       rts
 A2B5: 85 1B    sta $1b
 A2B7: 8A       txa
 A2B8: 48       pha
-A2B9: A5 4C    lda $4c
+A2B9: A5 4C    lda current_object_index_4c
 A2BB: 18       clc
 A2BC: 69 07    adc #$07
 A2BE: AA       tax
@@ -7348,8 +7353,8 @@ A2DD: 68       pla
 A2DE: AA       tax
 A2DF: 60       rts
 A2E0: A9 07    lda #$07
-A2E2: 85 4C    sta $4c
-A2E4: A6 4C    ldx $4c
+A2E2: 85 4C    sta current_object_index_4c
+A2E4: A6 4C    ldx current_object_index_4c
 A2E6: BD 1A 03 lda $031a, x
 A2E9: 10 1A    bpl $a305
 A2EB: B5 65    lda $65, x
@@ -7364,13 +7369,13 @@ A2FB: 85 00    sta $00
 A2FD: B9 0F A3 lda $a30f, y
 A300: 85 01    sta $01
 A302: 6C 00 00 jmp ($0000)        ; [indirect_jump]
-A305: E6 4C    inc $4c
-A307: A5 4C    lda $4c
+A305: E6 4C    inc current_object_index_4c
+A307: A5 4C    lda current_object_index_4c
 A309: C9 0C    cmp #$0c
 A30B: 90 D7    bcc $a2e4
 A30D: 60       rts
 
-A328: A5 4C    lda $4c
+A328: A5 4C    lda current_object_index_4c
 A32A: 38       sec
 A32B: E9 07    sbc #$07
 A32D: A8       tay
@@ -7382,7 +7387,7 @@ A335: BD D3 A3 lda jump_table_a3d3, x
 A338: 85 1B    sta $1b
 A33A: BD D4 A3 lda $a3d4, x
 A33D: 85 1C    sta $1c
-A33F: A6 4C    ldx $4c
+A33F: A6 4C    ldx current_object_index_4c
 A341: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 A344: BD 1A 03 lda $031a, x
 A347: 29 40    and #$40
@@ -7407,7 +7412,7 @@ A370: 98       tya
 A371: 18       clc
 A372: 7D F0 02 adc $02f0, x
 A375: 95 73    sta $73, x
-A377: A5 4C    lda $4c
+A377: A5 4C    lda current_object_index_4c
 A379: 38       sec
 A37A: E9 07    sbc #$07
 A37C: A8       tay
@@ -7486,7 +7491,7 @@ A433: B9 8F A4 lda $a48f, y
 A436: 85 1B    sta $1b
 A438: 98       tya
 A439: 48       pha
-A43A: A5 4C    lda $4c
+A43A: A5 4C    lda current_object_index_4c
 A43C: 38       sec
 A43D: E9 07    sbc #$07
 A43F: A8       tay
@@ -7502,20 +7507,20 @@ A44F: A8       tay
 A450: A5 1B    lda $1b
 A452: 08       php
 A453: 18       clc
-A454: 75 8F    adc player_logical_x_8f, x
-A456: 95 8F    sta player_logical_x_8f, x
-A458: B5 9D    lda player_side_9d, x
+A454: 75 8F    adc objects_logical_x_array_8f, x
+A456: 95 8F    sta objects_logical_x_array_8f, x
+A458: B5 9D    lda objects_side_array_9d, x
 A45A: 69 00    adc #$00
 A45C: 28       plp
 A45D: 10 03    bpl $a462
 A45F: 18       clc
 A460: 69 FF    adc #$ff
-A462: 95 9D    sta player_side_9d, x
+A462: 95 9D    sta objects_side_array_9d, x
 A464: B9 90 A4 lda $a490, y
 A467: 08       php
 A468: 18       clc
-A469: 75 B9    adc player_logical_y_b9, x
-A46B: 95 B9    sta player_logical_y_b9, x
+A469: 75 B9    adc objects_logical_y_array_b9, x
+A46B: 95 B9    sta objects_logical_y_array_b9, x
 A46D: B5 C7    lda $c7, x
 A46F: 69 00    adc #$00
 A471: 28       plp
@@ -7526,8 +7531,8 @@ A477: 95 C7    sta $c7, x
 A479: B9 91 A4 lda $a491, y
 A47C: 08       php
 A47D: 18       clc
-A47E: 75 E3    adc $e3, x
-A480: 95 E3    sta $e3, x
+A47E: 75 E3    adc objects_logical_z_array_e3, x
+A480: 95 E3    sta objects_logical_z_array_e3, x
 A482: B5 F1    lda $f1, x
 A484: 69 00    adc #$00
 A486: 28       plp
@@ -7542,21 +7547,21 @@ A4B5: 29 40    and #$40
 A4B7: D0 03    bne $a4bc
 A4B9: 20 E6 A5 jsr $a5e6
 A4BC: 20 03 A6 jsr $a603
-A4BF: B5 8F    lda player_logical_x_8f, x
+A4BF: B5 8F    lda objects_logical_x_array_8f, x
 A4C1: 18       clc
 A4C2: 69 04    adc #$04
-A4C4: 95 8F    sta player_logical_x_8f, x
-A4C6: B5 9D    lda player_side_9d, x
+A4C4: 95 8F    sta objects_logical_x_array_8f, x
+A4C6: B5 9D    lda objects_side_array_9d, x
 A4C8: 69 00    adc #$00
-A4CA: 95 9D    sta player_side_9d, x
-A4CC: B5 B9    lda player_logical_y_b9, x
+A4CA: 95 9D    sta objects_side_array_9d, x
+A4CC: B5 B9    lda objects_logical_y_array_b9, x
 A4CE: 18       clc
 A4CF: 69 01    adc #$01
-A4D1: 95 B9    sta player_logical_y_b9, x
-A4D3: B5 E3    lda $e3, x
+A4D1: 95 B9    sta objects_logical_y_array_b9, x
+A4D3: B5 E3    lda objects_logical_z_array_e3, x
 A4D5: 18       clc
 A4D6: 69 00    adc #$00
-A4D8: 95 E3    sta $e3, x
+A4D8: 95 E3    sta objects_logical_z_array_e3, x
 A4DA: B5 73    lda $73, x
 A4DC: 85 1B    sta $1b
 A4DE: A9 13    lda #$13
@@ -7581,7 +7586,7 @@ A50A: C9 03    cmp #$03
 A50C: 90 03    bcc $a511
 A50E: 20 29 A6 jsr $a629
 A511: 4C 05 A3 jmp $a305
-A514: A5 4C    lda $4c
+A514: A5 4C    lda current_object_index_4c
 A516: 38       sec
 A517: E9 07    sbc #$07
 A519: A8       tay
@@ -7598,14 +7603,14 @@ A530: 29 40    and #$40
 A532: D0 03    bne $a537
 A534: 20 E6 A5 jsr $a5e6
 A537: 20 03 A6 jsr $a603
-A53A: B5 B9    lda player_logical_y_b9, x
+A53A: B5 B9    lda objects_logical_y_array_b9, x
 A53C: 18       clc
 A53D: 69 01    adc #$01
-A53F: 95 B9    sta player_logical_y_b9, x
-A541: B5 E3    lda $e3, x
+A53F: 95 B9    sta objects_logical_y_array_b9, x
+A541: B5 E3    lda objects_logical_z_array_e3, x
 A543: 18       clc
 A544: 69 08    adc #$08
-A546: 95 E3    sta $e3, x
+A546: 95 E3    sta objects_logical_z_array_e3, x
 A548: B5 73    lda $73, x
 A54A: 85 1B    sta $1b
 A54C: A9 0C    lda #$0c
@@ -7685,7 +7690,7 @@ A5FA: BD 3A 02 lda $023a, x
 A5FD: 09 01    ora #$01
 A5FF: 9D 3A 02 sta $023a, x
 A602: 60       rts
-A603: A5 4C    lda $4c
+A603: A5 4C    lda current_object_index_4c
 A605: AA       tax
 A606: 38       sec
 A607: E9 07    sbc #$07
@@ -7704,7 +7709,7 @@ A61A: 69 0E    adc #$0e
 A61C: AA       tax
 A61D: C6 00    dec $00
 A61F: 10 ED    bpl $a60e
-A621: A5 4C    lda $4c
+A621: A5 4C    lda current_object_index_4c
 A623: AA       tax
 A624: 38       sec
 A625: E9 07    sbc #$07
@@ -7728,7 +7733,7 @@ A642: 68       pla
 A643: AA       tax
 A644: 60       rts
 A645: A2 06    ldx #$06
-A647: 86 4C    stx $4c
+A647: 86 4C    stx current_object_index_4c
 A649: BD 1A 03 lda $031a, x
 A64C: 29 7F    and #$7f
 A64E: 0A       asl a
@@ -7746,15 +7751,15 @@ A66D: 20 1F A7 jsr $a71f
 A670: A9 18    lda #$18
 A672: 95 65    sta $65, x
 A674: A9 00    lda #$00
-A676: 95 8F    sta player_logical_x_8f, x
+A676: 95 8F    sta objects_logical_x_array_8f, x
 A678: A9 01    lda #$01
-A67A: 95 9D    sta player_side_9d, x
+A67A: 95 9D    sta objects_side_array_9d, x
 A67C: A9 58    lda #$58
-A67E: 95 B9    sta player_logical_y_b9, x
+A67E: 95 B9    sta objects_logical_y_array_b9, x
 A680: A9 00    lda #$00
 A682: 95 C7    sta $c7, x
 A684: A9 00    lda #$00
-A686: 95 E3    sta $e3, x
+A686: 95 E3    sta objects_logical_z_array_e3, x
 A688: 95 F1    sta $f1, x
 A68A: B5 73    lda $73, x
 A68C: 85 1B    sta $1b
@@ -7821,7 +7826,7 @@ A729: 9D D6 02 sta $02d6, x
 A72C: 9D F0 02 sta $02f0, x
 A72F: 60       rts
 A730: A2 05    ldx #$05
-A732: 86 4C    stx $4c
+A732: 86 4C    stx current_object_index_4c
 A734: BD 1A 03 lda $031a, x
 A737: 29 7F    and #$7f
 A739: 0A       asl a
@@ -7975,7 +7980,7 @@ A893: AA       tax
 A894: C8       iny
 A895: C0 09    cpy #$09
 A897: 90 F1    bcc $a88a
-A899: A6 4C    ldx $4c
+A899: A6 4C    ldx current_object_index_4c
 A89B: 60       rts
 
 A8A5: A9 27    lda #$27
@@ -7985,12 +7990,12 @@ A8AB: 85 67    sta $67
 A8AD: 85 68    sta $68
 A8AF: A2 00    ldx #$00
 A8B1: A9 50    lda #$50
-A8B3: 95 B9    sta player_logical_y_b9, x
+A8B3: 95 B9    sta objects_logical_y_array_b9, x
 A8B5: A9 00    lda #$00
 A8B7: 95 C7    sta $c7, x
-A8B9: 95 E3    sta $e3, x
+A8B9: 95 E3    sta objects_logical_z_array_e3, x
 A8BB: 95 F1    sta $f1, x
-A8BD: 95 9D    sta player_side_9d, x
+A8BD: 95 9D    sta objects_side_array_9d, x
 A8BF: E8       inx
 A8C0: E0 04    cpx #$04
 A8C2: 90 ED    bcc $a8b1
@@ -8005,19 +8010,19 @@ A8CF: A8       tay
 A8D0: B9 62 A9 lda $a962, y
 A8D3: 85 73    sta $73
 A8D5: B9 63 A9 lda $a963, y
-A8D8: 85 8F    sta player_logical_x_8f
+A8D8: 85 8F    sta objects_logical_x_array_8f
 A8DA: B9 64 A9 lda $a964, y
 A8DD: 85 74    sta $74
 A8DF: B9 65 A9 lda $a965, y
 A8E2: 85 90    sta $90
 A8E4: A2 00    ldx #$00
-A8E6: 86 4C    stx $4c
+A8E6: 86 4C    stx current_object_index_4c
 A8E8: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 A8EB: A5 57    lda score_array_57
 A8ED: C9 10    cmp #$10
 A8EF: 90 07    bcc $a8f8
 A8F1: A2 01    ldx #$01
-A8F3: 86 4C    stx $4c
+A8F3: 86 4C    stx current_object_index_4c
 A8F5: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 A8F8: A5 58    lda $58
 A8FA: C9 10    cmp #$10
@@ -8045,31 +8050,33 @@ A922: 69 01    adc #$01
 A924: 85 91    sta $91
 A926: A9 01    lda #$01
 A928: 85 9F    sta $9f
+; a player
 A92A: A2 02    ldx #$02
-A92C: 86 4C    stx $4c
+A92C: 86 4C    stx current_object_index_4c
 A92E: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 A931: A5 58    lda $58
 A933: C9 10    cmp #$10
 A935: 90 07    bcc $a93e
+; a player from the same team
 A937: A2 03    ldx #$03
-A939: 86 4C    stx $4c
+A939: 86 4C    stx current_object_index_4c
 A93B: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 A93E: A2 00    ldx #$00
 A940: A9 05    lda #$05
 A942: 95 73    sta $73, x
 A944: A9 00    lda #$00
-A946: 95 8F    sta player_logical_x_8f, x
+A946: 95 8F    sta objects_logical_x_array_8f, x
 A948: A9 01    lda #$01
-A94A: 95 9D    sta player_side_9d, x
+A94A: 95 9D    sta objects_side_array_9d, x
 A94C: A9 78    lda #$78
-A94E: 95 B9    sta player_logical_y_b9, x
+A94E: 95 B9    sta objects_logical_y_array_b9, x
 A950: A9 00    lda #$00
 A952: 95 C7    sta $c7, x
 A954: A9 00    lda #$00
-A956: 95 E3    sta $e3, x
+A956: 95 E3    sta objects_logical_z_array_e3, x
 A958: 95 F1    sta $f1, x
 A95A: A9 00    lda #$00
-A95C: 85 4C    sta $4c
+A95C: 85 4C    sta current_object_index_4c
 A95E: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 A961: 60       rts
 
@@ -8078,7 +8085,7 @@ A9A4: 8A       txa
 A9A5: 48       pha
 A9A6: 98       tya
 A9A7: 48       pha
-A9A8: A5 4C    lda $4c
+A9A8: A5 4C    lda current_object_index_4c
 A9AA: 18       clc
 A9AB: 69 07    adc #$07
 A9AD: AA       tax
@@ -8093,9 +8100,10 @@ A9BE: 09 80    ora #$80
 A9C0: 9D 1A 03 sta $031a, x
 A9C3: A9 1C    lda #$1c
 A9C5: 95 65    sta $65, x
-A9C7: A5 4C    lda $4c
+A9C7: A5 4C    lda current_object_index_4c
 A9C9: C9 04    cmp #$04
 A9CB: D0 29    bne $a9f6
+; the object is the ball
 A9CD: 8A       txa
 A9CE: 48       pha
 A9CF: A0 00    ldy #$00
@@ -8116,14 +8124,14 @@ A9E6: C9 09    cmp #$09
 A9E8: 90 E9    bcc $a9d3
 A9EA: 68       pla
 A9EB: AA       tax
-A9EC: B5 B9    lda player_logical_y_b9, x
+A9EC: B5 B9    lda objects_logical_y_array_b9, x
 A9EE: 38       sec
 A9EF: E9 01    sbc #$01
-A9F1: 95 B9    sta player_logical_y_b9, x
+A9F1: 95 B9    sta objects_logical_y_array_b9, x
 A9F3: 4C 88 AA jmp $aa88
 A9F6: 8A       txa
 A9F7: 48       pha
-A9F8: A6 4C    ldx $4c
+A9F8: A6 4C    ldx current_object_index_4c
 A9FA: B5 73    lda $73, x
 A9FC: 29 7F    and #$7f
 A9FE: 38       sec
@@ -8145,9 +8153,9 @@ AA18: 85 1B    sta $1b
 AA1A: A5 1B    lda $1b
 AA1C: 08       php
 AA1D: 18       clc
-AA1E: 75 8F    adc player_logical_x_8f, x
+AA1E: 75 8F    adc objects_logical_x_array_8f, x
 AA20: 85 00    sta $00
-AA22: B5 9D    lda player_side_9d, x
+AA22: B5 9D    lda objects_side_array_9d, x
 AA24: 69 00    adc #$00
 AA26: 28       plp
 AA27: 10 03    bpl $aa2c
@@ -8157,8 +8165,8 @@ AA2C: 85 01    sta $01
 AA2E: B9 8E AA lda $aa8e, y
 AA31: 08       php
 AA32: 18       clc
-AA33: 75 B9    adc player_logical_y_b9, x
-AA35: 85 02    sta unpack_mode_02
+AA33: 75 B9    adc objects_logical_y_array_b9, x
+AA35: 85 02    sta unpack_mode_and_misc_02
 AA37: B5 C7    lda $c7, x
 AA39: 69 00    adc #$00
 AA3B: 28       plp
@@ -8167,16 +8175,16 @@ AA3E: 18       clc
 AA3F: 69 FF    adc #$ff
 AA41: 85 03    sta $03
 AA43: A5 BD    lda ball_logical_y_bd
-AA45: D5 B9    cmp player_logical_y_b9, x
+AA45: D5 B9    cmp objects_logical_y_array_b9, x
 AA47: B0 14    bcs $aa5d
-AA49: B5 B9    lda player_logical_y_b9, x
+AA49: B5 B9    lda objects_logical_y_array_b9, x
 AA4B: 38       sec
 AA4C: E5 BD    sbc ball_logical_y_bd
 AA4E: 85 1B    sta $1b
-AA50: A5 02    lda unpack_mode_02
+AA50: A5 02    lda unpack_mode_and_misc_02
 AA52: 38       sec
 AA53: E5 1B    sbc $1b
-AA55: 85 02    sta unpack_mode_02
+AA55: 85 02    sta unpack_mode_and_misc_02
 AA57: A5 03    lda $03
 AA59: E9 00    sbc #$00
 AA5B: 85 03    sta $03
@@ -8184,7 +8192,7 @@ AA5D: B9 8F AA lda $aa8f, y
 AA60: 18       clc
 AA61: 65 1B    adc $1b
 AA63: 18       clc
-AA64: 75 E3    adc $e3, x
+AA64: 75 E3    adc objects_logical_z_array_e3, x
 AA66: 85 04    sta $04
 AA68: B5 F1    lda $f1, x
 AA6A: 69 00    adc #$00
@@ -8192,15 +8200,15 @@ AA6C: 85 05    sta $05
 AA6E: 68       pla
 AA6F: AA       tax
 AA70: A5 00    lda $00
-AA72: 95 8F    sta player_logical_x_8f, x
+AA72: 95 8F    sta objects_logical_x_array_8f, x
 AA74: A5 01    lda $01
-AA76: 95 9D    sta player_side_9d, x
-AA78: A5 02    lda unpack_mode_02
-AA7A: 95 B9    sta player_logical_y_b9, x
+AA76: 95 9D    sta objects_side_array_9d, x
+AA78: A5 02    lda unpack_mode_and_misc_02
+AA7A: 95 B9    sta objects_logical_y_array_b9, x
 AA7C: A5 03    lda $03
 AA7E: 95 C7    sta $c7, x
 AA80: A5 04    lda $04
-AA82: 95 E3    sta $e3, x
+AA82: 95 E3    sta objects_logical_z_array_e3, x
 AA84: A5 05    lda $05
 AA86: 95 F1    sta $f1, x
 AA88: 68       pla
@@ -8210,16 +8218,16 @@ AA8B: AA       tax
 AA8C: 60       rts
 
 AB1D: A2 07    ldx #$07
-AB1F: 86 4C    stx $4c
-AB21: A6 4C    ldx $4c
+AB1F: 86 4C    stx current_object_index_4c
+AB21: A6 4C    ldx current_object_index_4c
 AB23: BD 1A 03 lda $031a, x
 AB26: 10 09    bpl $ab31
 AB28: B5 65    lda $65, x
 AB2A: C9 1C    cmp #$1c
 AB2C: D0 03    bne $ab31
 AB2E: 20 3A AB jsr $ab3a
-AB31: E6 4C    inc $4c
-AB33: A5 4C    lda $4c
+AB31: E6 4C    inc current_object_index_4c
+AB33: A5 4C    lda current_object_index_4c
 AB35: C9 0C    cmp #$0c
 AB37: 90 E8    bcc $ab21
 AB39: 60       rts
@@ -8287,8 +8295,8 @@ AC10: 68       pla
 AC11: AA       tax
 AC12: 60       rts
 AC13: A2 07    ldx #$07
-AC15: 86 4C    stx $4c
-AC17: A6 4C    ldx $4c
+AC15: 86 4C    stx current_object_index_4c
+AC17: A6 4C    ldx current_object_index_4c
 AC19: BD 1A 03 lda $031a, x
 AC1C: 10 47    bpl $ac65
 AC1E: B5 65    lda $65, x
@@ -8321,8 +8329,8 @@ AC5C: D0 07    bne $ac65
 AC5E: A9 00    lda #$00
 AC60: 9D 1A 03 sta $031a, x
 AC63: 95 65    sta $65, x
-AC65: E6 4C    inc $4c
-AC67: A5 4C    lda $4c
+AC65: E6 4C    inc current_object_index_4c
+AC67: A5 4C    lda current_object_index_4c
 AC69: C9 0B    cmp #$0b
 AC6B: 90 AA    bcc $ac17
 AC6D: 60       rts
@@ -8345,23 +8353,23 @@ AC87: E6 00    inc $00
 AC89: A5 00    lda $00
 AC8B: C9 09    cmp #$09
 AC8D: 90 E9    bcc $ac78
-AC8F: A6 4C    ldx $4c
-AC91: B5 E3    lda $e3, x
+AC8F: A6 4C    ldx current_object_index_4c
+AC91: B5 E3    lda objects_logical_z_array_e3, x
 AC93: 18       clc
 AC94: 69 40    adc #$40
-AC96: 95 E3    sta $e3, x
-AC98: B5 8F    lda player_logical_x_8f, x
+AC96: 95 E3    sta objects_logical_z_array_e3, x
+AC98: B5 8F    lda objects_logical_x_array_8f, x
 AC9A: 38       sec
 AC9B: E9 18    sbc #$18
-AC9D: 95 8F    sta player_logical_x_8f, x
-AC9F: B5 9D    lda player_side_9d, x
+AC9D: 95 8F    sta objects_logical_x_array_8f, x
+AC9F: B5 9D    lda objects_side_array_9d, x
 ACA1: E9 00    sbc #$00
-ACA3: 95 9D    sta player_side_9d, x
+ACA3: 95 9D    sta objects_side_array_9d, x
 ACA5: 60       rts
 ACA6: 60       rts
 ACA7: 60       rts
 ACA8: A2 0D    ldx #$0d
-ACAA: 86 4C    stx $4c
+ACAA: 86 4C    stx current_object_index_4c
 ACAC: A5 38    lda $38
 ACAE: 29 0F    and #$0f
 ACB0: F0 56    beq $ad08
@@ -8393,7 +8401,7 @@ ACDC: E6 1B    inc $1b
 ACDE: A5 1B    lda $1b
 ACE0: C9 09    cmp #$09
 ACE2: 90 EE    bcc $acd2
-ACE4: A6 4C    ldx $4c
+ACE4: A6 4C    ldx current_object_index_4c
 ACE6: A9 01    lda #$01
 ACE8: 9D 3A 02 sta $023a, x
 ACEB: 8A       txa
@@ -8419,16 +8427,16 @@ AD06: D0 BC    bne $acc4
 AD08: 60       rts
 
 AD82: A2 07    ldx #$07
-AD84: 86 4C    stx $4c
-AD86: A6 4C    ldx $4c
+AD84: 86 4C    stx current_object_index_4c
+AD86: A6 4C    ldx current_object_index_4c
 AD88: BD 1A 03 lda $031a, x
 AD8B: 10 09    bpl $ad96
 AD8D: B5 65    lda $65, x
 AD8F: C9 30    cmp #$30
 AD91: D0 03    bne $ad96
 AD93: 20 9F AD jsr $ad9f
-AD96: E6 4C    inc $4c
-AD98: A5 4C    lda $4c
+AD96: E6 4C    inc current_object_index_4c
+AD98: A5 4C    lda current_object_index_4c
 AD9A: C9 0B    cmp #$0b
 AD9C: 90 E8    bcc $ad86
 AD9E: 60       rts
@@ -8475,15 +8483,15 @@ ADEC: C9 09    cmp #$09
 ADEE: 90 E9    bcc $add9
 ADF0: 68       pla
 ADF1: A8       tay
-ADF2: A6 4C    ldx $4c
-ADF4: B5 E3    lda $e3, x
+ADF2: A6 4C    ldx current_object_index_4c
+ADF4: B5 E3    lda objects_logical_z_array_e3, x
 ADF6: 18       clc
 ADF7: 69 40    adc #$40
-ADF9: 95 E3    sta $e3, x
-ADFB: B5 B9    lda player_logical_y_b9, x
+ADF9: 95 E3    sta objects_logical_z_array_e3, x
+ADFB: B5 B9    lda objects_logical_y_array_b9, x
 ADFD: 38       sec
 ADFE: E9 01    sbc #$01
-AE00: 95 B9    sta player_logical_y_b9, x
+AE00: 95 B9    sta objects_logical_y_array_b9, x
 AE02: A9 08    lda #$08
 AE04: 85 1B    sta $1b
 AE06: B9 73 00 lda $0073, y
@@ -8493,15 +8501,15 @@ AE0D: 85 1B    sta $1b
 AE0F: A5 1B    lda $1b
 AE11: 08       php
 AE12: 18       clc
-AE13: 75 8F    adc player_logical_x_8f, x
-AE15: 95 8F    sta player_logical_x_8f, x
-AE17: B5 9D    lda player_side_9d, x
+AE13: 75 8F    adc objects_logical_x_array_8f, x
+AE15: 95 8F    sta objects_logical_x_array_8f, x
+AE17: B5 9D    lda objects_side_array_9d, x
 AE19: 69 00    adc #$00
 AE1B: 28       plp
 AE1C: 10 03    bpl $ae21
 AE1E: 18       clc
 AE1F: 69 FF    adc #$ff
-AE21: 95 9D    sta player_side_9d, x
+AE21: 95 9D    sta objects_side_array_9d, x
 AE23: B9 D4 03 lda $03d4, y
 AE26: 38       sec
 AE27: E9 01    sbc #$01
@@ -8594,8 +8602,8 @@ AEE9: D0 06    bne $aef1
 AEEB: 20 F6 5B jsr move_players_on_field_5bf6
 AEEE: 20 66 66 jsr $6666
 AEF1: A9 00    lda #$00
-AEF3: 85 4C    sta $4c
-AEF5: A6 4C    ldx $4c
+AEF3: 85 4C    sta current_object_index_4c
+AEF5: A6 4C    ldx current_object_index_4c
 AEF7: A5 46    lda game_state_bits_46
 AEF9: 29 01    and #$01
 AEFB: D0 3F    bne $af3c
@@ -8607,7 +8615,7 @@ AF05: A5 46    lda game_state_bits_46
 AF07: 4A       lsr a
 AF08: 4A       lsr a
 AF09: 4A       lsr a
-AF0A: 45 4C    eor $4c
+AF0A: 45 4C    eor current_object_index_4c
 AF0C: 29 02    and #$02
 AF0E: F0 02    beq $af12
 AF10: A0 9E    ldy #$9e
@@ -8630,7 +8638,7 @@ AF33: 4C 39 AF jmp $af39
 AF36: 20 D8 B0 jsr $b0d8
 ; commenting this freezes the game
 AF39: 20 30 91 jsr $9130
-AF3C: A6 4C    ldx $4c
+AF3C: A6 4C    ldx current_object_index_4c
 AF3E: BD 0A 03 lda $030a, x
 AF41: 10 15    bpl $af58
 AF43: 29 40    and #$40
@@ -8644,8 +8652,8 @@ AF50: BD 3A 02 lda $023a, x
 AF53: 09 40    ora #$40
 AF55: 9D 3A 02 sta $023a, x
 AF58: 20 B5 E1 jsr display_sprites_e1b5
-AF5B: E6 4C    inc $4c
-AF5D: A5 4C    lda $4c
+AF5B: E6 4C    inc current_object_index_4c
+AF5D: A5 4C    lda current_object_index_4c
 AF5F: C9 04    cmp #$04
 AF61: 90 92    bcc $aef5
 AF63: 60       rts
@@ -8665,14 +8673,14 @@ AF7E: B0 02    bcs $af82
 AF80: 95 47    sta $47, x
 AF82: 20 F6 5B jsr move_players_on_field_5bf6
 AF85: A9 03    lda #$03
-AF87: 85 4C    sta $4c
-AF89: A6 4C    ldx $4c
+AF87: 85 4C    sta current_object_index_4c
+AF89: A6 4C    ldx current_object_index_4c
 AF8B: 20 2D 70 jsr $702d
-AF8E: A5 4C    lda $4c
+AF8E: A5 4C    lda current_object_index_4c
 AF90: AA       tax
 AF91: 29 01    and #$01
 AF93: 85 00    sta $00
-AF95: A5 4C    lda $4c
+AF95: A5 4C    lda current_object_index_4c
 AF97: 95 65    sta $65, x
 AF99: 4A       lsr a
 AF9A: A8       tay
@@ -8723,18 +8731,18 @@ AFF1: 09 80    ora #$80
 AFF3: 95 73    sta $73, x
 AFF5: A9 01    lda #$01
 AFF7: 9D 3A 02 sta $023a, x
-AFFA: C6 4C    dec $4c
+AFFA: C6 4C    dec current_object_index_4c
 AFFC: 10 8B    bpl $af89
 AFFE: 60       rts
 
 B00B: A2 03    ldx #$03
 B00D: A9 40    lda #$40
 B00F: 85 00    sta $00
-B011: B5 8F    lda player_logical_x_8f, x
+B011: B5 8F    lda objects_logical_x_array_8f, x
 B013: 38       sec
 B014: E5 93    sbc ball_logical_x_93
 B016: 85 10    sta screen_source_pointer_0010
-B018: B5 9D    lda player_side_9d, x
+B018: B5 9D    lda objects_side_array_9d, x
 B01A: E5 A1    sbc ball_side_a1
 B01C: 85 11    sta $11
 B01E: 10 09    bpl $b029
@@ -8747,7 +8755,7 @@ B02B: A4 11    ldy $11
 B02D: F0 02    beq $b031
 B02F: A9 FF    lda #$ff
 B031: 9D 3B 03 sta $033b, x
-B034: B5 B9    lda player_logical_y_b9, x
+B034: B5 B9    lda objects_logical_y_array_b9, x
 B036: 38       sec
 B037: E5 BD    sbc ball_logical_y_bd
 B039: 85 10    sta screen_source_pointer_0010
@@ -8764,7 +8772,7 @@ B04E: A4 11    ldy $11
 B050: F0 02    beq $b054
 B052: A9 FF    lda #$ff
 B054: 9D 3F 03 sta $033f, x
-B057: B5 E3    lda $e3, x
+B057: B5 E3    lda objects_logical_z_array_e3, x
 B059: 38       sec
 B05A: E5 E7    sbc ball_logical_z_e7
 B05C: 85 10    sta screen_source_pointer_0010
@@ -8786,10 +8794,10 @@ B07C: 60       rts
 B07D: A0 00    ldy #$00
 B07F: A9 00    lda #$00
 B081: 85 00    sta $00
-B083: B9 8F 00 lda player_logical_x_8f, y
+B083: B9 8F 00 lda objects_logical_x_array_8f, y
 B086: 38       sec
 B087: F9 90 00 sbc $0090, y
-B08A: B9 9D 00 lda player_side_9d, y
+B08A: B9 9D 00 lda objects_side_array_9d, y
 B08D: F9 9E 00 sbc $009e, y
 B090: B0 02    bcs $b094
 B092: E6 00    inc $00
@@ -8803,10 +8811,10 @@ B0A2: 20 CD B0 jsr $b0cd
 B0A5: C8       iny
 B0A6: A9 00    lda #$00
 B0A8: 85 00    sta $00
-B0AA: B9 8F 00 lda player_logical_x_8f, y
+B0AA: B9 8F 00 lda objects_logical_x_array_8f, y
 B0AD: 38       sec
 B0AE: F9 90 00 sbc $0090, y
-B0B1: B9 9D 00 lda player_side_9d, y
+B0B1: B9 9D 00 lda objects_side_array_9d, y
 B0B4: F9 9E 00 sbc $009e, y
 B0B7: 90 02    bcc $b0bb
 B0B9: E6 00    inc $00
@@ -8826,7 +8834,7 @@ B0D3: AA       tax
 B0D4: 98       tya
 B0D5: 95 5F    sta $5f, x
 B0D7: 60       rts
-B0D8: A5 4C    lda $4c
+B0D8: A5 4C    lda current_object_index_4c
 B0DA: 4A       lsr a
 B0DB: AA       tax
 B0DC: 20 B7 F7 jsr $f7b7
@@ -8841,7 +8849,7 @@ B0EF: 90 02    bcc $b0f3
 B0F1: 09 10    ora #$10
 B0F3: AA       tax
 B0F4: BD 5C B1 lda $b15c, x
-B0F7: A6 4C    ldx $4c
+B0F7: A6 4C    ldx current_object_index_4c
 B0F9: 9D CC 03 sta $03cc, x
 B0FC: E4 4F    cpx $4f
 B0FE: F0 29    beq $b129
@@ -8910,7 +8918,7 @@ B1A5: 29 10    and #$10
 B1A7: 4A       lsr a
 B1A8: 4A       lsr a
 B1A9: 4A       lsr a
-B1AA: 45 4C    eor $4c
+B1AA: 45 4C    eor current_object_index_4c
 B1AC: 29 02    and #$02
 B1AE: F0 10    beq $b1c0
 B1B0: D0 4A    bne $b1fc
@@ -8919,15 +8927,15 @@ B1B5: 29 10    and #$10
 B1B7: 4A       lsr a
 B1B8: 4A       lsr a
 B1B9: 4A       lsr a
-B1BA: 45 4C    eor $4c
+B1BA: 45 4C    eor current_object_index_4c
 B1BC: 29 02    and #$02
 B1BE: D0 3C    bne $b1fc
-B1C0: A6 4C    ldx $4c
+B1C0: A6 4C    ldx current_object_index_4c
 B1C2: BD 16 03 lda $0316, x
 B1C5: 29 7F    and #$7f
 B1C7: C9 0B    cmp #$0b
 B1C9: D0 1A    bne $b1e5
-B1CB: A5 4C    lda $4c
+B1CB: A5 4C    lda current_object_index_4c
 B1CD: 49 01    eor #$01
 B1CF: A8       tay
 B1D0: B9 0A 03 lda $030a, y
@@ -8941,20 +8949,20 @@ B1DF: 90 04    bcc $b1e5
 B1E1: A9 0D    lda #$0d
 B1E3: D0 03    bne $b1e8
 B1E5: 20 FE B1 jsr $b1fe
-B1E8: A6 4C    ldx $4c
+B1E8: A6 4C    ldx current_object_index_4c
 B1EA: 09 80    ora #$80
-B1EC: 85 02    sta unpack_mode_02
+B1EC: 85 02    sta unpack_mode_and_misc_02
 B1EE: 5D 1A 03 eor $031a, x
 B1F1: 29 7F    and #$7f
 B1F3: F0 05    beq $b1fa
-B1F5: A5 02    lda unpack_mode_02
+B1F5: A5 02    lda unpack_mode_and_misc_02
 B1F7: 9D 27 03 sta $0327, x
 B1FA: 38       sec
 B1FB: 60       rts
 B1FC: 18       clc
 B1FD: 60       rts
 B1FE: 20 B9 C7 jsr $c7b9
-B201: A6 4C    ldx $4c
+B201: A6 4C    ldx current_object_index_4c
 B203: BD 37 03 lda $0337, x
 B206: 29 80    and #$80
 B208: DD E9 B2 cmp $b2e9, x
@@ -8980,7 +8988,7 @@ B237: A9 00    lda #$00
 B239: 85 01    sta $01
 B23B: BD 90 03 lda $0390, x
 B23E: 38       sec
-B23F: F5 B9    sbc player_logical_y_b9, x
+B23F: F5 B9    sbc objects_logical_y_array_b9, x
 B241: B0 06    bcs $b249
 B243: 49 FF    eor #$ff
 B245: 69 01    adc #$01
@@ -9031,7 +9039,7 @@ B2A2: AD ED 03 lda $03ed
 B2A5: 85 D4    sta $d4
 B2A7: A9 0D    lda #$0d
 B2A9: 20 4A B4 jsr $b44a
-B2AC: A6 4C    ldx $4c
+B2AC: A6 4C    ldx current_object_index_4c
 B2AE: 9D 2B 03 sta player_direction_032b, x
 B2B1: A0 13    ldy #$13
 B2B3: C9 D0    cmp #$d0
@@ -9056,12 +9064,12 @@ B2D7: C9 10    cmp #$10
 B2D9: 90 F5    bcc $b2d0
 B2DB: A0 15    ldy #$15
 B2DD: AD EC 03 lda $03ec
-B2E0: D5 B9    cmp player_logical_y_b9, x
+B2E0: D5 B9    cmp objects_logical_y_array_b9, x
 B2E2: B0 EC    bcs $b2d0
 B2E4: A0 16    ldy #$16
 B2E6: 4C D0 B2 jmp $b2d0
 
-B2ED: A6 4C    ldx $4c
+B2ED: A6 4C    ldx current_object_index_4c
 B2EF: A5 00    lda $00
 B2F1: 29 20    and #$20
 B2F3: F0 69    beq $b35e
@@ -9079,7 +9087,7 @@ B30A: 29 10    and #$10
 B30C: 4A       lsr a
 B30D: 4A       lsr a
 B30E: 4A       lsr a
-B30F: 45 4C    eor $4c
+B30F: 45 4C    eor current_object_index_4c
 B311: 29 02    and #$02
 B313: D0 08    bne $b31d
 B315: A5 56    lda $56
@@ -9094,7 +9102,7 @@ B326: 8A       txa
 B327: 4A       lsr a
 B328: A8       tay
 B329: B9 5F 00 lda $005f, y
-B32C: C5 4C    cmp $4c
+B32C: C5 4C    cmp current_object_index_4c
 B32E: F0 09    beq $b339
 B330: 8A       txa
 B331: 49 01    eor #$01
@@ -9129,7 +9137,7 @@ B36D: A9 00    lda #$00
 B36F: 9D D4 03 sta $03d4, x
 B372: A0 01    ldy #$01
 B374: A5 4F    lda $4f
-B376: C5 4C    cmp $4c
+B376: C5 4C    cmp current_object_index_4c
 B378: D0 02    bne $b37c
 B37A: A0 03    ldy #$03
 B37C: 84 00    sty $00
@@ -9144,7 +9152,7 @@ B38D: A9 03    lda #$03
 B38F: 9D D4 03 sta $03d4, x
 B392: 18       clc
 B393: 60       rts
-B394: A6 4C    ldx $4c
+B394: A6 4C    ldx current_object_index_4c
 B396: BD 0E 03 lda $030e, x
 B399: 29 08    and #$08
 B39B: F0 1E    beq $b3bb
@@ -9171,7 +9179,7 @@ B3C9: 4C E8 B1 jmp $b1e8
 B3CC: 18       clc
 B3CD: 60       rts
 
-B3EC: A6 4C    ldx $4c
+B3EC: A6 4C    ldx current_object_index_4c
 B3EE: BD 0E 03 lda $030e, x
 B3F1: 29 08    and #$08
 B3F3: F0 04    beq $b3f9
@@ -9185,7 +9193,7 @@ B401: A5 56    lda $56
 B403: 4A       lsr a
 B404: 4A       lsr a
 B405: 4A       lsr a
-B406: 45 4C    eor $4c
+B406: 45 4C    eor current_object_index_4c
 B408: 29 02    and #$02
 B40A: A9 00    lda #$00
 B40C: 4C E8 B1 jmp $b1e8
@@ -9225,11 +9233,11 @@ B44F: 98       tya
 B450: 48       pha
 B451: 08       php
 B452: A6 1B    ldx $1b
-B454: B5 8F    lda player_logical_x_8f, x
+B454: B5 8F    lda objects_logical_x_array_8f, x
 B456: 85 10    sta screen_source_pointer_0010
-B458: B5 9D    lda player_side_9d, x
+B458: B5 9D    lda objects_side_array_9d, x
 B45A: 85 11    sta $11
-B45C: B5 B9    lda player_logical_y_b9, x
+B45C: B5 B9    lda objects_logical_y_array_b9, x
 B45E: 85 12    sta multipurpose_12
 B460: B5 C7    lda $c7, x
 B462: 85 13    sta multipurpose_13
@@ -9242,12 +9250,12 @@ B46C: 48       pha
 B46D: 98       tya
 B46E: 48       pha
 B46F: 08       php
-B470: A6 4C    ldx $4c
-B472: B5 8F    lda player_logical_x_8f, x
+B470: A6 4C    ldx current_object_index_4c
+B472: B5 8F    lda objects_logical_x_array_8f, x
 B474: 85 14    sta multipurpose_14
-B476: B5 9D    lda player_side_9d, x
+B476: B5 9D    lda objects_side_array_9d, x
 B478: 85 15    sta $15
-B47A: B5 B9    lda player_logical_y_b9, x
+B47A: B5 B9    lda objects_logical_y_array_b9, x
 B47C: 85 16    sta screen_attribute_dest_address_16
 B47E: B5 C7    lda $c7, x
 B480: 85 17    sta $17
@@ -9289,17 +9297,17 @@ B4BE: E5 16    sbc screen_attribute_dest_address_16
 B4C0: 85 01    sta $01
 B4C2: A5 13    lda multipurpose_13
 B4C4: E5 17    sbc $17
-B4C6: 85 02    sta unpack_mode_02
+B4C6: 85 02    sta unpack_mode_and_misc_02
 B4C8: 10 16    bpl $b4e0
 B4CA: 49 FF    eor #$ff
-B4CC: 85 02    sta unpack_mode_02
+B4CC: 85 02    sta unpack_mode_and_misc_02
 B4CE: A5 01    lda $01
 B4D0: 49 FF    eor #$ff
 B4D2: 69 01    adc #$01
 B4D4: 85 01    sta $01
-B4D6: A5 02    lda unpack_mode_02
+B4D6: A5 02    lda unpack_mode_and_misc_02
 B4D8: 69 00    adc #$00
-B4DA: 85 02    sta unpack_mode_02
+B4DA: 85 02    sta unpack_mode_and_misc_02
 B4DC: A9 01    lda #$01
 B4DE: 85 00    sta $00
 B4E0: A5 00    lda $00
@@ -9311,7 +9319,7 @@ B4E8: 90 45    bcc $b52f
 B4EA: A5 01    lda $01
 B4EC: E5 04    sbc $04
 B4EE: 85 1B    sta $1b
-B4F0: A5 02    lda unpack_mode_02
+B4F0: A5 02    lda unpack_mode_and_misc_02
 B4F2: E5 05    sbc $05
 B4F4: 85 1C    sta $1c
 B4F6: A6 07    ldx unknown_07
@@ -9321,7 +9329,7 @@ B4FD: B0 1B    bcs $b51a
 B4FF: A9 04    lda #$04
 B501: 05 07    ora unknown_07
 B503: 85 07    sta unknown_07
-B505: A5 02    lda unpack_mode_02
+B505: A5 02    lda unpack_mode_and_misc_02
 B507: D0 06    bne $b50f
 B509: A9 08    lda #$08
 B50B: C5 01    cmp $01
@@ -9362,12 +9370,12 @@ B54A: 48       pha
 B54B: A5 01    lda $01
 B54D: 38       sec
 B54E: E5 04    sbc $04
-B550: A5 02    lda unpack_mode_02
+B550: A5 02    lda unpack_mode_and_misc_02
 B552: E5 05    sbc $05
 B554: 90 0D    bcc $b563
 B556: A5 01    lda $01
 B558: 85 12    sta multipurpose_12
-B55A: A5 02    lda unpack_mode_02
+B55A: A5 02    lda unpack_mode_and_misc_02
 B55C: A6 04    ldx $04
 B55E: A4 05    ldy $05
 B560: 4C 73 B5 jmp $b573
@@ -9378,7 +9386,7 @@ B569: A5 04    lda $04
 B56B: 85 12    sta multipurpose_12
 B56D: A5 05    lda $05
 B56F: A6 01    ldx $01
-B571: A4 02    ldy unpack_mode_02
+B571: A4 02    ldy unpack_mode_and_misc_02
 B573: 85 13    sta multipurpose_13
 B575: 86 10    stx screen_source_pointer_0010
 B577: 84 11    sty $11
@@ -9417,7 +9425,7 @@ B5AE: 85 10    sta screen_source_pointer_0010
 B5B0: 8A       txa
 B5B1: 60       rts
 
-B5C2: A6 4C    ldx $4c
+B5C2: A6 4C    ldx current_object_index_4c
 B5C4: BD 54 02 lda $0254, x
 B5C7: 85 00    sta $00
 B5C9: BD 61 02 lda $0261, x
@@ -9429,17 +9437,17 @@ B5D6: 18       clc
 B5D7: 75 81    adc $81, x
 B5D9: 95 81    sta $81, x
 B5DB: A5 11    lda $11
-B5DD: 9D 7B 02 sta $027b, x
+B5DD: 9D 7B 02 sta objects_x_speed_array_027b, x
 B5E0: 08       php
-B5E1: 75 8F    adc player_logical_x_8f, x
-B5E3: 95 8F    sta player_logical_x_8f, x
-B5E5: B5 9D    lda player_side_9d, x
+B5E1: 75 8F    adc objects_logical_x_array_8f, x
+B5E3: 95 8F    sta objects_logical_x_array_8f, x
+B5E5: B5 9D    lda objects_side_array_9d, x
 B5E7: 69 00    adc #$00
 B5E9: 28       plp
 B5EA: 10 03    bpl $b5ef
 B5EC: 18       clc
 B5ED: 69 FF    adc #$ff
-B5EF: 95 9D    sta player_side_9d, x
+B5EF: 95 9D    sta objects_side_array_9d, x
 B5F1: A5 12    lda multipurpose_12
 B5F3: 9D 88 02 sta $0288, x
 B5F6: 18       clc
@@ -9448,8 +9456,8 @@ B5F9: 95 AB    sta $ab, x
 B5FB: A5 13    lda multipurpose_13
 B5FD: 9D 95 02 sta $0295, x
 B600: 08       php
-B601: 75 B9    adc player_logical_y_b9, x
-B603: 95 B9    sta player_logical_y_b9, x
+B601: 75 B9    adc objects_logical_y_array_b9, x
+B603: 95 B9    sta objects_logical_y_array_b9, x
 B605: B5 C7    lda $c7, x
 B607: 69 00    adc #$00
 B609: 28       plp
@@ -9458,15 +9466,19 @@ B60C: 18       clc
 B60D: 69 FF    adc #$ff
 B60F: 95 C7    sta $c7, x
 B611: 60       rts
-B612: A6 4C    ldx $4c
+
+
+; called mostly for ball but also for jumping players
+parabolic_movement_b612:
+B612: A6 4C    ldx current_object_index_4c
 B614: B5 AB    lda $ab, x
 B616: 18       clc
 B617: 7D 88 02 adc $0288, x
 B61A: 95 AB    sta $ab, x
 B61C: BD 95 02 lda $0295, x
 B61F: 08       php
-B620: 75 B9    adc player_logical_y_b9, x
-B622: 95 B9    sta player_logical_y_b9, x
+B620: 75 B9    adc objects_logical_y_array_b9, x
+B622: 95 B9    sta objects_logical_y_array_b9, x
 B624: B5 C7    lda $c7, x
 B626: 69 00    adc #$00
 B628: 28       plp
@@ -9480,8 +9492,8 @@ B633: 7D A2 02 adc $02a2, x
 B636: 95 D5    sta $d5, x
 B638: BD AF 02 lda $02af, x
 B63B: 08       php
-B63C: 75 E3    adc $e3, x
-B63E: 95 E3    sta $e3, x
+B63C: 75 E3    adc objects_logical_z_array_e3, x
+B63E: 95 E3    sta objects_logical_z_array_e3, x
 B640: B5 F1    lda $f1, x
 B642: 69 00    adc #$00
 B644: 28       plp
@@ -9493,17 +9505,20 @@ B64C: BD 6E 02 lda $026e, x
 B64F: 18       clc
 B650: 75 81    adc $81, x
 B652: 95 81    sta $81, x
-B654: BD 7B 02 lda $027b, x
+; apply speed on object (X axis)
+B654: BD 7B 02 lda objects_x_speed_array_027b, x
 B657: 08       php
-B658: 75 8F    adc player_logical_x_8f, x
-B65A: 95 8F    sta player_logical_x_8f, x
-B65C: B5 9D    lda player_side_9d, x
+; can also be applied to the ball which comes after the player in array
+B658: 75 8F    adc objects_logical_x_array_8f, x
+B65A: 95 8F    sta objects_logical_x_array_8f, x
+; side depends on carry as middle screen is at x=256
+B65C: B5 9D    lda objects_side_array_9d, x
 B65E: 69 00    adc #$00
 B660: 28       plp
 B661: 10 03    bpl $b666
 B663: 18       clc
 B664: 69 FF    adc #$ff
-B666: 95 9D    sta player_side_9d, x
+B666: 95 9D    sta objects_side_array_9d, x
 B668: BD A2 02 lda $02a2, x
 B66B: 38       sec
 B66C: FD BC 02 sbc $02bc, x
@@ -9512,6 +9527,7 @@ B672: BD AF 02 lda $02af, x
 B675: FD C9 02 sbc $02c9, x
 B678: 9D AF 02 sta $02af, x
 B67B: 60       rts
+
 B67C: 48       pha
 B67D: 8A       txa
 B67E: 48       pha
@@ -9537,18 +9553,18 @@ B699: B9 B7 B6 lda $b6b7, y
 B69C: 08       php
 B69D: A5 00    lda $00
 B69F: 29 1F    and #$1f
-B6A1: 95 02    sta unpack_mode_02, x
+B6A1: 95 02    sta unpack_mode_and_misc_02, x
 B6A3: 28       plp
 B6A4: 10 07    bpl $b6ad
 B6A6: A9 20    lda #$20
 B6A8: 38       sec
-B6A9: F5 02    sbc unpack_mode_02, x
-B6AB: 95 02    sta unpack_mode_02, x
+B6A9: F5 02    sbc unpack_mode_and_misc_02, x
+B6AB: 95 02    sta unpack_mode_and_misc_02, x
 B6AD: 8A       txa
 B6AE: 49 01    eor #$01
 B6B0: AA       tax
 B6B1: A9 20    lda #$20
-B6B3: 95 02    sta unpack_mode_02, x
+B6B3: 95 02    sta unpack_mode_and_misc_02, x
 B6B5: 60       rts
 
 B6BE: A2 00    ldx #$00
@@ -9556,7 +9572,7 @@ B6C0: A0 00    ldy #$00
 B6C2: A9 00    lda #$00
 B6C4: 85 11    sta $11
 B6C6: 85 13    sta multipurpose_13
-B6C8: B5 02    lda unpack_mode_02, x
+B6C8: B5 02    lda unpack_mode_and_misc_02, x
 B6CA: 85 10    sta screen_source_pointer_0010
 B6CC: A5 01    lda $01
 B6CE: 85 12    sta multipurpose_12
@@ -9612,15 +9628,15 @@ B727: A9 00    lda #$00
 B729: 85 1B    sta $1b
 B72B: 85 1D    sta base_screen_pointer_list_001d
 B72D: 85 24    sta $24
-B72F: B5 8F    lda player_logical_x_8f, x
+B72F: B5 8F    lda objects_logical_x_array_8f, x
 B731: 85 29    sta $29
-B733: B5 9D    lda player_side_9d, x
+B733: B5 9D    lda objects_side_array_9d, x
 B735: 30 5B    bmi $b792
 B737: F0 22    beq $b75b
 B739: C9 02    cmp #$02
 B73B: B0 51    bcs $b78e
 B73D: E6 24    inc $24
-B73F: B5 8F    lda player_logical_x_8f, x
+B73F: B5 8F    lda objects_logical_x_array_8f, x
 B741: C9 C0    cmp #$c0
 B743: B0 09    bcs $b74e
 B745: C9 90    cmp #$90
@@ -9639,7 +9655,7 @@ B75B: B5 C7    lda $c7, x
 B75D: 10 05    bpl $b764
 B75F: A0 07    ldy #$07
 B761: 4C 78 B7 jmp $b778
-B764: B5 B9    lda player_logical_y_b9, x
+B764: B5 B9    lda objects_logical_y_array_b9, x
 B766: 85 1B    sta $1b
 B768: A9 00    lda #$00
 B76A: A0 00    ldy #$00
@@ -9665,7 +9681,7 @@ B790: 85 1B    sta $1b
 B792: 4C 94 B8 jmp $b894
 B795: C0 03    cpy #$03
 B797: D0 08    bne $b7a1
-B799: B5 B9    lda player_logical_y_b9, x
+B799: B5 B9    lda objects_logical_y_array_b9, x
 B79B: C9 40    cmp #$40
 B79D: 90 02    bcc $b7a1
 B79F: A0 08    ldy #$08
@@ -9687,7 +9703,7 @@ B7CB: C5 29    cmp $29
 B7CD: B0 04    bcs $b7d3
 B7CF: C8       iny
 B7D0: 4C C8 B7 jmp $b7c8
-B7D3: B5 9D    lda player_side_9d, x
+B7D3: B5 9D    lda objects_side_array_9d, x
 B7D5: 0A       asl a
 B7D6: 0A       asl a
 B7D7: 0A       asl a
@@ -9722,7 +9738,7 @@ B80E: A5 27    lda $27
 B810: F0 10    beq $b822
 B812: C9 02    cmp #$02
 B814: F0 0C    beq $b822
-B816: B5 9D    lda player_side_9d, x
+B816: B5 9D    lda objects_side_array_9d, x
 B818: 0A       asl a
 B819: 0A       asl a
 B81A: 0A       asl a
@@ -9748,7 +9764,7 @@ B83D: A5 26    lda $26
 B83F: 0A       asl a
 B840: 0A       asl a
 B841: 79 EE B8 adc $b8ee, y
-B844: D5 B9    cmp player_logical_y_b9, x
+B844: D5 B9    cmp objects_logical_y_array_b9, x
 B846: 90 02    bcc $b84a
 B848: E6 27    inc $27
 B84A: 18       clc
@@ -9759,7 +9775,7 @@ B850: 65 27    adc $27
 B852: A8       tay
 B853: 4C 16 B8 jmp $b816
 B856: 38       sec
-B857: B5 8F    lda player_logical_x_8f, x
+B857: B5 8F    lda objects_logical_x_array_8f, x
 B859: E9 F0    sbc #$f0
 B85B: 85 29    sta $29
 B85D: A5 2A    lda $2a
@@ -9777,12 +9793,12 @@ B871: 85 24    sta $24
 B873: 38       sec
 B874: B9 FA B8 lda $b8fa, y
 B877: E5 24    sbc $24
-B879: D5 B9    cmp player_logical_y_b9, x
+B879: D5 B9    cmp objects_logical_y_array_b9, x
 B87B: B0 01    bcs $b87e
 B87D: C8       iny
 B87E: B9 FF B8 lda $b8ff, y
 B881: 4C 9C B8 jmp $b89c
-B884: B5 9D    lda player_side_9d, x
+B884: B5 9D    lda objects_side_array_9d, x
 B886: 85 1B    sta $1b
 B888: A5 29    lda $29
 B88A: C9 F8    cmp #$f8
@@ -9865,7 +9881,7 @@ B9FA: A5 46    lda game_state_bits_46
 B9FC: 29 08    and #$08
 B9FE: D0 79    bne $ba79
 BA00: A9 04    lda #$04
-BA02: 85 4C    sta $4c
+BA02: 85 4C    sta current_object_index_4c
 BA04: A9 16    lda #$16
 BA06: 85 69    sta $69
 BA08: 20 7A BA jsr move_ball_ba7a
@@ -9893,7 +9909,7 @@ BA33: 68       pla
 BA34: 85 F5    sta $f5
 BA36: 68       pla
 BA37: 85 E7    sta ball_logical_z_e7
-BA39: A5 4C    lda $4c
+BA39: A5 4C    lda current_object_index_4c
 BA3B: 20 1F B7 jsr $b71f
 BA3E: 8D 77 03 sta $0377
 BA41: AD 13 04 lda $0413
@@ -9939,10 +9955,10 @@ BAB5: AD FF 03 lda $03ff
 BAB8: D0 0E    bne $bac8
 BABA: A9 00    lda #$00
 BABC: 8D 72 02 sta $0272
-BABF: 8D 7F 02 sta $027f
+BABF: 8D 7F 02 sta ball_x_speed_027f
 BAC2: 8D 8C 02 sta $028c
 BAC5: 8D 99 02 sta $0299
-BAC8: 20 12 B6 jsr $b612
+BAC8: 20 12 B6 jsr parabolic_movement_b612
 BACB: A5 F5    lda $f5
 BACD: 30 07    bmi $bad6
 BACF: 05 E7    ora ball_logical_z_e7
@@ -10004,7 +10020,7 @@ BB4A: 8A       txa
 BB4B: 20 B8 D7 jsr queue_sound_d7b8
 BB4E: A9 0D    lda #$0d
 BB50: 8D E0 03 sta $03e0
-BB53: A5 4C    lda $4c
+BB53: A5 4C    lda current_object_index_4c
 BB55: 20 1F B7 jsr $b71f
 BB58: 8D E9 03 sta $03e9
 BB5B: 29 0F    and #$0f
@@ -10063,7 +10079,7 @@ BBD1: 8D F4 02 sta $02f4
 BBD4: B9 F1 BB lda $bbf1, y
 BBD7: 18       clc
 BBD8: 6D F4 02 adc $02f4
-BBDB: 2C 7F 02 bit $027f
+BBDB: 2C 7F 02 bit ball_x_speed_027f
 BBDE: 30 02    bmi $bbe2
 BBE0: 49 80    eor #$80
 BBE2: 85 77    sta $77
@@ -10072,8 +10088,8 @@ BBE7: 09 01    ora #$01
 BBE9: 8D 3E 02 sta $023e
 BBEC: 60       rts
 
-ball_in_air_after_spike_bbf5:
-BBF5: 20 12 B6 jsr $b612
+ball_in_play_bbf5:
+BBF5: 20 12 B6 jsr parabolic_movement_b612
 BBF8: A5 F5    lda $f5
 BBFA: 30 04    bmi $bc00
 BBFC: 05 E7    ora ball_logical_z_e7
@@ -10161,25 +10177,28 @@ BC96: 60       rts
 
 ball_before_serve_bc97:
 ; steal the coords on the player who serves
+; to copy to the ball
 BC97: A6 4F    ldx $4f
-BC99: B5 8F    lda player_logical_x_8f, x
+BC99: B5 8F    lda objects_logical_x_array_8f, x
 BC9B: 85 93    sta ball_logical_x_93
-BC9D: B5 9D    lda player_side_9d, x
+BC9D: B5 9D    lda objects_side_array_9d, x
 BC9F: 85 A1    sta ball_side_a1
-BCA1: B5 B9    lda player_logical_y_b9, x
+BCA1: B5 B9    lda objects_logical_y_array_b9, x
 BCA3: 38       sec
 BCA4: E9 01    sbc #$01
 BCA6: 85 BD    sta ball_logical_y_bd
 BCA8: B5 C7    lda $c7, x
 BCAA: E9 00    sbc #$00
 BCAC: 85 CB    sta ball_kind_of_z_cb
-BCAE: B5 E3    lda $e3, x
+BCAE: B5 E3    lda objects_logical_z_array_e3, x
 BCB0: 18       clc
+; slightly higher than the player feet!
 BCB1: 69 18    adc #$18
 BCB3: 85 E7    sta ball_logical_z_e7
 BCB5: A9 00    lda #$00
 BCB7: 85 F5    sta $f5
 BCB9: 60       rts
+
 BCBA: A5 93    lda ball_logical_x_93
 BCBC: 38       sec
 BCBD: E9 08    sbc #$08
@@ -10270,7 +10289,7 @@ BD86: 8A       txa
 BD87: 48       pha
 BD88: 98       tya
 BD89: 48       pha
-BD8A: A6 4C    ldx $4c
+BD8A: A6 4C    ldx current_object_index_4c
 BD8C: BD 0A 03 lda $030a, x
 BD8F: 29 02    and #$02
 BD91: F0 03    beq $bd96
@@ -10280,7 +10299,7 @@ BD99: C9 0F    cmp #$0f
 BD9B: F0 F6    beq $bd93
 BD9D: C9 0D    cmp #$0d
 BD9F: F0 F2    beq $bd93
-BDA1: A5 4C    lda $4c
+BDA1: A5 4C    lda current_object_index_4c
 BDA3: 29 02    and #$02
 BDA5: 0A       asl a
 BDA6: 0A       asl a
@@ -10323,7 +10342,7 @@ BDF2: AD 08 04 lda $0408
 BDF5: 8D 09 04 sta $0409
 BDF8: A9 00    lda #$00
 BDFA: 8D 08 04 sta $0408
-BDFD: A6 4C    ldx $4c
+BDFD: A6 4C    ldx current_object_index_4c
 BDFF: BD 1A 03 lda $031a, x
 BE02: 29 7F    and #$7f
 BE04: 38       sec
@@ -10340,7 +10359,7 @@ BE18: 10 41    bpl $be5b
 BE1A: A5 53    lda $53
 BE1C: C9 04    cmp #$04
 BE1E: B0 2C    bcs $be4c
-BE20: A5 4C    lda $4c
+BE20: A5 4C    lda current_object_index_4c
 BE22: CD 11 04 cmp $0411
 BE25: 8D 11 04 sta $0411
 BE28: D0 16    bne $be40
@@ -10348,7 +10367,7 @@ BE2A: AD E1 03 lda $03e1
 BE2D: F0 11    beq $be40
 BE2F: C9 0E    cmp #$0e
 BE31: F0 0D    beq $be40
-BE33: A5 4C    lda $4c
+BE33: A5 4C    lda current_object_index_4c
 BE35: 29 02    and #$02
 BE37: 0A       asl a
 BE38: 0A       asl a
@@ -10387,10 +10406,10 @@ BE9A: A9 06    lda #$06
 BE9C: 85 56    sta $56
 BE9E: A9 40    lda #$40
 BEA0: 8D C0 02 sta $02c0
-BEA3: A6 4C    ldx $4c
+BEA3: A6 4C    ldx current_object_index_4c
 BEA5: A5 E7    lda ball_logical_z_e7
 BEA7: 38       sec
-BEA8: F5 E3    sbc $e3, x
+BEA8: F5 E3    sbc objects_logical_z_array_e3, x
 BEAA: C9 40    cmp #$40
 BEAC: B0 47    bcs $bef5
 BEAE: 20 C9 CD jsr $cdc9
@@ -10415,7 +10434,7 @@ BED8: 4C 53 BF jmp $bf53
 BEDB: A9 0A    lda #$0a
 BEDD: 8D E0 03 sta $03e0
 BEE0: A9 22    lda #$22
-BEE2: A6 4C    ldx $4c
+BEE2: A6 4C    ldx current_object_index_4c
 BEE4: 9D 27 03 sta $0327, x
 BEE7: A9 02    lda #$02
 BEE9: 9D 33 03 sta $0333, x
@@ -10444,7 +10463,7 @@ BF1E: A9 00    lda #$00
 BF20: 85 56    sta $56
 BF22: A9 00    lda #$00
 BF24: 85 53    sta $53
-BF26: A6 4C    ldx $4c
+BF26: A6 4C    ldx current_object_index_4c
 BF28: BD 0E 03 lda $030e, x
 BF2B: 29 F7    and #$f7
 BF2D: 9D 0E 03 sta $030e, x
@@ -10467,13 +10486,13 @@ BF50: 20 88 C5 jsr $c588
 BF53: 20 B9 C7 jsr $c7b9
 BF56: A9 00    lda #$00
 BF58: 8D 0F 04 sta $040f
-BF5B: A6 4C    ldx $4c
+BF5B: A6 4C    ldx current_object_index_4c
 BF5D: A5 56    lda $56
 BF5F: 1D 32 C0 ora $c032, x
 BF62: 85 56    sta $56
 BF64: 20 E7 C8 jsr ball_trajectory_change_c8e7
 BF67: 20 F5 C9 jsr $c9f5
-BF6A: A6 4C    ldx $4c
+BF6A: A6 4C    ldx current_object_index_4c
 BF6C: BD 0A 03 lda $030a, x
 BF6F: 09 02    ora #$02
 BF71: 9D 0A 03 sta $030a, x
@@ -10513,17 +10532,17 @@ BFBA: A2 28    ldx #$28
 BFBC: 20 A2 A9 jsr $a9a2
 BFBF: 8A       txa
 BFC0: 20 B8 D7 jsr queue_sound_d7b8		; play in-game sfx
-BFC3: A5 4C    lda $4c
+BFC3: A5 4C    lda current_object_index_4c
 BFC5: 4A       lsr a
 BFC6: A8       tay
-BFC7: A5 4C    lda $4c
+BFC7: A5 4C    lda current_object_index_4c
 BFC9: 49 01    eor #$01
 BFCB: 99 51 00 sta $0051, y
-BFCE: A6 4C    ldx $4c
+BFCE: A6 4C    ldx current_object_index_4c
 BFD0: BD 0A 03 lda $030a, x
 BFD3: 29 BF    and #$bf
 BFD5: 9D 0A 03 sta $030a, x
-BFD8: A5 4C    lda $4c
+BFD8: A5 4C    lda current_object_index_4c
 BFDA: 49 01    eor #$01
 BFDC: AA       tax
 BFDD: BD 0A 03 lda $030a, x
@@ -10543,20 +10562,20 @@ BFFB: 8D 0A 03 sta $030a
 BFFE: AD 0C 03 lda $030c
 C001: 29 FB    and #$fb
 C003: 8D 0C 03 sta $030c
-C006: A6 4C    ldx $4c
+C006: A6 4C    ldx current_object_index_4c
 C008: BD 16 03 lda $0316, x
 C00B: 29 7F    and #$7f
 C00D: C9 0B    cmp #$0b
 C00F: D0 12    bne $c023
 C011: B9 47 00 lda $0047, y
 C014: 10 0D    bpl $c023
-C016: A5 4C    lda $4c
+C016: A5 4C    lda current_object_index_4c
 C018: 29 02    and #$02
 C01A: A8       tay
 C01B: B9 0A 03 lda $030a, y
 C01E: 09 04    ora #$04
 C020: 99 0A 03 sta $030a, y
-C023: A6 4C    ldx $4c
+C023: A6 4C    ldx current_object_index_4c
 C025: BD 27 03 lda $0327, x
 C028: C9 22    cmp #$22
 C02A: D0 03    bne $c02f
@@ -10570,7 +10589,7 @@ C063: A9 05    lda #$05
 C065: 8D E0 03 sta $03e0
 C068: A9 03    lda #$03
 C06A: 85 56    sta $56
-C06C: A5 4C    lda $4c
+C06C: A5 4C    lda current_object_index_4c
 C06E: AA       tax
 C06F: 4A       lsr a
 C070: A8       tay
@@ -10600,7 +10619,7 @@ C09F: A9 04    lda #$04
 C0A1: 8D E0 03 sta $03e0
 C0A4: A9 01    lda #$01
 C0A6: 85 56    sta $56
-C0A8: A6 4C    ldx $4c
+C0A8: A6 4C    ldx current_object_index_4c
 C0AA: BD 1A 03 lda $031a, x
 C0AD: 29 7F    and #$7f
 C0AF: C9 0F    cmp #$0f
@@ -10613,7 +10632,7 @@ C0BC: D0 35    bne $c0f3
 C0BE: AD E1 03 lda $03e1
 C0C1: C9 0A    cmp #$0a
 C0C3: D0 2E    bne $c0f3
-C0C5: A6 4C    ldx $4c
+C0C5: A6 4C    ldx current_object_index_4c
 C0C7: BD 1A 03 lda $031a, x
 C0CA: 29 7F    and #$7f
 C0CC: 38       sec
@@ -10633,7 +10652,7 @@ C0E9: 09 20    ora #$20
 C0EB: 85 56    sta $56
 C0ED: 20 38 CD jsr $cd38
 C0F0: 4C 53 BF jmp $bf53
-C0F3: A5 4C    lda $4c
+C0F3: A5 4C    lda current_object_index_4c
 C0F5: AA       tax
 C0F6: BC CC 03 ldy $03cc, x
 C0F9: 20 7F 6B jsr $6b7f
@@ -10679,7 +10698,7 @@ C15D: 0A       asl a
 C15E: 85 01    sta $01
 C160: A9 00    lda #$00
 C162: 85 00    sta $00
-C164: A5 4C    lda $4c
+C164: A5 4C    lda current_object_index_4c
 C166: 4A       lsr a
 C167: A8       tay
 C168: B9 47 00 lda $0047, y
@@ -10711,7 +10730,7 @@ C46D: A9 08    lda #$08
 C46F: 8D E0 03 sta $03e0
 C472: A9 02    lda #$02
 C474: 85 56    sta $56
-C476: A5 4C    lda $4c
+C476: A5 4C    lda current_object_index_4c
 C478: AA       tax
 C479: 4A       lsr a
 C47A: A8       tay
@@ -10759,23 +10778,23 @@ C4E1: A9 00    lda #$00
 C4E3: 8D 65 02 sta $0265
 C4E6: A9 0E    lda #$0e
 C4E8: 8D E0 03 sta $03e0
-C4EB: A6 4C    ldx $4c
+C4EB: A6 4C    ldx current_object_index_4c
 C4ED: BD 0E 03 lda $030e, x
 C4F0: 29 F7    and #$f7
 C4F2: 9D 0E 03 sta $030e, x
 C4F5: A9 00    lda #$00
 C4F7: 85 F0    sta $f0
 C4F9: 85 FE    sta $fe
-C4FB: B5 8F    lda player_logical_x_8f, x
+C4FB: B5 8F    lda objects_logical_x_array_8f, x
 C4FD: 85 9C    sta $9c
-C4FF: B5 9D    lda player_side_9d, x
+C4FF: B5 9D    lda objects_side_array_9d, x
 C501: 85 AA    sta $aa
-C503: B5 B9    lda player_logical_y_b9, x
+C503: B5 B9    lda objects_logical_y_array_b9, x
 C505: 85 C6    sta $c6
 C507: B5 C7    lda $c7, x
 C509: 85 D4    sta $d4
 C50B: 4C 4D BF jmp $bf4d
-C50E: A6 4C    ldx $4c
+C50E: A6 4C    ldx current_object_index_4c
 C510: A5 4F    lda $4f
 C512: 10 2C    bpl $c540
 C514: BD D4 03 lda $03d4, x
@@ -10804,23 +10823,23 @@ C548: A9 00    lda #$00
 C54A: 85 53    sta $53
 C54C: A9 05    lda #$05
 C54E: 85 56    sta $56
-C550: A5 4C    lda $4c
+C550: A5 4C    lda current_object_index_4c
 C552: AA       tax
 C553: 4A       lsr a
 C554: A8       tay
 C555: AD E0 03 lda $03e0
 C558: C9 0C    cmp #$0c
 C55A: F0 11    beq $c56d
-C55C: B5 B9    lda player_logical_y_b9, x
+C55C: B5 B9    lda objects_logical_y_array_b9, x
 C55E: 85 BD    sta ball_logical_y_bd
-C560: B5 E3    lda $e3, x
+C560: B5 E3    lda objects_logical_z_array_e3, x
 C562: 18       clc
 C563: 69 38    adc #$38
 C565: 85 E7    sta ball_logical_z_e7
 C567: B5 F1    lda $f1, x
 C569: 69 00    adc #$00
 C56B: 85 F5    sta $f5
-C56D: A5 4C    lda $4c
+C56D: A5 4C    lda current_object_index_4c
 C56F: 4A       lsr a
 C570: A8       tay
 C571: B9 47 00 lda $0047, y
@@ -10850,7 +10869,7 @@ C5A3: AD CD 02 lda $02cd
 C5A6: 85 15    sta $15
 C5A8: A9 00    lda #$00
 C5AA: 85 01    sta $01
-C5AC: 85 02    sta unpack_mode_02
+C5AC: 85 02    sta unpack_mode_and_misc_02
 C5AE: 85 03    sta $03
 C5B0: 85 04    sta $04
 C5B2: 85 1B    sta $1b
@@ -10884,13 +10903,13 @@ C5E3: 30 44    bmi $c629
 C5E5: D0 CD    bne $c5b4
 C5E7: 05 10    ora screen_source_pointer_0010
 C5E9: F0 3E    beq $c629
-C5EB: A5 02    lda unpack_mode_02
+C5EB: A5 02    lda unpack_mode_and_misc_02
 C5ED: D0 0A    bne $c5f9
 C5EF: A5 10    lda screen_source_pointer_0010
 C5F1: C9 50    cmp #$50
 C5F3: B0 04    bcs $c5f9
 C5F5: A5 01    lda $01
-C5F7: 85 02    sta unpack_mode_02
+C5F7: 85 02    sta unpack_mode_and_misc_02
 C5F9: A5 03    lda $03
 C5FB: D0 0A    bne $c607
 C5FD: A5 10    lda screen_source_pointer_0010
@@ -10916,7 +10935,7 @@ C624: 85 1B    sta $1b
 C626: 4C B4 C5 jmp $c5b4
 C629: A5 01    lda $01
 C62B: 8D EE 03 sta $03ee
-C62E: A5 02    lda unpack_mode_02
+C62E: A5 02    lda unpack_mode_and_misc_02
 C630: 8D F9 03 sta $03f9
 C633: A5 03    lda $03
 C635: 8D F4 03 sta $03f4
@@ -10924,7 +10943,7 @@ C638: A5 04    lda $04
 C63A: 8D FF 03 sta $03ff
 C63D: AD 72 02 lda $0272
 C640: 85 10    sta screen_source_pointer_0010
-C642: AD 7F 02 lda $027f
+C642: AD 7F 02 lda ball_x_speed_027f
 C645: 85 11    sta $11
 C647: 10 03    bpl $c64c
 C649: 20 98 CF jsr $cf98
@@ -10936,7 +10955,7 @@ C654: A9 00    lda #$00
 C656: 24 01    bit $01
 C658: 10 02    bpl $c65c
 C65A: A9 FF    lda #$ff
-C65C: 85 02    sta unpack_mode_02
+C65C: 85 02    sta unpack_mode_and_misc_02
 C65E: AD EE 03 lda $03ee
 C661: 85 03    sta $03
 C663: 20 60 D1 jsr $d160
@@ -10986,7 +11005,7 @@ C6CB: A9 00    lda #$00
 C6CD: 24 01    bit $01
 C6CF: 10 02    bpl $c6d3
 C6D1: A9 FF    lda #$ff
-C6D3: 85 02    sta unpack_mode_02
+C6D3: 85 02    sta unpack_mode_and_misc_02
 C6D5: AD EE 03 lda $03ee
 C6D8: 85 03    sta $03
 C6DA: 20 60 D1 jsr $d160
@@ -11045,7 +11064,7 @@ C75E: A9 0D    lda #$0d
 C760: 20 1F B7 jsr $b71f
 C763: 8D F3 03 sta $03f3
 C766: 60       rts
-C767: 2C 7F 02 bit $027f
+C767: 2C 7F 02 bit ball_x_speed_027f
 C76A: 30 12    bmi $c77e
 C76C: A5 04    lda $04
 C76E: 18       clc
@@ -11107,14 +11126,14 @@ C7D0: E0 08    cpx #$08
 C7D2: 90 F5    bcc $c7c9
 C7D4: A4 01    ldy $01
 C7D6: B9 D5 C8 lda $c8d5, y
-C7D9: 85 02    sta unpack_mode_02
+C7D9: 85 02    sta unpack_mode_and_misc_02
 C7DB: A6 00    ldx $00
-C7DD: A4 02    ldy unpack_mode_02
-C7DF: B5 8F    lda player_logical_x_8f, x
+C7DD: A4 02    ldy unpack_mode_and_misc_02
+C7DF: B5 8F    lda objects_logical_x_array_8f, x
 C7E1: 38       sec
 C7E2: F9 EA 03 sbc $03ea, y
 C7E5: 85 10    sta screen_source_pointer_0010
-C7E7: B5 9D    lda player_side_9d, x
+C7E7: B5 9D    lda objects_side_array_9d, x
 C7E9: F9 EB 03 sbc $03eb, y
 C7EC: 85 11    sta $11
 C7EE: 10 03    bpl $c7f3
@@ -11126,8 +11145,8 @@ C7F9: F0 02    beq $c7fd
 C7FB: A9 FF    lda #$ff
 C7FD: 91 08    sta ($08), y
 C7FF: A6 00    ldx $00
-C801: A4 02    ldy unpack_mode_02
-C803: B5 B9    lda player_logical_y_b9, x
+C801: A4 02    ldy unpack_mode_and_misc_02
+C803: B5 B9    lda objects_logical_y_array_b9, x
 C805: 38       sec
 C806: F9 EC 03 sbc $03ec, y
 C809: 85 10    sta screen_source_pointer_0010
@@ -11244,9 +11263,9 @@ C8F2: B6 5F    ldx $5f, y
 C8F4: BD 76 C9 lda $c976, x
 C8F7: 18       clc
 C8F8: 08       php
-C8F9: 75 8F    adc player_logical_x_8f, x
+C8F9: 75 8F    adc objects_logical_x_array_8f, x
 C8FB: 8D 00 04 sta $0400
-C8FE: B5 9D    lda player_side_9d, x
+C8FE: B5 9D    lda objects_side_array_9d, x
 C900: 69 00    adc #$00
 C902: 28       plp
 C903: 10 02    bpl $c907
@@ -11260,12 +11279,12 @@ C911: ED 00 04 sbc $0400
 C914: 85 01    sta $01
 C916: A5 A1    lda ball_side_a1
 C918: ED 01 04 sbc $0401
-C91B: 85 02    sta unpack_mode_02
+C91B: 85 02    sta unpack_mode_and_misc_02
 C91D: 10 03    bpl $c922
 C91F: 20 D6 CF jsr $cfd6
 C922: AD 72 02 lda $0272
 C925: 85 10    sta screen_source_pointer_0010
-C927: AD 7F 02 lda $027f
+C927: AD 7F 02 lda ball_x_speed_027f
 C92A: 85 11    sta $11
 C92C: 10 03    bpl $c931
 C92E: 20 98 CF jsr $cf98
@@ -11299,14 +11318,14 @@ C975: 60       rts
 
 C97A: 48       pha
 C97B: A9 00    lda #$00
-C97D: 85 02    sta unpack_mode_02
+C97D: 85 02    sta unpack_mode_and_misc_02
 C97F: AD 8C 02 lda $028c
 C982: 85 00    sta $00
 C984: AD 99 02 lda $0299
 C987: 85 01    sta $01
 C989: 10 07    bpl $c992
 C98B: A9 FF    lda #$ff
-C98D: 85 02    sta unpack_mode_02
+C98D: 85 02    sta unpack_mode_and_misc_02
 C98F: 20 D6 CF jsr $cfd6
 C992: 68       pla
 C993: 85 03    sta $03
@@ -11377,16 +11396,16 @@ CA0B: 38       sec
 CA0C: F5 81    sbc $81, x
 CA0E: 85 00    sta $00
 CA10: A5 93    lda ball_logical_x_93
-CA12: F5 8F    sbc player_logical_x_8f, x
+CA12: F5 8F    sbc objects_logical_x_array_8f, x
 CA14: 85 01    sta $01
 CA16: A5 A1    lda ball_side_a1
-CA18: F5 9D    sbc player_side_9d, x
-CA1A: 85 02    sta unpack_mode_02
+CA18: F5 9D    sbc objects_side_array_9d, x
+CA1A: 85 02    sta unpack_mode_and_misc_02
 CA1C: 10 03    bpl $ca21
 CA1E: 20 D6 CF jsr $cfd6
 CA21: AD 72 02 lda $0272
 CA24: 85 10    sta screen_source_pointer_0010
-CA26: AD 7F 02 lda $027f
+CA26: AD 7F 02 lda ball_x_speed_027f
 CA29: 85 11    sta $11
 CA2B: 10 03    bpl $ca30
 CA2D: 20 98 CF jsr $cf98
@@ -11443,7 +11462,7 @@ CAA8: 85 00    sta $00
 CAAA: BD 17 04 lda $0417, x
 CAAD: 85 01    sta $01
 CAAF: BD 18 04 lda $0418, x
-CAB2: 85 02    sta unpack_mode_02
+CAB2: 85 02    sta unpack_mode_and_misc_02
 CAB4: 10 03    bpl $cab9
 CAB6: 20 D6 CF jsr $cfd6
 CAB9: E0 00    cpx #$00
@@ -11469,7 +11488,7 @@ CAE4: 85 00    sta $00
 CAE6: AD 17 04 lda $0417
 CAE9: 85 01    sta $01
 CAEB: AD 18 04 lda $0418
-CAEE: 85 02    sta unpack_mode_02
+CAEE: 85 02    sta unpack_mode_and_misc_02
 CAF0: 10 03    bpl $caf5
 CAF2: 20 D6 CF jsr $cfd6
 CAF5: 20 86 D0 jsr $d086
@@ -11479,13 +11498,13 @@ CAFD: 20 D6 CF jsr $cfd6
 CB00: A5 00    lda $00
 CB02: 8D 72 02 sta $0272
 CB05: A5 01    lda $01
-CB07: 8D 7F 02 sta $027f
+CB07: 8D 7F 02 sta ball_x_speed_027f
 CB0A: AD 19 04 lda $0419
 CB0D: 85 00    sta $00
 CB0F: AD 1A 04 lda $041a
 CB12: 85 01    sta $01
 CB14: AD 1B 04 lda $041b
-CB17: 85 02    sta unpack_mode_02
+CB17: 85 02    sta unpack_mode_and_misc_02
 CB19: 10 03    bpl $cb1e
 CB1B: 20 D6 CF jsr $cfd6
 CB1E: 20 86 D0 jsr $d086
@@ -11508,7 +11527,7 @@ CB45: 85 00    sta $00
 CB47: AD 1D 04 lda $041d
 CB4A: 85 01    sta $01
 CB4C: AD 1E 04 lda $041e
-CB4F: 85 02    sta unpack_mode_02
+CB4F: 85 02    sta unpack_mode_and_misc_02
 CB51: 10 03    bpl $cb56
 CB53: 20 D6 CF jsr $cfd6
 CB56: 20 86 D0 jsr $d086
@@ -11521,7 +11540,7 @@ CB66: A5 01    lda $01
 CB68: 8D B3 02 sta $02b3
 CB6B: AD 72 02 lda $0272
 CB6E: 85 10    sta screen_source_pointer_0010
-CB70: AD 7F 02 lda $027f
+CB70: AD 7F 02 lda ball_x_speed_027f
 CB73: 85 11    sta $11
 CB75: 10 03    bpl $cb7a
 CB77: 20 98 CF jsr $cf98
@@ -11530,11 +11549,11 @@ CB7C: 85 00    sta $00
 CB7E: A5 11    lda $11
 CB80: 85 01    sta $01
 CB82: A9 00    lda #$00
-CB84: 85 02    sta unpack_mode_02
+CB84: 85 02    sta unpack_mode_and_misc_02
 CB86: AD 1F 04 lda $041f
 CB89: 85 03    sta $03
 CB8B: 20 60 D1 jsr $d160
-CB8E: 2C 7F 02 bit $027f
+CB8E: 2C 7F 02 bit ball_x_speed_027f
 CB91: 10 03    bpl $cb96
 CB93: 20 F0 CF jsr $cff0
 CB96: A5 93    lda ball_logical_x_93
@@ -11569,7 +11588,7 @@ CBCE: 85 00    sta $00
 CBD0: A5 11    lda $11
 CBD2: 85 01    sta $01
 CBD4: A9 00    lda #$00
-CBD6: 85 02    sta unpack_mode_02
+CBD6: 85 02    sta unpack_mode_and_misc_02
 CBD8: AD 1F 04 lda $041f
 CBDB: 85 03    sta $03
 CBDD: 20 60 D1 jsr $d160
@@ -11615,7 +11634,7 @@ CC2F: 85 00    sta $00
 CC31: A5 11    lda $11
 CC33: 85 01    sta $01
 CC35: A9 00    lda #$00
-CC37: 85 02    sta unpack_mode_02
+CC37: 85 02    sta unpack_mode_and_misc_02
 CC39: AD 1F 04 lda $041f
 CC3C: 85 03    sta $03
 CC3E: 20 60 D1 jsr $d160
@@ -11730,7 +11749,7 @@ CD38: A9 40    lda #$40
 CD3A: 8D C0 02 sta $02c0
 CD3D: 20 9F CD jsr $cd9f
 CD40: 20 9F CD jsr $cd9f
-CD43: A6 4C    ldx $4c
+CD43: A6 4C    ldx current_object_index_4c
 CD45: BD 1A 03 lda $031a, x
 CD48: 29 7F    and #$7f
 CD4A: C9 12    cmp #$12
@@ -11762,7 +11781,7 @@ CD85: AD 09 04 lda $0409
 CD88: C9 02    cmp #$02
 CD8A: 90 12    bcc $cd9e
 CD8C: A9 22    lda #$22
-CD8E: A6 4C    ldx $4c
+CD8E: A6 4C    ldx current_object_index_4c
 CD90: 9D 27 03 sta $0327, x
 CD93: A9 02    lda #$02
 CD95: 9D 33 03 sta $0333, x
@@ -11770,10 +11789,10 @@ CD98: AD 15 04 lda $0415
 CD9B: 9D 54 02 sta $0254, x
 CD9E: 60       rts
 CD9F: 18       clc
-CDA0: 2C 7F 02 bit $027f
+CDA0: 2C 7F 02 bit ball_x_speed_027f
 CDA3: 10 01    bpl $cda6
 CDA5: 38       sec
-CDA6: 6E 7F 02 ror $027f
+CDA6: 6E 7F 02 ror ball_x_speed_027f
 CDA9: 6E 72 02 ror $0272
 CDAC: 60       rts
 CDAD: 18       clc
@@ -11792,13 +11811,13 @@ CDC5: 6E A6 02 ror $02a6
 CDC8: 60       rts
 CDC9: AD 72 02 lda $0272
 CDCC: 85 10    sta screen_source_pointer_0010
-CDCE: AD 7F 02 lda $027f
+CDCE: AD 7F 02 lda ball_x_speed_027f
 CDD1: 85 11    sta $11
 CDD3: 20 98 CF jsr $cf98
 CDD6: A5 10    lda screen_source_pointer_0010
 CDD8: 8D 72 02 sta $0272
 CDDB: A5 11    lda $11
-CDDD: 8D 7F 02 sta $027f
+CDDD: 8D 7F 02 sta ball_x_speed_027f
 CDE0: 60       rts
 CDE1: A2 03    ldx #$03
 CDE3: BD A0 03 lda $03a0, x
@@ -11915,7 +11934,7 @@ CECC: 4A       lsr a
 CECD: 05 7F    ora $7f
 CECF: 85 7F    sta $7f
 CED1: A9 0C    lda #$0c
-CED3: 85 4C    sta $4c
+CED3: 85 4C    sta current_object_index_4c
 CED5: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 CED8: 60       rts
 
@@ -11925,7 +11944,7 @@ CF10: 95 00    sta $00, x
 CF12: E8       inx
 CF13: D0 FB    bne $cf10
 CF15: 60       rts
-CF16: 85 02    sta unpack_mode_02
+CF16: 85 02    sta unpack_mode_and_misc_02
 CF18: A9 00    lda #$00
 CF1A: 85 00    sta $00
 CF1C: A9 02    lda #$02
@@ -11937,7 +11956,7 @@ CF26: C8       iny
 CF27: D0 FB    bne $cf24
 CF29: E6 01    inc $01
 CF2B: A5 01    lda $01
-CF2D: C5 02    cmp unpack_mode_02
+CF2D: C5 02    cmp unpack_mode_and_misc_02
 CF2F: 90 F1    bcc $cf22
 CF31: 20 8F D8 jsr handle_cocktail_mode_d88f
 CF34: 60       rts
@@ -12032,6 +12051,8 @@ CFCF: 49 FF    eor #$ff
 CFD1: 69 00    adc #$00
 CFD3: 85 11    sta $11
 CFD5: 60       rts
+
+; < compute stuff on $00,$01,$02 (updated)
 CFD6: A5 00    lda $00
 CFD8: 49 FF    eor #$ff
 CFDA: 18       clc
@@ -12041,11 +12062,12 @@ CFDF: A5 01    lda $01
 CFE1: 49 FF    eor #$ff
 CFE3: 69 00    adc #$00
 CFE5: 85 01    sta $01
-CFE7: A5 02    lda unpack_mode_02
+CFE7: A5 02    lda unpack_mode_and_misc_02
 CFE9: 49 FF    eor #$ff
 CFEB: 69 00    adc #$00
-CFED: 85 02    sta unpack_mode_02
+CFED: 85 02    sta unpack_mode_and_misc_02
 CFEF: 60       rts
+
 CFF0: A5 04    lda $04
 CFF2: 49 FF    eor #$ff
 CFF4: 18       clc
@@ -12148,26 +12170,28 @@ D094: 05 11    ora $11
 D096: D0 08    bne $d0a0
 D098: 85 00    sta $00
 D09A: 85 01    sta $01
-D09C: 85 02    sta unpack_mode_02
+D09C: 85 02    sta unpack_mode_and_misc_02
 D09E: F0 59    beq $d0f9
 D0A0: A2 18    ldx #$18
 D0A2: 18       clc
 D0A3: 26 00    rol $00
 D0A5: 26 01    rol $01
-D0A7: 26 02    rol unpack_mode_02
+D0A7: 26 02    rol unpack_mode_and_misc_02
 D0A9: CA       dex
 D0AA: F0 4D    beq $d0f9
+; testing carry clear from rol!
 D0AC: 90 F5    bcc $d0a3
 D0AE: A5 00    lda $00
 D0B0: 09 01    ora #$01
 D0B2: 85 00    sta $00
 D0B4: E8       inx
 D0B5: 86 0F    stx $0f
+; so this branches all the time as the carry is set
 D0B7: B0 07    bcs $d0c0
 D0B9: 38       sec
 D0BA: 26 00    rol $00
 D0BC: 26 01    rol $01
-D0BE: 26 02    rol unpack_mode_02
+D0BE: 26 02    rol unpack_mode_and_misc_02
 D0C0: 26 03    rol $03
 D0C2: 26 04    rol $04
 D0C4: 26 05    rol $05
@@ -12273,7 +12297,7 @@ D164: A5 00    lda $00
 D166: 85 07    sta unknown_07
 D168: A5 01    lda $01
 D16A: 85 08    sta $08
-D16C: A5 02    lda unpack_mode_02
+D16C: A5 02    lda unpack_mode_and_misc_02
 D16E: 85 09    sta $09
 D170: A9 00    lda #$00
 D172: 85 04    sta $04
@@ -12304,6 +12328,7 @@ D19F: 68       pla
 D1A0: AA       tax
 D1A1: 38       sec
 D1A2: 60       rts
+
 D1A3: 68       pla
 D1A4: A8       tay
 D1A5: 68       pla
@@ -13272,6 +13297,7 @@ DB50: 60       rts
 
 ; this region contains ascii strings
 
+; convert X/Y/Z isometric to X,Y screen
 convert_logical_to_screen_coords_dff3:
 DFF3: A9 01    lda #$01
 DFF5: 20 DF D8 jsr set_bank_d8df
@@ -13279,7 +13305,7 @@ DFF8: AD DA 06 lda $06da
 DFFB: C9 FC    cmp #$fc
 DFFD: 90 03    bcc $e002
 DFFF: 4C 7E E1 jmp $e17e
-E002: A6 4C    ldx $4c
+E002: A6 4C    ldx current_object_index_4c
 E004: B5 65    lda $65, x
 E006: 0A       asl a
 E007: A8       tay
@@ -13295,25 +13321,25 @@ E018: 85 10    sta screen_source_pointer_0010
 E01A: C8       iny
 E01B: B1 00    lda ($00), y
 E01D: 85 11    sta $11
-E01F: B5 B9    lda player_logical_y_b9, x
+E01F: B5 B9    lda objects_logical_y_array_b9, x
 E021: 18       clc
-E022: 75 E3    adc $e3, x
-E024: 85 02    sta unpack_mode_02
+E022: 75 E3    adc objects_logical_z_array_e3, x
+E024: 85 02    sta unpack_mode_and_misc_02
 E026: B5 C7    lda $c7, x
 E028: 75 F1    adc $f1, x
 E02A: 85 03    sta $03
-E02C: A5 02    lda unpack_mode_02
+E02C: A5 02    lda unpack_mode_and_misc_02
 E02E: 38       sec
 E02F: ED E0 07 sbc $07e0
-E032: 85 02    sta unpack_mode_02
+E032: 85 02    sta unpack_mode_and_misc_02
 E034: A5 03    lda $03
 E036: ED E1 07 sbc $07e1
 E039: 85 03    sta $03
-E03B: B5 8F    lda player_logical_x_8f, x
+E03B: B5 8F    lda objects_logical_x_array_8f, x
 E03D: 38       sec
 E03E: ED DE 07 sbc logical_scroll_value_lsb_07de
 E041: 85 00    sta $00
-E043: B5 9D    lda player_side_9d, x
+E043: B5 9D    lda objects_side_array_9d, x
 E045: ED DF 07 sbc logical_scroll_value_msb_07df
 E048: 85 01    sta $01
 E04A: B5 73    lda $73, x
@@ -13428,7 +13454,7 @@ E11A: B1 12    lda ($12), y
 E11C: 08       php
 E11D: C8       iny
 E11E: 18       clc
-E11F: 65 02    adc unpack_mode_02
+E11F: 65 02    adc unpack_mode_and_misc_02
 E121: 9D DB 06 sta sprite_shadow_ram_06db, x
 E124: A5 03    lda $03
 E126: 69 00    adc #$00
@@ -13481,7 +13507,7 @@ E183: 60       rts
 display_sprites_e1b5:
 E1B5: A9 01    lda #$01
 E1B7: 20 DF D8 jsr set_bank_d8df
-E1BA: A5 4C    lda $4c
+E1BA: A5 4C    lda current_object_index_4c
 E1BC: AA       tax
 E1BD: 0A       asl a
 E1BE: A8       tay
@@ -13504,16 +13530,16 @@ E1DD: A0 00    ldy #$00
 E1DF: B1 14    lda ($14), y
 E1E1: 09 80    ora #$80
 E1E3: 91 14    sta ($14), y
-E1E5: B5 8F    lda player_logical_x_8f, x
+E1E5: B5 8F    lda objects_logical_x_array_8f, x
 E1E7: A0 01    ldy #$01
 E1E9: 91 14    sta ($14), y
-E1EB: B5 9D    lda player_side_9d, x
+E1EB: B5 9D    lda objects_side_array_9d, x
 E1ED: 29 0F    and #$0f
 E1EF: C8       iny
 E1F0: 91 14    sta ($14), y
-E1F2: B5 B9    lda player_logical_y_b9, x
+E1F2: B5 B9    lda objects_logical_y_array_b9, x
 E1F4: 18       clc
-E1F5: 75 E3    adc $e3, x
+E1F5: 75 E3    adc objects_logical_z_array_e3, x
 E1F7: C8       iny
 E1F8: 91 14    sta ($14), y
 E1FA: B5 C7    lda $c7, x
@@ -13525,7 +13551,7 @@ E202: 0A       asl a
 E203: 0A       asl a
 E204: 11 14    ora ($14), y
 E206: 91 14    sta ($14), y
-E208: B5 B9    lda player_logical_y_b9, x
+E208: B5 B9    lda objects_logical_y_array_b9, x
 E20A: A0 04    ldy #$04
 E20C: 91 14    sta ($14), y
 E20E: B5 C7    lda $c7, x
@@ -13599,7 +13625,7 @@ E294: C8       iny
 E295: A5 06    lda $06
 E297: 29 08    and #$08
 E299: F0 17    beq $e2b2
-E29B: A6 4C    ldx $4c
+E29B: A6 4C    ldx current_object_index_4c
 E29D: BD 3A 02 lda $023a, x
 E2A0: 30 0E    bmi $e2b0
 E2A2: B1 10    lda (screen_source_pointer_0010), y
@@ -13649,7 +13675,7 @@ E2F1: E6 08    inc $08
 E2F3: 4C F9 E2 jmp $e2f9
 E2F6: B1 10    lda (screen_source_pointer_0010), y
 E2F8: C8       iny
-E2F9: 85 02    sta unpack_mode_02
+E2F9: 85 02    sta unpack_mode_and_misc_02
 E2FB: 84 0D    sty $0d
 E2FD: A5 06    lda $06
 E2FF: 29 20    and #$20
@@ -13710,7 +13736,7 @@ E365: A1 14    lda ($14, x)
 E367: 29 80    and #$80
 E369: 05 1B    ora $1b
 E36B: 81 14    sta ($14, x)
-E36D: A6 4C    ldx $4c
+E36D: A6 4C    ldx current_object_index_4c
 E36F: B5 65    lda $65, x
 E371: C9 16    cmp #$16
 E373: D0 0F    bne $e384
@@ -13734,7 +13760,7 @@ E396: B5 65    lda $65, x
 E398: 48       pha
 E399: B5 73    lda $73, x
 E39B: 48       pha
-E39C: B5 E3    lda $e3, x
+E39C: B5 E3    lda objects_logical_z_array_e3, x
 E39E: 48       pha
 E39F: B5 F1    lda $f1, x
 E3A1: 48       pha
@@ -13743,19 +13769,19 @@ E3A4: 95 65    sta $65, x
 E3A6: 98       tya
 E3A7: 95 73    sta $73, x
 E3A9: A9 00    lda #$00
-E3AB: 95 E3    sta $e3, x
+E3AB: 95 E3    sta objects_logical_z_array_e3, x
 E3AD: 95 F1    sta $f1, x
 E3AF: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
-E3B2: A6 4C    ldx $4c
+E3B2: A6 4C    ldx current_object_index_4c
 E3B4: 68       pla
 E3B5: 95 F1    sta $f1, x
 E3B7: 68       pla
-E3B8: 95 E3    sta $e3, x
+E3B8: 95 E3    sta objects_logical_z_array_e3, x
 E3BA: 68       pla
 E3BB: 95 73    sta $73, x
 E3BD: 68       pla
 E3BE: 95 65    sta $65, x
-E3C0: A6 4C    ldx $4c
+E3C0: A6 4C    ldx current_object_index_4c
 E3C2: B5 65    lda $65, x
 E3C4: C9 16    cmp #$16
 E3C6: B0 65    bcs $e42d
@@ -13776,12 +13802,12 @@ E3DF: A9 04    lda #$04
 E3E1: 18       clc
 E3E2: 69 8A    adc #$8a
 E3E4: 85 80    sta $80
-E3E6: A6 4C    ldx $4c
-E3E8: B5 8F    lda player_logical_x_8f, x
+E3E6: A6 4C    ldx current_object_index_4c
+E3E8: B5 8F    lda objects_logical_x_array_8f, x
 E3EA: 85 9C    sta $9c
-E3EC: B5 9D    lda player_side_9d, x
+E3EC: B5 9D    lda objects_side_array_9d, x
 E3EE: 85 AA    sta $aa
-E3F0: B5 B9    lda player_logical_y_b9, x
+E3F0: B5 B9    lda objects_logical_y_array_b9, x
 E3F2: 38       sec
 E3F3: 38       sec
 E3F4: E9 01    sbc #$01
@@ -13789,7 +13815,7 @@ E3F6: 85 C6    sta $c6
 E3F8: B5 C7    lda $c7, x
 E3FA: E9 00    sbc #$00
 E3FC: 85 D4    sta $d4
-E3FE: B5 E3    lda $e3, x
+E3FE: B5 E3    lda objects_logical_z_array_e3, x
 E400: 18       clc
 E401: 69 48    adc #$48
 E403: 85 F0    sta $f0
@@ -13804,16 +13830,16 @@ E415: 0A       asl a
 E416: 0A       asl a
 E417: 0D 47 02 ora $0247
 E41A: 8D 47 02 sta $0247
-E41D: A5 4C    lda $4c
+E41D: A5 4C    lda current_object_index_4c
 E41F: 48       pha
 E420: 0A       asl a
 E421: 85 01    sta $01
 E423: A9 0D    lda #$0d
-E425: 85 4C    sta $4c
+E425: 85 4C    sta current_object_index_4c
 E427: 20 B5 E1 jsr display_sprites_e1b5
 E42A: 68       pla
-E42B: 85 4C    sta $4c
-E42D: A6 4C    ldx $4c
+E42B: 85 4C    sta current_object_index_4c
+E42D: A6 4C    ldx current_object_index_4c
 E42F: BD 3A 02 lda $023a, x
 E432: 29 02    and #$02
 E434: 9D 3A 02 sta $023a, x
@@ -13824,18 +13850,18 @@ E43C: 60       rts
 E43D: B5 C7    lda $c7, x
 E43F: 30 36    bmi $e477
 E441: D0 30    bne $e473
-E443: B5 B9    lda player_logical_y_b9, x
+E443: B5 B9    lda objects_logical_y_array_b9, x
 E445: C9 80    cmp #$80
 E447: B0 2A    bcs $e473
 E449: C9 18    cmp #$18
 E44B: 90 2A    bcc $e477
-E44D: B5 9D    lda player_side_9d, x
+E44D: B5 9D    lda objects_side_array_9d, x
 E44F: 30 26    bmi $e477
 E451: C9 02    cmp #$02
 E453: B0 1E    bcs $e473
 E455: A9 80    lda #$80
 E457: 38       sec
-E458: F5 B9    sbc player_logical_y_b9, x
+E458: F5 B9    sbc objects_logical_y_array_b9, x
 E45A: 4A       lsr a
 E45B: 4A       lsr a
 E45C: 4A       lsr a
@@ -13845,10 +13871,10 @@ E460: 85 16    sta screen_attribute_dest_address_16
 E462: A9 00    lda #$00
 E464: 69 00    adc #$00
 E466: 85 17    sta $17
-E468: B5 8F    lda player_logical_x_8f, x
+E468: B5 8F    lda objects_logical_x_array_8f, x
 E46A: 38       sec
 E46B: E5 16    sbc screen_attribute_dest_address_16
-E46D: B5 9D    lda player_side_9d, x
+E46D: B5 9D    lda objects_side_array_9d, x
 E46F: E5 17    sbc $17
 E471: 90 04    bcc $e477
 E473: A9 00    lda #$00
@@ -14071,9 +14097,9 @@ E675: 69 00    adc #$00
 E677: 28       plp
 E678: 10 02    bpl $e67c
 E67A: 69 FF    adc #$ff
-E67C: 85 02    sta unpack_mode_02
+E67C: 85 02    sta unpack_mode_and_misc_02
 E67E: A5 01    lda $01
-E680: 05 02    ora unpack_mode_02
+E680: 05 02    ora unpack_mode_and_misc_02
 E682: D0 3B    bne $e6bf
 E684: 24 03    bit $03
 E686: 10 0B    bpl $e693
@@ -14399,9 +14425,9 @@ E9BF: AA       tax
 E9C0: B9 69 EA lda $ea69, y
 E9C3: 18       clc
 E9C4: 08       php
-E9C5: 75 8F    adc player_logical_x_8f, x
+E9C5: 75 8F    adc objects_logical_x_array_8f, x
 E9C7: 8D E2 07 sta $07e2
-E9CA: B5 9D    lda player_side_9d, x
+E9CA: B5 9D    lda objects_side_array_9d, x
 E9CC: 69 00    adc #$00
 E9CE: 28       plp
 E9CF: 10 02    bpl $e9d3
@@ -14776,7 +14802,7 @@ ED15: 69 10    adc #$10
 ED17: 85 17    sta $17
 ED19: B1 10    lda (screen_source_pointer_0010), y
 ED1B: C8       iny
-ED1C: 85 02    sta unpack_mode_02
+ED1C: 85 02    sta unpack_mode_and_misc_02
 ED1E: 29 7F    and #$7f
 ED20: AA       tax
 ED21: 84 00    sty $00
@@ -14791,7 +14817,7 @@ ED31: 91 14    sta ($14), y		; [unchecked_address]
 ED33: A5 13    lda multipurpose_13
 ED35: 91 16    sta ($16), y		; [video_address]
 ED37: C8       iny
-ED38: 24 02    bit unpack_mode_02		; test command
+ED38: 24 02    bit unpack_mode_and_misc_02		; test command
 ED3A: 30 06    bmi $ed42				; negative: RLE: X is the number of repeats
 ; positive: increase tile value X times
 ED3C: E6 12    inc multipurpose_12
@@ -14925,7 +14951,7 @@ EE19: 20 DF D8 jsr set_bank_d8df
 EE1C: 60       rts
 EE1D: B1 10    lda (screen_source_pointer_0010), y
 EE1F: C8       iny
-EE20: 85 02    sta unpack_mode_02
+EE20: 85 02    sta unpack_mode_and_misc_02
 EE22: B1 10    lda (screen_source_pointer_0010), y
 EE24: C8       iny
 EE25: 85 14    sta multipurpose_14
@@ -14944,7 +14970,7 @@ EE3B: A5 15    lda $15
 EE3D: 18       clc
 EE3E: 69 10    adc #$10
 EE40: 85 17    sta $17
-EE42: A6 02    ldx unpack_mode_02
+EE42: A6 02    ldx unpack_mode_and_misc_02
 EE44: A4 00    ldy $00
 EE46: B1 10    lda (screen_source_pointer_0010), y
 EE48: C9 FF    cmp #$ff
@@ -15251,7 +15277,7 @@ F0B6: 20 45 A6 jsr $a645
 F0B9: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F0BC: 20 CC E6 jsr $e6cc
 F0BF: A2 04    ldx #$04
-F0C1: 86 4C    stx $4c
+F0C1: 86 4C    stx current_object_index_4c
 F0C3: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 F0C6: 20 59 CF jsr clear_rest_of_sprites_cf59
 F0C9: A9 5A    lda #$5a
@@ -15345,7 +15371,7 @@ F187: 20 45 A6 jsr $a645
 F18A: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F18D: 20 CC E6 jsr $e6cc
 F190: A2 04    ldx #$04
-F192: 86 4C    stx $4c
+F192: 86 4C    stx current_object_index_4c
 F194: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
 F197: 20 59 CF jsr clear_rest_of_sprites_cf59
 F19A: 20 22 D8 jsr sync_d822
@@ -16079,11 +16105,11 @@ F7AE: 60       rts
 
 F7B7: AD 03 10 lda dsw1_1003
 F7BA: 10 05    bpl $f7c1
-F7BC: A5 4C    lda $4c
+F7BC: A5 4C    lda current_object_index_4c
 F7BE: 4A       lsr a
 F7BF: A8       tay
 F7C0: 60       rts
-F7C1: A4 4C    ldy $4c
+F7C1: A4 4C    ldy current_object_index_4c
 F7C3: B9 42 00 lda $0042, y
 F7C6: A8       tay
 F7C7: 60       rts
@@ -16436,8 +16462,8 @@ jump_table_ba8c:
 	dc.w	unknown_ball_behaviour_baae	; $ba9a
 	dc.w	unknown_ball_behaviour_baae	; $ba9c
 	dc.w	unknown_ball_behaviour_baae	; $ba9e
-	dc.w	ball_in_air_after_spike_bbf5	; $baa0
-	dc.w	ball_in_air_after_spike_bbf5	; $baa2
+	dc.w	ball_in_play_bbf5	; $baa0
+	dc.w	ball_in_play_bbf5	; $baa2
 	dc.w	unknown_ball_behaviour_baae	; $baa4
 	dc.w	unknown_ball_behaviour_baae	; $baa6
 	dc.w	unknown_ball_behaviour_baae	; $baa8

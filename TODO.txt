@@ -1,11 +1,10 @@
 - crashing after a while
-- A.I. is wrong: opponents don't catch the ball, 62BF now reached
-- ball position completelg off (too far) after serve
+- A.I. is wrong: reception is done properly, but second pass isn't done (pass player doesn't do it: continue RE)
+
   
 - time: bcd doesn't seem to work
 - select screen: no timer, game starts immediately!
 - after game starts, context is loaded but no game map, no level 1 background
-- black color still transparent on score big sprites and "ZAP" etc letters
 
 - converter: turn off optimizations on option:
   - if SBC_IMM	0x00 found later, don't optimize sbc into sub!

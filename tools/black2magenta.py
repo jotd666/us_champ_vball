@@ -9,7 +9,7 @@ this_dir = pathlib.Path(__file__).absolute().parent
 
 magenta = (254,0,254)
 
-def doit(sheet_subdir,fake_black,fake_black_to_apply):
+def doit(sheet_subdir,fake_black):
     sheets_dir = this_dir.parent / "assets" / "sheets" / sheet_subdir
     src_sprite_dir = sheets_dir / "sprites_black"  # the original sprites ripped from MAME with black background
     dst_sprite_dir = sheets_dir / "sprites"
@@ -17,13 +17,12 @@ def doit(sheet_subdir,fake_black,fake_black_to_apply):
     dst_sprite_dir.mkdir(exist_ok=True)
 
 
-
-
     replacement_pixels = dict()
 
+    yp = set()
+    # accumulate list of positions where black is actually really black, not the background
     for i,fb in fake_black.items():
         ref_image = Image.open(src_sprite_dir / f"pal_{i:02x}.png")
-        yp = set()
 
         # this palette has the nice property of having black not merged with background
         # black colors in other palettes are there yellow, so we can backport the black color in other palettes
@@ -32,15 +31,12 @@ def doit(sheet_subdir,fake_black,fake_black_to_apply):
                 p = ref_image.getpixel((x,y))
                 if p == fb:
                     yp.add((x,y))
-        replacement_pixels[i] = {"black_pixels":yp,"ref_image":ref_image}
         image_size = ref_image.size
 
-    for i,c in enumerate(fake_black_to_apply):
+    for i in range(8):
         imgname = f"pal_{i:02X}.png"
         src = src_sprite_dir / imgname
         dst = dst_sprite_dir / imgname
-
-        yp = replacement_pixels[c]["black_pixels"]
 
         src_image = Image.open(src)
 
@@ -58,5 +54,4 @@ def doit(sheet_subdir,fake_black,fake_black_to_apply):
 
         dst_image.save(dst)
 
-doit("level_3",fake_black = {0:(119,102,0),5:(255,0,0)},
-                fake_black_to_apply = [0,0,0,0,0,5,5,0])
+doit("level_3",fake_black = {0:(119,102,0),5:(255,0,0),2:(238,238,68)})

@@ -125,14 +125,21 @@ with open(source_dir / "conv.s") as f:
             line = "\tSET_C_FROM_X\n"+line
             lines[i+1] = remove_error(lines[i+1])
 
+        #########################################
+        # this part is tricky as the tests rely on carry
+        # but after that the ROL instructions also rely on carry
+        #########################################
         if line_address in {0xd04b,0xd0a9}:
             lines[i-3] = "\tscs\td6\n"+lines[i-3]
         if line_address in {0xd04e,0xd0ac}:
-            line = "\ttst.b\td6\n"+line.replace("cc\tl","eq\tl")
+            line = "\tCLR_XC_FLAGS\n\ttst.b\td6  | clear carry/x then test 'carry'\n"+line.replace("cc\tl","eq\tl")
         if optimizer_on and line_address in {0xd059,0xd0b7}:
             # carry clear tested above, just branch
-            line = line.replace("cs\tl","ra\tl")
+            # but before, set carry/X again
+
+            line = "\tSET_XC_FLAGS   | re-set carry/X then unconditional branch\n"+line.replace("cs\tl","ra\tl")
             lines[i+1] = remove_error(lines[i+1])
+        #################################################
 
         if line_address in [0xd92b,0xd939]:
             # disable port 3/4, put zero
