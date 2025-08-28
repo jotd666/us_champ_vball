@@ -320,6 +320,9 @@ get_address:
 	.else
 	add.w	d1,d1
 	move.l	(a0,d1.w),-(a7)
+	.ifndef	RELEASE
+	lsr.w	#1,d1
+	.endif
 	.endif
 	.endm
 
@@ -331,6 +334,9 @@ get_address:
 	.else
 	add.w	d2,d2
 	move.l	(a0,d2.w),-(a7)
+	.ifndef	RELEASE
+	lsr.w	#1,d2
+	.endif
 	.endif
 	.endm
 

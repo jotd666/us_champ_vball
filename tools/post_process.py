@@ -252,6 +252,13 @@ with open(source_dir / "conv.s") as f:
             line = "\tSET_C_FROM_X\n"+line
             lines[i+1] = remove_error(lines[i+1])
 
+        # fix the error: cmp+bcxx (inverted condition) followed by sbc or adc (relying on carry!)
+        if optimizer_on and line_address in {0x6dd0,0x6ef8,0x6f26,0x8b4a,0X8b7f,0xb86c,0xd117,0xda2a,0xf606,0xf781}:
+            if "addx" not in line:
+                # addx comes in 2 instructions, the second one should not invert flags!
+                line = "\tINVERT_XC_FLAGS   | cmp optimization above inverted flags\n"+line
+            lines[i+1] = remove_error(lines[i+1])
+
         if optimizer_on and line_address == 0xb429:
             # force clear C flag (cmp+rts)
             line = "\tCLR_XC_FLAGS\n"+line

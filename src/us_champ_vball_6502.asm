@@ -3369,7 +3369,7 @@ compare_player_positions_6923:
 78E7: B0 03    bcs $78ec
 78E9: 4C 80 79 jmp $7980
 78EC: 20 29 82 jsr $8229
-78EF: 90 18    bcc $7909
+78EF: 90 18    bcc player_preparing_for_pass_7909
 78F1: BD B8 03 lda $03b8, x
 78F4: F0 09    beq $78ff
 78F6: C9 01    cmp #$01
@@ -3380,6 +3380,10 @@ compare_player_positions_6923:
 7901: 20 96 82 jsr $8296
 7904: B0 46    bcs $794c
 7906: 4C 5B 79 jmp $795b
+
+; called the whole time the first player is sending the ball to
+; the second player who is positioning to pass the ball for the attack
+player_preparing_for_pass_7909:
 7909: AD F9 03 lda $03f9
 790C: 85 1B    sta $1b
 790E: A9 06    lda #$06
@@ -3438,7 +3442,7 @@ compare_player_positions_6923:
 7992: 85 1E    sta $1e
 7994: 20 6B 84 jsr $846b
 7997: 90 D8    bcc $7971
-7999: 4C 09 79 jmp $7909
+7999: 4C 09 79 jmp player_preparing_for_pass_7909
 799C: BD B8 03 lda $03b8, x
 799F: C9 04    cmp #$04
 79A1: F0 0C    beq $79af
@@ -4470,6 +4474,7 @@ compare_player_positions_6923:
 8366: 60       rts
 8367: 18       clc
 8368: 60       rts
+
 8369: BD B4 03 lda $03b4, x
 836C: 18       clc
 836D: 69 04    adc #$04
@@ -4479,6 +4484,7 @@ compare_player_positions_6923:
 8375: 60       rts
 8376: 18       clc
 8377: 60       rts
+
 8378: BD 2B 03 lda player_direction_032b, x
 837B: C9 50    cmp #$50
 837D: 90 0B    bcc $838a
@@ -4568,6 +4574,7 @@ compare_player_positions_6923:
 8426: 60       rts
 8427: 38       sec
 8428: 60       rts
+
 8429: 18       clc
 842A: BD B8 03 lda $03b8, x
 842D: F0 07    beq $8436
@@ -5767,6 +5774,7 @@ initialize_logical_xy_players_8d26:
 9020: A9 00    lda #$00
 9022: 9D B0 03 sta $03b0, x
 9025: 60       rts
+
 9026: BD 84 03 lda $0384, x
 9029: 85 11    sta $11
 902B: BD 80 03 lda $0380, x
@@ -5777,6 +5785,7 @@ initialize_logical_xy_players_8d26:
 9038: 85 13    sta multipurpose_13
 903A: 20 6A B4 jsr $b46a
 903D: 60       rts
+
 903E: A0 0D    ldy #$0d
 9040: BD 84 03 lda $0384, x
 9043: 99 9D 00 sta objects_side_array_9d, y
@@ -5897,6 +5906,7 @@ initialize_logical_xy_players_8d26:
 912A: A9 09    lda #$09
 912C: 99 16 03 sta $0316, y
 912F: 60       rts
+
 9130: A6 4C    ldx current_object_index_4c
 9132: 20 AC A2 jsr $a2ac
 9135: BD 0E 03 lda $030e, x
@@ -6115,6 +6125,8 @@ callback_92d1:
 935F: C8       iny
 9360: B9 92 93 lda $9392, y
 9363: 9D 61 02 sta $0261, x
+; reaches here only when a player is moving to position himself
+; (for instance second player positions himself for pass)
 9366: 20 15 A2 jsr $a215
 9369: B0 0D    bcs $9378
 936B: 20 C2 B5 jsr $b5c2
@@ -6129,6 +6141,7 @@ callback_92d1:
 9383: BD F0 02 lda $02f0, x
 9386: 29 01    and #$01
 9388: D0 05    bne $938f
+; walk sound?
 938A: A9 21    lda #$21
 938C: 20 B8 D7 jsr queue_sound_d7b8
 938F: 4C 89 91 jmp $9189
@@ -10531,6 +10544,9 @@ BFB8: A9 00    lda #$00
 BFBA: A2 28    ldx #$28
 BFBC: 20 A2 A9 jsr $a9a2
 BFBF: 8A       txa
+; play sound for ball hit (pass, spike...)
+; A=$29: pass
+; A=$27: spike...
 BFC0: 20 B8 D7 jsr queue_sound_d7b8		; play in-game sfx
 BFC3: A5 4C    lda current_object_index_4c
 BFC5: 4A       lsr a
@@ -12226,33 +12242,36 @@ D0FA: A8       tay
 D0FB: 68       pla
 D0FC: AA       tax
 D0FD: 60       rts
-D0FE: 48       pha
-D0FF: 8A       txa
-D100: 48       pha
-D101: A5 01    lda $01
-D103: 48       pha
-D104: A9 00    lda #$00
-D106: 85 01    sta $01
-D108: A2 10    ldx #$10
-D10A: 18       clc
-D10B: 26 10    rol screen_source_pointer_0010
-D10D: 26 11    rol $11
-D10F: 26 01    rol $01
-D111: A5 01    lda $01
-D113: C5 00    cmp $00
-D115: 90 04    bcc $d11b
-D117: E5 00    sbc $00
-D119: 85 01    sta $01
-D11B: 26 10    rol screen_source_pointer_0010
-D11D: 26 11    rol $11
-D11F: CA       dex
-D120: D0 ED    bne $d10f
-D122: 68       pla
-D123: 85 01    sta $01
-D125: 68       pla
-D126: AA       tax
-D127: 68       pla
-D128: 60       rts
+
+; seems unreached, not in jump tables, not reached when playing
+D0FE: 48       pha                                     ; [disabled]
+D0FF: 8A       txa                                     ; [disabled]
+D100: 48       pha                                     ; [disabled]
+D101: A5 01    lda $01                                 ; [disabled]
+D103: 48       pha                                     ; [disabled]
+D104: A9 00    lda #$00                                ; [disabled]
+D106: 85 01    sta $01                                 ; [disabled]
+D108: A2 10    ldx #$10                                ; [disabled]
+D10A: 18       clc                                     ; [disabled]
+D10B: 26 10    rol screen_source_pointer_0010          ; [disabled]
+D10D: 26 11    rol $11                                 ; [disabled]
+D10F: 26 01    rol $01                                 ; [disabled]
+D111: A5 01    lda $01                                 ; [disabled]
+D113: C5 00    cmp $00                                 ; [disabled]
+D115: 90 04    bcc $d11b                               ; [disabled]
+D117: E5 00    sbc $00                                 ; [disabled]
+D119: 85 01    sta $01                                 ; [disabled]
+D11B: 26 10    rol screen_source_pointer_0010          ; [disabled]
+D11D: 26 11    rol $11                                 ; [disabled]
+D11F: CA       dex                                     ; [disabled]
+D120: D0 ED    bne $d10f                               ; [disabled]
+D122: 68       pla                                     ; [disabled]
+D123: 85 01    sta $01                                 ; [disabled]
+D125: 68       pla                                     ; [disabled]
+D126: AA       tax                                     ; [disabled]
+D127: 68       pla                                     ; [disabled]
+D128: 60       rts                                     ; [disabled]
+
 D129: 8A       txa
 D12A: 48       pha
 D12B: 98       tya
@@ -16199,7 +16218,7 @@ player_behaviour_jump_table_633a:
 	dc.w	$63c5	; $6348
 	dc.w	$63d4	; $634a
 	dc.w	move_to_ball_reception_63fe	; $634c
-	dc.w	$6337	; $634e
+	dc.w	$6337	; $634e  loop on jmp... strange
 	dc.w	$6422	; $6350
 	dc.w	$6453	; $6352
 	dc.w	$647d	; $6354
@@ -16330,8 +16349,8 @@ jump_table_788d:
 	dc.w	jump_table_788d	; $788d
 	dc.w	$78e4	; $788f
 	dc.w	$78e4	; $7891
-	dc.w	$7909	; $7893
-	dc.w	$7909	; $7895
+	dc.w	player_preparing_for_pass_7909	; $7893
+	dc.w	player_preparing_for_pass_7909	; $7895
 	dc.w	$8009	; $7897
 jump_table_79da:
 	dc.w	jump_table_79da	; $79da

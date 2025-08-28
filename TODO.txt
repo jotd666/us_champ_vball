@@ -1,17 +1,25 @@
 - crashing after a while
 - A.I. is wrong: reception is done properly, but second pass isn't done (pass player doesn't do it: continue RE)
+  probably because: player index 3 (blond guy in right part) positions itself but fails to reach X=$1A (blocked by net too soon
+  because of wrong test to be determined) stays stuck in $20 minimum and chaos ensues (fails to reach 7909)
 
+7032: A6 4C    ldx current_object_index_4c
+7034: BD 0E 03 lda $030e, x   <= MAME reads $13 from X=3 after a while (prior: ok), amiga reads 3 (unchanged?)
+7037: 29 40    and #$40
+7039: D0 29    bne $7064
+703B: BD 1A 03 lda $031a, x   <= MAME reads $80, amiga reads $89
+703E: 29 7F    and #$7f
+7040: C9 22    cmp #$22
+then 718A mame A=$FF, amiga A=1 branching!
+
+- demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks
   
 - time: bcd doesn't seem to work
 - select screen: no timer, game starts immediately!
 - after game starts, context is loaded but no game map, no level 1 background
 
-- converter: turn off optimizations on option:
-  - if SBC_IMM	0x00 found later, don't optimize sbc into sub!
-  - clc+bcc / sec+bcs => no optim
-  - always add INVERT_XC_FLAGS after a cmp
-  - ...
-  (and remove fixes from post process)
+- converter:  if SBC_IMM	0x00 found later, don't optimize sbc into sub!
+
 - alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
 
 - rip sounds
