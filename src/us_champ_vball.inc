@@ -57,6 +57,10 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	move.w	(sp)+,ccr
 	.endm
 
+	.macro	SET_Z_FLAG
+	cmp.b	d4,d4
+	.endm
+	
 	.macro OP_R_ON_ZP_ADDRESS	inst,offset,reg
 	\inst\().b	(a6,\offset\().W),\reg
 	.endm
@@ -69,6 +73,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
 	move.b	(a0,d1.w),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
 	subx.b	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -77,6 +82,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
 	move.b	(a0,d2.w),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
 	subx.b	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -85,6 +91,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
 	move.b	(a0),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
 	subx.b	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -93,6 +100,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	INVERT_XC_FLAGS
 	GET_INDIRECT_ADDRESS	\address
 	move.b	(a0,d2.w),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
 	subx.b	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -101,6 +109,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
 	move.b	(a0),d4
+	SET_Z_FLAG
 	scbd	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -108,6 +117,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	.macro	SBC_IMM	param
 	INVERT_XC_FLAGS
 	move.b	#\param,d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
 	subx.b	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -115,6 +125,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	.macro	SBCD_IMM	param
 	INVERT_XC_FLAGS
 	move.b	#\param,d4
+	SET_Z_FLAG
 	sbcd	d4,d0
 	INVERT_XC_FLAGS
 	.endm
@@ -125,6 +136,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	eor.b	#0x11,d4
 	move.w	d4,(sp)
 	POP_SR
+	*eor.b	#0x11,ccr
 	.endm
 
 	.macro	TXS

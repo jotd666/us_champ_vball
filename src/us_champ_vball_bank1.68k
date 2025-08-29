@@ -113,9 +113,7 @@ b1_7a33:
 	GET_ADDRESS	0xe3                       	| [$7a3b: adc $e3, x]
 	move.b	(a0,d1.w),d4	| [...]
 	add.b	d4,d0                    	| [...]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x07,d0 |  [$7a3d: sta $07]
-	POP_SR
 	GET_ADDRESS	0xf1                       	| [$7a3f: lda $f1, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	move.b	#0x00,d4	| [$7a41: adc #$00]
@@ -156,7 +154,7 @@ b1_7a5c:
 	OP_R_ON_ZP_ADDRESS	move,0x06,d0 |  [$7a6f: lda $06]
 	bpl	b1_7a83                             	| [$7a71: bpl $7a83]
 	OP_R_ON_ZP_ADDRESS	move,0x05,d0 |  [$7a73: lda $05]
-	CLR_XC_FLAGS                           	| [$7a75: clc]
+	                           	| [$7a75: clc]
 	OP_R_ON_ZP_ADDRESS	add,0x01,d0 |  [$7a76: adc $01]
 	OP_W_ON_ZP_ADDRESS	move,0x1b,d0 |  [$7a78: sta $1b]
 	OP_R_ON_ZP_ADDRESS	move,0xbd,d0 |  [$7a7a: lda $bd]

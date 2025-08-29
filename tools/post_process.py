@@ -5,6 +5,9 @@ from shared import *
 # directly (to remove PUSH_SR...) but not too soon. It allows to change generation type, fix conversion bugs
 # until only the optimizations remain (the non-optimized code generated from 6502+post processing is still correct)
 
+# there are theoretical carry issues in B76D B7C8 B801 but the error compensates thanks to the subsequent adds
+# that reset X flag, so atm no need to fix anything there.
+
 routines_to_check_for_carry = set()
 
 input_read_dict = {
@@ -410,6 +413,7 @@ header = """\t.include "data.inc"
     .macro  CB_CASE  msb,lsb
     cmp.w    #0x\lsb\msb,(a6)
     jne        0f
+    clr.w     (a6)   | "ack" callback
     jra        callback_\msb\lsb
 0:
     .endm

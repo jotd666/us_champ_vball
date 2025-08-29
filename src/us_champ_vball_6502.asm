@@ -162,6 +162,7 @@ objects_logical_x_array_8f = $8f
 objects_logical_y_array_b9 = $b9
 objects_logical_z_array_e3 = $e3
 objects_x_speed_array_027b = $27b
+player_direction_copy_0254 = $254
 ball_x_speed_027f = $27f
 ; 0: left, 1: right, 4 values too
 objects_side_array_9d = $9d
@@ -169,6 +170,8 @@ bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 player_1_controls_022e = $022e
 player_2_controls_022f = $022f
+previous_player_1_controls_0236 = $236
+previous_player_2_controls_0237 = $237
 player_direction_032b = $32b
 sprite_shadow_ram_06db = $6db
 sound_to_queue_07f2 = $7f2
@@ -2581,7 +2584,7 @@ compare_player_positions_6923:
 7100: 9D 8C 03 sta $038c, x
 7103: 20 3E 90 jsr $903e
 7106: 9D 78 03 sta $0378, x
-7109: 20 26 90 jsr $9026
+7109: 20 26 90 jsr compute_player_direction_9026
 710C: 9D 2B 03 sta player_direction_032b, x
 710F: 20 29 82 jsr $8229
 7112: 90 3E    bcc $7152
@@ -2650,7 +2653,7 @@ compare_player_positions_6923:
 71AD: 9D 8C 03 sta $038c, x
 71B0: 20 3E 90 jsr $903e
 71B3: 9D 78 03 sta $0378, x
-71B6: 20 26 90 jsr $9026
+71B6: 20 26 90 jsr compute_player_direction_9026
 71B9: 9D 2B 03 sta player_direction_032b, x
 71BC: 20 29 82 jsr $8229
 71BF: 90 2A    bcc $71eb
@@ -2707,7 +2710,7 @@ compare_player_positions_6923:
 723E: 9D 88 03 sta $0388, x
 7241: 20 3E 90 jsr $903e
 7244: 9D 78 03 sta $0378, x
-7247: 20 26 90 jsr $9026
+7247: 20 26 90 jsr compute_player_direction_9026
 724A: 9D 2B 03 sta player_direction_032b, x
 724D: 20 29 82 jsr $8229
 7250: 90 28    bcc $727a
@@ -2753,7 +2756,7 @@ compare_player_positions_6923:
 72B7: 9D 88 03 sta $0388, x
 72BA: AD E9 03 lda $03e9
 72BD: 9D 78 03 sta $0378, x
-72C0: 20 26 90 jsr $9026
+72C0: 20 26 90 jsr compute_player_direction_9026
 72C3: 9D 2B 03 sta player_direction_032b, x
 72C6: 20 29 84 jsr $8429
 72C9: 90 39    bcc $7304
@@ -2823,7 +2826,7 @@ compare_player_positions_6923:
 736E: 20 95 90 jsr $9095
 7371: 20 3E 90 jsr $903e
 7374: 9D 78 03 sta $0378, x
-7377: 20 26 90 jsr $9026
+7377: 20 26 90 jsr compute_player_direction_9026
 737A: 9D 2B 03 sta player_direction_032b, x
 737D: A9 00    lda #$00
 737F: 85 2A    sta $2a
@@ -2930,7 +2933,7 @@ compare_player_positions_6923:
 7481: 20 95 90 jsr $9095
 7484: 20 3E 90 jsr $903e
 7487: 9D 78 03 sta $0378, x
-748A: 20 26 90 jsr $9026
+748A: 20 26 90 jsr compute_player_direction_9026
 748D: 9D 2B 03 sta player_direction_032b, x
 7490: A9 00    lda #$00
 7492: 85 2A    sta $2a
@@ -2998,7 +3001,7 @@ compare_player_positions_6923:
 7529: 9D 88 03 sta $0388, x
 752C: 20 3E 90 jsr $903e
 752F: 9D 78 03 sta $0378, x
-7532: 20 26 90 jsr $9026
+7532: 20 26 90 jsr compute_player_direction_9026
 7535: 9D 2B 03 sta player_direction_032b, x
 7538: A9 08    lda #$08
 753A: 09 80    ora #$80
@@ -3038,7 +3041,7 @@ compare_player_positions_6923:
 7597: 9D 8C 03 sta $038c, x
 759A: 20 3E 90 jsr $903e
 759D: 9D 78 03 sta $0378, x
-75A0: 20 26 90 jsr $9026
+75A0: 20 26 90 jsr compute_player_direction_9026
 75A3: 9D 2B 03 sta player_direction_032b, x
 75A6: 20 29 82 jsr $8229
 75A9: B0 6F    bcs $761a
@@ -3057,7 +3060,7 @@ compare_player_positions_6923:
 75CC: 20 95 90 jsr $9095
 75CF: 20 3E 90 jsr $903e
 75D2: 9D 78 03 sta $0378, x
-75D5: 20 26 90 jsr $9026
+75D5: 20 26 90 jsr compute_player_direction_9026
 75D8: 9D 2B 03 sta player_direction_032b, x
 75DB: A9 01    lda #$01
 75DD: 85 2A    sta $2a
@@ -3188,7 +3191,7 @@ compare_player_positions_6923:
 7718: 9D 8C 03 sta $038c, x
 771B: 20 3E 90 jsr $903e
 771E: 9D 78 03 sta $0378, x
-7721: 20 26 90 jsr $9026
+7721: 20 26 90 jsr compute_player_direction_9026
 7724: 9D 2B 03 sta player_direction_032b, x
 7727: 20 29 82 jsr $8229
 772A: B0 7E    bcs $77aa
@@ -3210,7 +3213,7 @@ compare_player_positions_6923:
 7755: 20 95 90 jsr $9095
 7758: 20 3E 90 jsr $903e
 775B: 9D 78 03 sta $0378, x
-775E: 20 26 90 jsr $9026
+775E: 20 26 90 jsr compute_player_direction_9026
 7761: 9D 2B 03 sta player_direction_032b, x
 7764: A9 00    lda #$00
 7766: 20 49 85 jsr $8549
@@ -3298,7 +3301,7 @@ compare_player_positions_6923:
 7831: 9D 88 03 sta $0388, x
 7834: 20 3E 90 jsr $903e
 7837: 9D 78 03 sta $0378, x
-783A: 20 26 90 jsr $9026
+783A: 20 26 90 jsr compute_player_direction_9026
 783D: 9D 2B 03 sta player_direction_032b, x
 7840: AD F9 03 lda $03f9
 7843: 85 1B    sta $1b
@@ -3354,7 +3357,7 @@ compare_player_positions_6923:
 78C3: 9D 88 03 sta $0388, x
 78C6: 20 3E 90 jsr $903e
 78C9: 9D 78 03 sta $0378, x
-78CC: 20 26 90 jsr $9026
+78CC: 20 26 90 jsr compute_player_direction_9026
 78CF: 9D 2B 03 sta player_direction_032b, x
 78D2: 8A       txa
 78D3: 29 02    and #$02
@@ -3505,7 +3508,7 @@ player_preparing_for_pass_7909:
 7A38: 20 C4 8F jsr $8fc4
 7A3B: 20 3E 90 jsr $903e
 7A3E: 9D 78 03 sta $0378, x
-7A41: 20 26 90 jsr $9026
+7A41: 20 26 90 jsr compute_player_direction_9026
 7A44: 9D 2B 03 sta player_direction_032b, x
 7A47: A9 00    lda #$00
 7A49: 20 49 85 jsr $8549
@@ -3531,7 +3534,7 @@ player_preparing_for_pass_7909:
 7A80: 9D 88 03 sta $0388, x
 7A83: 20 3E 90 jsr $903e
 7A86: 9D 78 03 sta $0378, x
-7A89: 20 26 90 jsr $9026
+7A89: 20 26 90 jsr compute_player_direction_9026
 7A8C: 9D 2B 03 sta player_direction_032b, x
 7A8F: A9 01    lda #$01
 7A91: 20 3E 84 jsr $843e
@@ -3810,7 +3813,7 @@ player_preparing_for_pass_7909:
 7D36: 9D 88 03 sta $0388, x
 7D39: 20 3E 90 jsr $903e
 7D3C: 9D 78 03 sta $0378, x
-7D3F: 20 26 90 jsr $9026
+7D3F: 20 26 90 jsr compute_player_direction_9026
 7D42: 9D 2B 03 sta player_direction_032b, x
 7D45: 20 29 84 jsr $8429
 7D48: 90 B2    bcc $7cfc
@@ -3849,7 +3852,7 @@ player_preparing_for_pass_7909:
 7D9A: 9D 8C 03 sta $038c, x
 7D9D: 20 3E 90 jsr $903e
 7DA0: 9D 78 03 sta $0378, x
-7DA3: 20 26 90 jsr $9026
+7DA3: 20 26 90 jsr compute_player_direction_9026
 7DA6: 9D 2B 03 sta player_direction_032b, x
 7DA9: 20 A0 83 jsr $83a0
 7DAC: 90 08    bcc $7db6
@@ -3907,7 +3910,7 @@ player_preparing_for_pass_7909:
 7E2A: 9D 8C 03 sta $038c, x
 7E2D: 20 3E 90 jsr $903e
 7E30: 9D 78 03 sta $0378, x
-7E33: 20 26 90 jsr $9026
+7E33: 20 26 90 jsr compute_player_direction_9026
 7E36: 9D 2B 03 sta player_direction_032b, x
 7E39: 20 29 82 jsr $8229
 7E3C: B0 16    bcs $7e54
@@ -3942,7 +3945,7 @@ player_preparing_for_pass_7909:
 7E7B: 9D 8C 03 sta $038c, x
 7E7E: 20 3E 90 jsr $903e
 7E81: 9D 78 03 sta $0378, x
-7E84: 20 26 90 jsr $9026
+7E84: 20 26 90 jsr compute_player_direction_9026
 7E87: 9D 2B 03 sta player_direction_032b, x
 7E8A: 20 29 82 jsr $8229
 7E8D: 90 03    bcc $7e92
@@ -4154,7 +4157,7 @@ player_preparing_for_pass_7909:
 8095: 9D 8C 03 sta $038c, x
 8098: 20 3E 90 jsr $903e
 809B: 9D 78 03 sta $0378, x
-809E: 20 26 90 jsr $9026
+809E: 20 26 90 jsr compute_player_direction_9026
 80A1: 9D 2B 03 sta player_direction_032b, x
 80A4: 20 29 82 jsr $8229
 80A7: 90 03    bcc $80ac
@@ -4176,7 +4179,7 @@ player_preparing_for_pass_7909:
 80D2: D0 06    bne $80da
 80D4: BD 78 03 lda $0378, x
 80D7: 9D 7C 03 sta $037c, x
-80DA: 20 26 90 jsr $9026
+80DA: 20 26 90 jsr compute_player_direction_9026
 80DD: 9D 2B 03 sta player_direction_032b, x
 80E0: 20 29 82 jsr $8229
 80E3: 90 4E    bcc $8133
@@ -4283,7 +4286,7 @@ player_preparing_for_pass_7909:
 81D2: 9D 88 03 sta $0388, x
 81D5: 20 3E 90 jsr $903e
 81D8: 9D 78 03 sta $0378, x
-81DB: 20 26 90 jsr $9026
+81DB: 20 26 90 jsr compute_player_direction_9026
 81DE: 9D 2B 03 sta player_direction_032b, x
 81E1: 20 29 82 jsr $8229
 81E4: 90 16    bcc $81fc
@@ -4322,7 +4325,8 @@ player_preparing_for_pass_7909:
 8234: 29 7F    and #$7f
 8236: C9 14    cmp #$14
 8238: F0 06    beq $8240
-823A: 20 26 90 jsr $9026
+; change player direction
+823A: 20 26 90 jsr compute_player_direction_9026
 823D: 9D 2B 03 sta player_direction_032b, x
 8240: 86 1B    stx $1b
 8242: A9 0D    lda #$0d
@@ -5775,6 +5779,7 @@ initialize_logical_xy_players_8d26:
 9022: 9D B0 03 sta $03b0, x
 9025: 60       rts
 
+compute_player_direction_9026:
 9026: BD 84 03 lda $0384, x
 9029: 85 11    sta $11
 902B: BD 80 03 lda $0380, x
@@ -5967,7 +5972,7 @@ initialize_logical_xy_players_8d26:
 91FA: C9 0F    cmp #$0f
 91FC: 90 11    bcc $920f
 91FE: BD 2B 03 lda player_direction_032b, x
-9201: 9D 54 02 sta $0254, x
+9201: 9D 54 02 sta player_direction_copy_0254, x
 9204: 9D C4 03 sta $03c4, x
 9207: BD 0E 03 lda $030e, x
 920A: 09 04    ora #$04
@@ -5987,7 +5992,7 @@ initialize_logical_xy_players_8d26:
 922A: 85 1C    sta $1c
 922C: A9 37    lda #$37
 922E: 85 00    sta $00
-9230: A9 92    lda #$92
+9230: A9 92    lda #$92	; callback 9237
 9232: 85 01    sta $01
 9234: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 callback_9237:
@@ -6035,7 +6040,7 @@ callback_9280:
 9299: 29 10    and #$10
 929B: F0 00    beq $929d
 929D: BD 2B 03 lda player_direction_032b, x
-92A0: 9D 54 02 sta $0254, x
+92A0: 9D 54 02 sta player_direction_copy_0254, x
 92A3: 18       clc
 92A4: 69 10    adc #$10
 92A6: 4A       lsr a
@@ -6062,7 +6067,7 @@ callback_9280:
 92CC: 85 01    sta $01
 92CE: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 callback_92d1:
-92D1: 20 15 A2 jsr $a215
+92D1: 20 15 A2 jsr player_walks_a215
 92D4: B0 03    bcs $92d9
 92D6: 20 C2 B5 jsr $b5c2
 92D9: 20 8D 9D jsr $9d8d
@@ -6100,7 +6105,7 @@ callback_92d1:
 9327: 98       tya
 9328: 9D C4 03 sta $03c4, x
 932B: 6C 00 00 jmp ($0000)        ; [jump_to_callback]        ; [indirect_jump]
-932E: BD 54 02 lda $0254, x
+932E: BD 54 02 lda player_direction_copy_0254, x
 9331: 9D C4 03 sta $03c4, x
 9334: 6C 00 00 jmp ($0000)        ; [jump_to_callback]        ; [indirect_jump]
 9337: BD 1A 03 lda $031a, x
@@ -6111,7 +6116,7 @@ callback_92d1:
 9344: 9D 0E 03 sta $030e, x
 9347: BD 2B 03 lda player_direction_032b, x
 934A: 9D C4 03 sta $03c4, x
-934D: 9D 54 02 sta $0254, x
+934D: 9D 54 02 sta player_direction_copy_0254, x
 9350: 18       clc
 9351: 69 10    adc #$10
 9353: 29 E0    and #$e0
@@ -6127,7 +6132,7 @@ callback_92d1:
 9363: 9D 61 02 sta $0261, x
 ; reaches here only when a player is moving to position himself
 ; (for instance second player positions himself for pass)
-9366: 20 15 A2 jsr $a215
+9366: 20 15 A2 jsr player_walks_a215
 9369: B0 0D    bcs $9378
 936B: 20 C2 B5 jsr $b5c2
 936E: DE DC 03 dec $03dc, x
@@ -6150,7 +6155,7 @@ callback_92d1:
 93A5: 30 48    bmi $93ef
 93A7: 20 95 A1 jsr $a195
 93AA: BD 2B 03 lda player_direction_032b, x
-93AD: 9D 54 02 sta $0254, x
+93AD: 9D 54 02 sta player_direction_copy_0254, x
 93B0: A9 40    lda #$40
 93B2: 9D C0 03 sta $03c0, x
 93B5: A0 00    ldy #$00
@@ -6179,7 +6184,7 @@ callback_92d1:
 93E2: 85 01    sta $01
 93E4: 4C 0E 93 jmp $930e
 callback_93e7:
-93E7: BD 54 02 lda $0254, x
+93E7: BD 54 02 lda player_direction_copy_0254, x
 93EA: 10 03    bpl $93ef
 93EC: 20 69 A1 jsr $a169
 93EF: BD 0E 03 lda $030e, x
@@ -6206,7 +6211,7 @@ callback_93e7:
 941B: BD C0 03 lda $03c0, x
 941E: 29 40    and #$40
 9420: D0 09    bne $942b
-9422: 20 15 A2 jsr $a215
+9422: 20 15 A2 jsr player_walks_a215
 9425: 20 12 B6 jsr parabolic_movement_b612
 9428: 20 8B 94 jsr $948b
 942B: 20 1C 9C jsr $9c1c
@@ -6313,7 +6318,7 @@ callback_93e7:
 9510: 85 01    sta $01
 9512: 4C 0E 93 jmp $930e
 callback_9515:
-9515: 20 15 A2 jsr $a215
+9515: 20 15 A2 jsr player_walks_a215
 9518: 20 12 B6 jsr parabolic_movement_b612
 951B: 20 8B 94 jsr $948b
 951E: 20 8D 9D jsr $9d8d
@@ -6445,11 +6450,11 @@ callback_958e:
 964D: 30 09    bmi $9658
 964F: 20 95 A1 jsr $a195
 9652: BD 2B 03 lda player_direction_032b, x
-9655: 9D 54 02 sta $0254, x
+9655: 9D 54 02 sta player_direction_copy_0254, x
 9658: BD F0 02 lda $02f0, x
 965B: C9 03    cmp #$03
 965D: D0 58    bne $96b7
-965F: 20 15 A2 jsr $a215
+965F: 20 15 A2 jsr player_walks_a215
 9662: B0 03    bcs $9667
 9664: 20 C2 B5 jsr $b5c2
 9667: BD C0 03 lda $03c0, x
@@ -6508,7 +6513,7 @@ callback_958e:
 96EE: 20 95 A1 jsr $a195
 96F1: 20 E6 97 jsr $97e6
 96F4: BD 2B 03 lda player_direction_032b, x
-96F7: 9D 54 02 sta $0254, x
+96F7: 9D 54 02 sta player_direction_copy_0254, x
 96FA: 18       clc
 96FB: 69 10    adc #$10
 96FD: 29 E0    and #$e0
@@ -6554,7 +6559,7 @@ callback_958e:
 974E: BD C0 03 lda $03c0, x
 9751: 09 20    ora #$20
 9753: 9D C0 03 sta $03c0, x
-9756: 20 15 A2 jsr $a215
+9756: 20 15 A2 jsr player_walks_a215
 9759: B0 03    bcs $975e
 975B: 20 C2 B5 jsr $b5c2
 975E: BD 61 02 lda $0261, x
@@ -6573,7 +6578,7 @@ callback_958e:
 977E: A9 24    lda #$24
 9780: 9D 1A 03 sta $031a, x
 9783: 4C E3 97 jmp $97e3
-9786: 20 15 A2 jsr $a215
+9786: 20 15 A2 jsr player_walks_a215
 9789: B0 03    bcs $978e
 978B: 20 C2 B5 jsr $b5c2
 978E: 20 39 A1 jsr $a139
@@ -6659,7 +6664,7 @@ callback_958e:
 987F: 9D 0E 03 sta $030e, x
 9882: 20 E6 97 jsr $97e6
 9885: BD 2B 03 lda player_direction_032b, x
-9888: 9D 54 02 sta $0254, x
+9888: 9D 54 02 sta player_direction_copy_0254, x
 988B: 18       clc
 988C: 69 10    adc #$10
 988E: 29 E0    and #$e0
@@ -6710,7 +6715,7 @@ callback_958e:
 98EA: BD C0 03 lda $03c0, x
 98ED: 09 20    ora #$20
 98EF: 9D C0 03 sta $03c0, x
-98F2: 20 15 A2 jsr $a215
+98F2: 20 15 A2 jsr player_walks_a215
 98F5: B0 03    bcs $98fa
 98F7: 20 C2 B5 jsr $b5c2
 98FA: BD 61 02 lda $0261, x
@@ -6729,7 +6734,7 @@ callback_958e:
 991A: A9 24    lda #$24
 991C: 9D 1A 03 sta $031a, x
 991F: 4C 61 99 jmp $9961
-9922: 20 15 A2 jsr $a215
+9922: 20 15 A2 jsr player_walks_a215
 9925: B0 03    bcs $992a
 9927: 20 C2 B5 jsr $b5c2
 992A: 20 39 A1 jsr $a139
@@ -6788,10 +6793,10 @@ callback_999d:
 99BB: 4C 0E 93 jmp $930e
 callback_99be:
 99BE: BD 2B 03 lda player_direction_032b, x
-99C1: 9D 54 02 sta $0254, x
+99C1: 9D 54 02 sta player_direction_copy_0254, x
 99C4: A9 10    lda #$10
 99C6: 9D 61 02 sta $0261, x
-99C9: 20 15 A2 jsr $a215
+99C9: 20 15 A2 jsr player_walks_a215
 99CC: B0 03    bcs $99d1
 99CE: 20 C2 B5 jsr $b5c2
 99D1: 20 8D 9D jsr $9d8d
@@ -6925,7 +6930,7 @@ callback_9a3d:
 9B17: BD 0E 03 lda $030e, x
 9B1A: 09 40    ora #$40
 9B1C: 9D 0E 03 sta $030e, x
-9B1F: BD 54 02 lda $0254, x
+9B1F: BD 54 02 lda player_direction_copy_0254, x
 9B22: 18       clc
 9B23: 69 10    adc #$10
 9B25: 29 E0    and #$e0
@@ -6953,7 +6958,7 @@ callback_9a3d:
 9B4C: C6 00    dec $00
 9B4E: 10 F0    bpl $9b40
 9B50: A6 4C    ldx current_object_index_4c
-9B52: BD 54 02 lda $0254, x
+9B52: BD 54 02 lda player_direction_copy_0254, x
 9B55: 10 03    bpl $9b5a
 9B57: 20 69 A1 jsr $a169
 9B5A: BD 2F 03 lda $032f, x
@@ -6961,13 +6966,13 @@ callback_9a3d:
 9B5F: F0 05    beq $9b66
 9B61: A9 01    lda #$01
 9B63: 9D F0 02 sta $02f0, x
-9B66: BD 54 02 lda $0254, x
+9B66: BD 54 02 lda player_direction_copy_0254, x
 9B69: 18       clc
 9B6A: 69 80    adc #$80
 9B6C: 9D C4 03 sta $03c4, x
 9B6F: BD F0 02 lda $02f0, x
 9B72: F0 20    beq $9b94
-9B74: 20 15 A2 jsr $a215
+9B74: 20 15 A2 jsr player_walks_a215
 9B77: B0 03    bcs $9b7c
 9B79: 20 C2 B5 jsr $b5c2
 9B7C: 20 39 A1 jsr $a139
@@ -7158,6 +7163,7 @@ A0FC: 60       rts
 A0FD: BD 0E 03 lda $030e, x
 A100: 29 10    and #$10
 A102: F0 34    beq $a138
+; reached when second player is very close to the net (blocked)
 A104: BD C0 03 lda $03c0, x
 A107: 29 20    and #$20
 A109: D0 0D    bne $a118
@@ -7166,7 +7172,7 @@ A10D: 20 B5 A2 jsr $a2b5
 A110: BD C0 03 lda $03c0, x
 A113: 09 20    ora #$20
 A115: 9D C0 03 sta $03c0, x
-A118: 20 15 A2 jsr $a215
+A118: 20 15 A2 jsr player_walks_a215
 A11B: B0 03    bcs $a120
 A11D: 20 C2 B5 jsr $b5c2
 A120: BD 61 02 lda $0261, x
@@ -7261,6 +7267,7 @@ A1E8: 09 10    ora #$10
 A1EA: 9D 0E 03 sta $030e, x
 A1ED: 60       rts
 
+player_walks_a215:
 A215: B5 8F    lda objects_logical_x_array_8f, x
 A217: 48       pha
 A218: B5 9D    lda objects_side_array_9d, x
@@ -7269,7 +7276,7 @@ A21B: B5 B9    lda objects_logical_y_array_b9, x
 A21D: 48       pha
 A21E: B5 C7    lda $c7, x
 A220: 48       pha
-A221: BD 54 02 lda $0254, x
+A221: BD 54 02 lda player_direction_copy_0254, x
 A224: 18       clc
 A225: 69 10    adc #$10
 A227: 29 E0    and #$e0
@@ -7856,7 +7863,7 @@ A751: BD 1A 03 lda $031a, x
 A754: 30 08    bmi $a75e
 A756: 20 71 A8 jsr $a871
 A759: A9 00    lda #$00
-A75B: 9D 54 02 sta $0254, x
+A75B: 9D 54 02 sta player_direction_copy_0254, x
 A75E: A0 84    ldy #$84
 A760: A5 A1    lda ball_side_a1
 A762: D0 06    bne $a76a
@@ -7885,7 +7892,7 @@ A791: BD 1A 03 lda $031a, x
 A794: 30 08    bmi $a79e
 A796: 20 71 A8 jsr $a871
 A799: A9 01    lda #$01
-A79B: 9D 54 02 sta $0254, x
+A79B: 9D 54 02 sta player_direction_copy_0254, x
 A79E: B5 73    lda $73, x
 A7A0: 85 1B    sta $1b
 A7A2: A9 81    lda #$81
@@ -7911,7 +7918,7 @@ A7CF: 98       tya
 A7D0: 95 73    sta $73, x
 A7D2: BD F0 02 lda $02f0, x
 A7D5: D0 0B    bne $a7e2
-A7D7: BD 54 02 lda $0254, x
+A7D7: BD 54 02 lda player_direction_copy_0254, x
 A7DA: C9 01    cmp #$01
 A7DC: D0 04    bne $a7e2
 A7DE: A9 81    lda #$81
@@ -7950,7 +7957,7 @@ A82D: 98       tya
 A82E: 95 73    sta $73, x
 A830: BD F0 02 lda $02f0, x
 A833: D0 0B    bne $a840
-A835: BD 54 02 lda $0254, x
+A835: BD 54 02 lda player_direction_copy_0254, x
 A838: C9 01    cmp #$01
 A83A: D0 04    bne $a840
 A83C: A9 81    lda #$81
@@ -9255,8 +9262,10 @@ B45E: 85 12    sta multipurpose_12
 B460: B5 C7    lda $c7, x
 B462: 85 13    sta multipurpose_13
 B464: 4C 70 B4 jmp $b470
+; seems not called ever
 B467: 38       sec
 B468: B0 01    bcs $b46b
+; this is called
 B46A: 18       clc
 B46B: 8A       txa
 B46C: 48       pha
@@ -9273,6 +9282,7 @@ B47C: 85 16    sta screen_attribute_dest_address_16
 B47E: B5 C7    lda $c7, x
 B480: 85 17    sta $17
 B482: 4C 8E B4 jmp $b48e
+; seems not called ever
 B485: 38       sec
 B486: B0 01    bcs $b489
 B488: 18       clc
@@ -9281,6 +9291,7 @@ B48A: 48       pha
 B48B: 98       tya
 B48C: 48       pha
 B48D: 08       php
+; this is called
 B48E: A9 00    lda #$00
 B490: 85 03    sta $03
 B492: 38       sec
@@ -9439,7 +9450,7 @@ B5B0: 8A       txa
 B5B1: 60       rts
 
 B5C2: A6 4C    ldx current_object_index_4c
-B5C4: BD 54 02 lda $0254, x
+B5C4: BD 54 02 lda player_direction_copy_0254, x
 B5C7: 85 00    sta $00
 B5C9: BD 61 02 lda $0261, x
 B5CC: 85 01    sta $01
@@ -10452,7 +10463,7 @@ BEE4: 9D 27 03 sta $0327, x
 BEE7: A9 02    lda #$02
 BEE9: 9D 33 03 sta $0333, x
 BEEC: AD 15 04 lda $0415
-BEEF: 9D 54 02 sta $0254, x
+BEEF: 9D 54 02 sta player_direction_copy_0254, x
 BEF2: 4C 6A BF jmp $bf6a
 BEF5: 20 9F CD jsr $cd9f
 BEF8: A9 02    lda #$02
@@ -11802,7 +11813,7 @@ CD90: 9D 27 03 sta $0327, x
 CD93: A9 02    lda #$02
 CD95: 9D 33 03 sta $0333, x
 CD98: AD 15 04 lda $0415
-CD9B: 9D 54 02 sta $0254, x
+CD9B: 9D 54 02 sta player_direction_copy_0254, x
 CD9E: 60       rts
 CD9F: 18       clc
 CDA0: 2C 7F 02 bit ball_x_speed_027f
@@ -13052,10 +13063,11 @@ D8E8: 8D 2D 02 sta bankswitch_copy_022d
 D8EB: 8D 09 10 sta bankswitch_1009   ; set bank value
 D8EE: 60       rts
 
+
 D8EF: 98       tya
 D8F0: 48       pha
 D8F1: AD 2E 02 lda player_1_controls_022e
-D8F4: 8D 36 02 sta $0236
+D8F4: 8D 36 02 sta previous_player_1_controls_0236
 D8F7: AD 00 10 lda p1_1000
 D8FA: 49 FF    eor #$ff
 D8FC: 8D 2E 02 sta player_1_controls_022e
@@ -13069,7 +13081,7 @@ D90C: 29 F0    and #$f0
 D90E: 19 86 D9 ora $d986, y
 D911: 8D 2E 02 sta player_1_controls_022e
 D914: AD 2F 02 lda player_2_controls_022f
-D917: 8D 37 02 sta $0237
+D917: 8D 37 02 sta previous_player_2_controls_0237
 D91A: AD 01 10 lda p2_1001
 D91D: 49 FF    eor #$ff
 D91F: 8D 2F 02 sta player_2_controls_022f
@@ -13092,11 +13104,11 @@ D948: AD 31 02 lda $0231
 D94B: 29 F0    and #$f0
 D94D: 19 96 D9 ora $d996, y
 D950: 8D 31 02 sta $0231
-D953: AD 36 02 lda $0236
+D953: AD 36 02 lda previous_player_1_controls_0236
 D956: 2D 2E 02 and player_1_controls_022e
 D959: 4D 2E 02 eor player_1_controls_022e
 D95C: 8D 32 02 sta $0232
-D95F: AD 37 02 lda $0237
+D95F: AD 37 02 lda previous_player_2_controls_0237
 D962: 2D 2F 02 and player_2_controls_022f
 D965: 4D 2F 02 eor player_2_controls_022f
 D968: 8D 33 02 sta $0233
