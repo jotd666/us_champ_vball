@@ -131,12 +131,7 @@ OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;
 	.endm
 
 	.macro INVERT_XC_FLAGS
-	PUSH_SR
-	move.w	(sp),d4
-	eor.b	#0x11,d4
-	move.w	d4,(sp)
-	POP_SR
-	*eor.b	#0x11,ccr
+	eor.b	#0x11,ccr
 	.endm
 
 	.macro	TXS
@@ -189,51 +184,29 @@ b6\@:
 	.endm
 
 	.macro CLR_XC_FLAGS
-	PUSH_SR
-	move.w	(sp),d3
-	and.b	#0xEE,d3		| bit 4 = X, bit 0 = C
-	move.w	d3,(sp)	
-	POP_SR
+	and.b	#0xEE,ccr		| bit 4 = X, bit 0 = C
 	.endm
 	
 	.macro SET_XC_FLAGS
-	PUSH_SR
-	move.w	(sp),d3
-	or.b	#0x11,d3		| bit 4 = X, bit 0 = C
-	move.w	d3,(sp)	
-	POP_SR
+	or.b	#0x11,ccr		| bit 4 = X, bit 0 = C
 	.endm
 
 	.macro CLR_V_FLAG
-	PUSH_SR
-	move.w	(sp),d3
-	and.b	#0xFD,d3		| bit 1 = V
-	move.w	d3,(sp)	
-	POP_SR
+	and.b	#0xFD,ccr		| bit 1 = V
 	.endm
 	
 	.macro SET_V_FLAG
-	PUSH_SR
-	move.w	(sp),d3
-	or.b	#0x2,d3		| bit 1 = V
-	move.w	d3,(sp)	
-	POP_SR
+	or.b	#0x2,ccr		| bit 1 = V
 	.endm
 	
 	.macro	SET_NV_FLAGS 
-	PUSH_SR
-	move.w	(sp),d3
-	or.b	#0xA,d3		| bit 1 = V, bit 3 = N
-	move.w	d3,(sp)	
-	POP_SR
+	or.b	#0xA,ccr		| bit 1 = V, bit 3 = N
 	.endm
 	
 
 	.macro SET_I_FLAG
-	ERROR "TODO: insert interrupt disable code here"
 	.endm
 	.macro CLR_I_FLAG
-	ERROR  "TODO: insert interrupt enable code here"
 	.endm
 
 

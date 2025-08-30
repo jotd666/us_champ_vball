@@ -3417,9 +3417,12 @@ osd_log_cpu:
 	move.l	a6,log_ptr
 	cmp.w	#0xCAFE,(a6)  | hitting the protection buffer
 	jne		444f
-	BREAKPOINT	"cpu log buffer full, dumping and exiting!"
+	* the old strategy dumped the buffer and quit. Now we dump the buffer
+	* and continue (just in case we need just the end of the execution)
+	
+	BREAKPOINT	"cpu log buffer full, dumping and resetting!"
 	jbsr	osd_dump_logs
-	illegal
+	move.l	#log_buffer,log_ptr
 444:
 	move.l	(a7)+,d1
 445:

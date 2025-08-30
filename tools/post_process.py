@@ -115,11 +115,7 @@ with open(source_dir / "conv.s") as f:
         if re.search("GET_ADDRESS\t\w*jump_table",line):
             index = "X" if ", x" in line or ",x" in line else "Y"
             line = line.replace("GET_ADDRESS",f"PUSH_TABLE_{index}_ADDRESS")
-
-            if line_address in {0xBE09,0xBA7F,0xB781,0xA73B,0XA650,0X8710,0x917c}:
-                lines[i+1] = "\trts   | rest of the code is useless, just jump\n\n"
-            else:
-                lines[i+1] = ""
+            lines[i+1] = ""
 
         if optimizer_on and line_address == 0xbdd5:
             line = "\tSET_X_FROM_CLEARED_C\n"+line
@@ -417,6 +413,9 @@ header = """\t.include "data.inc"
     jra        callback_\msb\lsb
 0:
     .endm
+invalid_0000:
+    BREAKPOINT  "invalid jump table entry"
+    illegal
 
 callback_0000:
     CB_CASE     93,e7

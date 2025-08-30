@@ -5992,8 +5992,8 @@ compute_player_direction_9026:
 922A: 85 1C    sta $1c
 922C: A9 37    lda #$37
 922E: 85 00    sta $00
-9230: A9 92    lda #$92	; callback 9237
-9232: 85 01    sta $01
+9230: A9 92    lda #$92			  
+9232: 85 01    sta $01			  ; [zero_callback] 9237
 9234: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 callback_9237:
 9237: BD 43 03 lda $0343, x
@@ -6022,10 +6022,10 @@ callback_9237:
 926E: 85 1B    sta $1b
 9270: B9 EB 92 lda $92eb, y
 9273: 85 1C    sta $1c
-9275: A9 80    lda #$80				; callback/jump next address: 9280
+9275: A9 80    lda #$80
 9277: 85 00    sta $00
 9279: A9 92    lda #$92
-927B: 85 01    sta $01
+927B: 85 01    sta $01			  ; [zero_callback] 9280
 927D: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 callback_9280:
 9280: 20 8D 9D jsr $9d8d
@@ -6061,10 +6061,10 @@ callback_9280:
 92BF: 85 1B    sta $1b
 92C1: B9 EB 92 lda $92eb, y
 92C4: 85 1C    sta $1c
-92C6: A9 D1    lda #$d1			; callback/jump in 92d1
+92C6: A9 D1    lda #$d1			; callback/jump in 
 92C8: 85 00    sta $00
 92CA: A9 92    lda #$92
-92CC: 85 01    sta $01
+92CC: 85 01    sta $01			  ; [zero_callback] 92d1
 92CE: 6C 1B 00 jmp ($001b)        ; [indirect_jump]
 callback_92d1:
 92D1: 20 15 A2 jsr player_walks_a215
@@ -6089,6 +6089,7 @@ callback_92d1:
 9307: 98       tya
 9308: 9D C4 03 sta $03c4, x
 930B: 6C 00 00 jmp ($0000)        ; [jump_to_callback]        ; [indirect_jump]
+
 930E: A0 20    ldy #$20
 9310: B5 B9    lda objects_logical_y_array_b9, x
 9312: C9 48    cmp #$48
@@ -7017,6 +7018,7 @@ callback_9a3d:
 9BF3: 29 BF    and #$bf
 9BF5: 9D 0E 03 sta $030e, x
 9BF8: 4C 89 91 jmp $9189
+
 9BFB: BD 1A 03 lda $031a, x
 9BFE: 30 16    bmi callback_9c16
 9C00: 20 95 A1 jsr $a195
@@ -7348,6 +7350,7 @@ A2AC: A5 4C    lda current_object_index_4c
 A2AE: 20 1F B7 jsr $b71f
 A2B1: 9D 73 03 sta $0373, x
 A2B4: 60       rts
+
 A2B5: 85 1B    sta $1b
 A2B7: 8A       txa
 A2B8: 48       pha
@@ -16436,6 +16439,8 @@ jump_table_918a:
 	dc.w	$9b0f	; $91ce
 	dc.w	$9bb2	; $91d0
 	dc.w	$9bda	; $91d2
+	dc.w	invalid_0000	; $91d4			invalid
+	dc.w	$9bfb	; $91d6
 jump_table_92ea:
 	dc.w	$92f0	; $92ea
 	dc.w	$930e	; $92ec

@@ -1,8 +1,10 @@
 - crashing after a while
-- callback 9200 doesn't exist this makes no sense (when passing the ball): clear 0/1 after callback return so it can be monitored!!
+- callback doesn't exist this makes no sense (when passing the ball)
+  MAME print various callbacks when jumping in 0000
 - check if P1/P2 controls are properly read (at $FF) in the game 
-
-
+bpset 930B
+bpset 9334
+bpset 932B
 
 - demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks
   

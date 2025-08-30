@@ -44,4 +44,4 @@ context = "level_3"
 
 #merge("intro","used_tiles",0x4000,nb_cluts = 8,overwrite=False)
 merge(context,"used_tiles",0x4000,nb_cluts = 8,overwrite=True)
-merge(context,"used_sprites",0x800,nb_cluts=8,overwrite=True)
+merge(context,"used_sprites",0x800,nb_cluts=8,overwrite=False)
