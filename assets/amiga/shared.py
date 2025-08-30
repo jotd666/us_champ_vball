@@ -66,8 +66,15 @@ def get_sprite_names():
     0x7e4:"player_head_2",
     0x7e5:"player_torso_2",
     0x7e6:"player_tigh_2",
-    0x7e7:"player_leg"
+    0x7e7:"player_leg",
+
     }
+
+    for i in range(0x2EE,0x2F5):
+        rval[i] = "ball"
+    for i in range(0x2E2,0x2EE):
+        rval[i] = "pole"
+
     return rval
 
 

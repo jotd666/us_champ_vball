@@ -294,7 +294,9 @@ def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
                         if simple_size or double_size:
                             pass # ok!!
                         else:
-                            raise Exception(f"{context_name}: Sprite {index:02x} has simple & double heights!")
+                            double_size = True
+                            # 43a: net
+                            print(f"{context_name}: Sprite {index:02x} has simple & double heights!")
 
 
                         add_tile(sprite_cluts,index,cluts=cluts,double_size=double_size,is_bob=True)

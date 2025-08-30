@@ -93,7 +93,7 @@ OPT_DEBUG_BANKSWITCH = 0
 	.endif
 	
 
-OPT_ENABLE_DOUBLE_BUFFERING = 0
+OPT_ENABLE_DOUBLE_BUFFERING = 1
 
 _custom = 0xDFF000
 
@@ -111,7 +111,7 @@ Y_MAX = NB_LINES
 NB_PLAYFIELD_LINES = NB_LINES
 
 
-SCREEN_PLANE_SIZE = NB_BYTES_PER_ROW*NB_PLAYFIELD_LINES
+SCREEN_PLANE_SIZE = NB_BYTES_PER_ROW*(NB_PLAYFIELD_LINES+16)
 
 SCREEN_SIZE = SCREEN_PLANE_SIZE*NB_PLAYFIELD_PLANES
 NB_HOST_SPRITES = 8
@@ -976,14 +976,7 @@ blit_background:
 *		int flipy = 0;
 *		int dy = -16;
 *
-*		if (flip_screen())
-*		{
-*			sx = 240 - sx;
-*			sy = 240 - sy;
-*			flipx = !flipx;
-*			flipy = !flipy;
-*			dy = -dy;
-*		}
+
 *
 *		switch (size)
 *		{
@@ -1020,6 +1013,8 @@ really_update_sprites:
 1:
 	move.w	(2,a4),d1
 	beq.b	11f		| y=0: inactive
+	cmp.w	#NB_LINES,d1
+	jcc		11f
 	move.w	(a4),d0
 	and.w	#0x1F0,d0		| align on 16 lower bound
 	* clear area where the sprite was
@@ -1044,6 +1039,7 @@ really_update_sprites:
 	jeq		20f
 	GET_RAM_START_IN_A6
 	lea		(SPRITE_ADDRESS,a6),a0
+	*lea		mockup,a0
     lea _custom,A5
 	move.l	bob_previous_drawed_sprites(pc),a6
 	move.l		d0,a4
@@ -1056,6 +1052,10 @@ really_update_sprites:
 20:
 	rts
 
+mockup:
+	.byte	0x51,0x96,0xA6,0x4A
+	.skip	0xFC
+	
 compute_sprite_xy_code:
 	moveq	#0,d0
 	* sx = ((m_spriteram[i + 3] + 8) & 0xff) - 7;
@@ -1180,6 +1180,8 @@ update_one_bob:
 	* Y/X = 0xF8 (raw): nothing displayed
 	cmp.l	#0xF80000F8,(a0)
 	jeq		2f
+0:
+	move.l	(a0),0x200
 	jbsr	compute_sprite_xy_code
 
 
@@ -1211,6 +1213,13 @@ update_one_bob:
 	jra		2f
 100:
 	.endif
+	
+	cmp.l	#0x19C406C-8,d4
+	jne		11111f
+	BREAKPOINT	"fuck it"
+	jra		0b
+11111:
+
 	* now select proper clut
 	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d3
 	moveq	#0,d2
@@ -1247,8 +1256,40 @@ update_one_bob:
 	move.l		playfield_drawed_screen_ptr(pc),a1
 	
 	move.l	d2,a3
-	moveq	#0,d2	| no y-clip
+	* now 2 cases: if Y is negative, we have to clip, else normal
+	tst		d1
+	jpl		8f
+	* negative: can happen with ball for instance
+	* convert that to clip
+	add.w	d1,d4		| reduce height
+	jeq		2f
+	jmi		2f			| too high => skip
+	neg		d1			| make it positive again
+	* now multiply d1 by number of bytes per bob source row
+	* we only have 2 cases here: 4 and 6
+	add.w	d1,d1		| times 2
+	cmp.w	#6,d5
+	jne		7f
+	add.w	d1,d1		| times 4 (double width)
+7:
+	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
+	move.w	d1,d5		| set Y offset
+	moveq	#0,d1		| and coord = 0
+
+	* store attributes for clipped sprite erase
+	move.w	d0,(a6)+			| store current sprite attributes to previous ones
+	clr.w	(a6)+			| store current sprite attributes to previous ones
+	move.w	d4,(a6)+			| store height
+	move.w	d2,(a6)+			| store width in bytes
+
+	jra		9f
+
+8:
+	cmp.w	#NB_LINES,d1
+	jcc		2f		| avoid out of screen
+
 	* note down that this bob will have to be erased
+	* store attributes for non-clipped sprite erase
 	move.w	d0,(a6)+			| store current sprite attributes to previous ones
 	move.w	d1,(a6)+			| store current sprite attributes to previous ones
 	move.w	d4,(a6)+			| store height
@@ -1256,7 +1297,7 @@ update_one_bob:
 	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
 	moveq	#0,d5			| Y-offset
 
-
+9:
 	moveq	#NB_PLAYFIELD_PLANES,d3
 
 	jbsr		blit_planes_any_internal_cookie_cut
@@ -1373,7 +1414,9 @@ blit_planes_any_internal_cookie_cut:
 	subq.w	#1,d1	| minus one
 1:	
 	tst	d1
-    beq.b   2f    | optim
+    beq.b   5f    | optim
+	
+4:	
     lea		mulNB_BYTES_PER_ROW_table(pc),a4
 	.ifdef	NO68020
 	add.w	d1,d1
@@ -1381,7 +1424,7 @@ blit_planes_any_internal_cookie_cut:
 	.else
     move.w  (a4,d1.w*2),d1	| y times 40
 	.endif
-2:
+5:
 	lea		cookie_cut_blit_table(pc),a4
 	
     move.w  d0,d6
@@ -1452,7 +1495,7 @@ blit_planes_any_internal_cookie_cut:
 	move.l	a1,bltcpt(a5)	|pristine background top (bottom) left corner
 	move.l	a1,bltdpt(a5)	|destination top (bottom) left corner
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
-    
+10:
     movem.l (a7)+,d0-d7/a4
     rts
 	
@@ -1673,7 +1716,7 @@ platform_init:
     move.w #0x0C00+BORDERBLANK<<5,bplcon3(a5)     | no AGA specificities, default ECS
 
  	*         VVHH
-    move.w #0x2489,d0
+    move.w #0x2489+8,d0
     move.w #0x2489,d1
 	cmp.l	#NTSC_MONITOR_ID,monitor
 	jne		0f
@@ -2072,9 +2115,9 @@ update_bg_tile:
 	move.l	playfield_displayed_screen_ptr,a2
 	.endif
 
-	lea		mulNB_BYTES_PER_ROW_table,A2
+	lea		mulNB_BYTES_PER_ROW_table,A3
 	add.w	d1,d1
-	move.w	(a2,d1.w),d1
+	move.w	(a3,d1.w),d1
 	swap	d0
 	clr		d0
 	swap	d0
@@ -2101,18 +2144,18 @@ update_bg_tile:
 
 	jra		11f
 12:
-	move.l	d0,a2
-	move.l	(a2,d3.w*4),d0	| get proper clut
+	move.l	d0,a4
+	move.l	(a4,d3.w*4),d0	| get proper clut
 	jeq		11f
 	
 	
-	move.l	d0,a2		| directly pointer on tile bitplanes
+	move.l	d0,a4		| directly pointer on tile bitplanes
 	
 	
 standard_tile:
 	* just copy
 4:
-	move.l	(a2)+,d0		| next plane
+	move.l	(a4)+,d0		| next plane
 	jeq		5f
 	move.l	d0,a0
 	.set	offset,0

@@ -6,7 +6,7 @@ from shared import *
 
 sprite_names = get_sprite_names()
 
-
+print(sprite_names)
 
 
 def load_tileset(image_name,width,height,dump_prefix=""):
@@ -40,11 +40,15 @@ tile_set = [loadtiles(i) for i in range(8)]
 
 
 def process(the_dump,name_filter=None,hide_named_sprite=None):
-    the_dump = pathlib.Path(the_dump)
-    # in input, we use a MAME memory dump: save sprites,$A000,$400
-    # (0x200 are read, but there's a kind of double buffering
-    with open(the_dump,"rb") as f:
-        mem_800 = bytearray(f.read())
+    if isinstance(the_dump,bytes):
+        mem_800 = bytearray(the_dump)
+        the_dump = pathlib.Path("anon_dump")
+    else:
+        the_dump = pathlib.Path(the_dump)
+        # in input, we use a MAME memory dump: save sprites,$A000,$400
+        # (0x200 are read, but there's a kind of double buffering
+        with open(the_dump,"rb") as f:
+            mem_800 = bytearray(f.read())
 
     m_spriteram = mem_800
 
@@ -105,7 +109,7 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     result.save(f"{the_dump.stem}.png")
     print(f"nb active: {nb_active}")
 
-
-#process(r"sprites_mame")
-process(r"sprites_amiga_2")
+#process(bytes([0x51,0x96,0xA6,0x4A])+bytes([0xF8,0,0,0xF8])*63)
+process(r"ballhigh")
+#process(r"sprites_amiga_2")
 

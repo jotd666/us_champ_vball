@@ -9,7 +9,7 @@
 	.ifdef	RELEASE
 OPT_FIXED_RANDOM = 0   | DO NOT CHANGE
 	.else
-OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;g})
+OPT_FIXED_RANDOM = 0   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;g})
 	.endif
 	
     .macro    ERROR    arg

@@ -1,14 +1,11 @@
-- crashing after a while
-- callback doesn't exist this makes no sense (when passing the ball)
-  MAME print various callbacks when jumping in 0000
-- check if P1/P2 controls are properly read (at $FF) in the game 
-bpset 930B
-bpset 9334
-bpset 932B
-
 - demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks
-  
 - time: bcd doesn't seem to work
+- when going off-screen X/Y computation goes berzerk
+
+- still missing some black pixels (big score sprites)
+- check if P1/P2 controls are properly read (at $FF) in the game 
+
+- group sprites horizontally too
 - select screen: no timer, game starts immediately!
 - after game starts, context is loaded but no game map, no level 1 background
 
