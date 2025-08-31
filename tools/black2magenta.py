@@ -21,16 +21,17 @@ def doit(sheet_subdir,fake_black):
 
     yp = set()
     # accumulate list of positions where black is actually really black, not the background
-    for i,fb in fake_black.items():
+    for i,fbl in fake_black.items():
         ref_image = Image.open(src_sprite_dir / f"pal_{i:02x}.png")
 
-        # this palette has the nice property of having black not merged with background
-        # black colors in other palettes are there yellow, so we can backport the black color in other palettes
-        for x in range(ref_image.size[0]):
-            for y in range(ref_image.size[1]):
-                p = ref_image.getpixel((x,y))
-                if p == fb:
-                    yp.add((x,y))
+        for fb in fbl:
+            # this palette has the nice property of having black not merged with background
+            # black colors in other palettes are there yellow, so we can backport the black color in other palettes
+            for x in range(ref_image.size[0]):
+                for y in range(ref_image.size[1]):
+                    p = ref_image.getpixel((x,y))
+                    if p == fb:
+                        yp.add((x,y))
         image_size = ref_image.size
 
     for i in range(8):
@@ -54,4 +55,4 @@ def doit(sheet_subdir,fake_black):
 
         dst_image.save(dst)
 
-doit("level_3",fake_black = {0:(119,102,0),5:(255,0,0),2:(238,238,68)})
+doit("level_3",fake_black = {0:((119,102,0),(0,204,0)),5:((255,0,0),),2:((238,238,68),)})

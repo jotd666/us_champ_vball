@@ -83,9 +83,8 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
             im = ImageOps.mirror(im)
 
         name = sprite_names.get(which,"unknown")
-        if name=="ball":
-            print(sy,m_spriteram[i])
-            ddd
+
+
 
         block = "".join(f"{x:02x}" for x in block)
 
@@ -114,6 +113,6 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     print(f"nb active: {nb_active}")
 
 #process(bytes([0x51,0x96,0xA6,0x4A])+bytes([0xF8,0,0,0xF8])*63)
-process(r"points")
+process(r"serve")
 #process(r"sprites_amiga_2")
 

@@ -1,45 +1,36 @@
-- demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks: probably a black transparency issue!!!
-- ball Y computation probably wrong when going out of screen, debug with MAME
-
+- ball Y computation probably wrong when going out of screen, debug with MAME   ***************
+  start log regs: f519
+  trace E5DB
+  
 - still missing some black pixels (big score sprites) why????
 - check if P1/P2 controls are properly read (at $FF) in the game 
 
-- group sprites horizontally too
+- add controls to be able to play to level 1
+
 - select screen: no timer, game starts immediately!
-- after game starts, context is loaded but no game map, no level 1 background
+- after game starts, context is loaded but no game map, no level 1 background  *************
+- better bank switching if too frequent (no copy, special GET_BANK_ADDRESS macro)
+- reduce global colors, reduce tile colors
+- cheat: level select
+- fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
+- DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
+
+- 25Hz by default
+
+- rip sounds
+
 
 - converter:  if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 - converter:  flag manipulation can sometimes just use ANDI/ORI/EORI CCR to be faster!
 - converter: addx: set Z flag before
 - converter: sbcd/abcd warning: check bpl flag afterwards, change to bcc
-
 - alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
 
-- rip sounds
 
-- 25Hz by default
 
-- add controls to be able to play to level 1
 
-- reduce global colors, reduce tile colors
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
-- convert_graphics: separate tile/sprite files but computed together, separate palette file
-- convert_graphics: group horizontally if possible for better performance, maybe using
-  hardware sprites would be possible for players? difficult given the angle
-
-
-- create one gfx set per level/context like Dragonninja based on palette setup
-  hopefully it's enough
-
-
-- DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-
-- fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
-
-- cheat: level select
-
-- better bank switching if too frequent (no copy, special GET_BANK_ADDRESS macro)
 
 debug bankswitch change on MAME (22D is the copy in readable memory):
 doesn't work as 22D is sometimes updated BEFORE bankswitch

@@ -4546,10 +4546,12 @@ player_preparing_for_pass_7909:
 83E0: A0 04    ldy #$04
 83E2: B9 F1 00 lda $00f1, y
 83E5: D0 11    bne $83f8
+; checks if ball if in height range for proper serve
 83E7: B9 E3 00 lda $00e3, y
 83EA: C9 64    cmp #$64
 83EC: 90 03    bcc $83f1
 83EE: 4C F8 83 jmp $83f8
+; ball is now high enough to be served (maybe too high!)
 83F1: B9 AF 02 lda $02af, y
 83F4: 10 02    bpl $83f8
 83F6: 18       clc
@@ -12050,6 +12052,7 @@ CF93: E8       inx
 CF94: E8       inx
 CF95: D0 DE    bne $cf75
 CF97: 60       rts
+
 CF98: A5 10    lda screen_source_pointer_0010
 CF9A: 49 FF    eor #$ff
 CF9C: 18       clc
@@ -13335,6 +13338,8 @@ DB50: 60       rts
 ; this region contains ascii strings
 
 ; convert X/Y/Z isometric to X,Y screen
+; < current_object_index_4c: object index
+; > writes directly to shadow ram
 convert_logical_to_screen_coords_dff3:
 DFF3: A9 01    lda #$01
 DFF5: 20 DF D8 jsr set_bank_d8df
@@ -13362,6 +13367,7 @@ E01F: B5 B9    lda objects_logical_y_array_b9, x
 E021: 18       clc
 E022: 75 E3    adc objects_logical_z_array_e3, x
 E024: 85 02    sta unpack_mode_and_misc_02
+; extended Z?
 E026: B5 C7    lda $c7, x
 E028: 75 F1    adc $f1, x
 E02A: 85 03    sta $03
@@ -13971,7 +13977,7 @@ E544: 90 03    bcc $e549
 E546: 20 6A E5 jsr $e56a
 E549: 20 BB E5 jsr $e5bb
 E54C: A9 06    lda #$06
-E54E: 20 DB E5 jsr update_players_and_net_sprites_e5db
+E54E: 20 DB E5 jsr update_sprite_shadow_ram_e5db
 E551: A5 1D    lda base_screen_pointer_list_001d
 E553: F0 0A    beq $e55f
 E555: C9 02    cmp #$02
@@ -14033,7 +14039,7 @@ E5C6: 48       pha
 E5C7: 98       tya
 E5C8: 48       pha
 E5C9: BD 00 02 lda $0200, x
-E5CC: 20 DB E5 jsr update_players_and_net_sprites_e5db
+E5CC: 20 DB E5 jsr update_sprite_shadow_ram_e5db
 E5CF: 68       pla
 E5D0: A8       tay
 E5D1: 68       pla
@@ -14045,7 +14051,7 @@ E5D6: C4 1E    cpy $1e
 E5D8: 90 EB    bcc $e5c5
 E5DA: 60       rts
 
-update_players_and_net_sprites_e5db:
+update_sprite_shadow_ram_e5db:
 E5DB: 48       pha
 E5DC: A9 01    lda #$01
 E5DE: 20 DF D8 jsr set_bank_d8df
@@ -14122,6 +14128,7 @@ E65F: C8       iny
 E660: 9D DC 06 sta $06dc, x
 E663: B1 10    lda (screen_source_pointer_0010), y
 E665: C8       iny
+; write sprite code (lower byte)
 E666: 9D DD 06 sta $06dd, x
 E669: B1 10    lda (screen_source_pointer_0010), y
 E66B: 18       clc
@@ -15313,6 +15320,7 @@ F0B3: 8D DA 06 sta $06da
 F0B6: 20 45 A6 jsr $a645
 F0B9: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F0BC: 20 CC E6 jsr $e6cc
+; ball!
 F0BF: A2 04    ldx #$04
 F0C1: 86 4C    stx current_object_index_4c
 F0C3: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
@@ -15407,6 +15415,7 @@ F184: 8D F5 07 sta timer_07f5
 F187: 20 45 A6 jsr $a645
 F18A: 20 6A AE jsr most_of_players_moves_and_draw_ae6a
 F18D: 20 CC E6 jsr $e6cc
+; ball!
 F190: A2 04    ldx #$04
 F192: 86 4C    stx current_object_index_4c
 F194: 20 F3 DF jsr convert_logical_to_screen_coords_dff3
