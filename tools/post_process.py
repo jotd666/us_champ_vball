@@ -148,6 +148,31 @@ with open(source_dir / "conv.s") as f:
             # jumping to bank 1!
             line = line.replace("l_7","b1_7")
 
+        if line_address == 0xf6db:
+            # credit decrease uses decimal mode too. We're going to decrease 1 credit
+            # so nevermind the value of coin per credit
+            lines[i-2] = remove_error(lines[i-2])
+            lines[i-1] = change_instruction("moveq\t#1,d4",lines,i-1)
+            line = change_instruction("sbcd\td4,d0",lines,i)
+
+        # time decrease (tricky because of bcd shit)
+        if line_address == 0xe703:
+            line = remove_error(line)
+        elif line_address == 0xe704:
+            line = remove_instruction(lines,i)
+        elif line_address == 0xe707:
+            # decimal mode still active from somewhere, converter didn't see it
+            # so timer goes berzerk
+            line = "\tmoveq\t#1,d4\n"+change_instruction("sbcd\td4,d0",lines,i)
+        elif line_address == 0xe70c:
+            # plus condition => carry as sbcd goes from 00 to 99 without negative
+            # (negative is not defined in sbcd)
+            line = change_instruction("jcc\tl_e71c",lines,i)
+
+        if line_address == 0xf6b6:
+            # plus condition => carry as sbcd goes from 00 to 99 without negative
+            # (negative is not defined in sbcd)
+            line = change_instruction("jcc\tl_f6bb",lines,i)
 
         ######################################################
         # those 2 changes are designed to save overflow flag after a bit instruction
@@ -181,7 +206,7 @@ with open(source_dir / "conv.s") as f:
 
         if line.startswith("pseudo_random_d00a:"):
             line += """\t.ifne\tOPT_FIXED_RANDOM\n
-\tmoveq #0,d0
+\tmove.b #OPT_FIXED_RANDOM_VALUE,d0
 \trts
 \t.endif
 """
@@ -202,12 +227,6 @@ with open(source_dir / "conv.s") as f:
             lines[i-1] = ""   # remove comment
             line = "\tINVERT_XC_FLAGS\n"+line.replace("bcs","bcc").replace("jcs","jcc")
 
-        if line_address == 0xe707:
-            line = change_instruction("subq.b\t#1,d0",lines,i)
-            lines[i+1]=""
-            lines[i+3]=""
-            lines[i-3]=""
-            lines[i-2] = remove_instruction(lines,i-2)
 
         if optimizer_on and line_address in {0xe66b,0xe64a,0xe9c3}:
             # we changed addx to add, no need for clc aka CLEAR_XC_FLAGS

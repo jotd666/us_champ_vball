@@ -1,8 +1,8 @@
 - demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks
-- time: bcd doesn't seem to work
-- when going off-screen X/Y computation goes berzerk
+- ball Y computation probably wrong when going out of screen, debug with MAME
+- when clipped sprite, erase doesn't work
 
-- still missing some black pixels (big score sprites)
+- still missing some black pixels (big score sprites) why????
 - check if P1/P2 controls are properly read (at $FF) in the game 
 
 - group sprites horizontally too
@@ -12,12 +12,13 @@
 - converter:  if SBC_IMM	0x00 found later, don't optimize sbc into sub!
 - converter:  flag manipulation can sometimes just use ANDI/ORI/EORI CCR to be faster!
 - converter: addx: set Z flag before
+- converter: sbcd/abcd warning: check bpl flag afterwards, change to bcc
 
 - alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
 
 - rip sounds
 
-- flashing sprites (no dblbuf) but dblbuf crashes!!
+- 25Hz by default
 
 - add controls to be able to play to level 1
 

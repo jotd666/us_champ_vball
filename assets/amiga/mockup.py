@@ -75,7 +75,6 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
         flipy = 0;
 
 
-
         im = tile_set[color][which]
 
         if flipy:
@@ -84,6 +83,9 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
             im = ImageOps.mirror(im)
 
         name = sprite_names.get(which,"unknown")
+        if name=="ball":
+            print(sy,m_spriteram[i])
+            ddd
 
         if not size:
             print(f"offs:{i:02x}, name: {name}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")

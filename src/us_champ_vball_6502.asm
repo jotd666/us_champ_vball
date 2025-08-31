@@ -142,6 +142,8 @@ random_gen_2c = $2c
 random_gen_2e = $2e
 random_index_2b = $2b
 random_index_2d = $2d
+time_seconds_4a = $4a
+time_minutes_4b = $4b
 current_object_index_4c = $4c
 score_array_57 = $57
 ball_logical_x_93 = $93
@@ -173,6 +175,7 @@ player_2_controls_022f = $022f
 previous_player_1_controls_0236 = $236
 previous_player_2_controls_0237 = $237
 player_direction_032b = $32b
+coin_per_credit_0416 = $416
 sprite_shadow_ram_06db = $6db
 sound_to_queue_07f2 = $7f2
 timer_07f5 = $7f5
@@ -10239,11 +10242,11 @@ BCCB: A5 CB    lda ball_kind_of_z_cb
 BCCD: 85 D4    sta $d4
 BCCF: A9 0D    lda #$0d
 BCD1: 20 1F B7 jsr $b71f
-BCD4: 8D 16 04 sta $0416
+BCD4: 8D 16 04 sta coin_per_credit_0416
 BCD7: AD 10 04 lda $0410
 BCDA: 10 03    bpl $bcdf
 BCDC: 4C 7E BD jmp $bd7e
-BCDF: AD 16 04 lda $0416
+BCDF: AD 16 04 lda coin_per_credit_0416
 BCE2: 4D 10 04 eor $0410
 BCE5: 29 10    and #$10
 BCE7: D0 03    bne $bcec
@@ -10277,7 +10280,7 @@ BD2A: 85 BD    sta ball_logical_y_bd
 BD2C: AD E6 03 lda $03e6
 BD2F: 85 CB    sta ball_kind_of_z_cb
 BD31: AD 10 04 lda $0410
-BD34: 8D 16 04 sta $0416
+BD34: 8D 16 04 sta coin_per_credit_0416
 BD37: AD E0 03 lda $03e0
 BD3A: 8D E1 03 sta $03e1
 BD3D: A9 0D    lda #$0d
@@ -10307,7 +10310,7 @@ BD74: A5 BD    lda ball_logical_y_bd
 BD76: 8D E5 03 sta $03e5
 BD79: A5 CB    lda ball_kind_of_z_cb
 BD7B: 8D E6 03 sta $03e6
-BD7E: AD 16 04 lda $0416
+BD7E: AD 16 04 lda coin_per_credit_0416
 BD81: 8D 10 04 sta $0410
 BD84: 60       rts
 
@@ -11487,7 +11490,7 @@ CA9D: 49 80    eor #$80
 CA9F: C9 40    cmp #$40
 CAA1: B0 02    bcs $caa5
 CAA3: A2 03    ldx #$03
-CAA5: BD 16 04 lda $0416, x
+CAA5: BD 16 04 lda coin_per_credit_0416, x
 CAA8: 85 00    sta $00
 CAAA: BD 17 04 lda $0417, x
 CAAD: 85 01    sta $01
@@ -11513,7 +11516,7 @@ CAD8: 8D 1F 04 sta $041f
 CADB: 85 10    sta screen_source_pointer_0010
 CADD: A9 00    lda #$00
 CADF: 85 11    sta $11
-CAE1: AD 16 04 lda $0416
+CAE1: AD 16 04 lda coin_per_credit_0416
 CAE4: 85 00    sta $00
 CAE6: AD 17 04 lda $0417
 CAE9: 85 01    sta $01
@@ -11747,7 +11750,7 @@ CCE3: 60       rts
 CCF5: A5 8E    lda $8e
 CCF7: 38       sec
 CCF8: E5 85    sbc $85
-CCFA: 8D 16 04 sta $0416
+CCFA: 8D 16 04 sta coin_per_credit_0416
 CCFD: A5 9C    lda $9c
 CCFF: E5 93    sbc ball_logical_x_93
 CD01: 8D 17 04 sta $0417
@@ -12929,7 +12932,7 @@ D7FB: 0A       asl a
 D7FC: 65 00    adc $00
 D7FE: AA       tax
 D7FF: F8       sed
-D800: AD 16 04 lda $0416
+D800: AD 16 04 lda coin_per_credit_0416
 D803: 18       clc
 D804: 75 3C    adc $3c, x
 D806: 95 3C    sta $3c, x
@@ -14206,23 +14209,23 @@ E6FF: A9 00    lda #$00
 E701: 85 49    sta $49
 E703: F8       sed
 E704: 38       sec
-E705: A5 4A    lda $4a
+E705: A5 4A    lda time_seconds_4a
 E707: E9 01    sbc #$01
-E709: 85 4A    sta $4a
+E709: 85 4A    sta time_seconds_4a
 E70B: D8       cld
 E70C: 10 0E    bpl $e71c
-E70E: A9 59    lda #$59
-E710: 85 4A    sta $4a
-E712: C6 4B    dec $4b
+E70E: A9 59    lda #$59		; put 59 seconds again
+E710: 85 4A    sta time_seconds_4a
+E712: C6 4B    dec time_minutes_4b		; decrease minutes
 E714: 10 06    bpl $e71c
 E716: A9 00    lda #$00
-E718: 85 4A    sta $4a
-E71A: 85 4B    sta $4b
+E718: 85 4A    sta time_seconds_4a
+E71A: 85 4B    sta time_minutes_4b
 E71C: A5 37    lda $37
 E71E: F0 0F    beq $e72f
-E720: A5 4B    lda $4b
+E720: A5 4B    lda time_minutes_4b
 E722: D0 0B    bne $e72f
-E724: A5 4A    lda $4a
+E724: A5 4A    lda time_seconds_4a
 E726: C9 29    cmp #$29
 E728: D0 05    bne $e72f
 E72A: A9 03    lda #$03
@@ -14232,12 +14235,12 @@ E731: 8D C0 3C sta $3cc0
 E734: 8D C1 3C sta $3cc1
 E737: 8D C2 3C sta $3cc2
 E73A: 8D C3 3C sta $3cc3
-E73D: A4 4B    ldy $4b
+E73D: A4 4B    ldy time_minutes_4b
 E73F: B9 65 E7 lda $e765, y
 E742: 8D C0 2C sta $2cc0
 E745: A9 C4    lda #$c4
 E747: 8D C1 2C sta $2cc1
-E74A: A5 4A    lda $4a
+E74A: A5 4A    lda time_seconds_4a
 E74C: 29 F0    and #$f0
 E74E: 4A       lsr a
 E74F: 4A       lsr a
@@ -14246,7 +14249,7 @@ E751: 4A       lsr a
 E752: A8       tay
 E753: B9 65 E7 lda $e765, y
 E756: 8D C2 2C sta $2cc2
-E759: A5 4A    lda $4a
+E759: A5 4A    lda time_seconds_4a
 E75B: 29 0F    and #$0f
 E75D: A8       tay
 E75E: B9 65 E7 lda $e765, y
@@ -15603,9 +15606,9 @@ F341: C9 03    cmp #$03
 F343: 90 02    bcc $f347
 F345: A0 0C    ldy #$0c
 F347: B9 56 F3 lda $f356, y
-F34A: 85 4A    sta $4a
+F34A: 85 4A    sta time_seconds_4a
 F34C: B9 57 F3 lda $f357, y
-F34F: 85 4B    sta $4b
+F34F: 85 4B    sta time_minutes_4b
 F351: 60       rts
 
 game_main_loop_f36f:
@@ -15732,8 +15735,8 @@ F45B: 9D 1A 03 sta $031a, x
 F45E: E8       inx
 F45F: E0 0D    cpx #$0d
 F461: 90 F8    bcc $f45b
-F463: A5 4A    lda $4a
-F465: 05 4B    ora $4b
+F463: A5 4A    lda time_seconds_4a
+F465: 05 4B    ora time_minutes_4b
 F467: F0 03    beq $f46c
 F469: 4C CA F4 jmp keep_playing_f4ca
 F46C: A5 37    lda $37
@@ -15756,8 +15759,8 @@ F492: 20 CC E6 jsr $e6cc
 F495: 20 59 CF jsr clear_rest_of_sprites_cf59
 F498: A9 12    lda #$12
 F49A: 20 80 EE jsr $ee80
-F49D: A5 4A    lda $4a
-F49F: 05 4B    ora $4b
+F49D: A5 4A    lda time_seconds_4a
+F49F: 05 4B    ora time_minutes_4b
 F4A1: D0 0F    bne $f4b2
 F4A3: A9 17    lda #$17
 F4A5: 20 7F DA jsr $da7f
@@ -15916,18 +15919,18 @@ F5EE: F8       sed
 F5EF: 18       clc
 F5F0: A9 00    lda #$00
 F5F2: 85 49    sta $49
-F5F4: A5 4A    lda $4a
+F5F4: A5 4A    lda time_seconds_4a
 F5F6: 69 30    adc #$30
-F5F8: 85 4A    sta $4a
-F5FA: A5 4B    lda $4b
+F5F8: 85 4A    sta time_seconds_4a
+F5FA: A5 4B    lda time_minutes_4b
 F5FC: 69 00    adc #$00
-F5FE: 85 4B    sta $4b
-F600: A5 4A    lda $4a
+F5FE: 85 4B    sta time_minutes_4b
+F600: A5 4A    lda time_seconds_4a
 F602: C9 60    cmp #$60
 F604: 90 06    bcc $f60c
 F606: E9 60    sbc #$60
-F608: 85 4A    sta $4a
-F60A: E6 4B    inc $4b
+F608: 85 4A    sta time_seconds_4a
+F60A: E6 4B    inc time_minutes_4b
 F60C: D8       cld
 F60D: 4C F5 EF jmp $eff5
 F610: A9 00    lda #$00
@@ -15972,14 +15975,14 @@ F669: F0 03    beq $f66e
 F66B: 20 F5 EF jsr $eff5
 F66E: 4C 53 EF jmp $ef53
 F671: A5 37    lda $37
-F673: 8D 16 04 sta $0416
+F673: 8D 16 04 sta coin_per_credit_0416
 F676: 38       sec
 F677: E5 35    sbc nb_credits_0035
 F679: 8D 17 04 sta $0417
 F67C: A0 13    ldy #$13
 F67E: A2 04    ldx #$04
 F680: A5 35    lda nb_credits_0035
-F682: CD 16 04 cmp $0416
+F682: CD 16 04 cmp coin_per_credit_0416
 F685: B0 0B    bcs $f692
 F687: A0 0B    ldy #$0b
 F689: CA       dex
@@ -16014,16 +16017,16 @@ F6BD: 20 A6 D9 jsr $d9a6
 F6C0: A9 02    lda #$02
 F6C2: 20 A6 D9 jsr $d9a6
 F6C5: A5 35    lda nb_credits_0035
-F6C7: CD 16 04 cmp $0416
+F6C7: CD 16 04 cmp coin_per_credit_0416
 F6CA: 90 46    bcc $f712
 F6CC: 20 EF D8 jsr $d8ef
-F6CF: AE 16 04 ldx $0416
+F6CF: AE 16 04 ldx coin_per_credit_0416
 F6D2: BD 2D 02 lda bankswitch_copy_022d, x
 F6D5: 10 3B    bpl $f712
 F6D7: A5 35    lda nb_credits_0035
 F6D9: F8       sed
 F6DA: 38       sec
-F6DB: ED 16 04 sbc $0416
+F6DB: ED 16 04 sbc coin_per_credit_0416
 F6DE: 85 35    sta nb_credits_0035
 F6E0: D8       cld
 F6E1: A9 01    lda #$01
