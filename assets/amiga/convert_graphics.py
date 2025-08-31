@@ -23,12 +23,15 @@ def dump_asm_bytes(*args,**kwargs):
     bitplanelib.dump_asm_bytes(*args,**kwargs,mit_format=False)
 
 
-def ensure_empty(d):
-    if os.path.exists(d):
-        for f in os.listdir(d):
-            os.remove(os.path.join(d,f))
+def ensure_empty(d : pathlib.Path):
+    if d.exists():
+        for f in d.glob("*"):
+            if f.is_dir():
+                f.rmdir()
+            else:
+                f.unlink()
     else:
-        os.makedirs(d)
+        d.mkdir(parents=True)
 
 def load_tileset(image_name,palette_index,width,height,tileset_name,dumpdir,
 dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
@@ -46,9 +49,15 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
     tileset_1 = []
 
     if dump:
-        dump_subdir = os.path.join(dumpdir,tileset_name)
+        dump_subdir = dumpdir / tileset_name
+        if is_bob:
+            dump_subdir_orphan = dump_subdir / "not_grouped"
+            if palette_index == 0 and tile_number == 0:
+                ensure_empty(dump_subdir_orphan)
         if palette_index == 0 and tile_number == 0:
             ensure_empty(dump_subdir)
+        if is_bob:
+            dump_subdir_orphan.mkdir(exist_ok=True)
 
     palette = set()
 
@@ -80,51 +89,65 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
             tile_number += 1
 
     if is_bob:
+        discarded_indexes = []
+
         # rework & dump grouped / non grouped sprites
         # rework tiles which are grouped
-        for tile_number,wtile in enumerate(tileset_1):
+        #
+        # multi-pass
 
+        for tile_number,wtile in enumerate(tileset_1):
+            # group vertically like the hardware does
             if wtile and double_size_sprites[tile_number]==1:
                 # append the next tile
                 dstile = Image.new("RGB",(wtile.size[0],wtile.size[1]*2))
                 dstile.paste(wtile)
                 nwtile = tileset_1[tile_number+1]
-
                 dstile.paste(nwtile,(0,wtile.size[1]))
                 wtile = dstile
                 tileset_1[tile_number] = wtile
-                tileset_1[tile_number+1] = None  # discatd
+                discarded_indexes.append(tile_number+1)  # discard
+
+        # group horizontally (amiga exclusive :))
+        for tile_number,wtile in enumerate(tileset_1):
+            if wtile and tile_number in group_sprite_pairs:
+                # append the next tile
+                dstile = Image.new("RGB",(wtile.size[0]*2,wtile.size[1]))
+                dstile.paste(wtile)
+                other_tile_number = group_sprite_pairs[tile_number]
+                nwtile = tileset_1[other_tile_number]
+                if nwtile is None:
+                    raise Exception(f"Other tile 0x{other_tile_number:x} not found (grouping with 0x{tile_number:x})")
+
+                dstile.paste(nwtile,(wtile.size[0],0))
+                wtile = dstile
+                tileset_1[tile_number] = wtile
+                discarded_indexes.append(other_tile_number)  # discard
 
 
-##            if wtile and tile_number in group_sprite_pairs:
-##                # change wtile, fetch code +0x100
-##                other_tile_index = tile_number+1
-##                other_tile = tileset_1[other_tile_index]
-##                if not other_tile:
-##                    raise Exception(f"other tile index 0x{other_tile_index:02x} not found")
-##                new_tile = Image.new("RGB",(wtile.size[0]*2,wtile.size[1]))
-##
-##                new_tile.paste(wtile)
-##
-##                new_tile.paste(other_tile,(wtile.size[0],0))
-##                tileset_1[tile_number] = new_tile
-##                tileset_1[tile_number+1] = None  # discatd
-##                wtile = new_tile
+        # remove 16x16 blocks that were grouped
+        for i in discarded_indexes:
+            tileset_1[i] = None
+
+        # now dump
+        for tile_number,wtile in enumerate(tileset_1):
             if dump_it and wtile:
+                ds = dump_subdir if not is_bob or wtile.size[0]>16 else dump_subdir_orphan
+
                 img = ImageOps.scale(wtile,5,resample=Image.Resampling.NEAREST)
                 if sprite_names:
                     name = sprite_names.get(tile_number,"unknown")
                 else:
                     name = "unknown"
 
-                img.save(os.path.join(dump_subdir,f"{name}_{tile_number:02x}_{palette_index:02x}.png"))
-
+                img.save(os.path.join(ds,f"{name}_{tile_number:03x}_{palette_index:02x}.png"))
 
 
     return sorted(set(palette)),tileset_1
 
 all_tile_cluts = False
 
+group_sprite_pairs = get_sprite_groups()
 
 nb_planes = 7
 nb_colors = 1<<nb_planes
@@ -333,9 +356,7 @@ def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
     cluts = sprite_cluts
     sprite_dump_dir = sdump_dir / "sprites"
 
-    for p in sprite_dump_dir.glob("*"):
-        p.unlink()
-    sprite_dump_dir.mkdir(exist_ok=True)
+
 
     for clut_index,tsd in sprite_sheet_dict.items():
         # BOBs
@@ -382,17 +403,17 @@ def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
         f.write(f"{decl_word}{ptr_name}-_base\n")
 
     out_asm_file = gen_dir / f"tiles_{context_name}.s"
-    with open(out_asm_file,"w") as f:
 
-##gs_array = [0]*0x100
-##for i in group_sprite_pairs:
-##    gs_array[i] = 1
-##    gs_array[i+1] = 0xFF
-##with open(os.path.join(src_dir,"sprite_groups.68k"),"w") as f:
+    gs_array = [0]*0x800
+    for i,j in group_sprite_pairs.items():
+        gs_array[j] = -i   # negative means that display only if mirrored and with x = x-16
+        gs_array[i] = i    # positive non null means that display only if not mirrored
+    with open(os.path.join(src_dir,"sprite_groups.68k"),"w") as f:
 ##    f.write("* 1: do not display unless mirrored\n")
-##    dump_asm_bytes(gs_array,f)
+        bitplanelib.dump_asm_bytes(gs_array,f,mit_format=True,size=2)
 
 
+    with open(out_asm_file,"w") as f:
 
         f.write("tile_table:\n")
 

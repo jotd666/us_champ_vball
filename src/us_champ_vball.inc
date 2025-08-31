@@ -10,7 +10,7 @@
 OPT_FIXED_RANDOM = 0   | DO NOT CHANGE
 	.else
 OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;g})
-OPT_FIXED_RANDOM_VALUE = 1   | 1: demo runs without ball going too high, 3: ball high
+OPT_FIXED_RANDOM_VALUE = 3   | 1: demo runs without ball going too high, 3: ball high
 	.endif
 	
     .macro    ERROR    arg

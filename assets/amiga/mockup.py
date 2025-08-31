@@ -87,13 +87,15 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
             print(sy,m_spriteram[i])
             ddd
 
+        block = "".join(f"{x:02x}" for x in block)
+
         if not size:
-            print(f"offs:{i:02x}, name: {name}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
+            print(f"offs:{i:02x}, name: {name}, raw: 0x{block}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
             result.paste(im,(sx,sy))
         else:
             # double height: tile is drawn 16 pixels above, and next tile is drawn at the original y
             sy -= 16
-            print(f"offs:{i:02x}, name: {name}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
+            print(f"offs:{i:02x}, name: {name}, raw: 0x{block}, dblsize: {size}, code:{which:02x}, flipx: {flipx}, flipy: {flipy}, color:{color:02x}, X:{sx}, Y:{sy}")
             result.paste(im,(sx,sy))
             sy += 16
             which += 1
@@ -112,6 +114,6 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     print(f"nb active: {nb_active}")
 
 #process(bytes([0x51,0x96,0xA6,0x4A])+bytes([0xF8,0,0,0xF8])*63)
-process(r"ballhigh")
+process(r"points")
 #process(r"sprites_amiga_2")
 

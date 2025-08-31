@@ -1,6 +1,5 @@
-- demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks
+- demo: TX vs TX: no shadow under blond player (either side!), ok for the player with green trunks: probably a black transparency issue!!!
 - ball Y computation probably wrong when going out of screen, debug with MAME
-- when clipped sprite, erase doesn't work
 
 - still missing some black pixels (big score sprites) why????
 - check if P1/P2 controls are properly read (at $FF) in the game 
