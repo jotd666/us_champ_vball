@@ -145,6 +145,10 @@ BIT_FIRE_2 = 5
 	.endif
 	.endm
 	
+	.macro	COLOR0_FLASH	v
+	move.w	#(BORDERBLANK<<5),_custom+bplcon3
+	move.w	#\v,_custom+color	
+	.endm
 
 
 	
@@ -1166,8 +1170,7 @@ update_one_bob:
 	and.b	#7,d2
 	lsl.w	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
-	move.w	#(BORDERBLANK<<5),_custom+bplcon3
-	move.w	#0xF00,_custom+color
+	COLOR0_FLASH	0xF00
 	*BREAKPOINT	"unregistered sprite clut (D2=code)"
 	jra		2f
 100:
@@ -1850,6 +1853,7 @@ sound_indirection_table:
 	move.w	last_known_m6502_pc,d5
 	BREAKPOINT	"setting bank \arg, prev bspc in d4, curpc in d5"
 	.endif
+	*COLOR0_FLASH	((\arg+1)*7)<<0x5
 	jbsr	copy_bank_\arg
 	move.b	#\arg,current_rom_bank
 	.ifndef	RELEASE

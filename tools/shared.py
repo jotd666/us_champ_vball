@@ -48,6 +48,7 @@ def subt(m):
     return rval
 
 store_to_video = re.compile("GET_ADDRESS\s+0x[23]\w\w\w",flags=re.I)
+access_bank = re.compile("GET_ADDRESS\s+0x[4-7]\w\w\w",flags=re.I)
 
 equates = []
 

@@ -1,6 +1,6 @@
-- ball Y computation probably wrong when going out of screen, debug with MAME   ***************
+- better bank switching: in progress, now do the address switch instead of copying! (no copy, special GET_BANK_ADDRESS macro)
   start log regs: f519
-  trace E5DB
+
   
 - still missing some black pixels (big score sprites) why????
 - check if P1/P2 controls are properly read (at $FF) in the game 
@@ -9,7 +9,6 @@
 
 - select screen: no timer, game starts immediately!
 - after game starts, context is loaded but no game map, no level 1 background  *************
-- better bank switching if too frequent (no copy, special GET_BANK_ADDRESS macro)
 - reduce global colors, reduce tile colors
 - cheat: level select
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
@@ -20,12 +19,13 @@
 - rip sounds
 
 
-- converter:  if SBC_IMM	0x00 found later, don't optimize sbc into sub!
-- converter:  flag manipulation can sometimes just use ANDI/ORI/EORI CCR to be faster!
-- converter: addx: set Z flag before
-- converter: sbcd/abcd warning: check bpl flag afterwards, change to bcc
+converter:
+- if SBC_IMM	0x00 found later, don't optimize sbc into sub!
+- flag manipulation can sometimes just use ANDI/ORI/EORI CCR to be faster!
+- addx: set Z flag before
+- sbcd/abcd warning: check bpl flag afterwards, change to bcc
 - alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
-
+- add or addx + addq + addx without jmp/jra/rts/CLR_XC_FLAGS/lsr/lsl/asr/asl/ror/rol => error
 
 
 

@@ -115,6 +115,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
                 dstile = Image.new("RGB",(wtile.size[0]*2,wtile.size[1]))
                 dstile.paste(wtile)
                 other_tile_number = group_sprite_pairs[tile_number]
+
                 nwtile = tileset_1[other_tile_number]
                 if nwtile is None:
                     raise Exception(f"Other tile 0x{other_tile_number:x} not found (grouping with 0x{tile_number:x})")
@@ -123,6 +124,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
                 wtile = dstile
                 tileset_1[tile_number] = wtile
                 discarded_indexes.append(other_tile_number)  # discard
+
 
 
         # remove 16x16 blocks that were grouped

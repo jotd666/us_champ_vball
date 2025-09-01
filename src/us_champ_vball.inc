@@ -106,6 +106,15 @@ OPT_FIXED_RANDOM_VALUE = 3   | 1: demo runs without ball going too high, 3: ball
 	INVERT_XC_FLAGS
 	.endm
 
+	.macro	SBC_IND_BANK_Y	address
+	INVERT_XC_FLAGS
+	GET_INDIRECT_BANK_ADDRESS	\address
+	move.b	(a0,d2.w),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
+	subx.b	d4,d0
+	INVERT_XC_FLAGS
+	.endm
+
 	.macro	SBCD_DIRECT	address
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
@@ -229,6 +238,10 @@ skip\@:
 	lea	\offset,a0
 	GET_ADDRESS_FUNC
 	.endm
+	.macro GET_BANK_ADDRESS	offset
+	lea	\offset,a0
+	GET_BANK_ADDRESS_FUNC
+	.endm
 
 	.macro GET_UNCHECKED_ADDRESS	offset
 	lea	\offset,a0
@@ -260,14 +273,23 @@ skip\@:
 	READ_LE_WORD	a0
 	GET_ADDRESS_FUNC
 	.endm
+	
 	.macro GET_INDIRECT_UNCHECKED_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_UNCHECKED_ADDRESS_FUNC
 	.endm
+	
+	.macro GET_INDIRECT_BANK_ADDRESS	offset
+	GET_ADDRESS	\offset
+	READ_LE_WORD	a0
+	GET_BANK_ADDRESS_FUNC
+	.endm
+	
 	.macro	GET_UNCHECKED_ADDRESS_FUNC
 	lea		(a6,a0.l),a0
 	.endm
+	
 	.ifdef	RELEASE
 	.macro	GET_ADDRESS_FUNC
 	GET_UNCHECKED_ADDRESS_FUNC
@@ -276,22 +298,44 @@ skip\@:
 	.macro	GET_ADDRESS_FUNC
 	jbsr	get_address
 	.endm
-
+	
+	.macro	GET_BANK_ADDRESS_FUNC
+	jbsr	get_bank_address
+	.endm
+	
+get_bank_address:
+	cmp.l	#0x8000,a0
+	jcs		0f
+	cmp.w	#0x4000,a0
+	jcc		0f
+	jbsr	osd_get_last_known_pc
+	BREAKPOINT	"get_bank_address out of 0x4000-0x7FFF range, PC in D6"	
+0:
+	* atm same as get_address
+	GET_UNCHECKED_ADDRESS_FUNC
+	rts
+	
 * dev mode, more checks about the address
 get_address:
 	cmp.l	#0x8000,a0
 	jcc		10f		| rom: ok
 
+*	cmp.w	#0x4000,a0
+*	jcc	10f
 	* 0X2000 <= range < 0x4000, video ram
 	cmp.w	#0x4000,a0
-	jcc	10f
+	jcs	0f
+	* between 0x4000 and 0x8000: can't access with this function
+	jbsr	osd_get_last_known_pc
+	BREAKPOINT	"unsupported address range 0x4000-0x7FFF, PC in D6"
+	jra		10f
+0:
 	cmp.w	#0x2000,a0
 	jcs		10f
 	* 0X2000 <= range < 0x4000, video ram
 	* video/attribute: must be done without "get_address"
 	jbsr	osd_get_last_known_pc
 	BREAKPOINT	"unsupported address range 0x2000-0x3FFF, PC in D6"
-	jra		10f
 10:
 	GET_UNCHECKED_ADDRESS_FUNC
 	rts

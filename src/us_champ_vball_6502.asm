@@ -1426,7 +1426,7 @@ player_awaiting_service_64ad:
 664C: A0 00    ldy #$00
 664E: F8       sed
 664F: 18       clc
-6650: 71 10    adc (screen_source_pointer_0010), y
+6650: 71 10    adc (screen_source_pointer_0010), y		; [bank_address]
 6652: B0 0A    bcs $665e
 6654: F0 04    beq $665a
 6656: C5 1B    cmp $1b
@@ -2475,7 +2475,7 @@ compare_player_positions_6923:
 6F14: A9 30    lda #$30
 6F16: 85 20    sta $20
 6F18: 4C AE 6B jmp $6bae
-6F1B: B1 25    lda ($25), y
+6F1B: B1 25    lda ($25), y		; [bank_address]
 6F1D: 85 2A    sta $2a
 6F1F: 20 0A D0 jsr pseudo_random_d00a
 6F22: C5 2A    cmp $2a
@@ -2483,8 +2483,9 @@ compare_player_positions_6923:
 6F26: E5 2A    sbc $2a
 6F28: 4C 22 6F jmp $6f22
 6F2B: C8       iny
-6F2C: 71 25    adc ($25), y
+6F2C: 71 25    adc ($25), y		; [bank_address]
 6F2E: 60       rts
+
 6F2F: 20 0A D0 jsr pseudo_random_d00a
 6F32: 29 03    and #$03
 6F34: C9 03    cmp #$03
@@ -13358,10 +13359,10 @@ E010: 85 01    sta $01
 E012: B5 73    lda $73, x
 E014: 0A       asl a
 E015: A8       tay
-E016: B1 00    lda ($00), y
+E016: B1 00    lda ($00), y				; [bank_address]
 E018: 85 10    sta screen_source_pointer_0010
 E01A: C8       iny
-E01B: B1 00    lda ($00), y
+E01B: B1 00    lda ($00), y					; [bank_address]
 E01D: 85 11    sta $11
 E01F: B5 B9    lda objects_logical_y_array_b9, x
 E021: 18       clc
@@ -13394,21 +13395,21 @@ E053: B4 65    ldy $65, x
 E055: B9 84 E1 lda $e184, y
 E058: 85 05    sta $05
 E05A: A0 00    ldy #$00
-E05C: B1 10    lda (screen_source_pointer_0010), y
+E05C: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E05E: 85 0C    sta $0c
 E060: D0 03    bne $e065
 E062: 4C 7E E1 jmp $e17e
 E065: C8       iny
-E066: B1 10    lda (screen_source_pointer_0010), y
+E066: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E068: 85 06    sta $06
 E06A: C8       iny
 E06B: 24 06    bit $06
 E06D: 10 05    bpl $e074
-E06F: B1 10    lda (screen_source_pointer_0010), y
+E06F: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E071: 85 07    sta unknown_07
 E073: C8       iny
 E074: 50 05    bvc $e07b
-E076: B1 10    lda (screen_source_pointer_0010), y
+E076: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E078: 85 08    sta $08
 E07A: C8       iny
 E07B: A5 06    lda $06
@@ -13416,10 +13417,10 @@ E07D: 29 08    and #$08
 E07F: F0 15    beq $e096
 E081: 2C 3A 02 bit $023a
 E084: 30 0E    bmi $e094
-E086: B1 10    lda (screen_source_pointer_0010), y
+E086: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E088: 48       pha
 E089: C8       iny
-E08A: B1 10    lda (screen_source_pointer_0010), y
+E08A: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E08C: 85 11    sta $11
 E08E: 68       pla
 E08F: 85 10    sta screen_source_pointer_0010
@@ -13429,10 +13430,10 @@ E095: C8       iny
 E096: A5 06    lda $06
 E098: 29 30    and #$30
 E09A: F0 0E    beq $e0aa
-E09C: B1 10    lda (screen_source_pointer_0010), y
+E09C: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E09E: 85 12    sta multipurpose_12
 E0A0: C8       iny
-E0A1: B1 10    lda (screen_source_pointer_0010), y
+E0A1: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E0A3: 85 13    sta multipurpose_13
 E0A5: C8       iny
 E0A6: A9 00    lda #$00
@@ -13441,7 +13442,7 @@ E0AA: AE DA 06 ldx $06da
 E0AD: A5 07    lda unknown_07
 E0AF: 24 06    bit $06
 E0B1: 30 03    bmi $e0b6
-E0B3: B1 10    lda (screen_source_pointer_0010), y
+E0B3: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E0B5: C8       iny
 E0B6: 05 05    ora $05
 E0B8: 45 04    eor $04
@@ -13462,7 +13463,7 @@ E0D7: 24 0A    bit $0a
 E0D9: 10 08    bpl $e0e3
 E0DB: E6 08    inc $08
 E0DD: 4C E3 E0 jmp $e0e3
-E0E0: B1 10    lda (screen_source_pointer_0010), y
+E0E0: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E0E2: C8       iny
 E0E3: 9D DD 06 sta $06dd, x
 E0E6: 84 0D    sty $0d
@@ -13475,7 +13476,7 @@ E0F2: A5 11    lda $11
 E0F4: 85 13    sta multipurpose_13
 E0F6: 84 09    sty $09
 E0F8: A4 09    ldy $09
-E0FA: B1 12    lda ($12), y
+E0FA: B1 12    lda ($12), y		; [bank_address]
 E0FC: C8       iny
 E0FD: 24 04    bit $04
 E0FF: 50 05    bvc $e106
@@ -13493,7 +13494,7 @@ E113: 28       plp
 E114: 10 02    bpl $e118
 E116: 69 FF    adc #$ff
 E118: 85 0E    sta $0e
-E11A: B1 12    lda ($12), y
+E11A: B1 12    lda ($12), y		; [bank_address]
 E11C: 08       php
 E11D: C8       iny
 E11E: 18       clc
@@ -13625,10 +13626,10 @@ E244: 85 01    sta $01
 E246: B5 73    lda $73, x
 E248: 0A       asl a
 E249: A8       tay
-E24A: B1 00    lda ($00), y
+E24A: B1 00    lda ($00), y		; [bank_address]
 E24C: 85 10    sta screen_source_pointer_0010
 E24E: C8       iny
-E24F: B1 00    lda ($00), y
+E24F: B1 00    lda ($00), y		; [bank_address]
 E251: 85 11    sta $11
 E253: B5 73    lda $73, x
 E255: 4A       lsr a
@@ -13648,21 +13649,21 @@ E26E: A5 15    lda $15
 E270: 69 00    adc #$00
 E272: 85 15    sta $15
 E274: A0 00    ldy #$00
-E276: B1 10    lda (screen_source_pointer_0010), y
+E276: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E278: 85 0C    sta $0c
 E27A: D0 03    bne $e27f
 E27C: 4C 57 E3 jmp $e357
 E27F: C8       iny
-E280: B1 10    lda (screen_source_pointer_0010), y
+E280: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E282: 85 06    sta $06
 E284: C8       iny
 E285: 24 06    bit $06
 E287: 10 05    bpl $e28e
-E289: B1 10    lda (screen_source_pointer_0010), y
+E289: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E28B: 85 07    sta unknown_07
 E28D: C8       iny
 E28E: 50 05    bvc $e295
-E290: B1 10    lda (screen_source_pointer_0010), y
+E290: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E292: 85 08    sta $08
 E294: C8       iny
 E295: A5 06    lda $06
@@ -13671,10 +13672,10 @@ E299: F0 17    beq $e2b2
 E29B: A6 4C    ldx current_object_index_4c
 E29D: BD 3A 02 lda $023a, x
 E2A0: 30 0E    bmi $e2b0
-E2A2: B1 10    lda (screen_source_pointer_0010), y
+E2A2: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E2A4: 48       pha
 E2A5: C8       iny
-E2A6: B1 10    lda (screen_source_pointer_0010), y
+E2A6: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E2A8: 85 11    sta $11
 E2AA: 68       pla
 E2AB: 85 10    sta screen_source_pointer_0010
@@ -13684,10 +13685,10 @@ E2B1: C8       iny
 E2B2: A5 06    lda $06
 E2B4: 29 30    and #$30
 E2B6: F0 0E    beq $e2c6
-E2B8: B1 10    lda (screen_source_pointer_0010), y
+E2B8: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E2BA: 85 12    sta multipurpose_12
 E2BC: C8       iny
-E2BD: B1 10    lda (screen_source_pointer_0010), y
+E2BD: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E2BF: 85 13    sta multipurpose_13
 E2C1: C8       iny
 E2C2: A9 00    lda #$00
@@ -13695,7 +13696,7 @@ E2C4: 85 09    sta $09
 E2C6: A5 07    lda unknown_07
 E2C8: 24 06    bit $06
 E2CA: 30 03    bmi $e2cf
-E2CC: B1 10    lda (screen_source_pointer_0010), y
+E2CC: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E2CE: C8       iny
 E2CF: 05 05    ora $05
 E2D1: 45 04    eor $04
@@ -13716,7 +13717,7 @@ E2ED: 24 0A    bit $0a
 E2EF: 10 08    bpl $e2f9
 E2F1: E6 08    inc $08
 E2F3: 4C F9 E2 jmp $e2f9
-E2F6: B1 10    lda (screen_source_pointer_0010), y
+E2F6: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 E2F8: C8       iny
 E2F9: 85 02    sta unpack_mode_and_misc_02
 E2FB: 84 0D    sty $0d
@@ -13729,7 +13730,7 @@ E307: A5 11    lda $11
 E309: 85 13    sta multipurpose_13
 E30B: 84 09    sty $09
 E30D: A4 09    ldy $09
-E30F: B1 12    lda ($12), y
+E30F: B1 12    lda ($12), y		; [bank_address]
 E311: C8       iny
 E312: 24 04    bit $04
 E314: 50 05    bvc $e31b
@@ -13737,7 +13738,7 @@ E316: 49 FF    eor #$ff
 E318: 18       clc
 E319: 69 01    adc #$01
 E31B: 85 03    sta $03
-E31D: B1 12    lda ($12), y
+E31D: B1 12    lda ($12), y		; [bank_address]
 E31F: C8       iny
 E320: 85 00    sta $00
 E322: 98       tya
@@ -14790,13 +14791,13 @@ copy_to_screen_ecb3:
 ECB3: 0A       asl a
 ECB4: A8       tay
 ; fetch the proper source depending on background id
-ECB5: B1 1D    lda ($1d), y
+ECB5: B1 1D    lda ($1d), y		; [bank_address]
 ECB7: 85 10    sta screen_source_pointer_0010
 ECB9: C8       iny
-ECBA: B1 1D    lda ($1d), y
+ECBA: B1 1D    lda ($1d), y		; [bank_address]
 ECBC: 85 11    sta $11		; now points to for ex: 7e4==f => 676C (title)
 ECBE: A0 00    ldy #$00
-ECC0: B1 10    lda (screen_source_pointer_0010), y	; get first byte, block ident
+ECC0: B1 10    lda (screen_source_pointer_0010), y	; [bank_address] get first byte, block ident
 ECC2: C8       iny
 ECC3: 85 01    sta $01		; store it in $1
 ECC5: C9 00    cmp #$00
@@ -14810,27 +14811,27 @@ ECD3: 4C AF ED jmp unpack_end_edaf		; ident==$ff end of sequence
 ECD6: C9 FE    cmp #$fe
 ECD8: D0 0E    bne $ece8
 ; ident==$fe: load a new pointer and continue
-ECDA: B1 10    lda (screen_source_pointer_0010), y
+ECDA: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ECDC: 48       pha
 ECDD: C8       iny
-ECDE: B1 10    lda (screen_source_pointer_0010), y
+ECDE: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ECE0: 85 11    sta $11
 ECE2: 68       pla
 ECE3: 85 10    sta screen_source_pointer_0010
 ECE5: 4C BE EC jmp $ecbe
 
 ; get data
-ECE8: B1 10    lda (screen_source_pointer_0010), y
+ECE8: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ECEA: 85 12    sta multipurpose_12			; tile code => $2xxx
 ECEC: C8       iny
-ECED: B1 10    lda (screen_source_pointer_0010), y
+ECED: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ECEF: 85 13    sta multipurpose_13		; tile attribute => $3xxx
 ECF1: C8       iny
 ; get data destination (screen address)
-ECF2: B1 10    lda (screen_source_pointer_0010), y
+ECF2: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ECF4: 85 1C    sta $1c
 ECF6: C8       iny
-ECF7: B1 10    lda (screen_source_pointer_0010), y
+ECF7: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ECF9: C8       iny
 ECFA: 85 1D    sta base_screen_pointer_list_001d
 ECFC: 05 1C    ora $1c
@@ -14848,7 +14849,7 @@ ED14: 18       clc
 ; ($16) = ($14)+$1000 (attribute)
 ED15: 69 10    adc #$10
 ED17: 85 17    sta $17
-ED19: B1 10    lda (screen_source_pointer_0010), y
+ED19: B1 10    lda (screen_source_pointer_0010), y	; [bank_address]
 ED1B: C8       iny
 ED1C: 85 02    sta unpack_mode_and_misc_02
 ED1E: 29 7F    and #$7f
@@ -14877,7 +14878,7 @@ ED43: D0 EA    bne $ed2f
 ED45: A9 20    lda #$20
 ED47: 85 1B    sta $1b
 ED49: A4 00    ldy $00
-ED4B: B1 10    lda (screen_source_pointer_0010), y
+ED4B: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 ED4D: C8       iny
 ED4E: AA       tax
 ED4F: C9 80    cmp #$80
@@ -14948,10 +14949,10 @@ EDC2: A5 11    lda $11
 EDC4: 99 05 00 sta $0005, y
 EDC7: 68       pla
 EDC8: A8       tay
-EDC9: B1 10    lda (screen_source_pointer_0010), y
+EDC9: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EDCB: C8       iny
 EDCC: 48       pha
-EDCD: B1 10    lda (screen_source_pointer_0010), y
+EDCD: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EDCF: C8       iny
 EDD0: 85 11    sta $11
 EDD2: 68       pla
@@ -14971,23 +14972,23 @@ EDE5: AD 02 60 lda $6002
 EDE8: 85 10    sta screen_source_pointer_0010
 EDEA: AD 03 60 lda $6003
 EDED: 85 11    sta $11
-EDEF: B1 10    lda (screen_source_pointer_0010), y
+EDEF: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EDF1: 48       pha
 EDF2: C8       iny
-EDF3: B1 10    lda (screen_source_pointer_0010), y
+EDF3: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EDF5: 85 11    sta $11
 EDF7: 68       pla
 EDF8: 85 10    sta screen_source_pointer_0010
 EDFA: A0 00    ldy #$00
-EDFC: B1 10    lda (screen_source_pointer_0010), y
+EDFC: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EDFE: C8       iny
 EDFF: 85 01    sta $01
 EE01: C9 00    cmp #$00
 EE03: D0 0E    bne $ee13
-EE05: B1 10    lda (screen_source_pointer_0010), y
+EE05: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE07: 48       pha
 EE08: C8       iny
-EE09: B1 10    lda (screen_source_pointer_0010), y
+EE09: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE0B: 85 11    sta $11
 EE0D: 68       pla
 EE0E: 85 10    sta screen_source_pointer_0010
@@ -14997,6 +14998,7 @@ EE15: D0 06    bne $ee1d
 EE17: A9 00    lda #$00
 EE19: 20 DF D8 jsr set_bank_d8df
 EE1C: 60       rts
+
 EE1D: B1 10    lda (screen_source_pointer_0010), y
 EE1F: C8       iny
 EE20: 85 02    sta unpack_mode_and_misc_02

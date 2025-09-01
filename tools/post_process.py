@@ -251,6 +251,9 @@ with open(source_dir / "conv.s") as f:
             line = remove_error(line)
         #################################################
 
+        if line_address == 0x6f2c:
+            # addx should be add, even if carry is probably out
+            lines[i+2] = lines[i+2].replace("addx.b","add.b")
 
         if line_address in {0xe64d,0xe66e}:
             # just in case X is set by addq above
@@ -344,11 +347,17 @@ with open(source_dir / "conv.s") as f:
         # pre-add video_address tag if we find a store instruction to an explicit 3000-3FFF address
         if store_to_video.search(line):
             line = line.rstrip() + " [video_address]\n"
+        # pre-add bank_address tag if we find a read instruction to an explicit 4000-7FFF address
+        if access_bank.search(line):
+            line = line.rstrip() + " [bank_address]\n"
 
 
         if "[unchecked_address" in line:
             # give me the original instruction
             line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")
+        if "[bank_address" in line:
+            # give me the original instruction
+            line = line.replace("_ADDRESS","_BANK_ADDRESS")
         if "[video_address" in line:
             # give me the original instruction
             line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")
