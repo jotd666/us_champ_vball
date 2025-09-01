@@ -14051,6 +14051,10 @@ E5D6: C4 1E    cpy $1e
 E5D8: 90 EB    bcc $e5c5
 E5DA: 60       rts
 
+; where the game updates the sprite shadow ram according to display
+; priority that changes constantly depending on objects logical y coordinate
+; (not isometric but simpler)
+
 update_sprite_shadow_ram_e5db:
 E5DB: 48       pha
 E5DC: A9 01    lda #$01

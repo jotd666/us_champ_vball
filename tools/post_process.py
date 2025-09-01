@@ -124,6 +124,17 @@ with open(source_dir / "conv.s") as f:
             line = "\tSET_C_FROM_X\n"+line
             lines[i+1] = remove_error(lines[i+1])
 
+        if line_address == 0xd020:
+            # in random generator (so no biggie but...)
+            # avoid dey to change X flag
+            line = "\tPUSH_SR  | preserve X\n"+line+"\tPOP_SR  | restore X\n\ttst.b\td2   | check Z\n"
+        if line_address == 0xe1f8:
+            # addq will trash carry: get push_sr below and put it there
+            if "PUSH_SR" in lines[i-1]:
+                lines[i-2],lines[i-1] = lines[i-1],lines[i-2]
+                lines[i-2] = lines[i-2].rstrip() + "  | preserving X flag before addq for addx\n"
+            else:
+                raise Exception("code generation has changed at E1F7, requires push_sr")
         #########################################
         # this part is tricky as the tests rely on carry
         # but after that the ROL instructions also rely on carry
