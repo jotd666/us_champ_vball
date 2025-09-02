@@ -161,6 +161,15 @@ OPT_FIXED_RANDOM_VALUE = 3   | 1: demo runs without ball going too high, 3: ball
 	.endm
 
 	.macro	SET_X_FROM_CLEARED_C
+	jcc		setx\@
+	and		#0xEF,ccr	 | C is set: clear X
+	jra	sxcout\@
+setx\@:
+	or		#0x10,ccr	 | C is not set: set X
+sxcout\@:
+	.endm
+
+	.macro	SET_X_FROM_CLEARED_Cold
 	PUSH_SR
 	move.w	(sp),d4
 	bset	#4,d4   | set X
@@ -238,6 +247,7 @@ skip\@:
 	lea	\offset,a0
 	GET_ADDRESS_FUNC
 	.endm
+	
 	.macro GET_BANK_ADDRESS	offset
 	lea	\offset,a0
 	GET_BANK_ADDRESS_FUNC
@@ -263,6 +273,7 @@ skip\@:
 	PREP_GET_ADDRESS_X	\offset
 	GET_ADDRESS_FUNC
 	.endm
+	
 	.macro GET_UNCHECKED_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_UNCHECKED_ADDRESS_FUNC
@@ -289,10 +300,17 @@ skip\@:
 	.macro	GET_UNCHECKED_ADDRESS_FUNC
 	lea		(a6,a0.l),a0
 	.endm
+	.macro	GET_UNCHECKED_BANK_ADDRESS_FUNC
+	move.b	current_bank,d5
+	add.l	bank_base,a0
+	.endm
 	
 	.ifdef	RELEASE
 	.macro	GET_ADDRESS_FUNC
 	GET_UNCHECKED_ADDRESS_FUNC
+	.endm
+	.macro	GET_BANK_ADDRESS_FUNC
+	GET_UNCHECKED_BANK_ADDRESS_FUNC
 	.endm
 	.else
 	.macro	GET_ADDRESS_FUNC
@@ -312,7 +330,7 @@ get_bank_address:
 	BREAKPOINT	"get_bank_address out of 0x4000-0x7FFF range, PC in D6"	
 0:
 	* atm same as get_address
-	GET_UNCHECKED_ADDRESS_FUNC
+	GET_UNCHECKED_BANK_ADDRESS_FUNC
 	rts
 	
 * dev mode, more checks about the address

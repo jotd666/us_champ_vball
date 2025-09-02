@@ -7,7 +7,7 @@
 
 - add controls to be able to play to level 1
 
-- select screen: no timer, game starts immediately!
+- select screen: no timer, game starts immediately! bank palette debug  break doesn't appear!
 - after game starts, context is loaded but no game map, no level 1 background  *************
 - reduce global colors, reduce tile colors
 - cheat: level select

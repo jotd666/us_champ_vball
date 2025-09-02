@@ -600,8 +600,9 @@ demo_game:
 	move.l	a6,ram_start_0000
 	.endif
 	
-	* default: install RAM 0
-	jbsr	copy_bank_0
+	* install RAM 0 in 0x4000, we may as well use that space
+
+	jbsr	install_bank_0
 	
 	* copy ROM at the end. Memory is one big block now
 	lea	rom_8000,a0
@@ -633,23 +634,28 @@ dump_and_quit:
 	.endif
 	
 
-* < A6: memory base
 copy_bank_1:
-	movem.l	a0/a1/d0,-(a7)
-	lea	bank1_4000,a0
-	jra		cb
+	move.l	#bank1_4000-0x4000,bank_base
+	move.b	#1,current_rom_bank
+	rts
 copy_bank_0:
+	move.l	a6,bank_base
+	clr.b	current_rom_bank
+	rts
+	
+* < A6: memory base
+install_bank_0:
 	movem.l	a0/a1/d0,-(a7)
 	lea	bank0_4000,a0
-cb:
-	move.l	a6,a1
-	add.l	#0x4000,a1
+	lea		(0x4000,a6),a1
 	move.w	#0xFFF,d0
 0:
 	move.l	(a0)+,(a1)+
 	dbf		d0,0b
 	movem.l	(a7)+,a0/a1/d0
-	rts
+	
+	jbra	copy_bank_0
+
 	
 * just in case some hardware calls nmi
 _nmi:
@@ -1855,7 +1861,6 @@ sound_indirection_table:
 	.endif
 	*COLOR0_FLASH	((\arg+1)*7)<<0x5
 	jbsr	copy_bank_\arg
-	move.b	#\arg,current_rom_bank
 	.ifndef	RELEASE
 	move.w	last_known_m6502_pc,last_bankswitch_pc
 	.endif

@@ -5,6 +5,7 @@
 	.global		vb_ticks_count
 	.global		break_at_startup_flag
 	.global		current_bank
+	.global		bank_base
 	.ifndef		RELEASE
 	.global		disable_bank_0_check
 	.endif
@@ -30,6 +31,8 @@ disable_bank_0_check:
 	* 4k for stack should be ok
 	.skip	0x1000
 stack_top:
+bank_base:
+	.skip	4
 current_bank:
 	.skip	1
 vb_ticks_count:
