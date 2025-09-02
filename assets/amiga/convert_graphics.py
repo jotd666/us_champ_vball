@@ -602,6 +602,6 @@ def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
 
 
 #gen_context_files("intro",with_sprites=False)
-#gen_context_files("level_1")  # also demo
-gen_context_files("level_3",write_sprite_size=True)  # also demo
+gen_context_files("level_1")
+#gen_context_files("level_3",write_sprite_size=True)  # also demo
 #gen_context_files("select")

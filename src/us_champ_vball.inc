@@ -9,7 +9,7 @@
 	.ifdef	RELEASE
 OPT_FIXED_RANDOM = 0   | DO NOT CHANGE
 	.else
-OPT_FIXED_RANDOM = 1   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;g})
+OPT_FIXED_RANDOM = 0   | set to 1 to fix random (MAME: bpset D00A,,{A=0;PC=AFFE;g})
 OPT_FIXED_RANDOM_VALUE = 3   | 1: demo runs without ball going too high, 3: ball high
 	.endif
 	
@@ -329,7 +329,6 @@ get_bank_address:
 	jbsr	osd_get_last_known_pc
 	BREAKPOINT	"get_bank_address out of 0x4000-0x7FFF range, PC in D6"	
 0:
-	* atm same as get_address
 	GET_UNCHECKED_BANK_ADDRESS_FUNC
 	rts
 	

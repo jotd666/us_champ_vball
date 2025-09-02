@@ -336,10 +336,10 @@ _user:
 	* init color table
 	lea		copperlist_colors+2,a0
 	lea		color_copper_pointers,a1
-	moveq	#NB_PLAYFIELD_PLANES-1,d0
+	moveq	#(TOTAL_NB_COLORS/32)-1,d0		| only 4 banks are required for max 128 colors
 0:
-	addq.w	#4,a0
-	move.w	#31,d1
+	addq.w	#4,a0		| skip set bank
+	move.w	#31,d1		| 32 colors per bank
 1:
 	move.l	a0,(a1)+
 	addq.w	#4,a0
@@ -2263,15 +2263,6 @@ osd_debug_hook:
 	rts
 	
 	
-BIT_START_1P = 7
-BIT_START_2P = 7
-
-BIT_LEFT = 1
-BIT_RIGHT = 0
-BIT_UP = 2
-BIT_DOWN = 3
-BIT_FIRE_1 = 4
-BIT_FIRE_2 = 5
 
 osd_read_p1_inputs:
 	move.b	player_1_controls,d0
@@ -2281,6 +2272,7 @@ osd_read_p1_inputs:
 	beq.b	0f
 	bclr	#BIT_START_1P,d0
 0:
+	move.b	d0,0x200
 	movem.l	(a7)+,a0/d1
 	rts
 	
@@ -2292,7 +2284,7 @@ osd_read_p2_inputs:
 	beq.b	0f
 	bclr	#BIT_START_2P,d0
 0:	
-	
+
 	move.l	(a7)+,a0
 	rts
 	
@@ -2321,7 +2313,7 @@ osd_set_scrollx_hi:
 	* ATM we're trying to avoid separate sprite palette, let's see
 	* if we can pull it off given that there are only sprites on 4
 	* different tilesets (4 fields) so coupling is probably OK
-*	BREAKPOINT	"sprites prom shift"
+	*BREAKPOINT	"sprites prom shift"
 	move.b	d0,current_sprite_prom_bank
 0:
 	
@@ -2615,6 +2607,7 @@ update_controls:
 
 	tst.b	(0x4C,a0)		| "up" key
 	beq.b	0f
+	BREAKPOINT	"KEY UP"
 	bclr	#BIT_UP,d0
 0:
 	tst.b	(0x4D,a0)		| "down" key
@@ -2642,6 +2635,7 @@ update_controls:
 	move.l	_joypad_state(pc),d1
 	btst	#JPB_BTN_UP,d1
 	beq.b	0f
+	BREAKPOINT	"JO UP"
 	bclr	#BIT_UP,d0
 0:
 	btst	#JPB_BTN_DOWN,d1
@@ -2666,6 +2660,8 @@ update_controls:
 0:
 	move.b	d0,player_1_controls
 
+	st.b	player_2_controls
+	
 	jbsr		is_game_playing
 	jeq	0f
 	* game not playing, we can insert coin/start with joypad
@@ -2677,16 +2673,12 @@ update_controls:
 0:
 	rts
 	
-direction_table:
-	.byte	0x00,0x01,0x01,0x00,0x01,0xff,0xff,0x00	| 0x0000
-	.byte	0x01,0xff,0xff,0x00,0x00,0x00,0x00,0x00	| 0x0008	
-
-
 
 osd_read_dsw1:
 	* actual dipswitches
 	not.b	d0		| active low
-	move.b	#0xBF,d0	| what MAME returns
+	move.b	#0xFA,d0	| what MAME returns, medium diff, 2P only
+	*move.b	#0x7A,d0	| what MAME returns, medium diff, 4P possible
 	rts
 	
 osd_read_system:
@@ -3392,11 +3384,13 @@ osd_log_cpu:
 	* we could have missed one bankswitch
 	move.w	last_bankswitch_pc,d5
 	move.w  last_known_m6502_pc,d4
+	.ifndef	RELEASE
 	tst.b	disable_bank_0_check
 	jne		0f
 	BREAKPOINT		"running code in 4000-8000 when bank doesn't match"
 	ILLEGAL
 0:
+	.endif
 	* check if cpu log is enabled
 	tst.b	cpu_log_enable
 	jeq		445f
@@ -3650,7 +3644,7 @@ sprite_log_table_end:
 	.endif
 
 color_copper_pointers:
-	.skip	(1<<NB_PLAYFIELD_PLANES)*4
+	.skip	TOTAL_NB_COLORS*4
 
 player_1_controls:
 	.byte	0
@@ -3666,10 +3660,9 @@ current_rom_bank:
 	.byte	0
 	.align	2
 
-host_sprites:
-	ds.b	8*SPRITE_SIZEOF
+
 keyboard_table:
-	ds.b	0x100
+	.skip	0x100
 
 interrupt_mode:
 	.word	0

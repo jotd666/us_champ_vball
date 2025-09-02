@@ -145,6 +145,8 @@ random_index_2d = $2d
 time_seconds_4a = $4a
 time_minutes_4b = $4b
 current_object_index_4c = $4c
+player_select_timer_lsb_54 = $54
+player_select_timer_seconds_55 = $55
 score_array_57 = $57
 ball_logical_x_93 = $93
 ball_logical_y_bd = $bd
@@ -206,6 +208,7 @@ scrolly_lo_100e = $100e
 
 scroll_values_table_ea5d = $ea5d
 directions_table_b3dc = $b3dc
+message_table_db51 = $db51
 
 ; screen_id_07e4 contains the identification of the background screen
 ; to be displayed. Some ids seem corrupt or repeated
@@ -216,17 +219,17 @@ directions_table_b3dc = $b3dc
 ; $03: Honolulu? volley playfield
 ; $04: Navy volley playfield
 ; $05: title screen
-; $06: Cartoonish screen with team backstory
-;  unknown_07: Cartoonish screen with team backstory 2
-; $08: Cartoonish screen with team backstory 3 (tournament ad)
+; $06: Cartoonish screen with team backstory (unused in US version)
+; $07: Cartoonish screen with team backstory 2 (unused in US version)
+; $08: Cartoonish screen with team backstory 3 (tournament ad) (unused in US version)
 ; $09: US map
 ; $0A: US map
 ; $0B: US map (trashed)
 ; $0C: US map (trashed)
-; $0D: street background
-; $0E: street background
+; $0D: street background (unused in US version)
+; $0E: street background (unused in US version)
 ; $0F: title screen (the one that is used at bootup)
-; $10: high-score screen
+; $10: high-score screen (unused)
 ; $11: winning screen
 ; $12: bare volley field, no net
 ; after that, other values crash the code
@@ -417,7 +420,7 @@ move_players_on_field_5bf6:
 5D93: 20 70 60 jsr $6070
 5D96: 4C 58 5E jmp $5e58
 5D99: A6 00    ldx $00
-5D9B: B5 54    lda $54, x
+5D9B: B5 54    lda player_select_timer_lsb_54, x
 5D9D: 29 0F    and #$0f
 5D9F: C9 05    cmp #$05
 5DA1: F0 F0    beq $5d93
@@ -496,7 +499,7 @@ move_players_on_field_5bf6:
 5E53: 4C 58 5E jmp $5e58
 5E56: A9 10    lda #$10
 5E58: A6 00    ldx $00
-5E5A: 95 54    sta $54, x
+5E5A: 95 54    sta player_select_timer_lsb_54, x
 5E5C: A5 00    lda $00
 5E5E: 0A       asl a
 5E5F: AA       tax
@@ -528,7 +531,7 @@ move_players_on_field_5bf6:
 5E94: C9 03    cmp #$03			; [disabled]
 5E96: B0 FE    bcs $5e96		; [bogus infinite loop] [disabled]
 5E98: 4C 4E 5F jmp $5f4e
-5E9B: B5 54    lda $54, x
+5E9B: B5 54    lda player_select_timer_lsb_54, x
 5E9D: C9 11    cmp #$11			; [disabled]
 5E9F: B0 FE    bcs $5e9f		; [bogus infinite loop] [disabled]
 5EA1: 0A       asl a
@@ -541,7 +544,7 @@ move_players_on_field_5bf6:
 
 5ED0: 20 70 60 jsr $6070
 5ED3: A6 00    ldx $00
-5ED5: 95 54    sta $54, x
+5ED5: 95 54    sta player_select_timer_lsb_54, x
 5ED7: 4C 9B 5E jmp $5e9b
 5EDA: 20 FE 60 jsr $60fe
 5EDD: 90 05    bcc $5ee4
@@ -589,7 +592,7 @@ move_players_on_field_5bf6:
 5F46: A9 0F    lda #$0f
 5F48: 4C 58 5E jmp $5e58
 5F4B: 4C 5C 5E jmp $5e5c
-5F4E: B5 54    lda $54, x
+5F4E: B5 54    lda player_select_timer_lsb_54, x
 5F50: C9 11    cmp #$11
 5F52: B0 FE    bcs $5f52
 5F54: 20 F5 60 jsr $60f5
@@ -12959,6 +12962,7 @@ D824: 85 2F    sta toggle_timer_2f
 D826: A5 2F    lda toggle_timer_2f
 D828: D0 FC    bne $d826
 D82A: 60       rts
+
 D82B: 8D F6 07 sta $07f6
 D82E: 8A       txa
 D82F: 48       pha
@@ -13224,6 +13228,8 @@ DA42: D0 02    bne $da46
 DA44: E6 13    inc multipurpose_13
 DA46: 60       rts
 
+; < A: message id (plus modifiers on higher bits)
+write_message_da7f:
 DA7F: 85 0F    sta $0f
 DA81: 85 10    sta screen_source_pointer_0010
 DA83: 8A       txa
@@ -13234,7 +13240,7 @@ DA87: A5 0F    lda $0f
 DA89: 29 3F    and #$3f
 DA8B: 0A       asl a
 DA8C: AA       tax
-DA8D: BD 51 DB lda $db51, x
+DA8D: BD 51 DB lda message_table_db51, x
 DA90: 85 10    sta screen_source_pointer_0010
 DA92: BD 52 DB lda $db52, x
 DA95: 85 11    sta $11
@@ -14699,7 +14705,7 @@ EBBE: 8D 09 10 sta bankswitch_1009
 EBC1: 8D 2D 02 sta bankswitch_copy_022d
 EBC4: 60       rts
 
-
+show_us_map_screen_ebf1:
 EBF1: A9 0A    lda #$0a
 EBF3: 8D E4 07 sta screen_id_07e4		; US map
 EBF6: 20 5E EB jsr set_context_scroll_and_prom_banks_eb5e
@@ -14999,16 +15005,16 @@ EE17: A9 00    lda #$00
 EE19: 20 DF D8 jsr set_bank_d8df
 EE1C: 60       rts
 
-EE1D: B1 10    lda (screen_source_pointer_0010), y
+EE1D: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE1F: C8       iny
 EE20: 85 02    sta unpack_mode_and_misc_02
-EE22: B1 10    lda (screen_source_pointer_0010), y
+EE22: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE24: C8       iny
 EE25: 85 14    sta multipurpose_14
-EE27: B1 10    lda (screen_source_pointer_0010), y
+EE27: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE29: C8       iny
 EE2A: 85 15    sta $15
-EE2C: B1 10    lda (screen_source_pointer_0010), y
+EE2C: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE2E: 85 13    sta multipurpose_13
 EE30: C8       iny
 EE31: 84 00    sty $00
@@ -15022,13 +15028,13 @@ EE3E: 69 10    adc #$10
 EE40: 85 17    sta $17
 EE42: A6 02    ldx unpack_mode_and_misc_02
 EE44: A4 00    ldy $00
-EE46: B1 10    lda (screen_source_pointer_0010), y
+EE46: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE48: C9 FF    cmp #$ff
 EE4A: F0 17    beq $ee63
 EE4C: C9 FE    cmp #$fe
 EE4E: D0 0B    bne $ee5b
 EE50: C8       iny
-EE51: B1 10    lda (screen_source_pointer_0010), y
+EE51: B1 10    lda (screen_source_pointer_0010), y		; [bank_address]
 EE53: 85 13    sta multipurpose_13
 EE55: E6 00    inc $00
 EE57: E6 00    inc $00
@@ -15187,7 +15193,7 @@ EF65: A9 0F    lda #$0f
 EF67: 8D E4 07 sta screen_id_07e4
 EF6A: 20 52 EB jsr setup_background_screen_eb52
 EF6D: A9 01    lda #$01
-EF6F: 20 7F DA jsr $da7f
+EF6F: 20 7F DA jsr write_message_da7f
 EF72: 20 9A EB jsr $eb9a
 EF75: A9 00    lda #$00
 EF77: 8D F5 07 sta timer_07f5
@@ -15197,7 +15203,7 @@ EF7F: 29 20    and #$20
 EF81: D0 02    bne $ef85
 EF83: A0 80    ldy #$80
 EF85: 98       tya
-EF86: 20 7F DA jsr $da7f
+EF86: 20 7F DA jsr write_message_da7f
 EF89: 20 22 D8 jsr sync_d822
 EF8C: EE F5 07 inc timer_07f5
 EF8F: D0 E9    bne $ef7a
@@ -15211,7 +15217,7 @@ EFA1: 20 52 EB jsr setup_background_screen_eb52
 EFA4: A9 19    lda #$19
 EFA6: 20 80 EE jsr $ee80
 EFA9: A9 06    lda #$06
-EFAB: 20 7F DA jsr $da7f
+EFAB: 20 7F DA jsr write_message_da7f
 EFAE: 20 9A EB jsr $eb9a
 EFB1: A9 F0    lda #$f0
 EFB3: 20 2B D8 jsr $d82b
@@ -15222,7 +15228,7 @@ EFBE: 20 52 EB jsr setup_background_screen_eb52
 EFC1: A9 19    lda #$19
 EFC3: 20 80 EE jsr $ee80
 EFC6: A9 07    lda #$07
-EFC8: 20 7F DA jsr $da7f
+EFC8: 20 7F DA jsr write_message_da7f
 EFCB: 20 9A EB jsr $eb9a
 EFCE: A9 F0    lda #$f0
 EFD0: 20 2B D8 jsr $d82b
@@ -15265,7 +15271,7 @@ F02C: A9 00    lda #$00
 F02E: 8D DB 07 sta $07db
 F031: 20 52 EB jsr setup_background_screen_eb52
 F034: A9 05    lda #$05
-F036: 20 7F DA jsr $da7f
+F036: 20 7F DA jsr write_message_da7f
 F039: 20 9A EB jsr $eb9a
 F03C: 20 E2 EA jsr $eae2
 F03F: A9 01    lda #$01
@@ -15273,10 +15279,11 @@ F041: 85 46    sta game_state_bits_46
 F043: A9 FF    lda #$ff
 F045: 85 4F    sta $4f
 F047: 20 64 AF jsr $af64
+; init select timer
 F04A: A9 00    lda #$00
-F04C: 85 54    sta $54
+F04C: 85 54    sta player_select_timer_lsb_54
 F04E: A9 10    lda #$10
-F050: 85 55    sta $55
+F050: 85 55    sta player_select_timer_seconds_55
 F052: A9 80    lda #$80
 F054: 8D DE 07 sta logical_scroll_value_lsb_07de
 F057: A9 00    lda #$00
@@ -15318,9 +15325,10 @@ F0A2: A0 03    ldy #$03
 F0A4: AD F5 07 lda timer_07f5
 F0A7: 29 10    and #$10
 F0A9: D0 02    bne $f0ad
+; "push start button" message flashing
 F0AB: A0 83    ldy #$83
 F0AD: 98       tya
-F0AE: 20 7F DA jsr $da7f
+F0AE: 20 7F DA jsr write_message_da7f
 F0B1: A9 00    lda #$00
 F0B3: 8D DA 06 sta $06da
 F0B6: 20 45 A6 jsr $a645
@@ -15339,6 +15347,8 @@ F0D1: EE F5 07 inc timer_07f5
 F0D4: 20 EF D8 jsr $d8ef
 F0D7: AD 03 10 lda dsw1_1003
 F0DA: 30 03    bmi $f0df
+; only 2 players set in DSW: depending on start button pressed
+; we know which players are in play (1P, 2P, CPU)
 F0DC: 4C B5 F1 jmp $f1b5
 F0DF: AD 2F 02 lda player_2_controls_022f
 F0E2: 10 27    bpl $f10b
@@ -15389,22 +15399,23 @@ F13D: A5 47    lda $47
 F13F: 05 48    ora $48
 F141: 30 03    bmi $f146
 F143: 4C 9D F0 jmp $f09d
-F146: E6 54    inc $54
-F148: A5 54    lda $54
+F146: E6 54    inc player_select_timer_lsb_54
+F148: A5 54    lda player_select_timer_lsb_54
 F14A: C9 30    cmp #$30
 F14C: 90 0D    bcc $f15b
 F14E: A9 00    lda #$00
-F150: 85 54    sta $54
-F152: A5 55    lda $55
+F150: 85 54    sta player_select_timer_lsb_54
+F152: A5 55    lda player_select_timer_seconds_55
 F154: F8       sed
 F155: 38       sec
 F156: E9 01    sbc #$01
-F158: 85 55    sta $55
+F158: 85 55    sta player_select_timer_seconds_55
 F15A: D8       cld
-F15B: A5 55    lda $55
+F15B: A5 55    lda player_select_timer_seconds_55
 F15D: 30 12    bmi $f171
+; display "TIME" message
 F15F: A9 18    lda #$18
-F161: 20 7F DA jsr $da7f
+F161: 20 7F DA jsr write_message_da7f
 F164: A9 06    lda #$06
 F166: 20 A6 D9 jsr $d9a6
 F169: 20 EC F7 jsr $f7ec
@@ -15497,9 +15508,10 @@ F22E: 85 46    sta game_state_bits_46
 F230: A5 36    lda game_playing_flag_36
 F232: D0 03    bne $f237
 F234: 4C BB F2 jmp $f2bb
+; play select music again from the start
 F237: A9 02    lda #$02
 F239: 20 B8 D7 jsr queue_sound_d7b8
-F23C: 20 F1 EB jsr $ebf1
+F23C: 20 F1 EB jsr show_us_map_screen_ebf1
 F23F: 20 9A EB jsr $eb9a
 F242: A9 02    lda #$02
 F244: 8D DB 07 sta $07db
@@ -15533,6 +15545,7 @@ F27E: EE F5 07 inc timer_07f5
 F281: AD F5 07 lda timer_07f5
 F284: C9 70    cmp #$70
 F286: 90 C4    bcc $f24c
+; first timer completed, now show pic above map
 F288: A9 00    lda #$00
 F28A: 8D F5 07 sta timer_07f5
 F28D: EE F5 07 inc timer_07f5
@@ -15548,6 +15561,7 @@ F2A6: C9 F0    cmp #$f0
 F2A8: D0 05    bne $f2af
 F2AA: AD F5 07 lda timer_07f5
 F2AD: 10 DE    bpl $f28d
+; second timer completed: proceed to play
 F2AF: 20 2F EC jsr $ec2f
 F2B2: 98       tya
 F2B3: 20 80 EE jsr $ee80
@@ -15778,15 +15792,15 @@ F49D: A5 4A    lda time_seconds_4a
 F49F: 05 4B    ora time_minutes_4b
 F4A1: D0 0F    bne $f4b2
 F4A3: A9 17    lda #$17
-F4A5: 20 7F DA jsr $da7f
+F4A5: 20 7F DA jsr write_message_da7f
 F4A8: A9 05    lda #$05
 F4AA: 20 B8 D7 jsr queue_sound_d7b8
 F4AD: A9 80    lda #$80
 F4AF: 20 3F D8 jsr $d83f
 F4B2: A9 00    lda #$00
-F4B4: 85 54    sta $54
+F4B4: 85 54    sta player_select_timer_lsb_54
 F4B6: A9 10    lda #$10
-F4B8: 85 55    sta $55
+F4B8: 85 55    sta player_select_timer_seconds_55
 F4BA: A5 46    lda game_state_bits_46
 F4BC: 29 F7    and #$f7
 F4BE: 09 40    ora #$40
@@ -15914,7 +15928,7 @@ F5BD: A9 0E    lda #$0e
 F5BF: C0 10    cpy #$10
 F5C1: 90 02    bcc $f5c5
 F5C3: A9 0F    lda #$0f
-F5C5: 20 7F DA jsr $da7f
+F5C5: 20 7F DA jsr write_message_da7f
 F5C8: A9 12    lda #$12
 F5CA: 20 B8 D7 jsr queue_sound_d7b8
 F5CD: 20 9A EB jsr $eb9a
@@ -15967,7 +15981,7 @@ F635: 20 59 CF jsr clear_rest_of_sprites_cf59
 F638: A9 12    lda #$12
 F63A: 20 80 EE jsr $ee80
 F63D: A9 14    lda #$14
-F63F: 20 7F DA jsr $da7f
+F63F: 20 7F DA jsr write_message_da7f
 F642: A9 10    lda #$10
 F644: 20 B8 D7 jsr queue_sound_d7b8
 F647: A9 FF    lda #$ff
@@ -16008,22 +16022,22 @@ F691: C8       iny
 F692: 8A       txa
 F693: 48       pha
 F694: 98       tya
-F695: 20 7F DA jsr $da7f
+F695: 20 7F DA jsr write_message_da7f
 F698: 68       pla
 F699: 20 A6 D9 jsr $d9a6
 F69C: A9 0A    lda #$0a
-F69E: 20 7F DA jsr $da7f
-F6A1: E6 54    inc $54
-F6A3: A5 54    lda $54
+F69E: 20 7F DA jsr write_message_da7f
+F6A1: E6 54    inc player_select_timer_lsb_54
+F6A3: A5 54    lda player_select_timer_lsb_54
 F6A5: C9 1F    cmp #$1f
 F6A7: 90 12    bcc $f6bb
 F6A9: A9 00    lda #$00
-F6AB: 85 54    sta $54
-F6AD: A5 55    lda $55
+F6AB: 85 54    sta player_select_timer_lsb_54
+F6AD: A5 55    lda player_select_timer_seconds_55
 F6AF: F8       sed
 F6B0: 38       sec
 F6B1: E9 01    sbc #$01
-F6B3: 85 55    sta $55
+F6B3: 85 55    sta player_select_timer_seconds_55
 F6B5: D8       cld
 F6B6: 10 03    bpl $f6bb
 F6B8: 4C 10 F6 jmp $f610

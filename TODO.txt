@@ -1,23 +1,23 @@
-- better bank switching: in progress, now do the address switch instead of copying! (no copy, special GET_BANK_ADDRESS macro)
-  start log regs: f519
-
+- better bank switching: use A5 for bank base to get more speed
+- release mode: no backgrounds
+- still some frames that appear missing (red) when all frames have been registered
+- determining context from bank alone doesn't work. We have to use the screen screen_id_07e4: redo map/level 1 from scratch
+- fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
   
-- still missing some black pixels (big score sprites) why????
-- check if P1/P2 controls are properly read (at $FF) in the game 
+  
+- if net doesn't move, maybe blit it in one big blit
 
 - add controls to be able to play to level 1
 
-- select screen: no timer, game starts immediately! bank palette debug  break doesn't appear!
-- after game starts, context is loaded but no game map, no level 1 background  *************
-- reduce global colors, reduce tile colors
 - cheat: level select
-- fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-
-- 25Hz by default
+- special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
+- 50Hz option
+- reduce global colors, reduce tile colors, (32 colors on ECS!)
 
 - rip sounds
 
+- still missing some black pixels (big score sprites) why????
 
 converter:
 - if SBC_IMM	0x00 found later, don't optimize sbc into sub!
@@ -31,6 +31,7 @@ converter:
 
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
+start log regs: f519
 
 debug bankswitch change on MAME (22D is the copy in readable memory):
 doesn't work as 22D is sometimes updated BEFORE bankswitch

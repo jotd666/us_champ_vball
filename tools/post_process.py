@@ -166,6 +166,10 @@ with open(source_dir / "conv.s") as f:
             lines[i-1] = change_instruction("moveq\t#1,d4",lines,i-1)
             line = change_instruction("sbcd\td4,d0",lines,i)
 
+        if line_address == 0xf155:
+            # remove set carry as it's BCD
+            line = remove_instruction(lines,i)
+
         # time decrease (tricky because of bcd shit)
         if line_address == 0xe703:
             line = remove_error(line)
