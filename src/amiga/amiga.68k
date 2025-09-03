@@ -2607,7 +2607,6 @@ update_controls:
 
 	tst.b	(0x4C,a0)		| "up" key
 	beq.b	0f
-	BREAKPOINT	"KEY UP"
 	bclr	#BIT_UP,d0
 0:
 	tst.b	(0x4D,a0)		| "down" key
@@ -2626,16 +2625,15 @@ update_controls:
 	beq.b	0f
 	bclr	#BIT_FIRE_1,d0
 0:
-*	tst.b	(0x64,a0)		| left "alt" key
-*	beq.b	0f
-*	bclr	#BIT_JUMP,d0
-*0:
+	tst.b	(0x64,a0)		| left "alt" key
+	beq.b	0f
+	bclr	#BIT_FIRE_2,d0
+0:
 
 	* directions + fire
 	move.l	_joypad_state(pc),d1
 	btst	#JPB_BTN_UP,d1
 	beq.b	0f
-	BREAKPOINT	"JO UP"
 	bclr	#BIT_UP,d0
 0:
 	btst	#JPB_BTN_DOWN,d1
@@ -3549,19 +3547,19 @@ level4_context:
 	.asciz	"level_4"
 intro_context:
 	.asciz	"intro"
-select_context:
-	.asciz	"select"
+map_context:
+	.asciz	"map"
 
 	.align	2
 
 * there are 8 possible contexts (prom banks)
 context_table:
-	.long	select_context     | 0
+	.long	level1_context     | 0
 	.long	0     | 1
 	.long	0     | 2
 	.long	level3_context     | 3
 	.long	0     | 4
-	.long	level1_context     | 5
+	.long	map_context     | 5 map context
 	.long	0     | 6
 	.long	intro_context     | 7
 

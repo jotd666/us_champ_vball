@@ -118,12 +118,12 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 
                 nwtile = tileset_1[other_tile_number]
                 if nwtile is None:
-                    raise Exception(f"Other tile 0x{other_tile_number:x} not found (grouping with 0x{tile_number:x})")
-
-                dstile.paste(nwtile,(wtile.size[0],0))
-                wtile = dstile
-                tileset_1[tile_number] = wtile
-                discarded_indexes.append(other_tile_number)  # discard
+                    print(f"Warn: Other tile 0x{other_tile_number:x} not found (grouping with 0x{tile_number:x})")
+                else:
+                    dstile.paste(nwtile,(wtile.size[0],0))
+                    wtile = dstile
+                    tileset_1[tile_number] = wtile
+                    discarded_indexes.append(other_tile_number)  # discard
 
 
 
@@ -281,7 +281,61 @@ magenta = (254,0,254)
 
 dump_it = True
 
-def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
+def quantize_palette(rgb_tuples,img_type,nb_quantize,transparent=None):
+    rgb_configs = set(rgb_tuples)
+
+    nb_target_colors = nb_quantize
+    if transparent:
+        rgb_configs.remove(transparent)
+        # remove black, white, we don't want it quantized
+        immutable_colors = (transparent,(0,0,0))
+    else:
+        immutable_colors = ((0,0,0),)
+
+    for c in immutable_colors:
+        rgb_configs.discard(c)
+        nb_quantize -= 1
+
+    dump_graphics = False
+    # now compose an image with the colors
+    clut_img = Image.new("RGB",(len(rgb_configs),1))
+    for i,rgb in enumerate(rgb_configs):
+        #rgb_value = (rgb[0]<<16)+(rgb[1]<<8)+rgb[2]
+        clut_img.putpixel((i,0),rgb)
+
+    reduced_colors_clut_img = clut_img.quantize(colors=nb_quantize,dither=0).convert('RGB')
+
+    # get the reduced palette
+    reduced_palette = [reduced_colors_clut_img.getpixel((i,0)) for i,_ in enumerate(rgb_configs)]
+    # apply rounding now, else possible color duplicates, which would be a pity
+    reduced_palette = bitplanelib.palette_round(reduced_palette,0xF0)
+
+    # now create a dictionary by associating the original & reduced colors
+    rval = dict(zip(rgb_configs,reduced_palette))
+
+    # add black & white & transparent back
+    for c in immutable_colors:
+        rval[c] = c
+
+
+    if dump_it:  # debug it, create 2 rows, 1 non-quantized, and 1 quantized, separated by bloack
+        s = clut_img.size
+        ns = (s[0]*30,s[1]*30)
+        clut_img = clut_img.resize(ns,resample=0)
+        whole_image = Image.new("RGB",(clut_img.size[0],clut_img.size[1]*3))
+        whole_image.paste(clut_img,(0,0))
+        reduced_colors_clut_img = reduced_colors_clut_img.resize(ns,resample=0)
+        whole_image.paste(reduced_colors_clut_img,(0,clut_img.size[1]*2))
+        whole_image.save(dump_dir / "{}_colors.png".format(img_type))
+
+    result_nb = len(set(reduced_palette))
+    if nb_quantize < result_nb:
+        raise Exception(f"quantize: {img_type}: {nb_quantize} expected, found {result_nb}")
+    # return it
+    return rval
+
+
+def gen_context_files(context_name,with_sprites=True):
     tile_sheet_dict = {i:Image.open(sheets_path / context_name / "tiles" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
     if with_sprites:
         sprite_sheet_dict = {i:Image.open(sheets_path / context_name / "sprites" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
@@ -370,25 +424,45 @@ def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
 
 
     full_palette = sorted(sprite_palette)
-    full_palette.remove(magenta)
+    must_insert_magenta = False
 
-    # magenta (transparent) first
-    full_palette.insert(0,magenta)
+    if magenta in full_palette:
+        full_palette.remove(magenta)
+        must_insert_magenta = True
 
+    # try to see if fits the number of colors (minus one, we removed transparent)
     used_nb_colors = len(full_palette)
-    remaining = (nb_colors-used_nb_colors)
+    remaining = (nb_colors-1-used_nb_colors)
     if remaining < 0:
-        raise Exception(f"Not enough colors: {nb_colors} < {used_nb_colors}")
-    print(f"{context_name}: Used number of colors {used_nb_colors}, tiles number of colors {len(tile_palette)}")
-    full_palette += remaining * [(0x10,0x20,0x30)]
+        # it doesn't: we have to reduce
+        print(f"Not enough colors: {nb_colors} < {used_nb_colors+1}, quantizing")
+        quantized = quantize_palette(full_palette,context_name,nb_colors-1)
+        used_nb_colors = len(quantized)
+        # apply quantize to all tiles & sprites now
+        for sset in sprite_set_list:
+            for tile in sset:
+                if tile:
+                    bitplanelib.replace_color_from_dict(tile,quantized)
+        for sset in tile_set_list:
+            for tile in sset:
+                if tile:
+                    bitplanelib.replace_color_from_dict(tile,quantized)
 
+        full_palette = sorted(set(quantized.values()))
+
+        remaining = (nb_colors-1-used_nb_colors)
+    else:
+        print(f"{context_name}: Used number of colors {used_nb_colors+1}, tiles number of colors {len(tile_palette)}")
+
+    if remaining>0:
+        full_palette += remaining * [(0x10,0x20,0x30)]
+    print(context_name,len(full_palette))
+
+    if must_insert_magenta:
+        # magenta (transparent) first
+        full_palette.insert(0,magenta)
 
     # sprite_set_list is now a 16x512 matrix of sprite tiles
-
-        # Hardware sprites
-    ##    cluts = hw_sprite_cluts
-    ##    _,hw_sprite_set = load_tileset(tsd,i,16,"hw_sprites",dump_dir,dump=dump_it,name_dict=sprite_names,cluts=cluts)
-    ##    hw_sprite_set_list.append(hw_sprite_set)
 
 
     tile_plane_cache = {}
@@ -595,13 +669,15 @@ def gen_context_files(context_name,with_sprites=True,write_sprite_size=False):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
-    # do that only on level context else it's incomplete and it fails!
-    if write_sprite_size:
-        with open(src_dir / "sprite_size.68k","w") as f:
-            bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
+
 
 
 #gen_context_files("intro",with_sprites=False)
-gen_context_files("level_1")
-#gen_context_files("level_3",write_sprite_size=True)  # also demo
-#gen_context_files("select")
+#gen_context_files("map",with_sprites=False)
+
+gen_context_files("level_1")  # also select
+gen_context_files("level_3")  # also demo
+
+# do that only on level context else it's incomplete and it fails!
+with open(src_dir / "sprite_size.68k","w") as f:
+    bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)

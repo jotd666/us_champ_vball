@@ -1731,19 +1731,19 @@ player_awaiting_service_64ad:
 68D6: A8       tay
 68D7: 38       sec
 68D8: A5 28    lda $28
-68DA: F9 FF 68 sbc $68ff, y
+68DA: F9 FF 68 sbc $68ff, y		; [bank_address]
 68DD: 30 18    bmi $68f7
 68DF: 98       tya
 68E0: 0A       asl a
 68E1: A8       tay
 68E2: 38       sec
-68E3: B9 0B 69 lda $690b, y
+68E3: B9 0B 69 lda $690b, y		; [bank_address]
 68E6: E5 28    sbc $28
 68E8: 30 12    bmi $68fc
 68EA: 0A       asl a
 68EB: 0A       asl a
 68EC: 0A       asl a
-68ED: 79 0C 69 adc $690c, y
+68ED: 79 0C 69 adc $690c, y		; [bank_address]
 68F0: 85 2A    sta $2a
 68F2: 38       sec
 68F3: A5 BD    lda ball_logical_y_bd

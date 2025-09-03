@@ -1,19 +1,19 @@
+- there's a small y scroll during game (not during demo!!) so we have to take scrolling into account... grrrr
+- reduce global colors, reduce tile colors, (32 colors on ECS!)
 - better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds
 - still some frames that appear missing (red) when all frames have been registered
-- determining context from bank alone doesn't work. We have to use the screen screen_id_07e4: redo map/level 1 from scratch
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
   
   
 - if net doesn't move, maybe blit it in one big blit
 
-- add controls to be able to play to level 1
+
 
 - cheat: level select
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
 - 50Hz option
-- reduce global colors, reduce tile colors, (32 colors on ECS!)
 
 - rip sounds
 
