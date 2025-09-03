@@ -1,10 +1,14 @@
 - there's a small y scroll during game (not during demo!!) so we have to take scrolling into account... grrrr
+- missing black on level 1 (referee trunk, poles)
+- level 2 transparent not done
+- maps don't appear at all (fire press??)
 - reduce global colors, reduce tile colors, (32 colors on ECS!)
 - better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds
-- still some frames that appear missing (red) when all frames have been registered
+- still some frames that appear missing (red) when all frames have been registered <=== ******
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
-  
+  - rip sounds
+
   
 - if net doesn't move, maybe blit it in one big blit
 
@@ -15,7 +19,6 @@
 - special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
 - 50Hz option
 
-- rip sounds
 
 - still missing some black pixels (big score sprites) why????
 

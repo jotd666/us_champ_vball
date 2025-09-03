@@ -79,9 +79,27 @@ OPT_FIXED_RANDOM_VALUE = 3   | 1: demo runs without ball going too high, 3: ball
 	INVERT_XC_FLAGS
 	.endm
 	
+	.macro	SBC_X_BANK	address
+	INVERT_XC_FLAGS
+	GET_BANK_ADDRESS	\address
+	move.b	(a0,d1.w),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
+	subx.b	d4,d0
+	INVERT_XC_FLAGS
+	.endm
+	
 	.macro	SBC_Y	address
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
+	move.b	(a0,d2.w),d4
+	SET_Z_FLAG		| set Z flag as subx never sets it!
+	subx.b	d4,d0
+	INVERT_XC_FLAGS
+	.endm
+	
+	.macro	SBC_Y_BANK	address
+	INVERT_XC_FLAGS
+	GET_BANK_ADDRESS	\address
 	move.b	(a0,d2.w),d4
 	SET_Z_FLAG		| set Z flag as subx never sets it!
 	subx.b	d4,d0

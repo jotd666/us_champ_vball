@@ -7,6 +7,12 @@ sprite_names = {}
 
 possible_hw_sprites = set()
 
+
+nb_planes = 5
+nb_colors = 1<<nb_planes
+nb_cluts = 8
+
+
 def asm2bin(source,dest):
     subprocess.run(["vasmm68k_mot","-nosym","-pic","-Fbin",source,"-o",dest],check=True,stdout=subprocess.DEVNULL)
 
@@ -150,10 +156,6 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 all_tile_cluts = False
 
 group_sprite_pairs = get_sprite_groups()
-
-nb_planes = 7
-nb_colors = 1<<nb_planes
-nb_cluts = 8
 
 double_size_sprites = [0]*NB_SPRITES
 
@@ -449,14 +451,13 @@ def gen_context_files(context_name,with_sprites=True):
                     bitplanelib.replace_color_from_dict(tile,quantized)
 
         full_palette = sorted(set(quantized.values()))
-
+        used_nb_colors = len(full_palette)
         remaining = (nb_colors-1-used_nb_colors)
     else:
         print(f"{context_name}: Used number of colors {used_nb_colors+1}, tiles number of colors {len(tile_palette)}")
 
     if remaining>0:
         full_palette += remaining * [(0x10,0x20,0x30)]
-    print(context_name,len(full_palette))
 
     if must_insert_magenta:
         # magenta (transparent) first
@@ -469,7 +470,6 @@ def gen_context_files(context_name,with_sprites=True):
     tile_table = read_tileset(tile_set_list,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
 
     bob_plane_cache = {}
-
     sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
 
 
@@ -676,6 +676,7 @@ def gen_context_files(context_name,with_sprites=True):
 #gen_context_files("map",with_sprites=False)
 
 gen_context_files("level_1")  # also select
+gen_context_files("level_2")
 gen_context_files("level_3")  # also demo
 
 # do that only on level context else it's incomplete and it fails!

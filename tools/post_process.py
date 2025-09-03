@@ -362,6 +362,7 @@ with open(source_dir / "conv.s") as f:
         if "[bank_address" in line:
             # give me the original instruction
             line = line.replace("_ADDRESS","_BANK_ADDRESS")
+            line = line.replace("SBC_Y","SBC_Y_BANK")
         if "[video_address" in line:
             # give me the original instruction
             line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")

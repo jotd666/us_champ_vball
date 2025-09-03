@@ -61,9 +61,6 @@ HW_SPRITE_Y_CORRECTION = 0
 NTSC_Y_SHIFT = 12
 
 
-
-BASE_BPLCON2_VALUE = 0x0064		| sprites above all playfields
-
 SCREEN_TILE_ADDRESS = 0x2000
 SCREEN_COLOR_ADDRESS = 0x3000
 SPRITE_ADDRESS = 0x800
@@ -99,11 +96,20 @@ _custom = 0xDFF000
 
 OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
-NB_PLAYFIELD_PLANES = 7
+NB_PLAYFIELD_PLANES = 5
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 80
 
-* game originally runs on a 512*512 screen, but only uses the lower half
+
+	.if	NB_PLAYFIELD_PLANES == 6
+BASE_BPLCON2_VALUE = 0x0224			| add killehb
+	.else
+BASE_BPLCON2_VALUE = 0x0024
+	
+	.endif
+	
+* game originally runs on a 512*512 screen, but only uses mostly the lower half
+* (scrolls very little)
 * so we just ignore the upper half which saves a lot of chipmem!
 NB_TARGET_LINES = 512
 NB_LINES = 256
@@ -1663,7 +1669,7 @@ platform_init:
 	.else
     move.w #0x200+BORDERBLANK+(NB_PLAYFIELD_PLANES<<12),bplcon0(a5) | 8 > nb bitplanes, borderblank
 	.endif
-    move.w #0x0024,bplcon2(a5)
+    move.w #BASE_BPLCON2_VALUE,bplcon2(a5)
     move.w #0x0C00+BORDERBLANK<<5,bplcon3(a5)     | no AGA specificities, default ECS
 
  	*         VVHH
@@ -3555,7 +3561,7 @@ map_context:
 * there are 8 possible contexts (prom banks)
 context_table:
 	.long	level1_context     | 0
-	.long	0     | 1
+	.long	level2_context     | 1
 	.long	0     | 2
 	.long	level3_context     | 3
 	.long	0     | 4
