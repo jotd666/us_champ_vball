@@ -112,7 +112,8 @@ BASE_BPLCON2_VALUE = 0x0024
 * (scrolls very little)
 * so we just ignore the upper half which saves a lot of chipmem!
 NB_TARGET_LINES = 512
-NB_LINES = 256
+SMALL_SCROLL_HEIGHT = 48
+NB_LINES = 256+SMALL_SCROLL_HEIGHT
 Y_MAX = NB_LINES
 NB_PLAYFIELD_LINES = NB_LINES
 
@@ -1211,7 +1212,8 @@ update_one_bob:
 	
 	* BOBs must follow screen scroll
 	* Y is not considered here
-	*add.w	scroll_y,d1
+	add.w	scroll_y,d1
+	sub.w	#256-SMALL_SCROLL_HEIGHT,d1
 	add.w	scroll_x_lo,d0
 	add.w	scroll_x_hi,d0
 	and.w	#0x1FF,d0
@@ -1890,7 +1892,6 @@ osd_set_bank:
 0:
 	move.w	(a7)+,d0
 	
-	move.w	scroll_y,0x110
 	
 	* now memory bank (bit 1 of the input)
 	bclr	#0,d4
@@ -2002,6 +2003,7 @@ compute_tile_xy:
 	add.w	#0x20,d0	| right quadrant
 0:
 	lsl.w	#3,d1		| Y times 8
+	add.w	#SMALL_SCROLL_HEIGHT,d1
 	rts
 
 *compute_tile_xy_portrait:
@@ -2216,19 +2218,20 @@ set_bobs_bitplanes:
 	* set bitplanes
 	moveq	#0,d0
 	
-	* the game doesn't use scroll y at all. It stays stuck to the
-	* bottom of the screen, and even some tiles aren't shown because
-	* they're too high
-	*move.w	scroll_y,d0
-	*add.b	scroll_y+1,d0
-	*add.w	d0,d0
-	*lea		mulNB_BYTES_PER_ROW_table,a2
-	*move.w	(a2,d0.w),d0		| compute Y offset
-	
+
+	move.w	scroll_y,d0
+	sub.w	#256-SMALL_SCROLL_HEIGHT,d0
+	jpl		0f
+	moveq	#0,d0
+	jra		1f			| avoids non-atomic illegal scroll value
+0:
+	add.w	d0,d0
+	lea		mulNB_BYTES_PER_ROW_table,a2
+	move.w	(a2,d0.w),d0		| compute Y offset
+1:	
 	* at start, lo=0xFC, hi=0x100
 	* m_scrollx = (m_scrollx_hi + m_scrollx_lo + 4)
 	moveq	#4,d2
-		move.b	#0,0x102
 
 	add.w	scroll_x_lo,d2
 	add.w	scroll_x_hi,d2
