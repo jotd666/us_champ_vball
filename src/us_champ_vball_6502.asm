@@ -11,7 +11,7 @@
 ;	map(0x1005, 0x1005).portr("P3");
 ;	map(0x1006, 0x1006).portr("P4");
 ;	map(0x1008, 0x1008).w(FUNC(vball_state::scrollx_hi_w));
-;	map(0x1009, 0x1009).w(FUNC(vball_state::bankswitch_w));
+;	map(0x1009, 0x1009).w(FUNC(vball_state::bankswitch_w));  // also contains scrolly_hi
 ;	map(0x100a, 0x100b).w(FUNC(vball_state::irq_ack_w));  // is there a scanline counter here?
 ;	map(0x100c, 0x100c).w(FUNC(vball_state::scrollx_lo_w));
 ;	map(0x100d, 0x100d).w("soundlatch", FUNC(generic_latch_8_device::write));
@@ -170,6 +170,7 @@ player_direction_copy_0254 = $254
 ball_x_speed_027f = $27f
 ; 0: left, 1: right, 4 values too
 objects_side_array_9d = $9d
+logical_y_scroll_07e0 = $7e0
 bankswitch_copy_022d = $022d
 scrollx_hi_copy_022c = $022c
 player_1_controls_022e = $022e
@@ -13380,7 +13381,7 @@ E028: 75 F1    adc $f1, x
 E02A: 85 03    sta $03
 E02C: A5 02    lda unpack_mode_and_misc_02
 E02E: 38       sec
-E02F: ED E0 07 sbc $07e0
+E02F: ED E0 07 sbc logical_y_scroll_07e0
 E032: 85 02    sta unpack_mode_and_misc_02
 E034: A5 03    lda $03
 E036: ED E1 07 sbc $07e1
@@ -14115,7 +14116,7 @@ E632: ED DF 07 sbc logical_scroll_value_msb_07df
 E635: 85 13    sta multipurpose_13
 E637: A5 14    lda multipurpose_14
 E639: 38       sec
-E63A: ED E0 07 sbc $07e0
+E63A: ED E0 07 sbc logical_y_scroll_07e0
 E63D: 85 14    sta multipurpose_14
 E63F: A5 15    lda $15
 E641: ED E1 07 sbc $07e1
@@ -14549,7 +14550,7 @@ EA53: 90 02    bcc $ea57
 EA55: A2 20    ldx #$20
 EA57: 8A       txa
 EA58: A8       tay
-EA59: 8C E0 07 sty $07e0
+EA59: 8C E0 07 sty logical_y_scroll_07e0
 EA5C: 60       rts
 
 EA6B: AD DB 07 lda $07db
@@ -14635,13 +14636,14 @@ EB1D: 29 FD    and #$fd
 EB1F: 0D F8 07 ora scroll_hi_copy_07f8
 EB22: 8D 2C 02 sta scrollx_hi_copy_022c
 EB25: 8D 08 10 sta scrollx_hi_1008
-EB28: AD E0 07 lda $07e0
+EB28: AD E0 07 lda logical_y_scroll_07e0
 EB2B: F0 14    beq $eb41
+; non-null Y scroll value
 EB2D: AD 2D 02 lda bankswitch_copy_022d
 EB30: 29 BF    and #$bf
 EB32: 8D 2D 02 sta bankswitch_copy_022d
 EB35: 8D 09 10 sta bankswitch_1009
-EB38: AD E0 07 lda $07e0
+EB38: AD E0 07 lda logical_y_scroll_07e0
 EB3B: 49 FF    eor #$ff
 EB3D: 8D 0E 10 sta scrolly_lo_100e
 EB40: 60       rts
@@ -15289,7 +15291,7 @@ F054: 8D DE 07 sta logical_scroll_value_lsb_07de
 F057: A9 00    lda #$00
 F059: 8D DF 07 sta logical_scroll_value_msb_07df
 F05C: A9 D0    lda #$d0
-F05E: 8D E0 07 sta $07e0
+F05E: 8D E0 07 sta logical_y_scroll_07e0
 F061: A9 FF    lda #$ff
 F063: 8D E1 07 sta $07e1
 F066: A9 00    lda #$00

@@ -8,7 +8,7 @@ sprite_names = {}
 possible_hw_sprites = set()
 
 
-nb_planes = 5
+nb_planes = 6
 nb_colors = 1<<nb_planes
 nb_cluts = 8
 
@@ -673,13 +673,13 @@ def gen_context_files(context_name,with_sprites=True):
 
 
 #gen_context_files("intro",with_sprites=False)
-#gen_context_files("map",with_sprites=False)
+gen_context_files("map",with_sprites=False)
 
 #gen_context_files("level_1")  # also select
 #gen_context_files("level_2")
 #gen_context_files("level_3")  # also demo
 
-
-# do that only on level context else it's incomplete and it fails!
-with open(src_dir / "sprite_size.68k","w") as f:
-    bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
+if any(double_size_sprites):
+    # do that only on level context else it's incomplete and it fails!
+    with open(src_dir / "sprite_size.68k","w") as f:
+        bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)

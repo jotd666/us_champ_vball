@@ -1,7 +1,9 @@
+  
 - there's a small y scroll during game (not during demo!!) so we have to take scrolling into account... grrrr
+  first 128 pixels aren't shown
+- DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - missing black on level 1 (referee trunk, poles)
 - level 2 transparent not done
-- maps don't appear at all (fire press??)
 - reduce global colors, reduce tile colors, (32 colors on ECS!)
 - better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds
@@ -9,18 +11,24 @@
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
   - rip sounds
 
-  
-- if net doesn't move, maybe blit it in one big blit
-
-
-
-- cheat: level select
-- DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-- special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
-- 50Hz option
+- check sand field colors, maybe replace by attached sprites if allows to save a lot of colors.
+  => field is huge (> 256 pixels) and uses only 8 colors, probably not worth it.
+- identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
 
 
 - still missing some black pixels (big score sprites) why????
+
+optims
+
+- cheat: set 9-0
+- cheat: level select
+- special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
+- 50Hz option
+
+- level 1 then map context: make a kludge to avoid having to reload level 1 tiles+sprites after map
+  we can probably load map with level 1 tiles+sprites loaded but that won't work for higher levels
+  so maybe create a context only for "select player" screen (with only a few tiles/sprites) and make a
+  special case using screen type variable on top of palette value
 
 converter:
 - if SBC_IMM	0x00 found later, don't optimize sbc into sub!

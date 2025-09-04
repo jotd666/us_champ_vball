@@ -96,7 +96,7 @@ _custom = 0xDFF000
 
 OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
-NB_PLAYFIELD_PLANES = 5
+NB_PLAYFIELD_PLANES = 6
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 80
 
@@ -1882,11 +1882,15 @@ osd_set_bank:
 	btst	#5,d0
 	seq		higher_gfxset		| inverted logic
 	
-	*move.w	d0,-(a7)
-	*rol.b	#2,d0
-	*and.b	#3,d0
-	*move.b	d0,scroll_y			| set scroll high value
-	*move.w	(a7)+,d0
+	move.w	d0,-(a7)
+	clr.b	scroll_y			| set scroll high value
+	btst	#6,d0
+	jeq		0f
+	move.b	#1,scroll_y
+0:
+	move.w	(a7)+,d0
+	
+	move.w	scroll_y,0x110
 	
 	* now memory bank (bit 1 of the input)
 	bclr	#0,d4
@@ -2330,7 +2334,7 @@ osd_set_scrollx_lo:
 	move.b	d0,scroll_x_lo+1
 	rts
 osd_set_scrolly_lo:
-	*move.b	d0,scroll_y+1
+	move.b	d0,scroll_y+1
 	rts
 
 	
