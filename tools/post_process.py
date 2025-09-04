@@ -24,6 +24,8 @@ input_read_dict = {
 input_write_dict = {
 "irq_ack_100a":"",
 "irq_ack_100b":"",
+"p1_1000":"",
+"p2_1001":"",
 "p3_1005":"",
 "p4_1006":"",   # no P3 and P4
 "sound_100d":"sound_start",   # sound_start
@@ -385,7 +387,23 @@ with open(source_dir / "conv.s") as f:
                     break
 
 
+        if line_address in [0xd854,0xf272,0xf29e]:
+            # remove p3/p4 I/O
+            for j in range(i,i+4):
+                lines[j] = remove_instruction(lines,j)
+            line = lines[i]
 
+        if line_address in [0xd84c]:
+            # and p1 / p2
+            line = change_instruction("jbsr\tosd_read_p1_inputs",lines,i,False)
+            lines[i-1] += "\tmove.b\td0,d4\n"
+            lines[i+1] = change_instruction("and.b\td4,d0",lines,i+1,False)
+
+        if line_address in [0xf26a,0xf296]:
+            # and p1 / p2
+            line = change_instruction("jbsr\tosd_read_p2_inputs",lines,i,False)
+            lines[i-1] += "\tmove.b\td0,d4\n"
+            lines[i+1] = change_instruction("and.b\td4,d0",lines,i+1,False)
 
         line = re.sub(tablere,subt,line)
 
@@ -393,34 +411,40 @@ with open(source_dir / "conv.s") as f:
         if "GET_ADDRESS" in line:
             val = line.split()[1]
             toks = line.split()
-            input_dict = input_read_dict if "lda" in toks or "bit" in toks else input_write_dict
-            osd_call = input_dict.get(val)
-            if osd_call is not None:
-                if osd_call:
-                    line = change_instruction(f"jbsr\tosd_{osd_call}",lines,i)
-                    if "bit" in toks:
-                        # bit for those special locations doesn't require d0 to be changed
-                        # it even requires it NOT to be changed by the syscall
-                        # here we "cheat" by copying the result of the syscall in RAM, it works because
-                        # ram is mapped here, since 0x1xxx is between RAM/sprite RAM and video ram but in
-                        # some smaller memory models it would not work!
-                        line = f"""\tmove.w\td0,-(a7)   | save d0
+            if '|' in toks:
+                original_inst = toks[toks.index('|')+2]
+                input_dict = input_read_dict if original_inst in ["lda","bit"] else input_write_dict
+                osd_call = input_dict.get(val)
+                if osd_call is not None:
+                    if input_dict == input_write_dict and original_inst != "sta":
+                        print(f"Unsupported {original_inst} for I/O address: {line.strip()}")
+                        i += 1
+                        continue
+                    if osd_call:
+                        line = change_instruction(f"jbsr\tosd_{osd_call}",lines,i)
+                        if original_inst == "bit":
+                            # bit for those special locations doesn't require d0 to be changed
+                            # it even requires it NOT to be changed by the syscall
+                            # here we "cheat" by copying the result of the syscall in RAM, it works because
+                            # ram is mapped here, since 0x1xxx is between RAM/sprite RAM and video ram but in
+                            # some smaller memory models it would not work!
+                            line = f"""\tmove.w\td0,-(a7)   | save d0
 \tGET_ADDRESS\t{val}
 """+line+"""\tmove.b\td0,(a0)   | update in ram so we can use BIT
 \tBIT\t(a0)
 \tmovem.w\t(a7)+,d0   | restore d0, preserving BIT status flags
 """
-                else:
+                    else:
+                        line = remove_instruction(lines,i)
+                    lines[i+1] = remove_instruction(lines,i+1)
+                    if "stx" in line:
+                        line = f"\texg\td0,d1\n{line}\texg\td0,d1\n"
+                    if "sty" in line:
+                        line = f"\texg\td0,d2\n{line}\texg\td0,d2\n"
+                if "read_dsw1" in line and "sta" in line.split():
                     line = remove_instruction(lines,i)
-                lines[i+1] = remove_instruction(lines,i+1)
-                if "stx" in line:
-                    line = f"\texg\td0,d1\n{line}\texg\td0,d1\n"
-                if "sty" in line:
-                    line = f"\texg\td0,d2\n{line}\texg\td0,d2\n"
-            if "read_dsw1" in line and "sta" in line.split():
-                line = remove_instruction(lines,i)
-            if "read_dsw2" in line and "sta" in line.split():
-                line = change_instruction("jbsr\tosd_video_control",lines,i)
+                if "read_dsw2" in line and "sta" in line.split():
+                    line = change_instruction("jbsr\tosd_video_control",lines,i)
 
         elif "unsupported instruction rti" in line:
             line = change_instruction("rts",lines,i)
