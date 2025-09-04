@@ -1,9 +1,11 @@
   
-- there's a small y scroll during game (not during demo!!) so we have to take scrolling into account... grrrr
-  first 128 pixels aren't shown
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - missing black on level 1 (referee trunk, poles)
-- level 2 transparent not done
+- level 2 transparent issue
+- level 3 to dump (los angeles)
+- F2 key for 0-9 score and rip player lose
+- keep ripping level 2 sprites
+
 - reduce global colors, reduce tile colors, (32 colors on ECS!)
 - better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds

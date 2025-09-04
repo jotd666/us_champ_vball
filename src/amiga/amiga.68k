@@ -877,9 +877,11 @@ lose_all_lives:
 	move.l	(a7)+,a6
 	rts
 
-skip_level:
+set_09:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
+	move.b	#9,(score_array_57,a6)
+	move.b	#0,(score_array_57+1,a6)
 	move.l	(a7)+,a6
 	rts
 
@@ -2868,32 +2870,16 @@ handle_keyboard:
 	jeq		10f
 	.endif
 	* cheat keys
-	cmp.b	#0x51,d0	| F2 key: open gates
-	bne.b	0f
-	move.w	#0x0FF,_custom+color
-	movem.l	d0-a6,-(a7)
-	GET_RAM_START_IN_A6
-	movem.l (a7)+,d0-a6
 
-	st.b	cheat_used
-	
-0:
 
 	cmp.b	#0x50,d0	| F1 key: skip level
 	bne.b	0f
 	st.b	cheat_used
-	jbsr	skip_level
+	jbsr	set_09
 	move.w	#0x0FF,_custom+color
 	
 0:
-	cmp.b	#0x52,d0	| F3 key
-	bne.b	0f
-	st.b	cheat_used
-	* add 10000 points
-	move.w	#0x0FF,_custom+color
-	jbsr	add_10000_points
-	
-0:
+
 	cmp.b	#0x53,d0	| F4 key
 	bne.b	0f
 	st.b	cheat_used
@@ -3567,10 +3553,10 @@ map_context:
 
 * there are 8 possible contexts (prom banks)
 context_table:
-	.long	level1_context     | 0
-	.long	level2_context     | 1
-	.long	0     | 2
-	.long	level3_context     | 3
+	.long	level1_context     | 0 daytona
+	.long	level2_context     | 1 new york
+	.long	level3_context     | 2 los angeles
+	.long	level4_context     | 3 hawai
 	.long	0     | 4
 	.long	map_context     | 5 map context
 	.long	0     | 6

@@ -677,7 +677,8 @@ gen_context_files("map",with_sprites=False)
 
 #gen_context_files("level_1")  # also select
 #gen_context_files("level_2")
-#gen_context_files("level_3")  # also demo
+#gen_context_files("level_3")
+#gen_context_files("level_4")  # also demo
 
 if any(double_size_sprites):
     # do that only on level context else it's incomplete and it fails!
