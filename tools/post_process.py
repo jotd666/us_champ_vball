@@ -285,6 +285,18 @@ with open(source_dir / "conv.s") as f:
 ##        if "insert SET_X_FROM_CLEARED_C" in line:
 ##            line = "\tSET_X_FROM_CLEARED_C\n"
 
+        # cheat: left side wins the current match whatever the outcome on the ball
+        if line_address == 0xf3b3:
+            line = """\ttst.b\tleft_team_wins_now_flag
+\tjeq\t0f
+\tclr.b\tleft_team_wins_now_flag
+\tmoveq\t#0,d0
+\tmoveq\t#0,d1
+\tOP_W_ON_ZP_ADDRESS\tmove,game_state_bits_46,d0
+\tmove.b\t#MAX_SCORE,d0
+0:
+""" + line
+        # cheat: start level
         if line_address == 0xeff9:
             line = change_instruction("move.b\tstart_level_flag,d0",lines,i)
 
@@ -303,6 +315,13 @@ with open(source_dir / "conv.s") as f:
         if optimizer_on and line_address == 0xb429:
             # force clear C flag (cmp+rts)
             line = "\tCLR_XC_FLAGS\n"+line
+
+        if line_address == 0xEA74:
+            # reset scrolling
+            # probably useless / redundant in most cases
+            # but more importantly messes with map (Hawaii, Air Base)
+            # (not on real HW but on amiga with different screen update sync it does)
+            line = remove_instruction(lines,i)
 
         if line_address in {0xeedf,0xef0c}:
             # rti => rts

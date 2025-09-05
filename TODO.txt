@@ -1,33 +1,29 @@
-- hawaii/aircftact: X scrolling doesnt work on map
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-- missing black on level 1 (referee trunk, poles)
-- level 2 transparent issue
-- level 3 to dump (los angeles)
-- ungroup sand sprites
-- remove static sprites that hide scenery (not in japan version: NY & LA)
+- remove static sprites that hide scenery (not in japan version: NY & LA): sprite codes identified, now don't dump them
 - keep ripping levels sprites
-- after winning major league seems that there's no context probably air base has the same palette?
 
-- reduce global colors, reduce tile colors, (32 colors on ECS!)
 - better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds
 - still some frames that appear missing (red) when all frames have been registered <=== ******
 - fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
   - rip sounds
 
-- check sand field colors, maybe replace by attached sprites if allows to save a lot of colors.
-  => field is huge (> 256 pixels) and uses only 8 colors, probably not worth it.
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
 
+- create Pistorm/vampire version with 128 colors
+- create AGA version with 64 colors
+- create ECS version with 32 colors
+
+minor:
 
 - still missing some black pixels (big score sprites) why????
+- hawaii: X scrolling wraps only in that case grrrrrr
 
 optims
 
-- cheat: set 9-0
-- cheat: level select
 - special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
-- 50Hz option
+  # => move in a subdir to extract!!!
+- 50Hz enabled for Pistorm 128 color version
 
 - level 1 then map context: make a kludge to avoid having to reload level 1 tiles+sprites after map
   we can probably load map with level 1 tiles+sprites loaded but that won't work for higher levels
@@ -46,7 +42,7 @@ converter:
 
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
-start log regs: f519
+start log regs: f519: start ball (serve)
 
 debug bankswitch change on MAME (22D is the copy in readable memory):
 doesn't work as 22D is sometimes updated BEFORE bankswitch
@@ -57,7 +53,7 @@ wpset 1009,1,W,wpdata!=b@22D
 
 wpset 1009,1,W,pc!=$eaff
 
-fix random (demo does exactly the same each time!):
+fix random (so demo does exactly the same each time!):
 
 bpset D00A,,{A=0;PC=AFFE;g}
 
@@ -76,8 +72,8 @@ identify each music as there are cut-scenes & other stuff removed from US versio
 4: unknown??
 3: stressful level end music (finish)
 
-A: unknown blues???
-B: unknown blues??? the same???
+A: unknown blues??? cut scene
+B: unknown blues??? the same??? cut scene
 c: short tune
 D: naval base last level music
 E: lost!

@@ -10168,6 +10168,7 @@ BC3E: 4A       lsr a
 BC3F: AA       tax
 BC40: 20 8B BC jsr $bc8b
 ; increase score (decimal)
+; X=0: left team, X=1: right team
 BC43: B5 57    lda score_array_57, x
 BC45: F8       sed
 BC46: 18       clc
@@ -14558,7 +14559,10 @@ EA6B: AD DB 07 lda $07db
 EA6E: 30 07    bmi $ea77
 EA70: C9 01    cmp #$01
 EA72: F0 04    beq $ea78
-EA74: 20 E2 EA jsr $eae2
+; this should not be called when showing map as it temporarily resets scrolling
+; but immediately scrollx is set to $17C (Hawaii). Hardware doesn't
+; register the small X change and settles with $17C
+EA74: 20 E2 EA jsr reset_scrolling_eae2
 EA77: 60       rts
 EA78: 20 06 EB jsr $eb06
 EA7B: 60       rts
@@ -14609,6 +14613,7 @@ EAD5: 8D 2C 02 sta scrollx_hi_copy_022c
 EAD8: 8D 08 10 sta scrollx_hi_1008
 EADB: 4C B7 EA jmp $eab7
 
+reset_scrolling_eae2:
 EAE2: AD 2C 02 lda scrollx_hi_copy_022c		; [disable] useless lda
 EAE5: A9 FC    lda #$fc
 EAE7: 8D 0C 10 sta scrollx_lo_100c
@@ -15180,7 +15185,7 @@ EF3B: A9 00    lda #$00
 EF3D: 8D F4 07 sta sprite_prom_bank_07f4
 EF40: 20 A2 D8 jsr update_prom_banks_d8a2
 EF43: 20 8F D8 jsr handle_cocktail_mode_d88f
-EF46: 20 E2 EA jsr $eae2
+EF46: 20 E2 EA jsr reset_scrolling_eae2
 EF49: A9 00    lda #$00
 EF4B: 8D 0D 10 sta sound_100d		; stop all sounds
 EF4E: A9 02    lda #$02
@@ -15213,7 +15218,7 @@ EF8F: D0 E9    bne $ef7a
 EF91: 4C EB EF jmp $efeb
 EF94: A9 00    lda #$00
 EF96: 8D DB 07 sta $07db
-EF99: 20 E2 EA jsr $eae2
+EF99: 20 E2 EA jsr reset_scrolling_eae2
 EF9C: A9 06    lda #$06
 EF9E: 8D E4 07 sta screen_id_07e4
 EFA1: 20 52 EB jsr setup_background_screen_eb52
@@ -15278,7 +15283,7 @@ F031: 20 52 EB jsr setup_background_screen_eb52
 F034: A9 05    lda #$05
 F036: 20 7F DA jsr write_message_da7f
 F039: 20 9A EB jsr $eb9a
-F03C: 20 E2 EA jsr $eae2
+F03C: 20 E2 EA jsr reset_scrolling_eae2
 F03F: A9 01    lda #$01
 F041: 85 46    sta game_state_bits_46
 F043: A9 FF    lda #$ff
@@ -15674,10 +15679,12 @@ F3A8: A2 00    ldx #$00
 F3AA: A5 46    lda game_state_bits_46
 F3AC: 29 10    and #$10
 F3AE: F0 01    beq $f3b1
+; right team (cpu in 1P mode) has won if bit 4 from game_state_bits_46 is set
 F3B0: E8       inx
 F3B1: B5 57    lda score_array_57, x
 F3B3: C9 10    cmp #MAX_SCORE
 F3B5: 90 1F    bcc $f3d6
+; one team has won
 F3B7: A5 46    lda game_state_bits_46
 F3B9: 29 FD    and #$fd
 F3BB: 09 08    ora #$08
@@ -15692,7 +15699,7 @@ F3CC: 98       tya
 F3CD: 20 B8 D7 jsr queue_sound_d7b8
 F3D0: 20 82 AF jsr $af82
 F3D3: 4C FD F4 jmp $f4fd
-F3D6: C9 08    cmp #$08
+F3D6: C9 08    cmp #APPROACHING_MAX_SCORE
 F3D8: D0 0F    bne $f3e9
 F3DA: 8A       txa
 F3DB: 49 01    eor #$01
@@ -15974,7 +15981,7 @@ F616: E8       inx
 F617: E0 05    cpx #$05
 F619: 90 F8    bcc $f613
 F61B: 8D DB 07 sta $07db
-F61E: 20 E2 EA jsr $eae2
+F61E: 20 E2 EA jsr reset_scrolling_eae2
 F621: 20 73 CF jsr $cf73
 F624: A9 00    lda #$00
 F626: 8D DA 06 sta $06da

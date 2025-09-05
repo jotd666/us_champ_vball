@@ -7,6 +7,7 @@
 	.global		current_bank
 	.global		bank_base
 	.global		start_level_flag
+	.global		left_team_wins_now_flag
 	.ifndef		RELEASE
 	.global		disable_bank_0_check
 	.endif
@@ -42,6 +43,8 @@ vb_ticks_count:
 break_at_startup_flag:
 	.skip	1
 start_level_flag:
+	.skip	1
+left_team_wins_now_flag:
 	.skip	1
 
 

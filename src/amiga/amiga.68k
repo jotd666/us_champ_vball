@@ -31,7 +31,7 @@ AFB_68020 = 1
 
 TOTAL_PUBLIC_MEMORY_SIZE = 400000
 * this is the minimum memory required for level 5
-TOTAL_CHIP_MEMORY_SIZE = 800000	
+TOTAL_CHIP_MEMORY_SIZE = 900000	
 
 BORDERBLANK = 0
 
@@ -888,6 +888,15 @@ set_90:
 	move.l	(a7)+,a6
 	rts
 
+left_team_wins_now:
+	move.l	a6,-(a7)
+	GET_RAM_START_IN_A6
+	move.b	#10,(score_array_57,a6)
+	move.b	#0,(score_array_57+1,a6)
+	bclr.b	#4,(game_state_bits_46,a6)
+	move.l	(a7)+,a6
+	rts
+
 add_10000_points:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
@@ -1216,7 +1225,6 @@ update_one_bob:
 	addq 	#2,a0
 	
 	* BOBs must follow screen scroll
-	* Y is not considered here
 	add.w	scroll_y,d1
 	sub.w	#256-SMALL_SCROLL_HEIGHT,d1
 	add.w	scroll_x_lo,d0
@@ -2875,17 +2883,24 @@ handle_keyboard:
 	* cheat keys
 
 
-	cmp.b	#0x50,d0	| F1 key: skip level
+	cmp.b	#0x50,d0	| F1 key: set score 9-0
 	bne.b	0f
 	st.b	cheat_used
 	jbsr	set_90
 	move.w	#0x0FF,_custom+color
 	
 0:
-	cmp.b	#0x51,d0	| F1 key: skip level
+	cmp.b	#0x51,d0	| F2 key: set score 0-9
 	bne.b	0f
 	st.b	cheat_used
 	jbsr	set_09
+	move.w	#0x0FF,_custom+color
+	
+0:
+	cmp.b	#0x52,d0	| F3 key: set score 10-0 and make left side win
+	bne.b	0f
+	st.b	cheat_used
+	st.b	left_team_wins_now_flag
 	move.w	#0x0FF,_custom+color
 	
 0:
