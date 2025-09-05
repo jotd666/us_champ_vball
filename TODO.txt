@@ -1,10 +1,12 @@
-  
+- hawaii/aircftact: X scrolling doesnt work on map
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - missing black on level 1 (referee trunk, poles)
 - level 2 transparent issue
 - level 3 to dump (los angeles)
-- F2 key for 0-9 score and rip player lose
-- keep ripping level 2 sprites
+- ungroup sand sprites
+- remove static sprites that hide scenery (not in japan version: NY & LA)
+- keep ripping levels sprites
+- after winning major league seems that there's no context probably air base has the same palette?
 
 - reduce global colors, reduce tile colors, (32 colors on ECS!)
 - better bank switching: use A5 for bank base to get more speed

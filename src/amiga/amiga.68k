@@ -3552,6 +3552,8 @@ level3_context:
 	.asciz	"level_3"
 level4_context:
 	.asciz	"level_4"
+level5_context:
+	.asciz	"level_5"
 intro_context:
 	.asciz	"intro"
 map_context:
@@ -3565,7 +3567,7 @@ context_table:
 	.long	level2_context     | 1 new york
 	.long	level3_context     | 2 los angeles
 	.long	level4_context     | 3 hawai
-	.long	0     | 4
+	.long	level5_context     | 4 aircraft
 	.long	map_context     | 5 map context
 	.long	0     | 6
 	.long	intro_context     | 7
