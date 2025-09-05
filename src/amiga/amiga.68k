@@ -51,7 +51,7 @@ NB_SPRITES = 0x800
 SPRITE_LOG_LENGTH = NB_CLUTS*NB_SPRITES
 TILE_LOG_LENGTH = NB_CLUTS*NB_TILES
 
-SPRITE_X_CORRECTION = 0
+SPRITE_X_CORRECTION = 4
 SPRITE_Y_CORRECTION = 0
 HW_SPRITE_X_CORRECTION = 0
 HW_SPRITE_Y_CORRECTION = 0
@@ -389,7 +389,7 @@ _user:
 	*move.b	difficulty_level+3,d0
 	*and.b	#3,d0
 	
-
+	move.b	start_level+3,start_level_flag
 	
 	move.l	misc_options,d1
 	btst	#0,d1
@@ -870,14 +870,17 @@ is_game_playing:
 	cmp.l	a6,a6
 	movem.l	(a7)+,a6
 	rts
-	
-lose_all_lives:
+
+
+set_09:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
+	move.b	#0,(score_array_57,a6)
+	move.b	#9,(score_array_57+1,a6)
 	move.l	(a7)+,a6
 	rts
 
-set_09:
+set_90:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
 	move.b	#9,(score_array_57,a6)
@@ -2875,6 +2878,13 @@ handle_keyboard:
 	cmp.b	#0x50,d0	| F1 key: skip level
 	bne.b	0f
 	st.b	cheat_used
+	jbsr	set_90
+	move.w	#0x0FF,_custom+color
+	
+0:
+	cmp.b	#0x51,d0	| F1 key: skip level
+	bne.b	0f
+	st.b	cheat_used
 	jbsr	set_09
 	move.w	#0x0FF,_custom+color
 	
@@ -2904,9 +2914,7 @@ handle_keyboard:
 	cmp.b	#0x57,d0	| F8 key: lose all lives
 	bne.b	0f
 	move.w	#0x0FF,_custom+color
-	* last life, if killed, direct game over
-	bsr		lose_all_lives
-	jbsr	force_sound_stop
+
 0:
 	cmp.b	#0x58,d0	| F9 key crashes game (restarts whdload)
 	bne.b	0f
@@ -3596,8 +3604,8 @@ dsw_options:
 		.long	WHDLTAG_CUSTOM3_GET
 misc_options:
 		.long	0
-		
 		.long	WHDLTAG_CUSTOM4_GET
+start_level:
 		.long	0
 
 		.long	WHDLTAG_CUSTOM5_GET

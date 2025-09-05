@@ -142,6 +142,7 @@ random_gen_2c = $2c
 random_gen_2e = $2e
 random_index_2b = $2b
 random_index_2d = $2d
+current_level_38 = $38
 time_seconds_4a = $4a
 time_minutes_4b = $4b
 current_object_index_4c = $4c
@@ -1019,7 +1020,7 @@ move_players_on_field_5bf6:
 627C: D0 01    bne $627f
 627E: 38       sec
 627F: 60       rts
-6280: A5 38    lda $38
+6280: A5 38    lda current_level_38
 6282: C9 04    cmp #$04
 6284: 90 02    bcc $6288
 6286: A9 04    lda #$04
@@ -1053,7 +1054,7 @@ move_player_62ae:
 62BF: A5 56    lda $56
 62C1: 29 0F    and #$0f
 62C3: F0 20    beq $62e5
-62C5: A5 38    lda $38
+62C5: A5 38    lda current_level_38
 62C7: C9 10    cmp #$10
 62C9: 90 02    bcc $62cd
 62CB: A9 09    lda #$09
@@ -5233,7 +5234,7 @@ player_preparing_for_pass_7909:
 8A67: 4C 52 8A jmp $8a52
 8A6A: A9 10    lda #$10
 8A6C: 85 23    sta $23
-8A6E: A5 38    lda $38
+8A6E: A5 38    lda current_level_38
 8A70: 29 0F    and #$0f
 8A72: D0 12    bne $8a86
 8A74: AD E0 03 lda $03e0
@@ -6637,10 +6638,10 @@ callback_958e:
 97F4: 85 1B    sta $1b
 97F6: 4C 09 98 jmp $9809
 97F9: A0 03    ldy #$03
-97FB: A5 38    lda $38
+97FB: A5 38    lda current_level_38
 97FD: 29 F0    and #$f0
 97FF: D0 05    bne $9806
-9801: A5 38    lda $38
+9801: A5 38    lda current_level_38
 9803: 29 0F    and #$0f
 9805: A8       tay
 9806: 98       tya
@@ -8403,7 +8404,7 @@ ACA6: 60       rts
 ACA7: 60       rts
 ACA8: A2 0D    ldx #$0d
 ACAA: 86 4C    stx current_object_index_4c
-ACAC: A5 38    lda $38
+ACAC: A5 38    lda current_level_38
 ACAE: 29 0F    and #$0f
 ACB0: F0 56    beq $ad08
 ACB2: C9 04    cmp #$04
@@ -8700,7 +8701,7 @@ AF72: B5 47    lda $47, x
 AF74: 30 0C    bmi $af82
 AF76: A9 09    lda #$09
 AF78: 95 47    sta $47, x
-AF7A: A5 38    lda $38
+AF7A: A5 38    lda current_level_38
 AF7C: C9 10    cmp #$10
 AF7E: B0 02    bcs $af82
 AF80: 95 47    sta $47, x
@@ -8721,7 +8722,7 @@ AF9B: AD F9 07 lda $07f9
 AF9E: D0 49    bne $afe9
 AFA0: B9 47 00 lda $0047, y
 AFA3: 30 44    bmi $afe9
-AFA5: A5 38    lda $38
+AFA5: A5 38    lda current_level_38
 AFA7: A4 3A    ldy $3a
 AFA9: 18       clc
 AFAA: 79 07 B0 adc $b007, y
@@ -8749,7 +8750,7 @@ AFD4: 05 00    ora $00
 AFD6: A8       tay
 AFD7: B9 FF AF lda $afff, y
 AFDA: 9D 12 03 sta $0312, x
-AFDD: A5 38    lda $38
+AFDD: A5 38    lda current_level_38
 AFDF: 29 0F    and #$0f
 AFE1: 0A       asl a
 AFE2: 18       clc
@@ -10743,7 +10744,7 @@ C166: 4A       lsr a
 C167: A8       tay
 C168: B9 47 00 lda $0047, y
 C16B: 30 0E    bmi $c17b
-C16D: A5 38    lda $38
+C16D: A5 38    lda current_level_38
 C16F: C9 09    cmp #$09
 C171: 90 02    bcc $c175
 C173: A9 09    lda #$09
@@ -14367,7 +14368,7 @@ E83E: 10 07    bpl $e847
 E840: A9 1F    lda #$1f
 E842: 85 5B    sta $5b
 E844: 4C 51 E8 jmp $e851
-E847: A5 38    lda $38
+E847: A5 38    lda current_level_38
 E849: 29 0F    and #$0f
 E84B: A8       tay
 E84C: B9 AE E8 lda $e8ae, y
@@ -14377,7 +14378,7 @@ E853: 10 07    bpl $e85c
 E855: A9 29    lda #$29
 E857: 85 5C    sta $5c
 E859: 4C 71 E8 jmp $e871
-E85C: A5 38    lda $38
+E85C: A5 38    lda current_level_38
 E85E: 29 0F    and #$0f
 E860: A8       tay
 E861: B9 AE E8 lda $e8ae, y
@@ -14732,7 +14733,7 @@ EC1F: A9 02    lda #$02
 EC21: 8D DB 07 sta $07db
 EC24: 60       rts
 
-EC2F: A5 38    lda $38
+EC2F: A5 38    lda current_level_38
 EC31: 29 0F    and #$0f
 EC33: A8       tay
 EC34: B9 39 EC lda $ec39, y
@@ -14755,7 +14756,7 @@ EC5C: 20 80 EE jsr $ee80
 EC5F: 60       rts
 EC60: C9 01    cmp #$01
 EC62: D0 1D    bne $ec81
-EC64: A5 38    lda $38
+EC64: A5 38    lda current_level_38
 EC66: 29 0F    and #$0f
 EC68: 18       clc
 EC69: 69 05    adc #$05
@@ -15244,13 +15245,15 @@ EFE3: 20 2B D8 jsr $d82b
 EFE6: A9 80    lda #$80
 EFE8: 20 2B D8 jsr $d82b
 EFEB: 20 16 F3 jsr $f316
+; demo mode show hawaii level
 EFEE: A9 03    lda #$03
-EFF0: 85 38    sta $38
+EFF0: 85 38    sta current_level_38
 EFF2: 4C A7 F1 jmp $f1a7
 EFF5: A5 36    lda game_playing_flag_36
 EFF7: D0 07    bne $f000
+; set start level at first level
 EFF9: A9 00    lda #$00
-EFFB: 85 38    sta $38
+EFFB: 85 38    sta current_level_38
 EFFD: 20 16 F3 jsr $f316
 F000: A9 08    lda #$08
 F002: 20 2B D8 jsr $d82b
@@ -15901,20 +15904,20 @@ F57E: C6 37    dec $37
 F580: A5 37    lda $37
 F582: D0 03    bne $f587
 F584: 4C 10 F6 jmp $f610
-F587: E6 38    inc $38
-F589: A5 38    lda $38
+F587: E6 38    inc current_level_38
+F589: A5 38    lda current_level_38
 F58B: 29 0F    and #$0f
 F58D: C9 09    cmp #$09
 F58F: 90 0F    bcc $f5a0
-F591: A5 38    lda $38
+F591: A5 38    lda current_level_38
 F593: 29 F0    and #$f0
 F595: C9 F0    cmp #$f0
 F597: F0 03    beq $f59c
 F599: 18       clc
 F59A: 69 10    adc #$10
 F59C: 09 04    ora #$04
-F59E: 85 38    sta $38
-F5A0: A5 38    lda $38
+F59E: 85 38    sta current_level_38
+F5A0: A5 38    lda current_level_38
 F5A2: 29 0F    and #$0f
 F5A4: C9 04    cmp #$04
 F5A6: D0 46    bne $f5ee
@@ -15925,7 +15928,7 @@ F5B0: 8D DB 07 sta $07db
 F5B3: A9 11    lda #$11
 F5B5: 8D E4 07 sta screen_id_07e4
 F5B8: 20 52 EB jsr setup_background_screen_eb52
-F5BB: A4 38    ldy $38
+F5BB: A4 38    ldy current_level_38
 F5BD: A9 0E    lda #$0e
 F5BF: C0 10    cpy #$10
 F5C1: 90 02    bcc $f5c5

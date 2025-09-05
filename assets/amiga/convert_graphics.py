@@ -671,16 +671,23 @@ def gen_context_files(context_name,with_sprites=True):
 
 
 
+sprite_size_cache_file = this_dir / "sprite_size.json"
+if sprite_size_cache_file.exists():
+    with open(sprite_size_cache_file,"r") as f:
+        double_size_sprites = json.load(f)
 
 #gen_context_files("intro",with_sprites=False)
-gen_context_files("map",with_sprites=False)
+#gen_context_files("map",with_sprites=False)
 
 #gen_context_files("level_1")  # also select
 #gen_context_files("level_2")
 #gen_context_files("level_3")
 #gen_context_files("level_4")  # also demo
+gen_context_files("level_5")
 
 if any(double_size_sprites):
+    with open(sprite_size_cache_file,"w") as f:
+        json.dump(double_size_sprites,f)
     # do that only on level context else it's incomplete and it fails!
     with open(src_dir / "sprite_size.68k","w") as f:
         bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)

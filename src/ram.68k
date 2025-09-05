@@ -6,6 +6,7 @@
 	.global		break_at_startup_flag
 	.global		current_bank
 	.global		bank_base
+	.global		start_level_flag
 	.ifndef		RELEASE
 	.global		disable_bank_0_check
 	.endif
@@ -39,6 +40,8 @@ vb_ticks_count:
 	.skip	1
 
 break_at_startup_flag:
+	.skip	1
+start_level_flag:
 	.skip	1
 
 

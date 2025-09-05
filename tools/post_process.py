@@ -285,6 +285,9 @@ with open(source_dir / "conv.s") as f:
 ##        if "insert SET_X_FROM_CLEARED_C" in line:
 ##            line = "\tSET_X_FROM_CLEARED_C\n"
 
+        if line_address == 0xeff9:
+            line = change_instruction("move.b\tstart_level_flag,d0",lines,i)
+
         if line_address in {0xb4fd,0xd9ea,0xdaf9,0x8b7d,0x9903,0xa129,0x9689,0Xb4e8,0xd817,0x9767}:
             # X is valid from previous add/sub,asl..: copy X to C just before bcc/bcs
             line = "\tSET_C_FROM_X\n"+line
