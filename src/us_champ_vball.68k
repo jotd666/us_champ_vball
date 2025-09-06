@@ -14557,10 +14557,10 @@ l_be16:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d0 |  [$be20: lda current_object_index_4c]
 	GET_ADDRESS	0x0411                     	| [$be22: cmp $0411]
 	cmp.b	(a0),d0                          	| [...]
-	PUSH_SR
+	PUSH_SR			| preserve Z flag
 	GET_ADDRESS	0x0411                     	| [$be25: sta $0411]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
+	POP_SR			| preserve Z flag
 	bne	l_be40                             	| [$be28: bne $be40]
 	GET_ADDRESS	0x03e1                     	| [$be2a: lda $03e1]
 	move.b	(a0),d0                         	| [...]
@@ -14580,11 +14580,9 @@ l_be40:
 	move.b	(a0),d0                         	| [...]
 	bpl	l_be5b                             	| [$be43: bpl $be5b]
 	clr.b	d0                               	| [$be45: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x0413                     	| [$be47: sta $0413]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
-	beq	l_be5b                             	| [$be4a: beq $be5b]
+	jra	l_be5b                             	| [$be4a: beq $be5b]
 l_be4c:
 	move.b	#0x20,d0                        	| [$be4c: lda #$20]
 	GET_ADDRESS	0x0413                     	| [$be4e: sta $0413]
@@ -14677,14 +14675,12 @@ l_bef5:
 	GET_ADDRESS	0x02b3                     	| [$befa: sta $02b3]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$befd: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x02a6                     	| [$beff: sta $02a6]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x028c                     	| [$bf02: sta $028c]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x0299                     	| [$bf05: sta $0299]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x56,d0 |  [$bf08: lda $56]
 	and.b	#0xf0,d0                         	| [$bf0a: and #$f0]
 	or.b	#0x07,d0                          	| [$bf0c: ora #$07]
@@ -14973,7 +14969,6 @@ l_c0f3:
 	move.b	(a0,d1.w),d2                    	| [...]
 	jbsr	l_6b7f                            	| [$c0f9: jsr $6b7f]
 	clr.b	d0                               	| [$c0fc: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0xfe,d0 |  [$c0fe: sta $fe]
 	OP_W_ON_ZP_ADDRESS	move,0xe2,d0 |  [$c100: sta $e2]
 	OP_W_ON_ZP_ADDRESS	move,0x8e,d0 |  [$c102: sta $8e]
@@ -14981,33 +14976,24 @@ l_c0f3:
 	OP_W_ON_ZP_ADDRESS	move,0x85,d0 |  [$c106: sta $85]
 	OP_W_ON_ZP_ADDRESS	move,0xaf,d0 |  [$c108: sta $af]
 	OP_W_ON_ZP_ADDRESS	move,0xd9,d0 |  [$c10a: sta $d9]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x1c,d0 |  [$c10c: lda $1c]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x9c,d0 |  [$c10e: sta $9c]
 	GET_ADDRESS	0x03fb                     	| [$c110: sta $03fb]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x1b,d0 |  [$c113: lda $1b]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0xaa,d0 |  [$c115: sta $aa]
 	GET_ADDRESS	0x03fc                     	| [$c117: sta $03fc]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x1e,d0 |  [$c11a: lda $1e]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0xc6,d0 |  [$c11c: sta $c6]
 	GET_ADDRESS	0x03fd                     	| [$c11e: sta $03fd]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,base_screen_pointer_list_001d,d0 |  [$c121: lda base_screen_pointer_list_001d]
 	OP_W_ON_ZP_ADDRESS	move,0xd4,d0 |  [$c123: sta $d4]
 	OP_R_ON_ZP_ADDRESS	move,0x20,d0 |  [$c125: lda $20]
-	PUSH_SR
 	GET_ADDRESS	0x03fe                     	| [$c127: sta $03fe]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0xf0,d0 |  [$c12a: sta $f0]
-	POP_SR
 	GET_ADDRESS	0x03e0                     	| [$c12c: lda $03e0]
 	move.b	(a0),d0                         	| [...]
 	cmp.b	#0x0a,d0                         	| [$c12f: cmp #$0a]
@@ -15018,7 +15004,7 @@ l_c0f3:
 	move.b	d0,d2                           	| [$c13a: tay]
 	GET_ADDRESS	0x0265                     	| [$c13b: lda $0265]
 	move.b	(a0),d0                         	| [...]
-	CLR_XC_FLAGS                           	| [$c13e: clc]
+	                           	| [$c13e: clc]
 	GET_ADDRESS	0xc148                     	| [$c13f: adc $c148, y]
 	add.b	(a0,d2.w),d0                    	| [...]
 	GET_ADDRESS	0x0265                     	| [$c142: sta $0265]
@@ -15105,44 +15091,32 @@ l_c499:
 	addq.b	#1,(a0)                         	| [...]
 	GET_ADDRESS	0x040a                     	| [$c49c: lda $040a]
 	move.b	(a0),d0                         	| [...]
-	PUSH_SR
 	GET_ADDRESS	0x03fb                     	| [$c49f: sta $03fb]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x9c,d0 |  [$c4a2: sta $9c]
-	POP_SR
 	GET_ADDRESS	0x040b                     	| [$c4a4: lda $040b]
 	move.b	(a0),d0                         	| [...]
-	PUSH_SR
 	GET_ADDRESS	0x03fc                     	| [$c4a7: sta $03fc]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0xaa,d0 |  [$c4aa: sta $aa]
-	POP_SR
 	GET_ADDRESS	0x040c                     	| [$c4ac: lda $040c]
 	move.b	(a0),d0                         	| [...]
-	PUSH_SR
 	GET_ADDRESS	0x03fd                     	| [$c4af: sta $03fd]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0xc6,d0 |  [$c4b2: sta $c6]
-	POP_SR
 	GET_ADDRESS	0x040d                     	| [$c4b4: lda $040d]
 	move.b	(a0),d0                         	| [...]
-	PUSH_SR
 	GET_ADDRESS	0x03fe                     	| [$c4b7: sta $03fe]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0xf0,d0 |  [$c4ba: sta $f0]
-	POP_SR
 	clr.b	d0                               	| [$c4bc: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0xd4,d0 |  [$c4be: sta $d4]
 	OP_W_ON_ZP_ADDRESS	move,0xfe,d0 |  [$c4c0: sta $fe]
-	POP_SR
 	GET_ADDRESS	0x040e                     	| [$c4c2: lda $040e]
 	move.b	(a0),d0                         	| [...]
-	PUSH_SR
 	GET_ADDRESS	0x03ff                     	| [$c4c5: sta $03ff]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x00,d0 |  [$c4c8: sta $00]
-	POP_SR
 	jbsr	l_ccf5                            	| [$c4ca: jsr $ccf5]
 	jbsr	l_cacf                            	| [$c4cd: jsr $cacf]
 	move.b	#0x0f,d0                        	| [$c4d0: lda #$0f]
@@ -15168,10 +15142,8 @@ l_c4dd:
 	GET_ADDRESS	0x030e                     	| [$c4f2: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$c4f5: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0xf0,d0 |  [$c4f7: sta $f0]
 	OP_W_ON_ZP_ADDRESS	move,0xfe,d0 |  [$c4f9: sta $fe]
-	POP_SR
 	GET_ADDRESS	objects_logical_x_array_8f 	| [$c4fb: lda objects_logical_x_array_8f, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x9c,d0 |  [$c4fd: sta $9c]
