@@ -34,13 +34,13 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
                 print(f"{used_name}: New: code={code:02x}, clut={clut:02x}, size={b}")
             if b==3:
                 # should not happen
-                print("*** warning ***: simple & double height found for sprite {code:02x}")
+                print(f"*** warning ***: simple & double height found for sprite {code:02x}")
 
         with open(bin_file,"wb") as f:
             f.write(contents)
 
 
-context = "level_4"
+context = "level_2"
 overwrite = False
 
 
