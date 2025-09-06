@@ -1,3 +1,4 @@
+- mirroring: make it fully dynamic like BadDudes
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - remove static sprites that hide scenery (not in japan version: NY & LA): sprite codes identified, now don't dump them
 - keep ripping levels sprites
@@ -14,6 +15,11 @@
 - create AGA version with 64 colors
 - create ECS version with 32 colors
 
+optims:
+
+- draw poles in one big group? and in background!
+- more horizontal grouping (x3/x4) marginal gain as not often displayed
+
 minor:
 
 - still missing some black pixels (big score sprites) why????
@@ -21,8 +27,6 @@ minor:
 
 optims
 
-- special cases for some sprites (referee, net, scores) to avoid mirroring and save chipmem
-  # => move in a subdir to extract!!!
 - 50Hz enabled for Pistorm 128 color version
 
 - level 1 then map context: make a kludge to avoid having to reload level 1 tiles+sprites after map
