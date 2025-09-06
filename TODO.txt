@@ -1,25 +1,20 @@
-- mirroring: make it fully dynamic like BadDudes
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - keep ripping levels sprites
-- continue timer carry issue decreases 2 by 2
-- scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
+- continue timer carry issue decreases 2 by 2: test again
+- map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 
-- better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds
 - still some frames that appear missing (red) when all frames have been registered <=== ******
-- fmode=3!! bplmod, ddfstop, pal copperlist & scroll table
   - rip sounds
 
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
 
 - create Pistorm/vampire version with 128 colors
 - create AGA version with 64 colors
-- create ECS version with 32 colors
+- create 68000/ECS version with 32 colors: fmode=0!! bplmod, ddfstop, pal copperlist & scroll table
 
-optims:
 
-- draw poles in one big group? and in background!
-- more horizontal grouping (x3/x4) marginal gain as not often displayed
+
 
 minor:
 
@@ -28,6 +23,9 @@ minor:
 
 optims
 
+- draw poles in one big group? and in background!
+- more horizontal grouping (x3/x4) marginal gain as not often displayed
+- better bank switching: use A5 for bank base to get more speed
 - 50Hz enabled for Pistorm 128 color version
 
 - level 1 then map context: make a kludge to avoid having to reload level 1 tiles+sprites after map

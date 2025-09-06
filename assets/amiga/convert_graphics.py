@@ -468,12 +468,12 @@ def gen_context_files(context_name,with_sprites=True):
 
     # sprite_set_list is now a 16x512 matrix of sprite tiles
 
-
+    # no orientations, only standard, with dynamic mirror
     tile_plane_cache = {}
     tile_table = read_tileset(tile_set_list,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
 
     bob_plane_cache = {}
-    sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
+    sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,False,False],cache=bob_plane_cache, is_bob=True)
 
 
 
@@ -571,30 +571,6 @@ def gen_context_files(context_name,with_sprites=True):
                 f.write("0")
             f.write("\n")
 
-##        f.write("hws_table:\n")
-##        for i,tile_entry in enumerate(sprite_table):
-##            f.write(decl_ptr)
-##            if any(t and "sprdat" in t['standard'] for t in tile_entry):
-##                prefix = sprite_names.get(i,"bob")
-##                prefix = f"hws_{prefix}_{i:02x}"
-##                f.write(prefix)
-##            else:
-##                f.write("0")
-##            f.write("\n")
-
-##        # HW sprites clut declaration
-##        for i,tile_entry in enumerate(sprite_table):
-##            if any(t and "sprdat" in t['standard'] for t in tile_entry):
-##                prefix = sprite_names.get(i,"bob")
-##                f.write(f"hws_{prefix}_{i:02x}:\n")
-##                for j,t in enumerate(tile_entry):
-##                    f.write(decl_ptr)
-##                    if t:
-##                        z = f"hws_{prefix}_{i:02x}_{j:02x}"
-##                        f.write(f"{z}_0,{z}_1")
-##                    else:
-##                        f.write("0,0")
-##                    f.write("\n")
 
 
         # BObs clut declaration
@@ -645,7 +621,7 @@ def gen_context_files(context_name,with_sprites=True):
                                 for bitplane_id in bitplanes:
                                     f.write(decl_ptr)
                                     if bitplane_id:
-                                        f.write(f"bob_plane_{bitplane_id:02d}-{name}")
+                                        f.write(f"bob_plane_{bitplane_id:04d}-{name}")
                                     else:
                                         f.write("0")
                                     f.write("\n")
@@ -655,7 +631,8 @@ def gen_context_files(context_name,with_sprites=True):
 
 
         for k,v in bob_plane_cache.items():
-            f.write(f"bob_plane_{v:02d}:")
+            f.write(f"{decl_word}\t0\t; plane {v:04d} orientation\n")
+            f.write(f"bob_plane_{v:04d}:")
             dump_asm_bytes(k,f)
 
         # HW sprites bitplane data
@@ -679,14 +656,14 @@ if sprite_size_cache_file.exists():
     with open(sprite_size_cache_file,"r") as f:
         double_size_sprites = json.load(f)
 
-#gen_context_files("intro",with_sprites=False)
-#gen_context_files("map",with_sprites=False)
+##gen_context_files("intro",with_sprites=False)
+##gen_context_files("map",with_sprites=False)
 
-gen_context_files("level_1")  # also select
-gen_context_files("level_2")
+#gen_context_files("level_1")  # also select
+#gen_context_files("level_2")
 gen_context_files("level_3")
-gen_context_files("level_4")  # also demo
-gen_context_files("level_5")
+#gen_context_files("level_4")  # also demo
+#gen_context_files("level_5")
 
 if any(double_size_sprites):
     with open(sprite_size_cache_file,"w") as f:
