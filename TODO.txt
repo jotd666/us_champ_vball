@@ -1,9 +1,8 @@
 - mirroring: make it fully dynamic like BadDudes
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-- referee level 3 transparent trunks
 - keep ripping levels sprites
 - continue timer carry issue decreases 2 by 2
-- scroll block should be only done when map context is set
+- scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 
 - better bank switching: use A5 for bank base to get more speed
 - release mode: no backgrounds

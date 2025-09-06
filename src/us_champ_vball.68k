@@ -13528,11 +13528,9 @@ l_b71f:
 	movem.w	d0,-(sp)                       	| [$b724: pha]
 	OP_R_ON_ZP_ADDRESS	move,0x1b,d1 |  [$b725: ldx $1b]
 	clr.b	d0                               	| [$b727: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x1b,d0 |  [$b729: sta $1b]
 	OP_W_ON_ZP_ADDRESS	move,base_screen_pointer_list_001d,d0 |  [$b72b: sta base_screen_pointer_list_001d]
 	OP_W_ON_ZP_ADDRESS	move,0x24,d0 |  [$b72d: sta $24]
-	POP_SR
 	GET_ADDRESS	objects_logical_x_array_8f 	| [$b72f: lda objects_logical_x_array_8f, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x29,d0 |  [$b731: sta $29]
@@ -13561,9 +13559,7 @@ l_b74e:
 	not.b	d0                               	| [$b751: eor #$ff]
 	move.b	#0x01,d4	| [$b753: adc #$01]
 	addx.b	d4,d0                        	| [$b753: adc #$01]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x29,d0 |  [$b755: sta $29]
-	POP_SR
 	bne	l_b75b                             	| [$b757: bne $b75b]
 	OP_W_ON_ZP_ADDRESS	addq,base_screen_pointer_list_001d,#1 |  [$b759: inc base_screen_pointer_list_001d]
 l_b75b:
@@ -13624,9 +13620,7 @@ l_b7b7:
 	GET_ADDRESS	0x2a                       	| [$b7b7: lsr $2a]
 	move.b	(a0),d4	| [...]
 	lsr.b	#1,d4                          	| [...]
-	PUSH_SR
 	move.b	d4,(a0)	| [...]
-	POP_SR
 l_b7b9:
 	OP_R_ON_ZP_ADDRESS	move,0x29,d0 |  [$b7b9: lda $29]
 	cmp.b	#0xf8,d0                         	| [$b7bb: cmp #$f8]
@@ -13676,9 +13670,7 @@ l_b7e7:
 	GET_ADDRESS	0x2a                       	| [$b7f4: asl $2a]
 	move.b	(a0),d4	| [...]
 	asl.b	#1,d4                          	| [...]
-	PUSH_SR
 	move.b	d4,(a0)	| [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x2a,d0 |  [$b7f6: lda $2a]
 	asl.b	#1,d0                            	| [$b7f8: asl a]
 	GET_ADDRESS	0x2a                       	| [$b7f9: adc $2a]
@@ -13994,7 +13986,6 @@ unknown_ball_behaviour_baae:
 	move.b	(a0),d0                         	| [...]
 	bne	l_bac8                             	| [$bab8: bne $bac8]
 	clr.b	d0                               	| [$baba: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x0272                     	| [$babc: sta $0272]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	ball_x_speed_027f          	| [$babf: sta ball_x_speed_027f]
@@ -14003,7 +13994,6 @@ unknown_ball_behaviour_baae:
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x0299                     	| [$bac5: sta $0299]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 l_bac8:
 	jbsr	parabolic_movement_b612           	| [$bac8: jsr parabolic_movement_b612]
 	OP_R_ON_ZP_ADDRESS	move,0xf5,d0 |  [$bacb: lda $f5]
@@ -14018,7 +14008,7 @@ l_bad6:
 	not.b	d0                               	| [$badb: eor #$ff]
 	                           	| [$badd: clc]
 	add.b	#0x01,d0                        	| [$bade: adc #$01]
-	CLR_XC_FLAGS                           	| [$bae0: clc]
+	                           	| [$bae0: clc]
 	OP_R_ON_ZP_ADDRESS	add,ball_logical_y_bd,d0 |  [$bae1: adc ball_logical_y_bd]
 	OP_W_ON_ZP_ADDRESS	move,ball_logical_y_bd,d0 |  [$bae3: sta ball_logical_y_bd]
 	OP_R_ON_ZP_ADDRESS	move,ball_kind_of_z_cb,d0 |  [$bae5: lda ball_kind_of_z_cb]
@@ -14026,11 +14016,9 @@ l_bad6:
 	addx.b	d4,d0                        	| [$bae7: adc #$00]
 	OP_W_ON_ZP_ADDRESS	move,ball_kind_of_z_cb,d0 |  [$bae9: sta ball_kind_of_z_cb]
 	clr.b	d0                               	| [$baeb: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0xd9,d0 |  [$baed: sta $d9]
 	OP_W_ON_ZP_ADDRESS	move,ball_logical_z_e7,d0 |  [$baef: sta ball_logical_z_e7]
 	OP_W_ON_ZP_ADDRESS	move,0xf5,d0 |  [$baf1: sta $f5]
-	POP_SR
 	clr.b	d0                               	| [$baf3: lda #$00]
 	GET_ADDRESS	0x02a6                     	| [$baf5: sta $02a6]
 	move.b	d0,(a0)                         	| [...]
@@ -14386,22 +14374,19 @@ l_bcec:
 	jbsr	l_cdc9                            	| [$bd02: jsr $cdc9]
 	jbsr	l_cd9f                            	| [$bd05: jsr $cd9f]
 	clr.b	d0                               	| [$bd08: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x0299                     	| [$bd0a: sta $0299]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x028c                     	| [$bd0d: sta $028c]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	move.b	#0x40,d0                        	| [$bd10: lda #$40]
 	GET_ADDRESS	0x02c0                     	| [$bd12: sta $02c0]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$bd15: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x02a6                     	| [$bd17: sta $02a6]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x02b3                     	| [$bd1a: sta $02b3]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
+	* TODO: optimize 3E3 .. => 3E6
 	GET_ADDRESS	0x03e3                     	| [$bd1d: lda $03e3]
 	move.b	(a0),d0                         	| [...]
 	OP_W_ON_ZP_ADDRESS	move,ball_logical_x_93,d0 |  [$bd20: sta ball_logical_x_93]
