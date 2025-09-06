@@ -51,6 +51,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
     nb_rows = tiles_1.size[1] // height
     nb_cols = tiles_1.size[0] // width
 
+    hidden_sprites = get_hidden_sprites()
 
     tileset_1 = []
 
@@ -72,6 +73,8 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 
             if cluts is not None and (tile_number not in cluts or palette_index not in cluts[tile_number]):
                 # no clut declared for that tile
+                tileset_1.append(None)
+            elif tile_number in hidden_sprites:
                 tileset_1.append(None)
             else:
 
@@ -680,10 +683,10 @@ if sprite_size_cache_file.exists():
 #gen_context_files("map",with_sprites=False)
 
 gen_context_files("level_1")  # also select
-#gen_context_files("level_2")
-#gen_context_files("level_3")
-#gen_context_files("level_4")  # also demo
-#gen_context_files("level_5")
+gen_context_files("level_2")
+gen_context_files("level_3")
+gen_context_files("level_4")  # also demo
+gen_context_files("level_5")
 
 if any(double_size_sprites):
     with open(sprite_size_cache_file,"w") as f:
@@ -691,3 +694,11 @@ if any(double_size_sprites):
     # do that only on level context else it's incomplete and it fails!
     with open(src_dir / "sprite_size.68k","w") as f:
         bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
+
+disabled_sprites = [0]*NB_SPRITES
+for i in get_hidden_sprites():
+    disabled_sprites[i] = 1
+
+with open(src_dir / "disabled_sprites.68k","w") as f:
+    bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
+

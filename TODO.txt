@@ -1,6 +1,6 @@
 - mirroring: make it fully dynamic like BadDudes
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-- remove static sprites that hide scenery (not in japan version: NY & LA): sprite codes identified, now don't dump them
+- referee level 3 transparent trunks
 - keep ripping levels sprites
 
 - better bank switching: use A5 for bank base to get more speed
