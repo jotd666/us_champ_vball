@@ -351,6 +351,7 @@ get_bank_address:
 	rts
 	
 * dev mode, more checks about the address
+* this must NOT use add/sub or should preserve status register if it does
 get_address:
 	cmp.l	#0x8000,a0
 	jcc		10f		| rom: ok

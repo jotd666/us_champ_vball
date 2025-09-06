@@ -130,13 +130,10 @@ with open(source_dir / "conv.s") as f:
             # in random generator (so no biggie but...)
             # avoid dey to change X flag
             line = "\tPUSH_SR  | preserve X\n"+line+"\tPOP_SR  | restore X\n\ttst.b\td2   | check Z\n"
-        if line_address == 0xe1f8:
-            # addq will trash carry: get push_sr below and put it there
-            if "PUSH_SR" in lines[i-1]:
-                lines[i-2],lines[i-1] = lines[i-1],lines[i-2]
-                lines[i-2] = lines[i-2].rstrip() + "  | preserving X flag before addq for addx\n"
-            else:
-                raise Exception("code generation has changed at E1F7, requires push_sr")
+        if line_address == 0xe1f7:
+            # addq will trash carry: swap independent instructions that will work too
+            line,lines[i-1] = lines[i-1],line
+
         #########################################
         # this part is tricky as the tests rely on carry
         # but after that the ROL instructions also rely on carry
@@ -316,12 +313,12 @@ with open(source_dir / "conv.s") as f:
             # force clear C flag (cmp+rts)
             line = "\tCLR_XC_FLAGS\n"+line
 
-        if line_address == 0xEA74:
-            # reset scrolling
-            # probably useless / redundant in most cases
-            # but more importantly messes with map (Hawaii, Air Base)
-            # (not on real HW but on amiga with different screen update sync it does)
-            line = remove_instruction(lines,i)
+##        if line_address == 0xEA74:
+##            # reset scrolling
+##            # probably useless / redundant in most cases
+##            # but more importantly messes with map (Hawaii, Air Base)
+##            # (not on real HW but on amiga with different screen update sync it does)
+##            line = remove_instruction(lines,i)
 
         if line_address in {0xeedf,0xef0c}:
             # rti => rts
