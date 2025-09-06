@@ -18884,10 +18884,8 @@ l_da46:
 
 * < A: message id (plus modifiers on higher bits)
 write_message_da7f:
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x0f,d0 |  [$da7f: sta $0f]
 	OP_W_ON_ZP_ADDRESS	move,screen_source_pointer_0010,d0 |  [$da81: sta screen_source_pointer_0010]
-	POP_SR
 	move.b	d1,d0                           	| [$da83: txa]
 	movem.w	d0,-(sp)                       	| [$da84: pha]
 	move.b	d2,d0                           	| [$da85: tya]
@@ -18916,10 +18914,8 @@ l_daa5:
 	GET_INDIRECT_ADDRESS	screen_source_pointer_0010	| [$daa5: lda (screen_source_pointer_0010), y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	addq.b	#1,d2                           	| [$daa7: iny]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_12,d0 |  [$daa8: sta multipurpose_12]
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_14,d0 |  [$daaa: sta multipurpose_14]
-	POP_SR
 	GET_INDIRECT_ADDRESS	screen_source_pointer_0010	| [$daac: lda (screen_source_pointer_0010), y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	addq.b	#1,d2                           	| [$daae: iny]
@@ -18968,10 +18964,8 @@ l_daeb:
 	addq.b	#1,d2                           	| [$daf1: iny]
 	CLR_XC_FLAGS                           	| [$daf2: clc]
 	OP_R_ON_ZP_ADDRESS	add,multipurpose_12,d0 |  [$daf3: adc multipurpose_12]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_12,d0 |  [$daf5: sta multipurpose_12]
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_14,d0 |  [$daf7: sta multipurpose_14]
-	POP_SR
 	SET_C_FROM_X
 	bcc	l_daff                             	| [$daf9: bcc $daff]
 	OP_W_ON_ZP_ADDRESS	addq,multipurpose_13,#1 |  [$dafb: inc multipurpose_13]
@@ -19118,9 +19112,7 @@ l_e05a:
 l_e05c:
 	GET_INDIRECT_BANK_ADDRESS	screen_source_pointer_0010	| [$e05c: lda (screen_source_pointer_0010), y] [bank_address]
 	move.b	(a0,d2.w),d0                    	| [...]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x0c,d0 |  [$e05e: sta $0c]
-	POP_SR
 	bne	l_e065                             	| [$e060: bne $e065]
 	jmp	l_e17e                             	| [$e062: jmp $e17e]
 l_e065:
@@ -19195,11 +19187,9 @@ l_e0b6:
 	move.b	(a0),d4	| [...]
 	eor.b	d4,d0                          	| [...]
 	eor.b	#0x40,d0                         	| [$e0ba: eor #$40]
-	PUSH_SR
 	GET_ADDRESS	0x06dc                     	| [$e0bc: sta $06dc, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x0a,d0 |  [$e0bf: sta $0a]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x06,d0 |  [$e0c1: lda $06]
 	and.b	#0x08,d0                         	| [$e0c3: and #$08]
 	beq	l_e0d1                             	| [$e0c5: beq $e0d1]
@@ -19224,21 +19214,17 @@ l_e0e0:
 	move.b	(a0,d2.w),d0                    	| [...]
 	addq.b	#1,d2                           	| [$e0e2: iny]
 l_e0e3:
-	PUSH_SR
 	GET_ADDRESS	0x06dd                     	| [$e0e3: sta $06dd, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x0d,d2 |  [$e0e6: sty $0d]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x06,d0 |  [$e0e8: lda $06]
 	and.b	#0x20,d0                         	| [$e0ea: and #$20]
 	bne	l_e0f8                             	| [$e0ec: bne $e0f8]
 	OP_R_ON_ZP_ADDRESS	move,screen_source_pointer_0010,d0 |  [$e0ee: lda screen_source_pointer_0010]
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_12,d0 |  [$e0f0: sta multipurpose_12]
 	OP_R_ON_ZP_ADDRESS	move,0x11,d0 |  [$e0f2: lda $11]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_13,d0 |  [$e0f4: sta multipurpose_13]
 	OP_W_ON_ZP_ADDRESS	move,0x09,d2 |  [$e0f6: sty $09]
-	POP_SR
 l_e0f8:
 	OP_R_ON_ZP_ADDRESS	move,0x09,d2 |  [$e0f8: ldy $09]
 	GET_INDIRECT_BANK_ADDRESS	0x12              	| [$e0fa: lda ($12), y] [bank_address]
@@ -19493,9 +19479,7 @@ l_e274:
 l_e276:
 	GET_INDIRECT_BANK_ADDRESS	screen_source_pointer_0010	| [$e276: lda (screen_source_pointer_0010), y] [bank_address]
 	move.b	(a0,d2.w),d0                    	| [...]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x0c,d0 |  [$e278: sta $0c]
-	POP_SR
 	bne	l_e27f                             	| [$e27a: bne $e27f]
 	jmp	l_e357                             	| [$e27c: jmp $e357]
 l_e27f:
@@ -19569,10 +19553,8 @@ l_e2cf:
 	move.b	(a0),d4	| [...]
 	eor.b	d4,d0                          	| [...]
 	eor.b	#0x40,d0                         	| [$e2d3: eor #$40]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x01,d0 |  [$e2d5: sta $01]
 	OP_W_ON_ZP_ADDRESS	move,0x0a,d0 |  [$e2d7: sta $0a]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x06,d0 |  [$e2d9: lda $06]
 	and.b	#0x08,d0                         	| [$e2db: and #$08]
 	beq	l_e2e7                             	| [$e2dd: beq $e2e7]
@@ -19595,20 +19577,16 @@ l_e2f6:
 	move.b	(a0,d2.w),d0                    	| [...]
 	addq.b	#1,d2                           	| [$e2f8: iny]
 l_e2f9:
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,unpack_mode_and_misc_02,d0 |  [$e2f9: sta unpack_mode_and_misc_02]
 	OP_W_ON_ZP_ADDRESS	move,0x0d,d2 |  [$e2fb: sty $0d]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x06,d0 |  [$e2fd: lda $06]
 	and.b	#0x20,d0                         	| [$e2ff: and #$20]
 	bne	l_e30d                             	| [$e301: bne $e30d]
 	OP_R_ON_ZP_ADDRESS	move,screen_source_pointer_0010,d0 |  [$e303: lda screen_source_pointer_0010]
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_12,d0 |  [$e305: sta multipurpose_12]
 	OP_R_ON_ZP_ADDRESS	move,0x11,d0 |  [$e307: lda $11]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,multipurpose_13,d0 |  [$e309: sta multipurpose_13]
 	OP_W_ON_ZP_ADDRESS	move,0x09,d2 |  [$e30b: sty $09]
-	POP_SR
 l_e30d:
 	OP_R_ON_ZP_ADDRESS	move,0x09,d2 |  [$e30d: ldy $09]
 	GET_INDIRECT_BANK_ADDRESS	0x12              	| [$e30f: lda ($12), y] [bank_address]
@@ -19725,12 +19703,10 @@ l_e396:
 	GET_ADDRESS	0x73                       	| [$e3a7: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$e3a9: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	objects_logical_z_array_e3 	| [$e3ab: sta objects_logical_z_array_e3, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0xf1                       	| [$e3ad: sta $f1, x]
     move.b	d0,(a0,d1.w)                 	| [...]
-	POP_SR
 	jbsr	convert_logical_to_screen_coords_dff3	| [$e3af: jsr convert_logical_to_screen_coords_dff3]
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$e3b2: ldx current_object_index_4c]
 	move.w	(sp)+,d0                        	| [$e3b4: pla]
@@ -19884,11 +19860,9 @@ l_e479:
 
 l_e4e8:
 	clr.b	d0                               	| [$e4e8: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x1b,d0 |  [$e4ea: sta $1b]
 	OP_W_ON_ZP_ADDRESS	move,0x1c,d0 |  [$e4ec: sta $1c]
 	OP_W_ON_ZP_ADDRESS	move,base_screen_pointer_list_001d,d0 |  [$e4ee: sta base_screen_pointer_list_001d]
-	POP_SR
 l_e4f0:
 	OP_R_ON_ZP_ADDRESS	move,0x1b,d0 |  [$e4f0: lda $1b]
 	cmp.b	#0x06,d0                         	| [$e4f2: cmp #$06]
@@ -19968,9 +19942,7 @@ l_e560:
 	move.b	#0x16,d0                        	| [$e560: lda #$16]
 	OP_W_ON_ZP_ADDRESS	move,0x1f,d0 |  [$e562: sta $1f]
 	OP_R_ON_ZP_ADDRESS	move,base_screen_pointer_list_001d,d0 |  [$e564: lda base_screen_pointer_list_001d]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x20,d0 |  [$e566: sta $20]
-	POP_SR
 	bne	l_e572                             	| [$e568: bne $e572]
 l_e56a:
 	clr.b	d0                               	| [$e56a: lda #$00]
@@ -20025,17 +19997,13 @@ l_e5a2:
 l_e5b1:
 	move.b	#0x16,d1                        	| [$e5b1: ldx #$16]
 	OP_R_ON_ZP_ADDRESS	move,base_screen_pointer_list_001d,d0 |  [$e5b3: lda base_screen_pointer_list_001d]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x1e,d0 |  [$e5b5: sta $1e]
-	POP_SR
 	bne	l_e5c3                             	| [$e5b7: bne $e5c3]
-	beq	l_e5da                             	| [$e5b9: beq $e5da]
+	bra	l_e5da                             	| [$e5b9: beq $e5da]
 l_e5bb:
 	clr.b	d1                               	| [$e5bb: ldx #$00]
 	OP_R_ON_ZP_ADDRESS	move,0x1c,d0 |  [$e5bd: lda $1c]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x1e,d0 |  [$e5bf: sta $1e]
-	POP_SR
 	beq	l_e5da                             	| [$e5c1: beq $e5da]
 l_e5c3:
 	clr.b	d2                               	| [$e5c3: ldy #$00]
@@ -20088,11 +20056,9 @@ l_e5ec:
 	GET_INDIRECT_ADDRESS	screen_source_pointer_0010	| [$e5fa: lda (screen_source_pointer_0010), y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$e5fc: and #$7f]
-	PUSH_SR
 	GET_INDIRECT_ADDRESS	screen_source_pointer_0010	| [$e5fe: sta (screen_source_pointer_0010), y]
 	move.b	d0,(a0,d2.w)                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x00,d0 |  [$e600: sta $00]
-	POP_SR
 	addq.b	#1,d2                           	| [$e602: iny]
 	GET_INDIRECT_ADDRESS	screen_source_pointer_0010	| [$e603: lda (screen_source_pointer_0010), y]
 	move.b	(a0,d2.w),d0                    	| [...]
@@ -20298,10 +20264,8 @@ l_e6f1:
 	OP_W_ON_ZP_ADDRESS	subq,time_minutes_4b,#1 |  [$e712: dec time_minutes_4b] decrease minutes
 	bpl	l_e71c                             	| [$e714: bpl $e71c]
 	clr.b	d0                               	| [$e716: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,time_seconds_4a,d0 |  [$e718: sta time_seconds_4a]
 	OP_W_ON_ZP_ADDRESS	move,time_minutes_4b,d0 |  [$e71a: sta time_minutes_4b]
-	POP_SR
 l_e71c:
 	OP_R_ON_ZP_ADDRESS	move,0x37,d0 |  [$e71c: lda $37]
 	beq	l_e72f                             	| [$e71e: beq $e72f]
@@ -20314,7 +20278,6 @@ l_e71c:
 	jbsr	queue_sound_d7b8                  	| [$e72c: jsr queue_sound_d7b8] stressful level end music!
 l_e72f:
 	clr.b	d0                               	| [$e72f: lda #$00]
-	PUSH_SR
 	GET_UNCHECKED_ADDRESS	0x3cc0                     	| [$e731: sta $3cc0] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -20327,7 +20290,6 @@ l_e72f:
 	GET_UNCHECKED_ADDRESS	0x3cc3                     	| [$e73a: sta $3cc3] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,time_minutes_4b,d2 |  [$e73d: ldy time_minutes_4b]
 	GET_ADDRESS	0xe765                     	| [$e73f: lda $e765, y]
 	move.b	(a0,d2.w),d0                    	| [...]
@@ -20376,7 +20338,6 @@ l_e77c:
 	OP_W_ON_ZP_ADDRESS	move,0x5a,d0 |  [$e782: sta $5a]
 l_e784:
 	clr.b	d0                               	| [$e784: lda #$00]
-	PUSH_SR
 	GET_UNCHECKED_ADDRESS	0x389d                     	| [$e786: sta $389d] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -20401,7 +20362,6 @@ l_e784:
 	GET_UNCHECKED_ADDRESS	0x3ca2                     	| [$e79b: sta $3ca2] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,score_array_57,d0 |  [$e79e: lda score_array_57]
 	and.b	#0xf0,d0                         	| [$e7a0: and #$f0]
                                          | [$e7a2: lsr a]
@@ -20469,7 +20429,6 @@ l_e7d4:
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
 	clr.b	d0                               	| [$e7f2: lda #$00]
-	PUSH_SR
 	GET_UNCHECKED_ADDRESS	0x389c                     	| [$e7f4: sta $389c] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -20482,9 +20441,7 @@ l_e7d4:
 	GET_UNCHECKED_ADDRESS	0x3ca3                     	| [$e7fd: sta $3ca3] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
-	POP_SR
 	move.b	#0xc6,d0                        	| [$e800: lda #$c6]
-	PUSH_SR
 	GET_UNCHECKED_ADDRESS	0x289c                     	| [$e802: sta $289c] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -20497,9 +20454,7 @@ l_e7d4:
 	GET_UNCHECKED_ADDRESS	0x2ca3                     	| [$e80b: sta $2ca3] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
-	POP_SR
 	clr.b	d0                               	| [$e80e: lda #$00]
-	PUSH_SR
 	GET_UNCHECKED_ADDRESS	0x387c                     	| [$e810: sta $387c] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -20524,9 +20479,7 @@ l_e7d4:
 	GET_UNCHECKED_ADDRESS	0x3c63                     	| [$e825: sta $3c63] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
-	POP_SR
 	move.b	#0xc6,d0                        	| [$e828: lda #$c6]
-	PUSH_SR
 	GET_UNCHECKED_ADDRESS	0x287c                     	| [$e82a: sta $287c] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -20539,7 +20492,6 @@ l_e7d4:
 	GET_UNCHECKED_ADDRESS	0x2c63                     	| [$e833: sta $2c63] [video_address]
 	move.b	d0,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
-	POP_SR
 	OP_R_ON_ZP_ADDRESS	move,0x37,d0 |  [$e836: lda $37]
 	cmp.b	#0x02,d0                         	| [$e838: cmp #$02]
 	beq	l_e869                             	| [$e83a: beq $e869]
@@ -20743,9 +20695,7 @@ l_e9dd:
 	GET_ADDRESS	logical_scroll_value_msb_07df	| [$e9e8: lda logical_scroll_value_msb_07df]
 	move.b	(a0),d0                         	| [...]
 	SBC	0x07e3                             	| [$e9eb: sbc $07e3]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x11,d0 |  [$e9ee: sta $11]
-	POP_SR
 	bpl	l_e9f7                             	| [$e9f0: bpl $e9f7]
 	move.b	#0x02,d2                        	| [$e9f2: ldy #$02]
 	jbsr	l_cf98                            	| [$e9f4: jsr $cf98]
@@ -20872,11 +20822,9 @@ update_scrolling_ea7c:
 	and.b	#0xfd,d0                         	| [$eaac: and #$fd]
 	GET_ADDRESS	scroll_hi_copy_07f8        	| [$eaae: ora scroll_hi_copy_07f8]
 	or.b	(a0),d0                           	| [...]
-	PUSH_SR
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eab1: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eab4: sta scrollx_hi_1008]
-	POP_SR
 l_eab7:
 	move.w	(sp)+,d0                        	| [$eab7: pla]
 	move.b	d0,d2                           	| [$eab8: tay]
@@ -20898,11 +20846,9 @@ l_eac4:
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$ead0: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x02,d0                          	| [$ead3: ora #$02]
-	PUSH_SR
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$ead5: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$ead8: sta scrollx_hi_1008]
-	POP_SR
 	jmp	l_eab7                             	| [$eadb: jmp $eab7]
 
 reset_scrolling_eae2:
@@ -20912,21 +20858,17 @@ reset_scrolling_eae2:
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eaea: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x02,d0                          	| [$eaed: ora #$02]
-	PUSH_SR
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eaef: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eaf2: sta scrollx_hi_1008]
-	POP_SR
 	clr.b	d0                               	| [$eaf5: lda #$00]
 	jbsr	osd_set_scrolly_lo |  [$eaf7: sta scrolly_lo_100e]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eafa: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x40,d0                          	| [$eafd: ora #$40]
-	PUSH_SR
 	jbsr	osd_set_bank |  [$eaff: sta bankswitch_1009]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb02: sta bankswitch_copy_022d]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	rts                                    	| [$eb05: rts]
 l_eb06:
 	GET_ADDRESS	logical_scroll_value_lsb_07de	| [$eb06: lda logical_scroll_value_lsb_07de]
@@ -20946,11 +20888,9 @@ l_eb06:
 	and.b	#0xfd,d0                         	| [$eb1d: and #$fd]
 	GET_ADDRESS	scroll_hi_copy_07f8        	| [$eb1f: ora scroll_hi_copy_07f8]
 	or.b	(a0),d0                           	| [...]
-	PUSH_SR
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eb22: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eb25: sta scrollx_hi_1008]
-	POP_SR
 	GET_ADDRESS	logical_y_scroll_07e0      	| [$eb28: lda logical_y_scroll_07e0]
 	move.b	(a0),d0                         	| [...]
 	beq	l_eb41                             	| [$eb2b: beq $eb41]
@@ -20958,11 +20898,9 @@ l_eb06:
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb2d: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xbf,d0                         	| [$eb30: and #$bf]
-	PUSH_SR
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb32: sta bankswitch_copy_022d]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_bank |  [$eb35: sta bankswitch_1009]
-	POP_SR
 	GET_ADDRESS	logical_y_scroll_07e0      	| [$eb38: lda logical_y_scroll_07e0]
 	move.b	(a0),d0                         	| [...]
 	not.b	d0                               	| [$eb3b: eor #$ff]
@@ -20972,11 +20910,9 @@ l_eb41:
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb41: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x40,d0                          	| [$eb44: ora #$40]
-	PUSH_SR
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb46: sta bankswitch_copy_022d]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_bank |  [$eb49: sta bankswitch_1009]
-	POP_SR
 	clr.b	d0                               	| [$eb4c: lda #$00]
 	jbsr	osd_set_scrolly_lo |  [$eb4e: sta scrolly_lo_100e]
 	rts                                    	| [$eb51: rts]
@@ -21005,11 +20941,9 @@ set_context_scroll_and_prom_banks_eb5e:
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb6c: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xbf,d0                         	| [$eb6f: and #$bf]
-	PUSH_SR
 	jbsr	osd_set_bank |  [$eb71: sta bankswitch_1009]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb74: sta bankswitch_copy_022d]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	jbsr	clear_screen_cf35                 	| [$eb77: jsr clear_screen_cf35]
 	GET_ADDRESS	screen_id_07e4             	| [$eb7a: ldy screen_id_07e4]
 	move.b	(a0),d2                         	| [...]
@@ -21018,21 +20952,17 @@ set_context_scroll_and_prom_banks_eb5e:
 	and.b	#0xe3,d0                         	| [$eb80: and #$e3]
 	GET_ADDRESS	0xebcb                     	| [$eb82: ora $ebcb, y]
 	or.b	(a0,d2.w),d0                      	| [...]
-	PUSH_SR
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eb85: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eb88: sta scrollx_hi_1008]
-	POP_SR
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb8b: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xdf,d0                         	| [$eb8e: and #$df]
 	GET_ADDRESS	0xebde                     	| [$eb90: ora $ebde, y]
 	or.b	(a0,d2.w),d0                      	| [...]
-	PUSH_SR
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb93: sta bankswitch_copy_022d]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_bank |  [$eb96: sta bankswitch_1009]
-	POP_SR
 	rts                                    	| [$eb99: rts]
 
 l_eb9a:
@@ -21048,21 +20978,17 @@ l_eb9a:
 	and.b	#0xfd,d0                         	| [$eba9: and #$fd]
 	GET_ADDRESS	0xebc8                     	| [$ebab: ora $ebc8, y]
 	or.b	(a0,d2.w),d0                      	| [...]
-	PUSH_SR
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$ebae: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$ebb1: sta scrollx_hi_1008]
-	POP_SR
 	clr.b	d0                               	| [$ebb4: lda #$00]
 	jbsr	osd_set_scrolly_lo |  [$ebb6: sta scrolly_lo_100e]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$ebb9: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x40,d0                          	| [$ebbc: ora #$40]
-	PUSH_SR
 	jbsr	osd_set_bank |  [$ebbe: sta bankswitch_1009]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$ebc1: sta bankswitch_copy_022d]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	rts                                    	| [$ebc4: rts]
 
 show_us_map_screen_ebf1:
@@ -21111,10 +21037,10 @@ l_ec42:
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	0x07e6                     	| [$ec45: cmp $07e6]
 	cmp.b	(a0),d0                          	| [...]
-	PUSH_SR
+	PUSH_SR		| save Z flag
 	GET_ADDRESS	0x07e6                     	| [$ec48: sta $07e6]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
+	POP_SR		| save Z flag
 	bne	l_ec52                             	| [$ec4b: bne $ec52]
 	cmp.b	#0x02,d0                         	| [$ec4d: cmp #$02]
 	beq	l_ec81                             	| [$ec4f: beq $ec81]
@@ -21143,12 +21069,10 @@ l_ec60:
 	* bcc=>bcs (cmp above)
 	bcs	l_ec80                             	| [$ec76: bcc $ec80]
 	clr.b	d0                               	| [$ec78: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x07e5                     	| [$ec7a: sta $07e5]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x07e7                     	| [$ec7d: sta $07e7]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 l_ec80:
 	rts                                    	| [$ec80: rts]
 l_ec81:
@@ -21161,13 +21085,11 @@ l_ec81:
 	GET_ADDRESS	0x00                       	| [$ec8c: asl $00]
 	move.b	(a0),d4	| [...]
 	asl.b	#1,d4                          	| [...]
-	PUSH_SR
 	move.b	d4,(a0)	| [...]
-	POP_SR
 l_ec8e:
 	jbsr	l_ec2f                            	| [$ec8e: jsr $ec2f]
 	and.b	#0x0f,d0                         	| [$ec91: and #$0f]
-	CLR_XC_FLAGS                           	| [$ec93: clc]
+	                           	| [$ec93: clc]
 	OP_R_ON_ZP_ADDRESS	add,0x00,d0 |  [$ec94: adc $00]
 	jbsr	l_ee80                            	| [$ec96: jsr $ee80]
 	GET_ADDRESS	0x07e7                     	| [$ec99: inc $07e7]
@@ -21398,11 +21320,9 @@ l_edb5:
 	addq.b	#1,d2                           	| [$edcf: iny]
 	OP_W_ON_ZP_ADDRESS	move,0x11,d0 |  [$edd0: sta $11]
 	move.w	(sp)+,d0                        	| [$edd2: pla]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,screen_source_pointer_0010,d0 |  [$edd3: sta screen_source_pointer_0010]
 	GET_ADDRESS	0x0c                       	| [$edd5: sty $0c, x]
     move.b	d2,(a0,d1.w)                 	| [...]
-	POP_SR
 	OP_W_ON_ZP_ADDRESS	addq,0x03,#1 |  [$edd7: inc $03]
 	clr.b	d2                               	| [$edd9: ldy #$00]
 	rts                                    	| [$eddb: rts]
@@ -21605,10 +21525,8 @@ l_eee0:
 * probably a delay?? WTF???
 	jbsr	copy_shadow_sprites_d1b7          	| [$eeed: jsr copy_shadow_sprites_d1b7]
 	clr.b	d0                               	| [$eef0: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,toggle_timer_2f,d0 |  [$eef2: sta toggle_timer_2f]
 	OP_W_ON_ZP_ADDRESS	move,0x30,d0 |  [$eef4: sta $30]
-	POP_SR
 	jbsr	l_ea6b                            	| [$eef6: jsr $ea6b]
 * wait for vblank sync
 wait_for_vblank_eef9:
@@ -21617,10 +21535,8 @@ wait_for_vblank_eef9:
 	 |  [$eefe: bne wait_for_vblank_eef9]
 * end of interrupt
 	clr.b	d0                               	| [$ef00: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,irq_07_counter_31,d0 |  [$ef02: sta irq_07_counter_31]
 	 |  [$ef04: sta irq_ack_100a]
-	POP_SR
 	move.w	(sp)+,d0                        	| [$ef07: pla]
 	move.b	d0,d2                           	| [$ef08: tay]
 	move.w	(sp)+,d0                        	| [$ef09: pla]
@@ -21641,17 +21557,13 @@ reset_ef0d:
 	jbsr	clear_screen_cf35                 	| [$ef1f: jsr clear_screen_cf35]
 	jbsr	l_cf73                            	| [$ef22: jsr $cf73]
 	move.b	#0xff,d0                        	| [$ef25: lda #$ff]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x42,d0 |  [$ef27: sta $42]
 	OP_W_ON_ZP_ADDRESS	move,0x43,d0 |  [$ef29: sta $43]
 	OP_W_ON_ZP_ADDRESS	move,0x44,d0 |  [$ef2b: sta $44]
 	OP_W_ON_ZP_ADDRESS	move,0x45,d0 |  [$ef2d: sta $45]
-	POP_SR
 	CLR_I_FLAG                             	| [$ef2f: cli]
-	PUSH_SR
 	 |  [$ef30: sta irq_ack_100a]
 	 |  [$ef33: sta irq_ack_100b]
-	POP_SR
 	move.b	#0x02,d0                        	| [$ef36: lda #$02]
 	GET_ADDRESS	tile_prom_bank_07f3        	| [$ef38: sta tile_prom_bank_07f3]
 	move.b	d0,(a0)                         	| [...]
@@ -21669,11 +21581,9 @@ l_ef53:
 	move.b	#0x05,d0                        	| [$ef53: lda #$05]
 	jbsr	queue_sound_d7b8                  	| [$ef55: jsr queue_sound_d7b8] play intro music
 	clr.b	d0                               	| [$ef58: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,game_playing_flag_36,d0 |  [$ef5a: sta game_playing_flag_36] game not playing
 	GET_ADDRESS	0x07db                     	| [$ef5c: sta $07db]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	jbsr	l_cf73                            	| [$ef5f: jsr $cf73]
 	jbsr	handle_cocktail_mode_d88f         	| [$ef62: jsr handle_cocktail_mode_d88f]
 	move.b	#0x0f,d0                        	| [$ef65: lda #$0f]
@@ -21803,12 +21713,10 @@ l_f000:
 	GET_ADDRESS	0x07e1                     	| [$f063: sta $07e1]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$f066: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,ball_kind_of_z_cb,d0 |  [$f068: sta ball_kind_of_z_cb]
 	OP_W_ON_ZP_ADDRESS	move,ball_logical_x_93,d0 |  [$f06a: sta ball_logical_x_93]
 	OP_W_ON_ZP_ADDRESS	move,ball_logical_z_e7,d0 |  [$f06c: sta ball_logical_z_e7]
 	OP_W_ON_ZP_ADDRESS	move,0xf5,d0 |  [$f06e: sta $f5]
-	POP_SR
 	move.b	#0x01,d0                        	| [$f070: lda #$01]
 	OP_W_ON_ZP_ADDRESS	move,ball_side_a1,d0 |  [$f072: sta ball_side_a1]
 	move.b	#0xb0,d0                        	| [$f074: lda #$b0]
@@ -21886,12 +21794,9 @@ l_f0df:
 	* bcc=>bcs (cmp above)
 	bcs	l_f13d                             	| [$f0ef: bcc $f13d]
 	move.b	#0x80,d0                        	| [$f0f1: lda #$80]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x47,d0 |  [$f0f3: sta $47]
 	OP_W_ON_ZP_ADDRESS	move,0x48,d0 |  [$f0f5: sta $48]
-	POP_SR
 	move.b	#0xc0,d0                        	| [$f0f7: lda #$c0]
-	PUSH_SR
 	GET_ADDRESS	0x030a                     	| [$f0f9: sta $030a]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x030b                     	| [$f0fc: sta $030b]
@@ -21900,11 +21805,8 @@ l_f0df:
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x030d                     	| [$f102: sta $030d]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	move.b	#0x02,d0                        	| [$f105: lda #$02]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x37,d0 |  [$f107: sta $37]
-	POP_SR
 	bne	l_f12a                             	| [$f109: bne $f12a]
 * check for start button
 l_f10b:
@@ -21918,17 +21820,13 @@ l_f10b:
 	move.b	#0x80,d0                        	| [$f118: lda #$80]
 	OP_W_ON_ZP_ADDRESS	move,0x47,d0 |  [$f11a: sta $47]
 	move.b	#0xc0,d0                        	| [$f11c: lda #$c0]
-	PUSH_SR
 	GET_ADDRESS	0x030a                     	| [$f11e: sta $030a]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x030b                     	| [$f121: sta $030b]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	move.b	#0x01,d0                        	| [$f124: lda #$01]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x37,d0 |  [$f126: sta $37]
 	OP_W_ON_ZP_ADDRESS	move,0x00,d0 |  [$f128: sta $00]
-	POP_SR
 l_f12a:
 	OP_R_ON_ZP_ADDRESS	move,nb_credits_0035,d0 |  [$f12b: lda nb_credits_0035]
 	moveq	#1,d4 |  [$f12d: sec]
@@ -21972,7 +21870,6 @@ l_f15b:
 	jmp	l_f09d                             	| [$f16e: jmp $f09d]
 l_f171:
 	move.b	#0xc0,d0                        	| [$f171: lda #$c0]
-	PUSH_SR
 	GET_ADDRESS	0x030a                     	| [$f173: sta $030a]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x030b                     	| [$f176: sta $030b]
@@ -21981,14 +21878,11 @@ l_f171:
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x030d                     	| [$f17c: sta $030d]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	clr.b	d0                               	| [$f17f: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x06da                     	| [$f181: sta $06da]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	timer_07f5                 	| [$f184: sta timer_07f5]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	jbsr	l_a645                            	| [$f187: jsr $a645]
 	jbsr	most_of_players_moves_and_draw_ae6a	| [$f18a: jsr most_of_players_moves_and_draw_ae6a]
 	jbsr	l_e6cc                            	| [$f18d: jsr $e6cc]
@@ -22004,14 +21898,12 @@ l_f171:
 	jbsr	l_d82b                            	| [$f1a4: jsr $d82b]
 l_f1a7:
 	clr.b	d0                               	| [$f1a7: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x07f9                     	| [$f1a9: sta $07f9]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x07db                     	| [$f1ac: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x07e1                     	| [$f1af: sta $07e1]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	jmp	l_f213                             	| [$f1b2: jmp $f213]
 l_f1b5:
 	move.b	#0x03,d0                        	| [$f1b5: lda #$03]
@@ -22060,12 +21952,10 @@ l_f1ca:
 	GET_ADDRESS	0x42                       	| [$f1f9: sta $42, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	move.b	#0xc0,d0                        	| [$f1fb: lda #$c0]
-	PUSH_SR
 	GET_ADDRESS	0x030a                     	| [$f1fd: sta $030a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x030a                     	| [$f200: sta $030a, y]
     move.b	d0,(a0,d2.w)                 	| [...]
-	POP_SR
 	GET_ADDRESS	0x0042                     	| [$f203: lda $0042, y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	bpl	l_f20c                             	| [$f206: bpl $f20c]
@@ -22201,12 +22091,10 @@ l_f2bb:
 	GET_ADDRESS	0x03e0                     	| [$f2db: sta $03e0]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$f2de: lda #$00]
-	PUSH_SR
 	GET_ADDRESS	0x07dd                     	| [$f2e0: sta $07dd]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	logical_scroll_value_msb_07df	| [$f2e3: sta logical_scroll_value_msb_07df]
 	move.b	d0,(a0)                         	| [...]
-	POP_SR
 	move.b	#0x80,d0                        	| [$f2e6: lda #$80]
 	GET_ADDRESS	logical_scroll_value_lsb_07de	| [$f2e8: sta logical_scroll_value_lsb_07de]
 	move.b	d0,(a0)                         	| [...]
@@ -22601,19 +22489,15 @@ l_f561:
 	OP_W_ON_ZP_ADDRESS	subq,0x37,#1 |  [$f56d: dec $37]
 l_f56f:
 	move.b	#0xff,d0                        	| [$f56f: lda #$ff]
-	PUSH_SR
 	GET_ADDRESS	0x0042                     	| [$f571: sta $0042, y]
     move.b	d0,(a0,d2.w)                 	| [...]
-	POP_SR
-	bmi	l_f580                             	| [$f574: bmi $f580]
+	bra	l_f580                             	| [$f574: bmi $f580]
 l_f576:
 	move.b	#0xff,d0                        	| [$f576: lda #$ff]
-	PUSH_SR
 	GET_ADDRESS	0x0042                     	| [$f578: sta $0042, y]
     move.b	d0,(a0,d2.w)                 	| [...]
 	GET_ADDRESS	0x0043                     	| [$f57b: sta $0043, y]
     move.b	d0,(a0,d2.w)                 	| [...]
-	POP_SR
 	OP_W_ON_ZP_ADDRESS	subq,0x37,#1 |  [$f57e: dec $37]
 l_f580:
 	OP_R_ON_ZP_ADDRESS	move,0x37,d0 |  [$f580: lda $37]
@@ -22728,18 +22612,14 @@ l_f613:
 	move.b	#0xff,d0                        	| [$f64c: lda #$ff]
 	jbsr	l_d83f                            	| [$f64e: jsr $d83f]
 	clr.b	d0                               	| [$f651: lda #$00]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x47,d0 |  [$f653: sta $47]
 	OP_W_ON_ZP_ADDRESS	move,0x48,d0 |  [$f655: sta $48]
 	OP_W_ON_ZP_ADDRESS	move,0x37,d0 |  [$f657: sta $37]
-	POP_SR
 	move.b	#0xff,d0                        	| [$f659: lda #$ff]
-	PUSH_SR
 	OP_W_ON_ZP_ADDRESS	move,0x42,d0 |  [$f65b: sta $42]
 	OP_W_ON_ZP_ADDRESS	move,0x43,d0 |  [$f65d: sta $43]
 	OP_W_ON_ZP_ADDRESS	move,0x44,d0 |  [$f65f: sta $44]
 	OP_W_ON_ZP_ADDRESS	move,0x45,d0 |  [$f661: sta $45]
-	POP_SR
 	clr.b	d0                               	| [$f663: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,game_playing_flag_36,d0 |  [$f665: sta game_playing_flag_36]
 	OP_R_ON_ZP_ADDRESS	move,nb_credits_0035,d0 |  [$f667: lda nb_credits_0035]
