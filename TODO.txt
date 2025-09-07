@@ -1,12 +1,17 @@
-- to test speed: remove net/poles sprites / sand splash
+- draw net in one big group and in background! if 0X2E2 sprite is detected (first time after context change)
+  then blit in background restore, blit on screen and never blit again.
+- to test speed: remove sand splash
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - keep ripping levels sprites
 - continue timer carry issue decreases 2 by 2
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 
-- release mode: no backgrounds/crashes after a while
-- rip more sounds
-- "pass" sound seems incorrect
+- sometimes irq locks up the keyboard interrupt. maybe no need to call "update scrolling" so often
+  actually update scrolling should be called only every each frame! no need to overdo it!!!!
+
+- release mode: crashes after a while when updating sprites??? even in noncpu-cycle exact! 
+- rip more sounds??
+
 
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
@@ -16,13 +21,11 @@
 
 minor:
 
-- still missing some black pixels (big score sprites) why????
+- still missing some black pixels (big score sprites) not always... why????
 - hawaii: X scrolling wraps only in that case grrrrrr
 
 optims
 
-- draw poles in one big group? and in background! if sprite is detected (first time after context change)
-  then blit in background restore, blit on screen and never blit again.
   
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
 - better bank switching: use A5 for bank base to get more speed
@@ -40,8 +43,6 @@ converter:
 - sbcd/abcd warning: check bpl flag afterwards, change to bcc
 - alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
 - add or addx + addq + addx without jmp/jra/rts/CLR_XC_FLAGS/lsr/lsl/asr/asl/ror/rol => error
-
-
 
 - more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
@@ -71,6 +72,12 @@ bpset d7e7,A<0X15,{PC=$D7EA;g}
 capture sound: remove demo sounds from dsw
 
 bpset f7a3,,{A=$xx;g}
+
+snapshot with uniform non-black background
+>fill 2000,1000,0
+>fill 3000,1000,8
+>snap
+
 
 
 

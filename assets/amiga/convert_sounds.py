@@ -38,7 +38,9 @@ credit_34
 explode_22
 explode_25
 fall_24
+oooh_36
 smack_27
+hit_2d
 step_21
 swoosh_2a
 swoosh_2b
@@ -46,12 +48,13 @@ whistle_33
 yaah_31""".upper().splitlines()
 
     srdict = {0x38:lq_sample_rate}
-    priodict = {0x21:20}
+    priodict = {0x21:20,0x36:50}
+    chandict = {0x36:2}
     sound_dict = {}
     for s in sounds:
         toks = s.rsplit("_",maxsplit=1)
         idx = int(toks[1],16)
-        sound_dict[s+"_SND"] = {"index":idx,"channel":3,"sample_rate":srdict.get(idx,hq_sample_rate),"priority":priodict.get(idx,40)}
+        sound_dict[s+"_SND"] = {"index":idx,"channel":chandict.get(idx,3),"sample_rate":srdict.get(idx,hq_sample_rate),"priority":priodict.get(idx,40)}
 
 
     EMPTY_SND = "EMPTY_SND"

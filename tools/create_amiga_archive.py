@@ -28,17 +28,32 @@ for file in ["readme.md",f"{gamename}.slave"]:
     shutil.copy(os.path.join(progdir,file),outdir)
 
 #shutil.copy(os.path.join(progdir,"assets","amiga",f"Lock'N'Chase.info"),outdir)
-
+datain = progdir/"data"
 
 for suffix in ["000"]: #,"020"]:
     # pack the file for floppy
     exename = f"{gamename}_{suffix}"
-    subprocess.check_output(["cranker_windows.exe","-f",str(progdir/"data"/exename),"-o",str(progdir/f"{exename}.rnc")])
+    subprocess.check_output(["cranker_windows.exe","-f",str(datain/exename),"-o",str(progdir/f"{exename}.rnc")])
+
+pack_data = True
 
 for p in ["bobs_*","tiles_*","palette_*","us_champ_vball_*"]:
-    for datafile in (progdir/"data").glob(p):
-        print(datafile)
-        shutil.copy(datafile,datadir)
+    for sourcefile in datain.glob(p):
+    # -= RNC ProPackED v1.8 [by Lab 313] (01/26/2021) =-
+        destfile = outdir / "data" / sourcefile.name
+        with open(sourcefile,"rb") as f:
+            header = f.read(3).decode(errors="ignore")
+        if header=="RNC" or not pack_data or sourcefile.name.startswith("palette_"):
+            # already packed/do not pack
+            print(f"Copying {destfile}...")
+            shutil.copy(sourcefile,destfile)
+        else:
+            cmd = ["propack","p",str(sourcefile),str(destfile)]
+            print(f"Packing {destfile}...")
+            p = subprocess.run(cmd,check=False,stdout=subprocess.DEVNULL)
+            if p.returncode:
+                print(f"failed packing {destfile}")
+                shutil.copy(sourcefile,destfile)
 
 subprocess.check_call(cmd_prefix+["clean"],cwd=progdir/"src")
 

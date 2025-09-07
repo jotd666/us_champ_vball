@@ -1,5 +1,5 @@
 from PIL import Image,ImageOps
-import os,sys,bitplanelib,subprocess
+import os,sys,bitplanelib,subprocess,collections
 
 from shared import *
 
@@ -168,6 +168,8 @@ def add_tile(table,index,cluts=[0],is_bob=False,double_size=False):
     elif not isinstance(index,(list,tuple)):
         index = [index]
     for idx in index:
+        # merge
+        cluts = sorted(set(table[idx]) | set(cluts))
         table[idx] = cluts
         # done for each context but the sprites are the same
         if is_bob and double_size:
@@ -353,7 +355,7 @@ def gen_context_files(context_name,with_sprites=True):
     sdump_dir = dump_dir / context_name
     sdump_dir.mkdir(exist_ok=True)
 
-    tile_cluts = {}
+    tile_cluts = collections.defaultdict(list)
     try:
         with open(used_graphics_dir / context_name / "used_tiles","rb") as f:
             for index in range(NB_TILES):
@@ -363,8 +365,11 @@ def gen_context_files(context_name,with_sprites=True):
                     add_tile(tile_cluts,index,cluts=cluts,is_bob=False)
     except OSError:
         pass
+    # add alphanum
+    for i in range(0x2041,0x207B):
+        add_tile(tile_cluts,i,[0],is_bob=False)
 
-    sprite_cluts = {}
+    sprite_cluts = collections.defaultdict(list)
 
     if with_sprites:
         try:
@@ -660,10 +665,10 @@ if sprite_size_cache_file.exists():
 ##gen_context_files("map",with_sprites=False)
 
 gen_context_files("level_1")  # also select
-#gen_context_files("level_2")
-#gen_context_files("level_3")
-#gen_context_files("level_4")  # also demo
-#gen_context_files("level_5")
+gen_context_files("level_2")
+gen_context_files("level_3")
+gen_context_files("level_4")  # also demo
+gen_context_files("level_5")
 
 if any(double_size_sprites):
     with open(sprite_size_cache_file,"w") as f:

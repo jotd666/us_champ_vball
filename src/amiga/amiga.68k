@@ -2203,9 +2203,9 @@ update_bg_tile:
 	lsr.w	#2,d2
 	add.w	#SCREEN_TILE_ADDRESS,d7
 	*BREAKPOINT	"unregistered game tile (in D2, at address D7)"	
-	.endif
 
 	jra		11f
+	.endif
 12:
 	move.l	d0,a4
 	move.l	(a4,d3.w*4),d0	| get proper clut
