@@ -2,7 +2,7 @@ import subprocess,os,struct,glob,tempfile
 import shutil
 
 
-gamename = "lock_and_chase"
+gamename = "us_champ_vball"
 sox = "sox"
 
 def convert():
@@ -24,43 +24,43 @@ def convert():
     hq_sample_rate = 18000
     lq_sample_rate = 8000
 
+    sounds = """ah_2f
+ball_26
+pass_29
+blast_28
+ball_on_ground_2c
+boom_30
+cheering_37
+cheering_38
+crash_23
+crash_2e
+credit_34
+explode_22
+explode_25
+fall_24
+smack_27
+step_21
+swoosh_2a
+swoosh_2b
+whistle_33
+yaah_31""".upper().splitlines()
+
+    srdict = {0x38:lq_sample_rate}
+    priodict = {0x21:20}
+    sound_dict = {}
+    for s in sounds:
+        toks = s.rsplit("_",maxsplit=1)
+        idx = int(toks[1],16)
+        sound_dict[s+"_SND"] = {"index":idx,"channel":3,"sample_rate":srdict.get(idx,hq_sample_rate),"priority":priodict.get(idx,40)}
 
 
     EMPTY_SND = "EMPTY_SND"
-    sound_dict = {
-# 2,8,4,A,
-# 4: gate closing, 1E/1F picking dots. +0x80 stop sound
-# 17: loop faster(?)
-# 25: bonus alarm (x3)
-# 8: picked hat
-# A: picked bag
-# 2: laugh after bag pick
-# B: extra life
-"CREDIT_SND"               :{"index":1,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
-"KILLED_SND"               :{"index":0x42,"channel":1,"sample_rate":lq_sample_rate,"priority":40},
-"LOOP_FASTEST_SND"               :{"index":0x19,"channel":3,"sample_rate":lq_sample_rate,"priority":40,"loops":True},
-"LOOP_FASTER_SND"               :{"index":0x18,"channel":3,"sample_rate":lq_sample_rate,"priority":40,"loops":True},
-"LOOP_FAST_SND"               :{"index":0x17,"channel":3,"sample_rate":lq_sample_rate,"priority":40,"loops":True},
-"LOOP_SND"               :{"index":0x16,"channel":3,"sample_rate":lq_sample_rate,"priority":40,"loops":True},
-"ENGINE_SND"               :{"index":0x1D,"channel":3,"sample_rate":hq_sample_rate,"priority":40,"loops":True},
-"BANG_SND"               :{"index":3,"channel":1,"sample_rate":hq_sample_rate,"priority":40},  # red gates/enter letter sound
-"GATE_CLOSING_SND"               :{"index":4,"channel":1,"sample_rate":hq_sample_rate,"priority":40},
-"START_MUSIC_SND"               :{"index":0x41,"channel":0,"sample_rate":lq_sample_rate,"priority":40},
-"HAPPY_SND"               :{"index":2,"channel":0,"sample_rate":lq_sample_rate,"priority":50},  # ignore, just play after "bag picked", else repeats a lot/super fast and causes issues
-"BAG_PICKED_SND"               :{"index":0xA,"channel":0,"sample_rate":hq_sample_rate,"priority":50},
-"HAT_PICKED_SND"               :{"index":8,"channel":0,"sample_rate":hq_sample_rate,"priority":50},
-"COPS_LOCKED_SND"               :{"index":9,"channel":1,"sample_rate":hq_sample_rate,"priority":50},
-"NO_MORE_GATES_SND"               :{"index":0x24,"channel":1,"sample_rate":hq_sample_rate,"priority":30},#
-"BAG_TO_PICK_SND"               :{"index":0x25,"channel":2,"sample_rate":hq_sample_rate,"priority":50,"loops":True},#
-"EXTRA_LIFE_SND"               :{"index":0xB,"channel":1,"sample_rate":lq_sample_rate,"priority":50},#
-"STEP_1_SND"               :{"index":0X1E,"channel":1,"sample_rate":hq_sample_rate,"priority":30},#
-"STEP_2_SND"               :{"index":0X1F,"channel":1,"sample_rate":hq_sample_rate,"priority":30},#
-##"HIGHSCORE_END_SND"               :{"index":15,"channel":3,"sample_rate":lq_sample_rate,"priority":50},#
-
-#"BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x15,"volume":32,'loops':True},
 
 
-    }
+    #"BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x15,"volume":32,'loops':True},
+
+
+
 
 
     with open(os.path.join(src_dir,"..","sounds.inc"),"w") as f:

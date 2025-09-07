@@ -5,17 +5,14 @@
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 
 - release mode: no backgrounds/crashes after a while
-- still some frames that appear missing (red) when all frames have been registered <=== ******
-  - rip sounds
+- rip more sounds
+- "pass" sound seems incorrect
 
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
 - create Pistorm/vampire version with 128 colors
 - create AGA version with 64 colors
 - create 68000/ECS version with 32 colors: fmode=0!! bplmod, ddfstop, pal copperlist & scroll table
-
-
-
 
 minor:
 
@@ -24,7 +21,9 @@ minor:
 
 optims
 
-- draw poles in one big group? and in background!
+- draw poles in one big group? and in background! if sprite is detected (first time after context change)
+  then blit in background restore, blit on screen and never blit again.
+  
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
 - better bank switching: use A5 for bank base to get more speed
 - 50Hz enabled for Pistorm 128 color version
@@ -65,10 +64,20 @@ log sound:
 
 wpset 100D,1,W,,{print A;g}
 
+stop music:
+
+bpset d7e7,A<0X15,{PC=$D7EA;g}
+
+capture sound: remove demo sounds from dsw
+
+bpset f7a3,,{A=$xx;g}
+
+
+
 identify each music as there are cut-scenes & other stuff removed from US version!!!
 2: select/start music
 5: intro music
-
+(
 9: level 1 music
 8: level 4 music
 7: level 3 music
