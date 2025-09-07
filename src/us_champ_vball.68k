@@ -18558,12 +18558,13 @@ l_d86d:
 	subq.b	#1,(a0)                         	| [...]
 	jne	l_d86d                             	| [$d873: jne $d86d]
 	rts                                    	| [$d875: rts]
-l_d876:
-	movem.w	d0,-(sp)                       	| [$d876: pha]
-	move.b	d1,d0                           	| [$d877: txa]
-	movem.w	d0,-(sp)                       	| [$d878: pha]
-	move.b	d2,d0                           	| [$d879: tya]
-	movem.w	d0,-(sp)                       	| [$d87a: pha]
+	
+cpu_delay_for_scrolling_d876:
+	movem.w	d0-d2,-(sp)                       	| [$d876: pha]
+	                        	| [$d877: txa]
+	                       	| [$d878: pha]
+	                        	| [$d879: tya]
+	                       	| [$d87a: pha]
 	move.b	#0x7e,d1                        	| [$d87b: ldx #$7e]
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$d87d: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
@@ -18573,11 +18574,11 @@ l_d876:
 l_d886:
 	subq.b	#1,d1                           	| [$d886: dex]
 	jne	l_d886                             	| [$d887: jne $d886]
-	move.w	(sp)+,d0                        	| [$d889: pla]
-	move.b	d0,d2                           	| [$d88a: tay]
-	move.w	(sp)+,d0                        	| [$d88b: pla]
-	move.b	d0,d1                           	| [$d88c: tax]
-	move.w	(sp)+,d0                        	| [$d88d: pla]
+	movem.w	(sp)+,d0-d2                        	| [$d889: pla]
+	                       	| [$d88a: tay]
+	                       	| [$d88b: pla]
+	                       	| [$d88c: tax]
+	                       	| [$d88d: pla]
 	rts                                    	| [$d88e: rts]
 
 handle_cocktail_mode_d88f:
@@ -20809,7 +20810,11 @@ update_scrolling_ea7c:
 	GET_ADDRESS	0xeade                     	| [$ea8d: cmp $eade, y]
 	cmp.b	(a0,d2.w),d0                     	| [...]
 	jne	l_eaba                             	| [$ea90: jne $eaba]
-	jbsr	l_d876                            	| [$ea92: jsr $d876]
+	
+* this hardware seems to be not so great with scrolling, the software seems
+* to "race the beam" to try to make it correct
+* we can safely remove this and it saves a lot of CPU
+	*jbsr	cpu_delay_for_scrolling_d876                            	| [$ea92: jsr $d876]
 	GET_ADDRESS	logical_scroll_value_lsb_07de	| [$ea95: lda logical_scroll_value_lsb_07de]
 	move.b	(a0)+,d0                         	| [...]
 	SET_XC_FLAGS |  [$ea98: sec]
@@ -20838,12 +20843,13 @@ l_eaba:
 	GET_ADDRESS	0xeae0                     	| [$eaba: cmp $eae0, y]
 	cmp.b	(a0,d2.w),d0                     	| [...]
 	jne	l_eab7                             	| [$eabd: jne $eab7]
-	jbsr	l_d876                            	| [$eabf: jsr $d876]
-	move.b	#0x28,d2                        	| [$eac2: ldy #$28]
+	jbsr	cpu_delay_for_scrolling_d876                            	| [$eabf: jsr $d876]
+	* cpu-timed delay! no way!!!!
+	                        	| [$eac2: ldy #$28]
 l_eac4:
 	 |  [$eac4: nop]
-	subq.b	#1,d2                           	| [$eac5: dey]
-	bpl	l_eac4                             	| [$eac6: bpl $eac4]
+	                           	| [$eac5: dey]
+	                             	| [$eac6: bpl $eac4]
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eac8: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	move.b	#0xfc,d0                        	| [$eacb: lda #$fc]

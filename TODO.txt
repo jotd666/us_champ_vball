@@ -1,5 +1,7 @@
 - draw net in one big group and in background! if 0X2E2 sprite is detected (first time after context change)
   then blit in background restore, blit on screen and never blit again.
+- profile MAME cpu count
+- try to get rid of the high speed interrupt, reverse engineer the scrolling
 - to test speed: remove sand splash
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - keep ripping levels sprites

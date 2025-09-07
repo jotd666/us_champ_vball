@@ -1201,7 +1201,9 @@ update_one_bob:
 10:
 	add.w	d2,d2				| code times 4 now
 	move.l	(a4,d2.w),d4		| get pointer from bob table
-	.ifndef	RELEASE
+	.ifdef	RELEASE
+	jeq		2f
+	.else
 	jne		100f
 	* in dev mode, break if we try to display a non-existing bob
 	* we have the table (0,1,2) but if we forgot to register a bob
@@ -1212,7 +1214,7 @@ update_one_bob:
 	lsl.w	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	COLOR0_FLASH	0xF00
-	*BREAKPOINT	"unregistered sprite clut (D2=code)"
+	BREAKPOINT	"unregistered sprite clut (D2=code)"
 	jra		2f
 100:
 	.endif

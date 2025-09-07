@@ -13006,6 +13006,8 @@ D86D: 20 22 D8 jsr sync_d822
 D870: CE F6 07 dec $07f6
 D873: D0 F8    bne $d86d
 D875: 60       rts
+
+cpu_delay_for_scrolling_d876:
 D876: 48       pha
 D877: 8A       txa
 D878: 48       pha
@@ -14567,6 +14569,8 @@ EA77: 60       rts
 EA78: 20 06 EB jsr $eb06
 EA7B: 60       rts
 ; done super frequently (1/1000th of second)
+; this hardware seems to be not so great with scrolling, the software seems
+; to "race the beam" to try to make it correct
 update_scrolling_ea7c:
 EA7C: 98       tya
 EA7D: 48       pha
@@ -14579,7 +14583,7 @@ EA8A: A8       tay
 EA8B: A5 31    lda irq_07_counter_31
 EA8D: D9 DE EA cmp $eade, y
 EA90: D0 28    bne $eaba
-EA92: 20 76 D8 jsr $d876
+EA92: 20 76 D8 jsr cpu_delay_for_scrolling_d876
 EA95: AD DE 07 lda logical_scroll_value_lsb_07de
 EA98: 38       sec
 EA99: E9 04    sbc #$04
@@ -14599,7 +14603,7 @@ EAB8: A8       tay
 EAB9: 60       rts
 EABA: D9 E0 EA cmp $eae0, y
 EABD: D0 F8    bne $eab7
-EABF: 20 76 D8 jsr $d876
+EABF: 20 76 D8 jsr cpu_delay_for_scrolling_d876
 EAC2: A0 28    ldy #$28
 EAC4: EA       nop
 EAC5: 88       dey
