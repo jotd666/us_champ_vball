@@ -1,14 +1,15 @@
+- to test speed: remove net/poles sprites / sand splash
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - keep ripping levels sprites
-- continue timer carry issue decreases 2 by 2: test again
+- continue timer carry issue decreases 2 by 2
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 
-- release mode: no backgrounds
+- release mode: no backgrounds/crashes after a while
 - still some frames that appear missing (red) when all frames have been registered <=== ******
   - rip sounds
 
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
-
+  simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
 - create Pistorm/vampire version with 128 colors
 - create AGA version with 64 colors
 - create 68000/ECS version with 32 colors: fmode=0!! bplmod, ddfstop, pal copperlist & scroll table
@@ -62,7 +63,7 @@ bpset D00A,,{A=0;PC=AFFE;g}
 
 log sound:
 
-wpset 100D,1,W,,{print A,g}
+wpset 100D,1,W,,{print A;g}
 
 identify each music as there are cut-scenes & other stuff removed from US version!!!
 2: select/start music

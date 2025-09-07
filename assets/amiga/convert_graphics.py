@@ -659,9 +659,9 @@ if sprite_size_cache_file.exists():
 ##gen_context_files("intro",with_sprites=False)
 ##gen_context_files("map",with_sprites=False)
 
-#gen_context_files("level_1")  # also select
+gen_context_files("level_1")  # also select
 #gen_context_files("level_2")
-gen_context_files("level_3")
+#gen_context_files("level_3")
 #gen_context_files("level_4")  # also demo
 #gen_context_files("level_5")
 
