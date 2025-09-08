@@ -424,16 +424,21 @@ def gen_context_files(context_name,with_sprites=True):
     cluts = sprite_cluts
     sprite_dump_dir = sdump_dir / "sprites"
 
+    net_img = None
 
+    if with_sprites:
+        for clut_index,tsd in sprite_sheet_dict.items():
+            # BOBs
 
-    for clut_index,tsd in sprite_sheet_dict.items():
-        # BOBs
+            sp,sprite_set = load_tileset(tsd,clut_index,16,16,"sprites",sdump_dir,dump=dump_it,
+            name_dict=sprite_names,cluts=sprite_cluts,is_bob=True)
+            sprite_set_list[clut_index] = sprite_set
+            sprite_palette.update(sp)
 
-        sp,sprite_set = load_tileset(tsd,clut_index,16,16,"sprites",sdump_dir,dump=dump_it,
-        name_dict=sprite_names,cluts=sprite_cluts,is_bob=True)
-        sprite_set_list[clut_index] = sprite_set
-        sprite_palette.update(sp)
-
+        net_pic = sheets_path / "net.png"
+        net_img = Image.open(net_pic).convert("RGB")
+        # add the colors of the net (has also 254,0,254 magenta as transparent)
+        sprite_palette.update(bitplanelib.palette_extract(net_img))
 
     full_palette = sorted(sprite_palette)
     must_insert_magenta = False
@@ -460,6 +465,9 @@ def gen_context_files(context_name,with_sprites=True):
                 if tile:
                     bitplanelib.replace_color_from_dict(tile,quantized)
 
+        if net_img:
+            bitplanelib.replace_color_from_dict(net_img,quantized)
+
         full_palette = sorted(set(quantized.values()))
         used_nb_colors = len(full_palette)
         remaining = (nb_colors-1-used_nb_colors)
@@ -482,11 +490,36 @@ def gen_context_files(context_name,with_sprites=True):
     bob_plane_cache = {}
     sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,False,False],cache=bob_plane_cache, is_bob=True)
 
-
-
-
     def write_ptr(f,ptr_name):
-        f.write(f"{decl_word}{ptr_name}-_base\n")
+        f.write(f"{decl_ptr}{ptr_name}-_base\n")
+
+    # net
+    if net_img:
+        net_bitplanes = bitplanelib.palette_image2raw(net_img,None,full_palette,
+        forced_nb_planes=nb_planes,generate_mask=bitplanelib.MASK_ON,mask_color=magenta)
+        height = net_img.size[1]
+        width = net_img.size[0]//8
+        if net_img.size[0]%8:
+            width += 1
+        if width % 2:
+            width += 1
+
+        out_asm_file = gen_dir / f"net_{context_name}.s"
+        with open(out_asm_file,"w") as f:
+
+            f.write(f"{decl_word}{width},{height}   ; width,height\n")
+            f.write("_base:\n")
+            block_size = len(net_bitplanes)//(nb_planes+1)
+
+            for i in range(nb_planes+1):
+                write_ptr(f,f"net_plane_{i}")
+
+            for i in range(nb_planes+1):
+                f.write(f"net_plane_{i}:\n")
+                block = net_bitplanes[i*block_size:(i+1)*block_size]
+                dump_asm_bytes(block,f)
+        out_bin_file = data_dir / out_asm_file.stem
+        asm2bin(out_asm_file,out_bin_file)
 
     out_asm_file = gen_dir / f"tiles_{context_name}.s"
 
@@ -554,7 +587,7 @@ def gen_context_files(context_name,with_sprites=True):
             f.write(f"tile_plane_{v:02d}:")
             dump_asm_bytes(k,f)
 
-    out_bin_file = data_dir / f"tiles_{context_name}"
+    out_bin_file = data_dir / out_asm_file.stem
     asm2bin(out_asm_file,out_bin_file)
 
     out_bin_file = data_dir / f"palette_{context_name}"
@@ -565,7 +598,7 @@ def gen_context_files(context_name,with_sprites=True):
     asm2bin(out_asm_file,out_bin_file)
 
     out_asm_file = gen_dir / f"bobs_{context_name}.s"
-    out_bin_file = data_dir / f"bobs_{context_name}"
+    out_bin_file = data_dir / out_asm_file.stem
     with open(out_asm_file,"w") as f:
 
         f.write("bob_table:\n")
@@ -667,10 +700,10 @@ if sprite_size_cache_file.exists():
 ##gen_context_files("map",with_sprites=False)
 
 gen_context_files("level_1")  # also select
-#gen_context_files("level_2")
-#gen_context_files("level_3")
-#gen_context_files("level_4")  # also demo
-#gen_context_files("level_5")
+gen_context_files("level_2")
+gen_context_files("level_3")
+gen_context_files("level_4")  # also demo
+gen_context_files("level_5")
 
 if any(double_size_sprites):
     with open(sprite_size_cache_file,"w") as f:

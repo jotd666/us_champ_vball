@@ -1,6 +1,6 @@
-- draw net in one big group and in background! if 0X2E2 sprite is detected (first time after context change)
-  then blit in background restore, blit on screen and never blit again.
+- too much top of the screen is shown (player select, also levels)
 - exclude net sprite tiles where they are hit by the ball
+- draw net sprites only if some x/y sprites are too close (right side players very close to the net)
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
 - profile MAME cpu count
@@ -14,9 +14,8 @@
 - sometimes irq locks up the keyboard interrupt. maybe no need to call "update scrolling" so often
   actually update scrolling should be called only every each frame! no need to overdo it!!!!
 
-- release mode: crashes after a while when updating sprites??? even in noncpu-cycle exact! 
 - rip more sounds??
-
+- maybe not include some sounds?
 
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
