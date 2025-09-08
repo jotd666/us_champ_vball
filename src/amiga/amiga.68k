@@ -688,14 +688,21 @@ _vblank:
 	btst	#5,d0
 	beq.b		1f
 
-	move.l	_joypad_state(pc),d1
+	move.l	joypad_1_state(pc),d1
 	move.l	d1,d2
 	moveq	#1,d0
 	jsr	_read_joystick
-	move.l	d0,_joypad_state
+	move.l	d0,joypad_1_state
+	
+	move.l	joypad_2_state(pc),d1
+	move.l	d1,d2
+	moveq	#0,d0
+	jsr	_read_joystick
+	move.l	d0,joypad_2_state
+	
 	jbsr	update_controls
 	
-	move.l	_joypad_state,d0
+	move.l	joypad_1_state,d0
 	btst	#JPB_BTN_BLU,d0
 	beq.b	0f
 	btst	#JPB_BTN_BLU,d2
@@ -1214,7 +1221,7 @@ update_one_bob:
 	lsl.w	#8,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	COLOR0_FLASH	0xF00
-	BREAKPOINT	"unregistered sprite clut (D2=code)"
+	*BREAKPOINT	"unregistered sprite clut (D2=code)"
 	jra		2f
 100:
 	.endif
@@ -2722,7 +2729,6 @@ purge_sprite_log_data:
 update_controls:
 	moveq	#-1,d0
 
-
 	lea		keyboard_table(pc),a0
 
 	tst.b	(0x4C,a0)		| "up" key
@@ -2751,7 +2757,29 @@ update_controls:
 0:
 
 	* directions + fire
-	move.l	_joypad_state(pc),d1
+	move.l	joypad_1_state(pc),d1
+	jbsr	decode_joypad_controls
+	move.b	d0,player_1_controls
+
+	
+	jbsr		is_game_playing
+	jeq	0f
+	* game not playing, we can insert coin/start with joypad
+	btst	#JPB_BTN_RED,d1		| "5" key like in MAME
+	jeq		0f
+	btst	#JPB_BTN_RED,d2
+	jne		0f
+	nop  | todo insertcoin
+0:
+	moveq	#-1,d0
+
+	move.l	joypad_2_state(pc),d1
+	jbsr	decode_joypad_controls
+	move.b	d0,player_2_controls
+
+	rts
+	
+decode_joypad_controls:
 	btst	#JPB_BTN_UP,d1
 	beq.b	0f
 	bclr	#BIT_UP,d0
@@ -2776,22 +2804,8 @@ update_controls:
 	beq.b	0f
 	bclr	#BIT_FIRE_2,d0
 0:
-	move.b	d0,player_1_controls
-
-	st.b	player_2_controls
-	
-	jbsr		is_game_playing
-	jeq	0f
-	* game not playing, we can insert coin/start with joypad
-	btst	#JPB_BTN_RED,d1		| "5" key like in MAME
-	jeq		0f
-	btst	#JPB_BTN_RED,d2
-	jne		0f
-	nop  | todo insertcoin
-0:
 	rts
 	
-
 osd_read_dsw1:
 	* actual dipswitches
 	not.b	d0		| active low
@@ -2814,7 +2828,7 @@ osd_read_system:
 
 *	jbsr		is_game_playing
 *	jeq	1f
-*	move.l	_joypad_state,d1
+*	move.l	joypad_1_state,d1
 *	* game not playing, we can start with joypad
 *	btst	#JPB_BTN_UP,d1		| "1" key like in MAME
 *	beq.b	0f
@@ -3800,9 +3814,13 @@ vbl_counter:
 	.word	0
 _resload:
 	.long	0
-_joypad_state:
+joypad_1_state:
 	.long	0
-_previous_joypad_state:
+joypad_2_state:
+	.long	0
+_previous_joypad_1_state:
+	.long	0
+_previous_joypad_2_state:
 	.long	0
 _gfxbase:
 	.long	0

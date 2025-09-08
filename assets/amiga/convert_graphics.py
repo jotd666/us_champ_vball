@@ -392,6 +392,8 @@ def gen_context_files(context_name,with_sprites=True):
         except OSError:
             print("Cannot find used_sprites")
 
+        # add "2P" sprite to all levels
+        add_tile(sprite_cluts,index=0x2e0,cluts=[5],double_size=True,is_bob=True)
 
 
     if dump_it:

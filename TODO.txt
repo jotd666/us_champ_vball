@@ -1,5 +1,8 @@
 - draw net in one big group and in background! if 0X2E2 sprite is detected (first time after context change)
   then blit in background restore, blit on screen and never blit again.
+- exclude net sprite tiles where they are hit by the ball
+- 2P: we have to rip more tiles (net with ball?)
+- 2P: check that (with net) we can fail a serve!!
 - profile MAME cpu count
 - try to get rid of the high speed interrupt, reverse engineer the scrolling
 - to test speed: remove sand splash
