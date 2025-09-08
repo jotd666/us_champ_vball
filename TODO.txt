@@ -1,13 +1,14 @@
 - too much top of the screen is shown (player select, also levels)
-- exclude net sprite tiles where they are hit by the ball
-- draw net sprites only if some x/y sprites are too close (right side players very close to the net)
+- bottom of the screen: strange flickering of sprites like if double buffering is not there
+- exclude (still draw) net sprite tiles where they are hit by the ball (when failing the serve)
+- draw net sprites (not poles) only if some x/y sprites are too close (right side players very close to the net)
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
 - profile MAME cpu count
 - try to get rid of the high speed interrupt, reverse engineer the scrolling
 - to test speed: remove sand splash
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-- keep ripping levels sprites
+- keep ripping levels sprites: level 3 seems to miss sprite 36B!!! level 2 too
 - continue timer carry issue decreases 2 by 2
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 

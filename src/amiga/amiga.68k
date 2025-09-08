@@ -80,17 +80,20 @@ TARGET_SPRITE_CODE = 2
 TARGET_SPRITE_SIZEOF = 4
 
 	.ifdef	RELEASE
+
 OPT_ENABLE_LOGGING = 0           | DO NOT CHANGE THIS
 OPT_DEBUG_BANKSWITCH = 0          | DO NOT CHANGE THIS
 	.else
 OPT_ENABLE_LOGGING = 1
 OPT_DEBUG_BANKSWITCH = 0
-
-
-
 	.endif
 	
-
+* neat trick to avoid drawing the net/poles sprites continuously (there are a lot of them)
+* instead: draw only once per screen (first time) and draw it in the restore buffer too
+* (draw it 2/3 times only once, then it's free to display it)
+* the net is mostly on the background except for some rare cases where we reactivate sprite
+* display of the net, but only for a short time (and only net, not poles)
+OPT_NET_BACKGROUND_TRICK = 1
 OPT_ENABLE_DOUBLE_BUFFERING = 1
 
 _custom = 0xDFF000
@@ -1131,6 +1134,7 @@ compute_sprite_xy_code:
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	rts
 	
+	.ifne	OPT_NET_BACKGROUND_TRICK
 draw_net:
 	movem.l	d0-d5/a0-a3/a6,-(a7)
 	move.l net_ptr,a0
@@ -1156,10 +1160,12 @@ draw_net:
 	movem.l	d0-d5/a0/a3,-(a7)
 	jbsr	blit_planes_any_internal_cookie_cut
 	movem.l	(a7)+,d0-d5/a0/a3
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	move.l	playfield_displayed_screen_ptr,a1
 	movem.l	d0-d5/a0/a3,-(a7)
 	jbsr	blit_planes_any_internal_cookie_cut
 	movem.l	(a7)+,d0-d5/a0/a3
+	.endif
 	lea		background_restore_buffer,a1
 
 	jbsr	blit_planes_any_internal_cookie_cut
@@ -1168,6 +1174,7 @@ draw_net:
 	movem.l	(a7)+,d0-d5/a0-a3/a6
 	st.b	net_drawn
 	rts
+	.endif
 	
 *  240-Y    S|X|CLR|WCH WHICH    240-X
 *  xxxxxxxx x|x|xxx|xxx xxxxxxxx xxxxxxxx
@@ -1207,6 +1214,7 @@ update_one_bob:
 
 	jbsr	compute_sprite_xy_code
 
+	.ifne	OPT_NET_BACKGROUND_TRICK
 	cmp.w	#0X2E2,d2
 	jne 	0f
 	tst.b	net_drawn
@@ -1215,6 +1223,7 @@ update_one_bob:
 	* to display the net: draw it
 	jbsr	draw_net
 0:
+	.endif
 	lea		disabled_sprites(pc),a3
 	tst.b	(a3,d2.w)
 	jne		2f				| some (static) sprites are disabled
