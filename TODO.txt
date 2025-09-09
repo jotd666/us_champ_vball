@@ -1,5 +1,7 @@
 - too much top of the screen is shown (player select, also levels)
-- during a spike+counter, game slows down a lot
+- increase screen height as when screen scrolls up, players feet blit 'wrap' to the top other planes
+- during a spike+counter, game slows down a lot. Log blits but mostly log blit size!
+- use CPU-driven erase?
 - exclude (still draw) net sprite tiles where they are hit by the ball (when failing the serve)
   currently net doesn't budge when hit by ball
 - draw net sprites (not poles) only if some x/y sprites are too close (right side players very close to the net)
@@ -8,11 +10,10 @@
 - 2P: check that (with net) we can fail a serve!!
 - continue timer carry issue decreases 2 by 2
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
-- maybe not include some sounds to save memory?
+- maybe not include some unused sounds to save memory?
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
 - create Pistorm/vampire version with 128 colors
-- create AGA version with 64 colors
 - create 68000/ECS version with 32 colors: fmode=0!! bplmod, ddfstop, pal copperlist & scroll table
 
 minor:

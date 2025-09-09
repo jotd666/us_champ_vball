@@ -37,7 +37,7 @@ for suffix in ["000"]: #,"020"]:
 
 pack_data = True
 
-for p in ["bobs_*","tiles_*","palette_*","us_champ_vball_*"]:
+for p in ["bobs_*","tiles_*","palette_*","net_*","us_champ_vball_*"]:
     for sourcefile in datain.glob(p):
     # -= RNC ProPackED v1.8 [by Lab 313] (01/26/2021) =-
         destfile = outdir / "data" / sourcefile.name
