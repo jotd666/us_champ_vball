@@ -49,6 +49,8 @@ coin_per_credit_0416 = 0x416
 sprite_shadow_ram_06db = 0x6db
 sound_to_queue_07f2 = 0x7f2
 timer_07f5 = 0x7f5
+* 0: locked left, 1: unlocked (play), FF: locked center (start of play)
+scroll_lock_07db = 0x7db
 logical_scroll_value_lsb_07de = 0x7de
 logical_scroll_value_msb_07df = 0x7df
 scroll_hi_copy_07f8 = 0x07f8

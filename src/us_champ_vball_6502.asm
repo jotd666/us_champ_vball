@@ -183,6 +183,8 @@ coin_per_credit_0416 = $416
 sprite_shadow_ram_06db = $6db
 sound_to_queue_07f2 = $7f2
 timer_07f5 = $7f5
+; 0: locked left, 1: unlocked (play), FF: locked center (start of play)
+scroll_lock_07db = $7db
 ; $7de=16 bit scroll value 0-1FF (little endian)
 logical_scroll_value_lsb_07de = $7de
 logical_scroll_value_msb_07df = $7df
@@ -14407,7 +14409,7 @@ E88B: B9 B8 E8 lda $e8b8, y
 E88E: 8D 62 2C sta $2c62
 E891: 60       rts
 
-E923: AD DB 07 lda $07db
+E923: AD DB 07 lda scroll_lock_07db
 E926: D0 01    bne $e929
 E928: 60       rts
 E929: A5 46    lda game_state_bits_46
@@ -14557,7 +14559,7 @@ EA58: A8       tay
 EA59: 8C E0 07 sty logical_y_scroll_07e0
 EA5C: 60       rts
 
-EA6B: AD DB 07 lda $07db
+EA6B: AD DB 07 lda scroll_lock_07db
 EA6E: 30 07    bmi $ea77
 EA70: C9 01    cmp #$01
 EA72: F0 04    beq $ea78
@@ -14574,7 +14576,7 @@ EA7B: 60       rts
 update_scrolling_ea7c:
 EA7C: 98       tya
 EA7D: 48       pha
-EA7E: AD DB 07 lda $07db
+EA7E: AD DB 07 lda scroll_lock_07db
 EA81: C9 02    cmp #$02
 EA83: D0 32    bne $eab7
 EA85: AD 2C 02 lda scrollx_hi_copy_022c
@@ -14670,7 +14672,7 @@ setup_background_screen_eb52:
 EB52: 20 5E EB jsr set_context_scroll_and_prom_banks_eb5e
 EB55: 20 9D EC jsr unpack_background_screen_ec9d
 EB58: A9 00    lda #$00
-EB5A: 8D DB 07 sta $07db
+EB5A: 8D DB 07 sta scroll_lock_07db
 EB5D: 60       rts
 
 ; before setting up a background picture, setup scrolling X/Y
@@ -14678,10 +14680,10 @@ EB5D: 60       rts
 
 set_context_scroll_and_prom_banks_eb5e:
 EB5E: 20 8F D8 jsr handle_cocktail_mode_d88f
-EB61: AD DB 07 lda $07db
+EB61: AD DB 07 lda scroll_lock_07db
 EB64: 8D DC 07 sta $07dc
 EB67: A9 FF    lda #$ff
-EB69: 8D DB 07 sta $07db
+EB69: 8D DB 07 sta scroll_lock_07db
 EB6C: AD 2D 02 lda bankswitch_copy_022d
 EB6F: 29 BF    and #$bf
 EB71: 8D 09 10 sta bankswitch_1009
@@ -14701,7 +14703,7 @@ EB96: 8D 09 10 sta bankswitch_1009
 EB99: 60       rts
 
 EB9A: AC DC 07 ldy $07dc
-EB9D: 8C DB 07 sty $07db
+EB9D: 8C DB 07 sty scroll_lock_07db
 EBA0: B9 C5 EB lda $ebc5, y
 EBA3: 8D 0C 10 sta scrollx_lo_100c
 EBA6: AD 2C 02 lda scrollx_hi_copy_022c
@@ -14739,7 +14741,7 @@ EC16: 8D DE 07 sta logical_scroll_value_lsb_07de
 EC19: B9 26 EC lda $ec26, y
 EC1C: 8D DF 07 sta logical_scroll_value_msb_07df
 EC1F: A9 02    lda #$02
-EC21: 8D DB 07 sta $07db
+EC21: 8D DB 07 sta scroll_lock_07db
 EC24: 60       rts
 
 EC2F: A5 38    lda current_level_38
@@ -15198,7 +15200,7 @@ EF53: A9 05    lda #$05
 EF55: 20 B8 D7 jsr queue_sound_d7b8	; play intro music
 EF58: A9 00    lda #$00
 EF5A: 85 36    sta game_playing_flag_36	; game not playing
-EF5C: 8D DB 07 sta $07db
+EF5C: 8D DB 07 sta scroll_lock_07db
 EF5F: 20 73 CF jsr $cf73
 EF62: 20 8F D8 jsr handle_cocktail_mode_d88f
 EF65: A9 0F    lda #$0f
@@ -15221,7 +15223,7 @@ EF8C: EE F5 07 inc timer_07f5
 EF8F: D0 E9    bne $ef7a
 EF91: 4C EB EF jmp $efeb
 EF94: A9 00    lda #$00
-EF96: 8D DB 07 sta $07db
+EF96: 8D DB 07 sta scroll_lock_07db
 EF99: 20 E2 EA jsr reset_scrolling_eae2
 EF9C: A9 06    lda #$06
 EF9E: 8D E4 07 sta screen_id_07e4
@@ -15282,7 +15284,7 @@ F024: 20 8F D8 jsr handle_cocktail_mode_d88f
 F027: A9 12    lda #$12
 F029: 8D E4 07 sta screen_id_07e4
 F02C: A9 00    lda #$00
-F02E: 8D DB 07 sta $07db
+F02E: 8D DB 07 sta scroll_lock_07db
 F031: 20 52 EB jsr setup_background_screen_eb52
 F034: A9 05    lda #$05
 F036: 20 7F DA jsr write_message_da7f
@@ -15458,7 +15460,7 @@ F1A2: A9 50    lda #$50
 F1A4: 20 2B D8 jsr $d82b
 F1A7: A9 00    lda #$00
 F1A9: 8D F9 07 sta $07f9
-F1AC: 8D DB 07 sta $07db
+F1AC: 8D DB 07 sta scroll_lock_07db
 F1AF: 8D E1 07 sta $07e1
 F1B2: 4C 13 F2 jmp $f213
 F1B5: A9 03    lda #$03
@@ -15528,7 +15530,7 @@ F239: 20 B8 D7 jsr queue_sound_d7b8
 F23C: 20 F1 EB jsr show_us_map_screen_ebf1
 F23F: 20 9A EB jsr $eb9a
 F242: A9 02    lda #$02
-F244: 8D DB 07 sta $07db
+F244: 8D DB 07 sta scroll_lock_07db
 F247: A9 00    lda #$00
 F249: 8D F5 07 sta timer_07f5
 F24C: 20 2F EC jsr $ec2f
@@ -15609,7 +15611,7 @@ F2F1: 8D F5 07 sta timer_07f5
 F2F4: A9 80    lda #$80
 F2F6: 8D DE 07 sta logical_scroll_value_lsb_07de
 F2F9: A9 01    lda #$01
-F2FB: 8D DB 07 sta $07db
+F2FB: 8D DB 07 sta scroll_lock_07db
 F2FE: A9 00    lda #$00
 F300: 8D F5 07 sta timer_07f5
 F303: A5 36    lda game_playing_flag_36
@@ -15793,7 +15795,7 @@ F476: 9D DD 07 sta $07dd, x
 F479: E8       inx
 F47A: E0 05    cpx #$05
 F47C: 90 F8    bcc $f476
-F47E: 8D DB 07 sta $07db
+F47E: 8D DB 07 sta scroll_lock_07db
 F481: 20 73 CF jsr $cf73
 F484: A9 00    lda #$00
 F486: 8D DA 06 sta $06da
@@ -15935,7 +15937,7 @@ F5A6: D0 46    bne $f5ee
 F5A8: 20 73 CF jsr $cf73
 F5AB: 20 35 CF jsr clear_screen_cf35
 F5AE: A9 00    lda #$00
-F5B0: 8D DB 07 sta $07db
+F5B0: 8D DB 07 sta scroll_lock_07db
 F5B3: A9 11    lda #$11
 F5B5: 8D E4 07 sta screen_id_07e4
 F5B8: 20 52 EB jsr setup_background_screen_eb52
@@ -15984,7 +15986,7 @@ F613: 9D DD 07 sta $07dd, x
 F616: E8       inx
 F617: E0 05    cpx #$05
 F619: 90 F8    bcc $f613
-F61B: 8D DB 07 sta $07db
+F61B: 8D DB 07 sta scroll_lock_07db
 F61E: 20 E2 EA jsr reset_scrolling_eae2
 F621: 20 73 CF jsr $cf73
 F624: A9 00    lda #$00
@@ -16075,7 +16077,7 @@ F6DB: ED 16 04 sbc coin_per_credit_0416
 F6DE: 85 35    sta nb_credits_0035
 F6E0: D8       cld
 F6E1: A9 01    lda #$01
-F6E3: 8D DB 07 sta $07db
+F6E3: 8D DB 07 sta scroll_lock_07db
 F6E6: A5 46    lda game_state_bits_46
 F6E8: 29 BF    and #$bf
 F6EA: 85 46    sta game_state_bits_46

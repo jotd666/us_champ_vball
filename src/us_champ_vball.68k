@@ -20561,7 +20561,7 @@ l_e871:
 	rts                                    	| [$e891: rts]
 
 l_e923:
-	GET_ADDRESS	0x07db                     	| [$e923: lda $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$e923: lda $07db]
 	move.b	(a0),d0                         	| [...]
 	jne	l_e929                             	| [$e926: jne $e929]
 	rts                                    	| [$e928: rts]
@@ -20779,7 +20779,7 @@ l_ea59:
 	rts                                    	| [$ea5c: rts]
 
 l_ea6b:
-	GET_ADDRESS	0x07db                     	| [$ea6b: lda $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$ea6b: lda $07db]
 	move.b	(a0),d0                         	| [...]
 	bmi	l_ea77                             	| [$ea6e: bmi $ea77]
 	cmp.b	#0x01,d0                         	| [$ea70: cmp #$01]
@@ -20798,10 +20798,10 @@ l_ea78:
 update_scrolling_ea7c:
 	                           	| [$ea7c: tya]
 	move.w	d2,-(sp)                       	| [$ea7d: pha]
-	GET_ADDRESS	0x07db                     	| [$ea7e: lda $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$ea7e: lda $07db]
 	move.b	(a0),d0                         	| [...]
 	cmp.b	#0x02,d0                         	| [$ea81: cmp #$02]
-	jne	l_eab7                             	| [$ea83: jne $eab7]
+	jne	update_scroll_out_eab7                             	| [$ea83: jne $eab7]
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$ea85: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x01,d0                         	| [$ea88: and #$01]
@@ -20835,15 +20835,15 @@ update_scrolling_ea7c:
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eab1: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eab4: sta scrollx_hi_1008]
-l_eab7:
+update_scroll_out_eab7:
 	move.w	(sp)+,d2                        	| [$eab7: pla]
 	                           	| [$eab8: tay]
 	rts                                    	| [$eab9: rts]
 l_eaba:
 	GET_ADDRESS	0xeae0                     	| [$eaba: cmp $eae0, y]
 	cmp.b	(a0,d2.w),d0                     	| [...]
-	jne	l_eab7                             	| [$eabd: jne $eab7]
-	jbsr	cpu_delay_for_scrolling_d876                            	| [$eabf: jsr $d876]
+	jne	update_scroll_out_eab7                             	| [$eabd: jne $eab7]
+	*jbsr	cpu_delay_for_scrolling_d876                            	| [$eabf: jsr $d876]
 	* cpu-timed delay! no way!!!!
 	                        	| [$eac2: ldy #$28]
 l_eac4:
@@ -20860,7 +20860,7 @@ l_eac4:
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$ead5: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$ead8: sta scrollx_hi_1008]
-	jmp	l_eab7                             	| [$eadb: jmp $eab7]
+	jmp	update_scroll_out_eab7                             	| [$eadb: jmp $eab7]
 
 reset_scrolling_eae2:
 	 |  [$eae2: lda scrollx_hi_copy_022c] [disable] useless lda
@@ -20933,7 +20933,7 @@ setup_background_screen_eb52:
 	jbsr	set_context_scroll_and_prom_banks_eb5e	| [$eb52: jsr set_context_scroll_and_prom_banks_eb5e]
 	jbsr	unpack_background_screen_ec9d     	| [$eb55: jsr unpack_background_screen_ec9d]
 	clr.b	d0                               	| [$eb58: lda #$00]
-	GET_ADDRESS	0x07db                     	| [$eb5a: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$eb5a: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	rts                                    	| [$eb5d: rts]
 
@@ -20942,12 +20942,12 @@ setup_background_screen_eb52:
 
 set_context_scroll_and_prom_banks_eb5e:
 	jbsr	handle_cocktail_mode_d88f         	| [$eb5e: jsr handle_cocktail_mode_d88f]
-	GET_ADDRESS	0x07db                     	| [$eb61: lda $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$eb61: lda $07db]
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	0x07dc                     	| [$eb64: sta $07dc]
 	move.b	d0,(a0)                         	| [...]
 	move.b	#0xff,d0                        	| [$eb67: lda #$ff]
-	GET_ADDRESS	0x07db                     	| [$eb69: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$eb69: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb6c: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
@@ -20979,7 +20979,7 @@ set_context_scroll_and_prom_banks_eb5e:
 l_eb9a:
 	GET_ADDRESS	0x07dc                     	| [$eb9a: ldy $07dc]
 	move.b	(a0),d2                         	| [...]
-	GET_ADDRESS	0x07db                     	| [$eb9d: sty $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$eb9d: sty $07db]
 	move.b	d2,(a0)                         	| [...]
 	GET_ADDRESS	0xebc5                     	| [$eba0: lda $ebc5, y]
 	move.b	(a0,d2.w),d0                    	| [...]
@@ -21030,7 +21030,7 @@ l_ec07:
 	GET_ADDRESS	logical_scroll_value_msb_07df	| [$ec1c: sta logical_scroll_value_msb_07df]
 	move.b	d0,(a0)                         	| [...]
 	move.b	#0x02,d0                        	| [$ec1f: lda #$02]
-	GET_ADDRESS	0x07db                     	| [$ec21: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$ec21: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	rts                                    	| [$ec24: rts]
 
@@ -21594,7 +21594,7 @@ l_ef53:
 	jbsr	queue_sound_d7b8                  	| [$ef55: jsr queue_sound_d7b8] play intro music
 	clr.b	d0                               	| [$ef58: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,game_playing_flag_36,d0 |  [$ef5a: sta game_playing_flag_36] game not playing
-	GET_ADDRESS	0x07db                     	| [$ef5c: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$ef5c: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	l_cf73                            	| [$ef5f: jsr $cf73]
 	jbsr	handle_cocktail_mode_d88f         	| [$ef62: jsr handle_cocktail_mode_d88f]
@@ -21624,7 +21624,7 @@ l_ef85:
 	jne	l_ef7a                             	| [$ef8f: jne $ef7a]
 	jmp	l_efeb                             	| [$ef91: jmp $efeb]
 	clr.b	d0                               	| [$ef94: lda #$00]
-	GET_ADDRESS	0x07db                     	| [$ef96: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$ef96: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	reset_scrolling_eae2              	| [$ef99: jsr reset_scrolling_eae2]
 	move.b	#0x06,d0                        	| [$ef9c: lda #$06]
@@ -21695,7 +21695,7 @@ l_f000:
 	GET_ADDRESS	screen_id_07e4             	| [$f029: sta screen_id_07e4]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$f02c: lda #$00]
-	GET_ADDRESS	0x07db                     	| [$f02e: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f02e: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	setup_background_screen_eb52      	| [$f031: jsr setup_background_screen_eb52]
 	move.b	#0x05,d0                        	| [$f034: lda #$05]
@@ -21909,7 +21909,7 @@ l_f1a7:
 	clr.b	d0                               	| [$f1a7: lda #$00]
 	GET_ADDRESS	0x07f9                     	| [$f1a9: sta $07f9]
 	move.b	d0,(a0)                         	| [...]
-	GET_ADDRESS	0x07db                     	| [$f1ac: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f1ac: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	0x07e1                     	| [$f1af: sta $07e1]
 	move.b	d0,(a0)                         	| [...]
@@ -21996,7 +21996,7 @@ l_f237:
 	jbsr	show_us_map_screen_ebf1           	| [$f23c: jsr show_us_map_screen_ebf1]
 	jbsr	l_eb9a                            	| [$f23f: jsr $eb9a]
 	move.b	#0x02,d0                        	| [$f242: lda #$02]
-	GET_ADDRESS	0x07db                     	| [$f244: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f244: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$f247: lda #$00]
 	GET_ADDRESS	timer_07f5                 	| [$f249: sta timer_07f5]
@@ -22115,7 +22115,7 @@ l_f2bb:
 	GET_ADDRESS	logical_scroll_value_lsb_07de	| [$f2f6: sta logical_scroll_value_lsb_07de]
 	move.b	d0,(a0)                         	| [...]
 	move.b	#0x01,d0                        	| [$f2f9: lda #$01]
-	GET_ADDRESS	0x07db                     	| [$f2fb: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f2fb: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	clr.b	d0                               	| [$f2fe: lda #$00]
 	GET_ADDRESS	timer_07f5                 	| [$f300: sta timer_07f5]
@@ -22361,7 +22361,7 @@ l_f476:
 	cmp.b	#0x05,d1                         	| [$f47a: cpx #$05]
 	* bcc=>bcs (cmp above)
 	bcs	l_f476                             	| [$f47c: bcc $f476]
-	GET_ADDRESS	0x07db                     	| [$f47e: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f47e: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	l_cf73                            	| [$f481: jsr $cf73]
 	clr.b	d0                               	| [$f484: lda #$00]
@@ -22535,7 +22535,7 @@ l_f5a0:
 	jbsr	l_cf73                            	| [$f5a8: jsr $cf73]
 	jbsr	clear_screen_cf35                 	| [$f5ab: jsr clear_screen_cf35]
 	clr.b	d0                               	| [$f5ae: lda #$00]
-	GET_ADDRESS	0x07db                     	| [$f5b0: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f5b0: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	move.b	#0x11,d0                        	| [$f5b3: lda #$11]
 	GET_ADDRESS	screen_id_07e4             	| [$f5b5: sta screen_id_07e4]
@@ -22597,7 +22597,7 @@ l_f613:
 	cmp.b	#0x05,d1                         	| [$f617: cpx #$05]
 	* bcc=>bcs (cmp above)
 	bcs	l_f613                             	| [$f619: bcc $f613]
-	GET_ADDRESS	0x07db                     	| [$f61b: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f61b: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	reset_scrolling_eae2              	| [$f61e: jsr reset_scrolling_eae2]
 	jbsr	l_cf73                            	| [$f621: jsr $cf73]
@@ -22707,7 +22707,7 @@ l_f6bb:
 	OP_W_ON_ZP_ADDRESS	move,nb_credits_0035,d0 |  [$f6de: sta nb_credits_0035]
 	 |  [$f6e0: cld]
 	move.b	#0x01,d0                        	| [$f6e1: lda #$01]
-	GET_ADDRESS	0x07db                     	| [$f6e3: sta $07db]
+	GET_ADDRESS	scroll_lock_07db                     	| [$f6e3: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	OP_R_ON_ZP_ADDRESS	move,game_state_bits_46,d0 |  [$f6e6: lda game_state_bits_46]
 	and.b	#0xbf,d0                         	| [$f6e8: and #$bf]
