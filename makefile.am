@@ -6,9 +6,11 @@ MAIN_020 = ..\data\$(PROGNAME)_020
 ifdef RELEASE_BUILD
 OPT_RELEASE = --defsym RELEASE=1
 OPT_RELEASE_LINK = -s
+OPT_WHD_RELEASE=1
 else
 OPT_RELEASE = 
 OPT_RELEASE_LINK = 
+OPT_WHD_RELEASE=0
 endif
 
 # Bebbo's package usually installs itself there
@@ -18,7 +20,6 @@ ASM = $(ASM_BASE) -m68000
 ASM_020 = $(ASM_BASE) -m68020 --defsym MC68020=1
 START_OBJ = amiga.o
 WHDLOADER = ..\$(PROGNAME).slave
-WHDLOADER_CHIP = ..\$(PROGNAME)_chip.slave
 ASSETS = ..\assets\amiga
 AMIGASRC = amiga
 SOURCE = $(AMIGASRC)/$(PROGNAME)HD.s
@@ -35,11 +36,11 @@ WHDASM = vasmm68k_mot -DDATETIME -I$(HDBASE)/amiga39_JFF_OS/include -I$(WHDBASE)
 # leave START_OBJ first
 OBJS = $(START_OBJ) sounds.o bank0.o bank1.o ram.o rom.o vbr.o ReadJoyPad.o ptplayer.o 
 
-all : $(MAIN_000) $(AMIGA_SHELL) $(WHDLOADER) $(WHDLOADER_CHIP) $(AMIGASRC)/sounds.68k 
-#$(MAIN_020) not built
+all : $(MAIN_020) $(AMIGA_SHELL) $(WHDLOADER) $(WHDLOADER_CHIP) $(AMIGASRC)/sounds.68k 
+#$(MAIN_000) not built
 
 clean:
-	del $(OBJS) $(PROGNAME)_000.o $(PROGNAME)_020.o "$(MAIN_000)" "$(MAIN_020)"
+	del $(OBJS) $(PROGNAME)_000.o $(PROGNAME)_020.o "$(MAIN_000)" "$(MAIN_020)" $(WHDLOADER)
 	
 shell.o: $(AMIGASRC)/shell.68k
 	$(ASM) -Iamiga $(AMIGASRC)/shell.68k -o shell.o
@@ -71,7 +72,7 @@ $(PROGNAME)_000.o: $(PROGNAME).68k $(PROGNAME)_bank1.68k $(PROGNAME).inc sounds.
 $(PROGNAME)_020.o: $(PROGNAME).68k $(PROGNAME)_bank1.68k $(PROGNAME).inc sounds.inc
 	$(ASM_020) $(PROGNAME).68k -o $(PROGNAME)_020.o
 	
-amiga.o: $(AMIGASRC)/amiga.68k $(AMIGASRC)/sprite_size.68k $(PROGNAME).inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/sound_entries.68k
+amiga.o: $(AMIGASRC)/amiga.68k $(AMIGASRC)/sprite_size.68k $(PROGNAME).inc $(AMIGASRC)/utility_macros.inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/sound_entries.68k
 	$(ASM_020) -Iamiga $(AMIGASRC)/amiga.68k -o amiga.o
 vbr.o: $(AMIGASRC)/vbr.68k
 	$(ASM_020) -Iamiga $(AMIGASRC)/vbr.68k -o vbr.o
@@ -86,8 +87,5 @@ ReadJoyPad.o: $(AMIGASRC)/ReadJoyPad.68k amiga/ReadJoyPad.i
 
 $(WHDLOADER) : $(SOURCE)
 	wdate.py> datetime
-	$(WHDASM) -o $(WHDLOADER) $(SOURCE)
+	$(WHDASM) -DRELEASE=$(OPT_WHD_RELEASE) -o $(WHDLOADER) $(SOURCE)
 	
-$(WHDLOADER_CHIP) : $(SOURCE)
-	wdate.py> datetime
-	$(WHDASM) -DCHIP_ONLY -o $(WHDLOADER_CHIP) $(SOURCE)

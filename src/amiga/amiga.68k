@@ -40,7 +40,7 @@ CURRENT_SPRITE_SIZE = 4
 
 SCORE_FILE_SIZE = 0x23		| wrong
 
-LOG_BUFFER_SIZE = 0x300000
+LOG_BUFFER_SIZE = 0x8000
 
 NB_CLUTS_POW = 3
 NB_CLUTS = 1<<NB_CLUTS_POW
@@ -1088,10 +1088,6 @@ really_update_sprites:
 	dbf		d7,1b
 20:
 	rts
-
-mockup:
-	.byte	0x51,0x96,0xA6,0x4A
-	.skip	0xFC
 	
 compute_sprite_xy_code:
 	moveq	#0,d0
@@ -1198,7 +1194,7 @@ update_one_bob:
 0:
 
 	jbsr	compute_sprite_xy_code
-
+	
 	.ifne	OPT_NET_BACKGROUND_TRICK
 	cmp.w	#0X2E2,d2
 	jne 	0f
@@ -1236,6 +1232,8 @@ update_one_bob:
 	lea		sprite_group_table(pc),a3
 	move.w	(a3,d2.w),d4
 	jeq		10f			| nothing to do
+
+
 	btst	#6,d3
 	jne		101f
 	* mirror: negate the code
@@ -1247,9 +1245,16 @@ update_one_bob:
 	add.w	d2,d2	| code times 2
 10:
 	add.w	d2,d2				| code times 4 now
+
+*	move.w	d2,-(a7)
+*	lsr.w	#2,d2
+*	* log the sprite code here is a good idea to debug: this really will be displayed
+*	move.w	d2,0x110
+*	move.w	(a7)+,d2
+	
 	move.l	(a4,d2.w),d4		| get pointer from bob table
 	.ifdef	RELEASE
-	jeq		2f
+	jeq		2f				| can theorically happen as sprite update is not atomic (it could be...)
 	.else
 	jne		100f
 	* in dev mode, break if we try to display a non-existing bob
@@ -1267,11 +1272,11 @@ update_one_bob:
 	.endif
 	
 	* now select proper clut
+	move.l	d4,a0
 	moveq	#0,d2
 	move.b	d3,d2
 	and.b	#0x38,d2
 	lsr.w	#1,d2		| attribute times 4
-	move.l	d4,a0
 	move.l	(a0,d2.w),d4
 	jeq		2f		| invalid clut: can happen in transition phases
 	move.l	d4,a0
@@ -1371,6 +1376,7 @@ mirror_sprite_planes:
 	lea		mirror_table,a1
 	moveq	#0,d2
 	moveq	#NB_PLAYFIELD_PLANES+1-1,d6
+	lea		mirror_function_table(pc),a3
 0:
 	move.l	(a0)+,d1		| current plane data
 	jeq		1f				| no data: skip
@@ -1383,8 +1389,8 @@ mirror_sprite_planes:
 	subq	#1,d1		| minus one for dbf
 11:
 	move.w	d5,d0       | number of byte values (4: 16 bits + shifting)
+	.ifndef	MC68020
 	lea		mirror_function_table(pc),a3
-	.ifdef	NO68020
 	add.w	d0,d0
 	add.w	d0,d0
 	move.l	(a3,d0.w),a3
@@ -1401,7 +1407,13 @@ mirror_sprite_planes:
 mirror_16_bit_wide:
 	move.w	(a2)+,d2
 	jeq		14f					| zero: optim
+	.ifndef	MC68020
+	add.w	d2,d2
+	add.w	d2,d2
+	move.w	(a1,d2.l),(-2,a2)
+	.else
 	move.w	(a1,d2.l*2),(-2,a2)
+	.endif
 14:
 	dbf		d1,mirror_16_bit_wide		| next
 	rts
@@ -1411,12 +1423,22 @@ mirror_32_bit_wide:
 10:
 	move.w	(a2)+,d2
 	move.w	(a2),d0	
+	.ifndef	MC68020
+	add.w	d2,d2
+	add.w	d2,d2
+	add.w	d0,d0
+	add.w	d0,d0
+	move.w	(a1,d2.l),(a2)		| get mirror value
+	move.w	(a1,d0.l),-(a2)		| get mirror value
+	.else
 	move.w	(a1,d2.l*2),(a2)		| get mirror value
 	move.w	(a1,d0.l*2),-(a2)		| get mirror value
+	.endif
 	addq	#4,a2					| skip row
 	dbf		d1,10b
 	rts
 
+	.ifdef 	UNUSED
 mirror_48_bit_wide:
 
 	moveq	#0,d0
@@ -1451,15 +1473,15 @@ mirror_64_bit_wide:
 	addq	#6,a2					| skip row
 	dbf		d1,10b
 	rts
-
+	.endif
 	
 mirror_function_table:
 	.long	nope
 	.long	nope
 	.long	mirror_16_bit_wide
 	.long	mirror_32_bit_wide
-	.long	mirror_48_bit_wide  | not used right now
-	.long	mirror_64_bit_wide  | not used right now
+	.long	nope  | not used right now
+	.long	nope  | not used right now
 	.long	nope		| just in case, but there are no such objects
 	.long	nope
 
@@ -1579,7 +1601,7 @@ blit_planes_any_internal_cookie_cut:
 	
 4:	
     lea		mulNB_BYTES_PER_ROW_table(pc),a4
-	.ifdef	NO68020
+	.ifndef	MC68020
 	add.w	d1,d1
     move.w  (a4,d1.w),d1	| y times 40
 	.else
@@ -1592,7 +1614,7 @@ blit_planes_any_internal_cookie_cut:
     lsr.w   #3,d0			| X displacement in bytes
 	*bclr	#0,d0			| no need, it will be even
     and.w   #0xF,d6
-	.ifdef	NO68020
+	.ifndef	MC68020
 	add.w	d6,d6
 	add.w	d6,d6
 	move.l	(a4,d6.w),d7
@@ -2025,7 +2047,7 @@ osd_sound_command:
 	rts	
 	.endm
 	
-* set bank and y scroll (y scroll is useless here we deactivated it)
+* set bank and y scroll
 
 osd_set_bank:
 	move.b	d0,d4
@@ -2241,11 +2263,13 @@ update_bg_tile:
 	lea		background_restore_buffer,a3
 	add.l	d0,a3
 	
+	.ifdef	MC68020
+	move.l	(a0,d2.l*4),d0		| tile pointer as LONG!
+	.else
 	add.w	d2,d2
-	jeq		11f				| optimize
 	add.w	d2,d2	
 	move.l	(a0,d2.l),d0		| tile pointer as LONG!
-	
+	.endif
 	*jeq		11f 	| can happen when tile code is read when screen is being erased	
 	.ifndef	RELEASE
 	jne		12f
@@ -2257,7 +2281,13 @@ update_bg_tile:
 	.endif
 12:
 	move.l	d0,a4
+	.ifdef	MC68020
 	move.l	(a4,d3.w*4),d0	| get proper clut
+	.else
+	add.w	d3,d3
+	add.w	d3,d3	
+	move.l	(a4,d3.w),d0	| get proper clut
+	.endif
 	jeq		11f
 	
 	
@@ -2317,7 +2347,7 @@ store_sprite_pos:
 
     lea	HW_SpriteXTable(pc),a0
 	
-	.ifdef	NO68020
+	.ifndef	MC68020
     add.w	d0,d0
     add.w	d0,d0
     move.l	(a0,d0.w),d0
@@ -2438,6 +2468,7 @@ osd_read_p1_inputs:
 	tst.b	(1,a0)		| "1" key like in MAME
 	beq.b	0f
 	bclr	#BIT_START_1P,d0
+	clr.b	net_drawn	| kludge as "continue" screen redraws the field. Starting resets flag!
 0:
 	move.b	d0,0x200
 	movem.l	(a7)+,a0/d1
@@ -2450,6 +2481,7 @@ osd_read_p2_inputs:
 	tst.b	(2,a0)		| "2" key like in MAME
 	beq.b	0f
 	bclr	#BIT_START_2P,d0
+	clr.b	net_drawn
 0:	
 
 	move.l	(a7)+,a0
@@ -2903,10 +2935,12 @@ osd_read_system:
 *	btst	#JPB_BTN_UP,d1		| "1" key like in MAME
 *	beq.b	0f
 *	bclr	#BIT_START_1P,d0
+*	clr.b	net_drawn
 *0:
 *	btst	#JPB_BTN_DOWN,d1		| "2" key like in MAME
 *	beq.b	0f
 *	bclr	#BIT_START_2P,d0
+*	clr.b	net_drawn
 *0:	
 *1:	
 	movem.l	(a7)+,a0/d1

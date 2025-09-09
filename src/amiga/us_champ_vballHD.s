@@ -3,7 +3,7 @@
 	INCLUDE	whdload.i
 	INCLUDE	whdmacros.i
 
-;DEV_MODE
+
 
 EXPMEM = $180000
 CHIPSIZE = $1C0000
@@ -11,7 +11,7 @@ CHIPSIZE = $1C0000
 _base	SLAVE_HEADER					; ws_security + ws_id
 	dc.w	17					; ws_version (was 10)
 	dc.w	WHDLF_NoError|WHDLF_ReqAGA
-    IFD DEV_MODE
+    IFEQ RELEASE
 	dc.l	$200000					; ws_basememsize
 	ELSE
 	dc.l	CHIPSIZE
@@ -25,7 +25,7 @@ _keydebug
 _keyexit
 	dc.b	$59					; ws_keyexit
 _expmem
-    IFD DEV_MODE
+    IFEQ RELEASE
     dc.l    $700000
     ELSE
 	dc.l	EXPMEM					; ws_expmem
@@ -66,7 +66,7 @@ DECL_VERSION:MACRO
 	ENDM
 _data   dc.b    "data",0
 _name	dc.b	"US Championship Volleyball"
-	IFD	DEV_MODE
+	IFEQ	RELEASE
 	dc.b	" (dev mode)"
 	ENDC
 		dc.b	0
@@ -86,14 +86,11 @@ start:
 	move.l	a0,a2
 	move.l	a0,a2
     
-    IFD CHIP_ONLY
-    lea  _expmem(pc),a0
-    move.l  #$60000,(a0)
-	ELSE
+
 	move.l	_expmem(pc),a0
 	add.l	#EXPMEM,a0
 	move.l 	a0,a7		; top of fastmem
-    ENDC
+
     lea progstart(pc),a0
     move.l  _expmem(pc),(a0)
 
@@ -143,6 +140,6 @@ progstart
 	; 020 exe just uses CCR instead of SR. Not a problem in
 	; supervisor mode
 exe:
-	dc.b	"us_champ_vball_000",0
+	dc.b	"us_champ_vball_020",0
 
 	

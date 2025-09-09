@@ -59,6 +59,7 @@ sprite_prom_bank_07f4 = 0x7f4
 tile_prom_bank_07f3 = 0x7f3
 sound_queue_07ea = 0x7ea
 nb_queued_sounds_07e9 = 0x7e9
+sprite_ram_0800 = 0x800
 p1_1000 = 0x1000
 p2_1001 = 0x1001
 p3_1005 = 0x1005

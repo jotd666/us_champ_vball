@@ -1,20 +1,14 @@
 - too much top of the screen is shown (player select, also levels)
-- bottom of the screen: strange flickering of sprites like if double buffering is not there
+- during a spike+counter, game slows down a lot
 - exclude (still draw) net sprite tiles where they are hit by the ball (when failing the serve)
+  currently net doesn't budge when hit by ball
 - draw net sprites (not poles) only if some x/y sprites are too close (right side players very close to the net)
+  for that we need to make a separate net sprites table (not with the "do not draw" table)
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
-- profile MAME cpu count
-- to test speed: remove sand splash
-- DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
-- keep ripping levels sprites: level 3 seems to miss sprite 36B!!! level 2 too
 - continue timer carry issue decreases 2 by 2
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
-
-
-- rip more sounds??
-- maybe not include some sounds?
-
+- maybe not include some sounds to save memory?
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
 - create Pistorm/vampire version with 128 colors
@@ -23,16 +17,19 @@
 
 minor:
 
+- sometimes starts with 10 credits!!
 - still missing some black pixels (big score sprites) not always... why????
 - hawaii: X scrolling wraps only in that case grrrrrr
+- bottom of the screen: strange flickering of sprites like if double buffering is not there
 
 optims
 
   
+- in dev mode check that prev address (store in A2) is != from A0, use GET_ADDRESS_FORCE to override
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
 - better bank switching: use A5 for bank base to get more speed
 - 50Hz enabled for Pistorm 128 color version
-
+- optimize bob erase/redraw at least for referee and score sprites
 - level 1 then map context: make a kludge to avoid having to reload level 1 tiles+sprites after map
   we can probably load map with level 1 tiles+sprites loaded but that won't work for higher levels
   so maybe create a context only for "select player" screen (with only a few tiles/sprites) and make a
@@ -45,8 +42,6 @@ converter:
 - sbcd/abcd warning: check bpl flag afterwards, change to bcc
 - alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
 - add or addx + addq + addx without jmp/jra/rts/CLR_XC_FLAGS/lsr/lsl/asr/asl/ror/rol => error
-
-- more accurate irq period (do irqs after pal wait if possible, at least 1 should be possible!)
 
 start log regs: f519: start ball (serve)
 
