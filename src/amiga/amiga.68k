@@ -30,8 +30,7 @@ AFB_68020 = 1
 
 
 TOTAL_PUBLIC_MEMORY_SIZE = 400000
-* this is the minimum memory required for level 5
-TOTAL_CHIP_MEMORY_SIZE = 900000	
+TOTAL_CHIP_MEMORY_SIZE = 550000	
 
 BORDERBLANK = 1
 
@@ -508,7 +507,7 @@ parse_integer:
     beq.b   .out
     
     cmp.b   #32,d2
-    beq.b   .skip
+    beq.b   .sk
     sub.b   #48,d2
     bcs.b   .error
     cmp.b   #10,d2
@@ -520,7 +519,7 @@ parse_integer:
     dbf d3,.muloop
 .doadd:
     add.l   d2,d0
-.skip:
+.sk:
     subq.l  #1,d1
     bra.b   .loop2
 .out:    
@@ -3882,10 +3881,6 @@ frameskip:
 	.word	0
 no_main_tune:
 	.word	0
-tiles_row_flags:
-	.skip	0x20
-tiles_refresh_table:
-	.skip	0x400
 	
 vbl_counter:
 	.word	0
@@ -4085,14 +4080,12 @@ copperlist_colors:
 	.word	0x8001,0xFFFE
 pal_intreq_block_game:
 	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
-	.set	current_line,128
 
 	*.word	0xF001,0xFFFE	| if we don't add an extra wait, NTSC version locks up
 	
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait
 	* extra wait for PAL (NTSC can't afford this)
-	*.set	current_line,8
 
 	
 pal_wait:

@@ -5,15 +5,12 @@
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
 - profile MAME cpu count
-- try to get rid of the high speed interrupt, reverse engineer the scrolling
 - to test speed: remove sand splash
 - DB16: write blank char doesn't work in 2BA9: debug: comes and goes, super annoying
 - keep ripping levels sprites: level 3 seems to miss sprite 36B!!! level 2 too
 - continue timer carry issue decreases 2 by 2
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 
-- sometimes irq locks up the keyboard interrupt. maybe no need to call "update scrolling" so often
-  actually update scrolling should be called only every each frame! no need to overdo it!!!!
 
 - rip more sounds??
 - maybe not include some sounds?

@@ -3,16 +3,16 @@
 	INCLUDE	whdload.i
 	INCLUDE	whdmacros.i
 
-;CHIP_ONLY
+;DEV_MODE
 
-EXPMEM = $700000
-CHIPSIZE = $200000
+EXPMEM = $180000
+CHIPSIZE = $1C0000
 
 _base	SLAVE_HEADER					; ws_security + ws_id
 	dc.w	17					; ws_version (was 10)
 	dc.w	WHDLF_NoError|WHDLF_ReqAGA
-    IFD CHIP_ONLY
-	dc.l	CHIPSIZE+$40000+EXPMEM					; ws_basememsize
+    IFD DEV_MODE
+	dc.l	$200000					; ws_basememsize
 	ELSE
 	dc.l	CHIPSIZE
 	ENDC
@@ -25,8 +25,8 @@ _keydebug
 _keyexit
 	dc.b	$59					; ws_keyexit
 _expmem
-    IFD CHIP_ONLY
-    dc.l    $0
+    IFD DEV_MODE
+    dc.l    $700000
     ELSE
 	dc.l	EXPMEM					; ws_expmem
     ENDC
@@ -65,7 +65,11 @@ DECL_VERSION:MACRO
 	ENDC
 	ENDM
 _data   dc.b    "data",0
-_name	dc.b	"US Championship Volleyball",0
+_name	dc.b	"US Championship Volleyball"
+	IFD	DEV_MODE
+	dc.b	" (dev mode)"
+	ENDC
+		dc.b	0
 _copy	dc.b	'2025 JOTD',0
 _info
     dc.b    "Original by Technos 1988",0
