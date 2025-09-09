@@ -2,7 +2,7 @@
 	.include "breakpoint.inc"
 	.global	nmi_ee9e
 	.global	reset_eea1
-	.global	irq_eea4
+
 * game performs indirect jump to 0000
 * sometimes it's a jump table, but sometimes it's
 * an address that was set by the game as return callback
@@ -21475,38 +21475,32 @@ l_ee80:
 	rts                                    	| [$ee9d: rts]
 
 nmi_ee9e:
-	jmp	l_eee0                             	| [$ee9e: jmp $eee0]
+	* call "fast" irq first, but just once in a while, should be enough
+	jbsr	irq_eea4
+	* now proceed to standard 1/60th second irq	
+	jmp	nmi_eee0                             	| [$ee9e: jmp $eee0]
 
 reset_eea1:
 	jmp	reset_ef0d                         	| [$eea1: jmp reset_ef0d]
 
 irq_eea4:
-	 |  [$eea4: jmp $eea7] [disabled] useless, really!
-l_eea7:
-	 |  [$eea7: cld]
-	 * no need to save regs                      	| [$eea8: pha]
-* super fast loop (around 1ms), only thing done is scrolling update
-	OP_W_ON_ZP_ADDRESS	addq,irq_07_counter_31,#1 |  [$eea9: inc irq_07_counter_31] fine tick (0-7)
 	jbsr	update_scrolling_ea7c             	| [$eeab: jsr update_scrolling_ea7c]
-	OP_R_ON_ZP_ADDRESS	move,irq_07_counter_31,d0 |  [$eeae: lda irq_07_counter_31]
-	and.b	#0x07,d0                         	| [$eeb0: and #$07]
-	jne	l_eedb                             	| [$eeb2: jne $eedb]
-* do things slightly less often: once every 8 irqs (around each 8 ms)
 	OP_R_ON_ZP_ADDRESS	move,nb_credits_0035,d0 |  [$eeb4: lda nb_credits_0035]
-	movem.w	d0/d1/d2,-(sp)                       	| [$eeb6: pha]
+	move.w	d0,-(sp)                       	| [$eeb6: pha]
 	                        	| [$eeb7: txa]
 	                       	| [$eeb8: pha]
 	                        	| [$eeb9: tya]
 	                       	| [$eeba: pha]
 	jbsr	play_sound_if_needed_d7d0         	| [$eebb: jsr play_sound_if_needed_d7d0]
 	jbsr	check_coin_inserted_f715          	| [$eebe: jsr check_coin_inserted_f715]
-	movem.w	(sp)+,d0/d1/d2                        	| [$eec1: pla]
+	move.w	(sp)+,d0                        	| [$eec1: pla]
 	                    	| [$eec2: tay]
 	                    	| [$eec3: pla]
 	                    	| [$eec4: tax]
 	                    	| [$eec5: pla]
 	OP_R_ON_ZP_ADDRESS	cmp,nb_credits_0035,d0 |  [$eec6: cmp nb_credits_0035]
-	beq	l_eedb                             	| [$eec8: beq $eedb]
+	jeq	l_eedb                             	| [$eec8: beq $eedb]
+	* number of credits has changed: quit!!
 	OP_R_ON_ZP_ADDRESS	move,game_playing_flag_36,d0 |  [$eeca: lda game_playing_flag_36]
 	GET_ADDRESS	0x07f9                     	| [$eecc: ora $07f9]
 	or.b	(a0),d0                           	| [...]
@@ -21514,16 +21508,12 @@ l_eea7:
 * number of credits > 0: branch on player select screen
 * recovering from interrupts and escaping from the irq
 	jbsr	escape_from_irq |  [$eed1: ldx #$ff] set top of the stack
-	 |  [$eed3: txs]
-	 |  [$eed4: cli] enable interrupts
-	 |  [$eed5: sta irq_ack_100b] ack interrupt
-	 |  [$eed8: jmp $eff5] and jump!
 * ack interrupt
 l_eedb:
-	 |  [$eedb: sta irq_ack_100b]
-	                        	| [$eede: pla]
 	rts |  [$eedf: rti]
-l_eee0:
+	
+	
+nmi_eee0:
 	* no need to save registers, the host layer handles that
 	                       	| [$eee0: pha]
 	                        	| [$eee1: txa]
@@ -21555,7 +21545,7 @@ wait_for_vblank_eef9:
 	                       	| [$ef0a: tax]
 	                       	| [$ef0b: pla]
 	rts |  [$ef0c: rti]
-
+	
 reset_ef0d:
 	SET_I_FLAG                             	| [$ef0d: sei] no interrupts
 	 |  [$ef0e: cld] no decimal mode
