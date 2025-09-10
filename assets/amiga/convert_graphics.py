@@ -50,7 +50,8 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
     nb_rows = tiles_1.size[1] // height
     nb_cols = tiles_1.size[0] // width
 
-    hidden_sprites = get_hidden_sprites()
+    # hidden sprites only for sprites, not tiles
+    hidden_sprites = get_hidden_sprites() if is_bob else set()
 
     tileset_1 = []
 
@@ -285,7 +286,6 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
 
 magenta = (254,0,254)
 
-dump_it = True
 
 def quantize_palette(rgb_tuples,img_type,nb_quantize,transparent=None):
     rgb_configs = set(rgb_tuples)
@@ -713,8 +713,8 @@ if sprite_size_cache_file.exists():
 plane_range = [5,6,7]
 level_range = range(1,6)
 
-plane_range = [6,7]
-level_range = [1]
+##plane_range = [5,6]
+##level_range = [1]
 for nb_planes in plane_range:
     print(f"Generating for nb colors = {1<<nb_planes}")
     gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
