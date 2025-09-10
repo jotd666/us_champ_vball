@@ -8,15 +8,14 @@ sprite_names = get_sprite_names()
 possible_hw_sprites = set()
 
 
-nb_planes = 6
-nb_colors = 1<<nb_planes
+
 nb_cluts = 8
 
+dump_it = False
 
 def asm2bin(source,dest):
     subprocess.run(["vasmm68k_mot","-nosym","-pic","-Fbin",source,"-o",dest],check=True,stdout=subprocess.DEVNULL)
 
-dump_it = True
 
 if dump_it:
     if not os.path.exists(dump_dir):
@@ -342,7 +341,19 @@ def quantize_palette(rgb_tuples,img_type,nb_quantize,transparent=None):
     return rval
 
 
-def gen_context_files(context_name,with_sprites=True):
+def gen_context_files(context_name,nb_planes,with_sprites=True):
+
+    nb_colors = 1<<nb_planes
+
+    if nb_planes < 6:
+        chipset = "ecs"
+    else:
+        chipset = f"aga_{nb_colors}"
+
+    sub_data_dir = data_dir / chipset
+
+    sub_data_dir.mkdir(exist_ok=True)
+
     tile_sheet_dict = {i:Image.open(sheets_path / context_name / "tiles" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
     if with_sprites:
         sprite_sheet_dict = {i:Image.open(sheets_path / context_name / "sprites" / f"pal_{i:02x}.png") for i in range(nb_cluts)}
@@ -474,12 +485,14 @@ def gen_context_files(context_name,with_sprites=True):
     else:
         print(f"{context_name}: Used number of colors {used_nb_colors+1}, tiles number of colors {len(tile_palette)}")
 
-    if remaining>0:
-        full_palette += remaining * [(0x10,0x20,0x30)]
 
     if must_insert_magenta:
         # magenta (transparent) first
         full_palette.insert(0,magenta)
+
+    # recompute remaining colors
+    remaining = nb_colors-len(full_palette)
+    full_palette += remaining * [(0x10,0x20,0x30)]
 
     # sprite_set_list is now a 16x512 matrix of sprite tiles
 
@@ -518,7 +531,7 @@ def gen_context_files(context_name,with_sprites=True):
                 f.write(f"net_plane_{i}:\n")
                 block = net_bitplanes[i*block_size:(i+1)*block_size]
                 dump_asm_bytes(block,f)
-        out_bin_file = data_dir / out_asm_file.stem
+        out_bin_file = sub_data_dir / out_asm_file.stem
         asm2bin(out_asm_file,out_bin_file)
 
     out_asm_file = gen_dir / f"tiles_{context_name}.s"
@@ -587,10 +600,10 @@ def gen_context_files(context_name,with_sprites=True):
             f.write(f"tile_plane_{v:02d}:")
             dump_asm_bytes(k,f)
 
-    out_bin_file = data_dir / out_asm_file.stem
+    out_bin_file = sub_data_dir / out_asm_file.stem
     asm2bin(out_asm_file,out_bin_file)
 
-    out_bin_file = data_dir / f"palette_{context_name}"
+    out_bin_file = sub_data_dir / f"palette_{context_name}"
     out_asm_file = gen_dir / f"palette_{context_name}.s"
     with open(out_asm_file,"w") as f:
         full_palette[0] = (0,0,0)  # restore black in first position
@@ -598,7 +611,7 @@ def gen_context_files(context_name,with_sprites=True):
     asm2bin(out_asm_file,out_bin_file)
 
     out_asm_file = gen_dir / f"bobs_{context_name}.s"
-    out_bin_file = data_dir / out_asm_file.stem
+    out_bin_file = sub_data_dir / out_asm_file.stem
     with open(out_asm_file,"w") as f:
 
         f.write("bob_table:\n")
@@ -696,14 +709,18 @@ if sprite_size_cache_file.exists():
     with open(sprite_size_cache_file,"r") as f:
         double_size_sprites = json.load(f)
 
-##gen_context_files("intro",with_sprites=False)
-##gen_context_files("map",with_sprites=False)
 
-gen_context_files("level_1")  # also select
-gen_context_files("level_2")
-gen_context_files("level_3")
-gen_context_files("level_4")  # also demo
-gen_context_files("level_5")
+plane_range = [5,6,7]
+level_range = range(1,6)
+
+plane_range = [6,7]
+level_range = [1]
+for nb_planes in plane_range:
+    print(f"Generating for nb colors = {1<<nb_planes}")
+    gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
+    gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
+    for level in level_range:
+        gen_context_files(f"level_{level}",nb_planes=nb_planes)  # also select
 
 if any(double_size_sprites):
     with open(sprite_size_cache_file,"w") as f:

@@ -99,7 +99,17 @@ _custom = 0xDFF000
 
 OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
-NB_PLAYFIELD_PLANES = 6
+*NB_PLAYFIELD_PLANES = 6  | this is externally defined!!
+	.ifndef	NB_PLAYFIELD_PLANES
+	.error	"NB_PLAYFIELD_PLANES must be defined via --defsym"
+	.endif
+	
+	.if	NB_PLAYFIELD_PLANES>5
+OPT_AGA_MODE=1
+	.else
+OPT_AGA_MODE=0
+	.endif
+	
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 80
 
@@ -3869,19 +3879,6 @@ scroll_x_lo:
 	.word	0
 
 
-	.ifne	OPT_ENABLE_LOGGING
-tile_bank_table:
-	.skip	0x1000
-tile_log_table:
-	* a lot of combinations aren't used (fortunately!)
-	.skip	TILE_LOG_LENGTH
-tile_log_table_end:
-
-sprite_log_table:
-	* a lot of combinations aren't used (fortunately!)
-	.skip	SPRITE_LOG_LENGTH
-sprite_log_table_end:
-	.endif
 
 color_copper_pointers:
 	.skip	TOTAL_NB_COLORS*4
@@ -4009,6 +4006,20 @@ _end_of_ng_code:
 	.section	.bss
 
 
+	.ifne	OPT_ENABLE_LOGGING
+tile_bank_table:
+	.skip	0x1000
+tile_log_table:
+	* a lot of combinations aren't used (fortunately!)
+	.skip	TILE_LOG_LENGTH
+tile_log_table_end:
+
+sprite_log_table:
+	* a lot of combinations aren't used (fortunately!)
+	.skip	SPRITE_LOG_LENGTH
+sprite_log_table_end:
+	.endif
+	
 public_memory_block:
 	.skip	TOTAL_PUBLIC_MEMORY_SIZE
 	

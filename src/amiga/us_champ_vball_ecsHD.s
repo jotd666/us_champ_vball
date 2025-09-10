@@ -6,11 +6,11 @@
 
 
 EXPMEM = $180000
-CHIPSIZE = $1C0000
+CHIPSIZE = $100000
 
 _base	SLAVE_HEADER					; ws_security + ws_id
 	dc.w	17					; ws_version (was 10)
-	dc.w	WHDLF_NoError|WHDLF_ReqAGA
+	dc.w	WHDLF_NoError
     IFEQ RELEASE
 	dc.l	$200000					; ws_basememsize
 	ELSE
@@ -54,7 +54,7 @@ _config
 	ENDC
 
 DECL_VERSION:MACRO
-	dc.b	"1.0"
+	dc.b	"1.1"
 	IFD BARFLY
 		dc.b	" "
 		INCBIN	"T:date"
@@ -65,7 +65,7 @@ DECL_VERSION:MACRO
 	ENDC
 	ENDM
 _data   dc.b    "data",0
-_name	dc.b	"US Championship Volleyball"
+_name	dc.b	"US Championship Volleyball ECS"
 	IFEQ	RELEASE
 	dc.b	" (dev mode)"
 	ENDC
@@ -84,8 +84,12 @@ start:
 	LEA	_resload(PC),A1
 	MOVE.L	A0,(A1)
 	move.l	a0,a2
-	move.l	a0,a2
-    
+
+	;setup cache: max cache everywhere
+	move.l	#WCPUF_Base_NC|WCPUF_Exp_CB|WCPUF_Slave_CB|WCPUF_IC|WCPUF_DC|WCPUF_BC|WCPUF_SS|WCPUF_SB,d0
+	move.l	#WCPUF_All,d1
+	jsr	(resload_SetCPU,a2)
+   
 
 	move.l	_expmem(pc),a0
 	add.l	#EXPMEM,a0
@@ -137,9 +141,8 @@ _resload:
 	dc.l	0
 progstart
     dc.l    0
-	; 020 exe just uses CCR instead of SR. Not a problem in
-	; supervisor mode
+
 exe:
-	dc.b	"us_champ_vball_020",0
+	dc.b	"us_champ_vball_000",0
 
 	

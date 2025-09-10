@@ -1,6 +1,5 @@
 - too much top of the screen is shown (player select, also levels)
 - increase screen height as when screen scrolls up, players feet blit 'wrap' to the top other planes
-- during a spike+counter, game slows down a lot. Log blits but mostly log blit size!
 - use CPU-driven erase?
 - exclude (still draw) net sprite tiles where they are hit by the ball (when failing the serve)
   currently net doesn't budge when hit by ball
@@ -13,7 +12,7 @@
 - maybe not include some unused sounds to save memory?
 - identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
-- create Pistorm/vampire version with 128 colors
+- create version with 128 colors
 - create 68000/ECS version with 32 colors: fmode=0!! bplmod, ddfstop, pal copperlist & scroll table
 
 minor:
@@ -25,7 +24,8 @@ minor:
 
 optims
 
-  
+- update_bg_tile: pre-compute address => x/y => screen address offset, make a 0x1000 size table (word) 
+  with address offsets (can be done at game startup)
 - in dev mode check that prev address (store in A2) is != from A0, use GET_ADDRESS_FORCE to override
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
 - better bank switching: use A5 for bank base to get more speed
