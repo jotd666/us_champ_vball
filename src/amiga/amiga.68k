@@ -1400,7 +1400,6 @@ mirror_sprite_planes:
 	.ifndef	MC68020
 	lea		mirror_function_table(pc),a3
 	add.w	d0,d0
-	add.w	d0,d0
 	move.l	(a3,d0.w),a3
 	jsr		(a3)
 	.else
@@ -1413,12 +1412,12 @@ mirror_sprite_planes:
 	rts
 	
 mirror_16_bit_wide:
+	moveq	#0,d2
 	move.w	(a2)+,d2
 	jeq		14f					| zero: optim
 	.ifndef	MC68020
 	add.w	d2,d2
-	add.w	d2,d2
-	move.w	(a1,d2.l),(-2,a2)
+	move.w	(a1,d2.l),(-2,a2)   | use .l as d2.w may be > 0x7FFF
 	.else
 	move.w	(a1,d2.l*2),(-2,a2)
 	.endif
@@ -1428,13 +1427,12 @@ mirror_16_bit_wide:
 
 mirror_32_bit_wide:	
 	moveq	#0,d0
+	moveq	#0,d2
 10:
 	move.w	(a2)+,d2
 	move.w	(a2),d0	
 	.ifndef	MC68020
 	add.w	d2,d2
-	add.w	d2,d2
-	add.w	d0,d0
 	add.w	d0,d0
 	move.w	(a1,d2.l),(a2)		| get mirror value
 	move.w	(a1,d0.l),-(a2)		| get mirror value
@@ -3708,19 +3706,7 @@ sprite_log_name:
 	.endif	
 
 
-	.ifndef	RELEASE
-log_ptr:
-	.long	log_buffer
 
-log_buffer:
-	.skip	LOG_BUFFER_SIZE
-	.rept	20
-	.long	0xCAFECAFE
-	.endr
-
-cpu_log_enable:
-	.word	0
-	.endif
 
 * all 4 channels
 	.align	2
@@ -4005,7 +3991,20 @@ _end_of_ng_code:
 
 	.section	.bss
 
+	.ifndef	RELEASE
+log_ptr:
+	.long	log_buffer
 
+log_buffer:
+	.skip	LOG_BUFFER_SIZE
+	.rept	20
+	.long	0xCAFECAFE
+	.endr
+
+cpu_log_enable:
+	.word	0
+	.endif
+	
 	.ifne	OPT_ENABLE_LOGGING
 tile_bank_table:
 	.skip	0x1000
