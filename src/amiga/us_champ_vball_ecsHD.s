@@ -42,11 +42,11 @@ _config
 ;	dc.b	"C1:X:invincible:0;"
 ;	dc.b	"C1:X:infinite lives:1;"
 	dc.b	"C1:X:cheat keys:4;"
-;	dc.b	"C3:X:25 Hz update:0;"
+	dc.b	"C2:X:50 Hz update:0;"
+	dc.b	"C2:X:win in 7 points:1;"
+	dc.b	"C3:L:difficulty level:easy,medium,hard,very hard;"
 	dc.b	"C4:L:start level:Daytona,New York,Los Angeles,Hawaii,Daytona 2,New York 2,Los Angeles 2,Hawaii 2,Air Base;"
-	IFD		CHIP_ONLY
-	dc.b	"C3:X:break at startup:31;"
-	ENDC
+
 	dc.b	0
 
 	IFD BARFLY

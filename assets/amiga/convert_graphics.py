@@ -716,7 +716,7 @@ level_range = range(1,6)
 ##plane_range = [5,6]
 ##level_range = [1]
 for nb_planes in plane_range:
-    print(f"Generating for nb colors = {1<<nb_planes}")
+    print(f"*** Generating for nb colors = {1<<nb_planes}")
     gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
     gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
     for level in level_range:

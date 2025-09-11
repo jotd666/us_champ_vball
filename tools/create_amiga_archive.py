@@ -30,13 +30,13 @@ def distribute(suffix):
     for file in ["readme.md",f"{gamename}_{chipset}.slave"]:
         shutil.copy(os.path.join(progdir,file),outdir)
 
-    #shutil.copy(os.path.join(progdir,"assets","amiga",f"Lock'N'Chase.info"),outdir)
+    shutil.copy(os.path.join(progdir,"assets","amiga",f"USChampionshipVball{chipset.upper()}.info"),outdir)
     datain = progdir/"data"/suffix
 
-    for suffix in ["000"]: #,"020"]:
-        # pack the file for floppy
-        exename = f"{gamename}_{suffix}"
-        subprocess.check_output(["cranker_windows.exe","-f",str(datain/exename),"-o",str(progdir/f"{exename}.rnc")])
+##    for suffix in ["000"]: #,"020"]:
+##        # pack the file for floppy
+##        exename = f"{gamename}_{suffix}"
+##        subprocess.check_output(["cranker_windows.exe","-f",str(datain/exename),"-o",str(progdir/f"{exename}.rnc")])
 
     pack_data = True
 
@@ -60,6 +60,7 @@ def distribute(suffix):
 
 distribute("ecs")
 distribute("aga_64")
+distribute("aga_128")
 
 subprocess.check_call(cmd_prefix+["clean"],cwd=progdir/"src")
 

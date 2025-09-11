@@ -21502,6 +21502,11 @@ nmi_ee9e:
 	jmp	nmi_eee0                             	| [$ee9e: jmp $eee0]
 
 reset_eea1:
+	tst.b	max_score
+	jne		0f
+	move.b	#MAX_SCORE,max_score
+	move.b	#APPROACHING_MAX_SCORE,critical_score
+0:
 	jmp	reset_ef0d                         	| [$eea1: jmp reset_ef0d]
 
 irq_eea4:
@@ -22230,9 +22235,9 @@ l_f3b1:
 	moveq	#0,d0
 	moveq	#0,d1
 	OP_W_ON_ZP_ADDRESS	move,game_state_bits_46,d0
-	move.b	#MAX_SCORE,d0
+	move.b	max_score,d0
 0:
-	cmp.b	#MAX_SCORE,d0                    	| [$f3b3: cmp #MAX_SCORE]
+	cmp.b	max_score,d0                    	| [$f3b3: cmp #MAX_SCORE]
 	* bcc=>bcs (cmp above)
 	bcs	l_f3d6                             	| [$f3b5: bcc $f3d6]
 * one team has won
@@ -22254,7 +22259,7 @@ l_f3cc:
 	jbsr	l_af82                            	| [$f3d0: jsr $af82]
 	jmp	l_f4fd                             	| [$f3d3: jmp $f4fd]
 l_f3d6:
-	cmp.b	#APPROACHING_MAX_SCORE,d0        	| [$f3d6: cmp #APPROACHING_MAX_SCORE]
+	cmp.b	critical_score,d0        	| [$f3d6: cmp #APPROACHING_MAX_SCORE]
 	jne	l_f3e9                             	| [$f3d8: jne $f3e9]
 	move.b	d1,d0                           	| [$f3da: txa]
 	eor.b	#0x01,d0                         	| [$f3db: eor #$01]
@@ -22262,7 +22267,7 @@ l_f3d6:
 * check for score > 8
 	GET_ADDRESS	score_array_57             	| [$f3de: lda score_array_57, x]
 	move.b	(a0,d1.w),d0                    	| [...]
-	cmp.b	#APPROACHING_MAX_SCORE,d0        	| [$f3e0: cmp #APPROACHING_MAX_SCORE]
+	cmp.b	critical_score,d0        	| [$f3e0: cmp #APPROACHING_MAX_SCORE]
 	* bcs=>bcc
 	bcc	l_f3e9                             	| [$f3e2: bcs $f3e9]
 * score >= 8: play stressful music
