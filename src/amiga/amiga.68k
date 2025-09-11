@@ -410,9 +410,11 @@ _user:
 	
 	move.b	start_level+3,start_level_flag
 	
+	* default is 25Hz, game crawls at 50Hz unless on pistorm
 	move.l	misc_options,d1
 	btst	#0,d1
-	sne		frameskip
+	seq		frameskip
+	
 	.ifndef	RELEASE
 	btst	#31,d1
 	sne		break_at_startup_flag
@@ -780,6 +782,14 @@ _vblank:
 	.endif
 	
 	
+	lea	_custom,a5
+	move.w	(intreqr,a5),d0
+	btst	#4,d0
+	jeq		23f
+	* interrupt arrived during this interrupt: this is taking too long
+	* so skip the refresh
+	move.b	#0,0x110
+	move.b	#1,flip_flop
 23:
 	.ifne	OPT_ENABLE_LOGGING
 	jbsr	log_used_tiles
@@ -791,6 +801,7 @@ _vblank:
 	beq.b	4f
 	move.l	return_address,(2,a7)		| change return address
 	clr.l	return_address				| just for this time
+	
 4:
     rte
 	
@@ -1818,8 +1829,6 @@ store_system:
 	move.l	d0,system_vbr
 1:
 	
-	* ATM force 25Hz, game crawls at 50Hz
-	st.b	frameskip
 
 	lea	_custom,a6
 	move.w	intenar(a6),old_intena
