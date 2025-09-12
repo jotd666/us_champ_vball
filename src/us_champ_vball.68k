@@ -5461,7 +5461,7 @@ l_7f13:
 	beq	l_7f10                             	| [$7f1d: beq $7f10]
 	GET_ADDRESS	0x07fa                     	| [$7f1f: inc $07fa]
 	addq.b	#1,(a0)                         	| [...]
-	GET_ADDRESS	0x07fa                     	| [$7f22: lda $07fa]
+	                     	| [$7f22: lda $07fa]
 	move.b	(a0),d0                         	| [...]
 	cmp.b	#0x20,d0                         	| [$7f25: cmp #$20]
 	beq	l_7f5c                             	| [$7f27: beq $7f5c]
@@ -5483,6 +5483,7 @@ l_7f2e:
 	rts |  [$7f41: jra ($001b)] [indirect_jump]
 l_7f4c:
 	or.b	#0x80,d0                          	| [$7f4c: ora #$80]
+	NEW_ADDRESS
 	GET_ADDRESS	0x0316                     	| [$7f4e: sta $0316, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$7f51: lda #$00]
@@ -5813,7 +5814,7 @@ l_8167:
 	jra	l_81f9                             	| [$8177: jra $81f9]
 l_817a:
 	or.b	#0x80,d0                          	| [$817a: ora #$80]
-	GET_ADDRESS	0x0316                     	| [$817c: sta $0316, x]
+	                     	| [$817c: sta $0316, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$817f: lda #$00]
 	GET_ADDRESS	0x03b8                     	| [$8181: sta $03b8, x]
@@ -7600,7 +7601,7 @@ initialize_logical_xy_players_8cff:
 	move.b	(a0),d4	| [...]
 	asl.b	#1,d4                          	| [...]
 	move.b	d4,(a0)	| [...]
-	GET_ADDRESS	0x1b                       	| [$8d0b: adc $1b]
+	                       	| [$8d0b: adc $1b]
 	move.b	(a0),d4	| [...]
 	addx.b	d4,d0                         	| [...]
                                          | [$8d0d: asl a]
@@ -8231,7 +8232,7 @@ l_9130:
 	GET_ADDRESS	0x0327                     	| [$9146: lda $0327, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$9149: and #$7f]
-	GET_ADDRESS	0x0327                     	| [$914b: sta $0327, x]
+	                     	| [$914b: sta $0327, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x031a                     	| [$914e: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
@@ -8244,6 +8245,7 @@ l_9130:
     move.b	d0,(a0,d1.w)                 	| [...]
 	jbsr	l_91f3                            	| [$915c: jsr $91f3]
 l_915f:
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$915f: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$9162: and #$7f]
@@ -8257,6 +8259,7 @@ l_915f:
 	clr.b	d0                               	| [$9170: lda #$00]
 	jbsr	set_bank_d8df                     	| [$9172: jsr set_bank_d8df]
 l_9175:
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$9175: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$9178: and #$7f]
@@ -8272,6 +8275,7 @@ l_9189:
 	rts                                    	| [$9189: rts]
 
 l_91d8:
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$91d8: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$91db: and #$7f]
@@ -8295,6 +8299,7 @@ l_91f2:
 	rts                                    	| [$91f2: rts]
 
 l_91f3:
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$91f3: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x17,d0                         	| [$91f6: cmp #$17]
@@ -8312,7 +8317,7 @@ l_91f3:
 	GET_ADDRESS	0x030e                     	| [$9207: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x04,d0                          	| [$920a: ora #$04]
-	GET_ADDRESS	0x030e                     	| [$920c: sta $030e, x]
+	                     	| [$920c: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_920f:
 	rts                                    	| [$920f: rts]
@@ -8347,14 +8352,14 @@ callback_9237:
 	GET_ADDRESS	0x03c0                     	| [$923e: lda $03c0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$9241: ora #$80]
-	GET_ADDRESS	0x03c0                     	| [$9243: sta $03c0, x]
+	                     	| [$9243: sta $03c0, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	jne	l_9250                             	| [$9246: jne $9250]
 l_9248:
 	GET_ADDRESS	0x03c0                     	| [$9248: lda $03c0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$924b: and #$7f]
-	GET_ADDRESS	0x03c0                     	| [$924d: sta $03c0, x]
+	                     	| [$924d: sta $03c0, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_9250:
 	jbsr	l_9d8d                            	| [$9250: jsr $9d8d]
@@ -8452,7 +8457,7 @@ l_92f0:
 	beq	l_92fb                             	| [$92f7: beq $92fb]
 	move.b	#0x60,d2                        	| [$92f9: ldy #$60]
 l_92fb:
-	GET_ADDRESS	0x0337                     	| [$92fb: lda $0337, x]
+	                     	| [$92fb: lda $0337, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bmi	l_9307                             	| [$92fe: bmi $9307]
 	move.b	d2,d0                           	| [$9300: tya]
@@ -8479,7 +8484,7 @@ l_9318:
 	* bcc=>bcs (cmp above)
 	bcs	l_9327                             	| [$931a: bcc $9327]
 	move.b	#0xe0,d2                        	| [$931c: ldy #$e0]
-	GET_ADDRESS	objects_logical_y_array_b9 	| [$931e: lda objects_logical_y_array_b9, x]
+	 	| [$931e: lda objects_logical_y_array_b9, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x48,d0                         	| [$9320: cmp #$48]
 	* bcc=>bcs (cmp above)
@@ -8505,7 +8510,7 @@ l_9337:
 	GET_ADDRESS	0x030e                     	| [$933f: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0xef,d0                         	| [$9342: and #$ef]
-	GET_ADDRESS	0x030e                     	| [$9344: sta $030e, x]
+	                     	| [$9344: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_9347:
 	GET_ADDRESS	player_direction_032b      	| [$9347: lda player_direction_032b, x]
@@ -9461,10 +9466,11 @@ l_998a:
 callback_999d:
 l_999d:
 	jbsr	l_9d8d                            	| [$999d: jsr $9d8d]
+	NEW_ADDRESS
 	GET_ADDRESS	0x023a                     	| [$99a0: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$99a3: ora #$80]
-	GET_ADDRESS	0x023a                     	| [$99a5: sta $023a, x]
+	                     	| [$99a5: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	jra	l_9189                             	| [$99a8: jra $9189]
 l_99ab:
@@ -9518,7 +9524,7 @@ l_9a02:
 	GET_ADDRESS	0x023a                     	| [$9a02: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$9a05: ora #$80]
-	GET_ADDRESS	0x023a                     	| [$9a07: sta $023a, x]
+	                     	| [$9a07: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x02f0                     	| [$9a0a: lda $02f0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
@@ -9527,7 +9533,7 @@ l_9a02:
 	GET_ADDRESS	0x030e                     	| [$9a11: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0xf7,d0                         	| [$9a14: and #$f7]
-	GET_ADDRESS	0x030e                     	| [$9a16: sta $030e, x]
+	                     	| [$9a16: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	jra	l_9a1f                             	| [$9a19: jra $9a1f]
 l_9a1c:
@@ -9542,7 +9548,7 @@ l_9a22:
 	GET_ADDRESS	0x030e                     	| [$9a2a: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x04,d0                          	| [$9a2d: ora #$04]
-	GET_ADDRESS	0x030e                     	| [$9a2f: sta $030e, x]
+	                     	| [$9a2f: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	move.b	#0x3d,d0                        	| [$9a32: lda #$3d]
 	OP_W_ON_ZP_ADDRESS	move,0x00,d0 |  [$9a34: sta $00]
@@ -9573,7 +9579,7 @@ l_9a58:
 	GET_ADDRESS	0x030e                     	| [$9a60: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x04,d0                          	| [$9a63: ora #$04]
-	GET_ADDRESS	0x030e                     	| [$9a65: sta $030e, x]
+	                     	| [$9a65: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_9a68:
 	GET_ADDRESS	0x02f0                     	| [$9a68: lda $02f0, x]
@@ -9581,7 +9587,7 @@ l_9a68:
 	jne	l_9a98                             	| [$9a6b: jne $9a98]
 	GET_ADDRESS	0x02d6                     	| [$9a6d: inc $02d6, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02d6                     	| [$9a70: lda $02d6, x]
+	                     	| [$9a70: lda $02d6, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x10,d0                         	| [$9a73: cmp #$10]
 	* bcc=>bcs (cmp above)
@@ -9592,7 +9598,7 @@ l_9a68:
 	GET_ADDRESS	0x02f0                     	| [$9a7c: lda $02f0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	eor.b	#0x01,d0                         	| [$9a7f: eor #$01]
-	GET_ADDRESS	0x02f0                     	| [$9a81: sta $02f0, x]
+	                     	| [$9a81: sta $02f0, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d2                               	| [$9a84: ldy #$00]
 l_9a86:
@@ -9621,12 +9627,12 @@ l_9a98:
 	GET_ADDRESS	0x02f0                     	| [$9aa8: lda $02f0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	eor.b	#0x01,d0                         	| [$9aab: eor #$01]
-	GET_ADDRESS	0x02f0                     	| [$9aad: sta $02f0, x]
+	                     	| [$9aad: sta $02f0, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x030e                     	| [$9ab0: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$9ab3: and #$7f]
-	GET_ADDRESS	0x030e                     	| [$9ab5: sta $030e, x]
+	                     	| [$9ab5: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_9ab8:
 	jbsr	l_9d8d                            	| [$9ab8: jsr $9d8d]
@@ -9971,6 +9977,7 @@ l_9de7:
     move.b	d0,(a0,d1.w)                 	| [...]
 	jra	l_9e01                             	| [$9def: jra $9e01]
 l_9df2:
+	NEW_ADDRESS
 	GET_ADDRESS	0x03c4                     	| [$9df2: lda $03c4, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_9dfd                             	| [$9df5: bpl $9dfd]
@@ -9982,14 +9989,14 @@ l_9dfd:
 	GET_ADDRESS	0x73                       	| [$9dff: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_9e01:
-	GET_ADDRESS	0x73                       	| [$9e01: lda $73, x]
+	                       	| [$9e01: lda $73, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x20,d0 |  [$9e03: cmp $20]
 	beq	l_9e0f                             	| [$9e05: beq $9e0f]
 	GET_ADDRESS	0x023a                     	| [$9e07: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$9e0a: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$9e0c: sta $023a, x]
+	                    	| [$9e0c: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_9e0f:
 	rts                                    	| [$9e0f: rts]
@@ -10156,7 +10163,7 @@ l_a1a6:
 	GET_ADDRESS	0x023a                     	| [$a1b7: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a1ba: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a1bc: sta $023a, x]
+	                     	| [$a1bc: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x031a                     	| [$a1bf: ldy $031a, x]
 	move.b	(a0,d1.w),d2                    	| [...]
@@ -10185,7 +10192,7 @@ l_a1a6:
 	GET_ADDRESS	0x030e                     	| [$a1e5: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x10,d0                          	| [$a1e8: ora #$10]
-	GET_ADDRESS	0x030e                     	| [$a1ea: sta $030e, x]
+	                     	| [$a1ea: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a1ed:
 	rts                                    	| [$a1ed: rts]
@@ -10349,6 +10356,7 @@ l_a2e0:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d0 |  [$a2e2: sta current_object_index_4c]
 l_a2e4:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$a2e4: ldx current_object_index_4c]
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a2e6: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_a305                             	| [$a2e9: bpl $a305]
@@ -10433,13 +10441,13 @@ l_a370:
 	GET_ADDRESS	0x0073                     	| [$a37d: lda $0073, y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	bpl	l_a388                             	| [$a380: bpl $a388]
-	GET_ADDRESS	0x73                       	| [$a382: lda $73, x]
+	                       	| [$a382: lda $73, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$a384: ora #$80]
-	GET_ADDRESS	0x73                       	| [$a386: sta $73, x]
+	                       	| [$a386: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a388:
-	GET_ADDRESS	0x73                       	| [$a388: lda $73, x]
+	                       	| [$a388: lda $73, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$a38a: cmp $1b]
 	beq	l_a396                             	| [$a38c: beq $a396]
@@ -10663,13 +10671,13 @@ l_a4bc:
 	GET_ADDRESS	0x023a                     	| [$a4ea: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a4ed: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a4ef: sta $023a, x]
+	                     	| [$a4ef: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a4f2:
 	jbsr	l_a639                            	| [$a4f2: jsr $a639]
 	GET_ADDRESS	0x02d6                     	| [$a4f5: inc $02d6, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02d6                     	| [$a4f8: lda $02d6, x]
+	                     	| [$a4f8: lda $02d6, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x02,d0                         	| [$a4fb: cmp #$02]
 	* bcc=>bcs (cmp above)
@@ -10679,7 +10687,7 @@ l_a4f2:
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x02f0                     	| [$a504: inc $02f0, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02f0                     	| [$a507: lda $02f0, x]
+	                     	| [$a507: lda $02f0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x03,d0                         	| [$a50a: cmp #$03]
 	* bcc=>bcs (cmp above)
@@ -10746,29 +10754,29 @@ l_a55f:
 	GET_ADDRESS	0x023a                     	| [$a565: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a568: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a56a: sta $023a, x]
+	                     	| [$a56a: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a56d:
 	jbsr	l_a639                            	| [$a56d: jsr $a639]
 	GET_ADDRESS	0x02d6                     	| [$a570: inc $02d6, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02d6                     	| [$a573: lda $02d6, x]
+	                     	| [$a573: lda $02d6, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x02,d0                         	| [$a576: cmp #$02]
 	* bcc=>bcs (cmp above)
 	bcs	l_a58e                             	| [$a578: bcc $a58e]
 	clr.b	d0                               	| [$a57a: lda #$00]
-	GET_ADDRESS	0x02d6                     	| [$a57c: sta $02d6, x]
+	                     	| [$a57c: sta $02d6, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x02f0                     	| [$a57f: inc $02f0, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02f0                     	| [$a582: lda $02f0, x]
+	                     	| [$a582: lda $02f0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x03,d0                         	| [$a585: cmp #$03]
 	* bcc=>bcs (cmp above)
 	bcs	l_a58e                             	| [$a587: bcc $a58e]
 	clr.b	d0                               	| [$a589: lda #$00]
-	GET_ADDRESS	0x02f0                     	| [$a58b: sta $02f0, x]
+	                     	| [$a58b: sta $02f0, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a58e:
 	jra	l_a305                             	| [$a58e: jra $a305]
@@ -10802,13 +10810,13 @@ l_a5af:
 	GET_ADDRESS	0x023a                     	| [$a5ba: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a5bd: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a5bf: sta $023a, x]
+	                     	| [$a5bf: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a5c2:
 	jbsr	l_a639                            	| [$a5c2: jsr $a639]
 	GET_ADDRESS	0x02d6                     	| [$a5c5: inc $02d6, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02d6                     	| [$a5c8: lda $02d6, x]
+	                     	| [$a5c8: lda $02d6, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x02,d0                         	| [$a5cb: cmp #$02]
 	* bcc=>bcs (cmp above)
@@ -10818,7 +10826,7 @@ l_a5c2:
     move.b	d0,(a0,d1.w)                 	| [...]
 	GET_ADDRESS	0x02f0                     	| [$a5d4: inc $02f0, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02f0                     	| [$a5d7: lda $02f0, x]
+	                     	| [$a5d7: lda $02f0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x04,d0                         	| [$a5da: cmp #$04]
 	* bcc=>bcs (cmp above)
@@ -10837,7 +10845,7 @@ l_a5e6:
 	GET_ADDRESS	0x031a                     	| [$a5ee: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x40,d0                          	| [$a5f1: ora #$40]
-	GET_ADDRESS	0x031a                     	| [$a5f3: sta $031a, x]
+	                     	| [$a5f3: sta $031a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	move.b	#0x1a,d0                        	| [$a5f6: lda #$1a]
 	GET_ADDRESS	0x65                       	| [$a5f8: sta $65, x]
@@ -10845,7 +10853,7 @@ l_a5e6:
 	GET_ADDRESS	0x023a                     	| [$a5fa: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a5fd: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a5ff: sta $023a, x]
+	                     	| [$a5ff: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	rts                                    	| [$a602: rts]
 l_a603:
@@ -10859,7 +10867,7 @@ l_a603:
 l_a60e:
 	GET_ADDRESS	0x0081                     	| [$a60e: lda $0081, y]
 	move.b	(a0,d2.w),d0                    	| [...]
-	GET_ADDRESS	0x81                       	| [$a611: sta $81, x]
+	                       	| [$a611: sta $81, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	move.b	d2,d0                           	| [$a613: tya]
 	                           	| [$a614: clc]
@@ -10886,7 +10894,7 @@ l_a629:
 	GET_ADDRESS	0x03c0                     	| [$a630: lda $03c0, y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	and.b	#0xdf,d0                         	| [$a633: and #$df]
-	GET_ADDRESS	0x03c0                     	| [$a635: sta $03c0, y]
+	                     	| [$a635: sta $03c0, y]
     move.b	d0,(a0,d2.w)                 	| [...]
 	rts                                    	| [$a638: rts]
 l_a639:
@@ -10947,14 +10955,14 @@ l_a68a:
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x1b,d0 |  [$a68c: sta $1b]
 	move.b	#0x80,d0                        	| [$a68e: lda #$80]
-	GET_ADDRESS	0x73                       	| [$a690: sta $73, x]
+	                       	| [$a690: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$a692: cmp $1b]
 	beq	l_a69e                             	| [$a694: beq $a69e]
 	GET_ADDRESS	0x023a                     	| [$a696: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a699: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a69b: sta $023a, x]
+	                     	| [$a69b: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a69e:
 	move.b	d1,d0                           	| [$a69e: txa]
@@ -11013,7 +11021,7 @@ l_a6e7:
 	move.b	d0,d1                           	| [$a6ed: tax]
 	GET_ADDRESS	0x02d6                     	| [$a6ee: inc $02d6, x]
     addq.b	#1,(a0,d1.w)                 	| [...]
-	GET_ADDRESS	0x02d6                     	| [$a6f1: lda $02d6, x]
+	                     	| [$a6f1: lda $02d6, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x02,d0                         	| [$a6f4: cmp #$02]
 	* bcc=>bcs (cmp above)
@@ -11027,10 +11035,11 @@ l_a700:
 	jra	l_a65d                             	| [$a700: jra $a65d]
 
 l_a71f:
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a71f: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$a722: ora #$80]
-	GET_ADDRESS	0x031a                     	| [$a724: sta $031a, x]
+	                     	| [$a724: sta $031a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$a727: lda #$00]
 	GET_ADDRESS	0x02d6                     	| [$a729: sta $02d6, x]
@@ -11041,6 +11050,7 @@ l_a71f:
 l_a730:
 	move.b	#0x05,d1                        	| [$a730: ldx #$05]
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$a732: stx current_object_index_4c]
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a734: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$a737: and #$7f]
@@ -11087,14 +11097,14 @@ l_a778:
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x1b,d0 |  [$a77a: sta $1b]
 	move.b	d2,d0                           	| [$a77c: tya]
-	GET_ADDRESS	0x73                       	| [$a77d: sta $73, x]
+	                       	| [$a77d: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$a77f: cmp $1b]
 	beq	l_a78b                             	| [$a781: beq $a78b]
 	GET_ADDRESS	0x023a                     	| [$a783: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a786: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a788: sta $023a, x]
+	                     	| [$a788: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a78b:
 	jbsr	l_a639                            	| [$a78b: jsr $a639]
@@ -11112,14 +11122,14 @@ l_a79e:
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x1b,d0 |  [$a7a0: sta $1b]
 	move.b	#0x81,d0                        	| [$a7a2: lda #$81]
-	GET_ADDRESS	0x73                       	| [$a7a4: sta $73, x]
+	                       	| [$a7a4: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$a7a6: cmp $1b]
 	beq	l_a7b2                             	| [$a7a8: beq $a7b2]
 	GET_ADDRESS	0x023a                     	| [$a7aa: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a7ad: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a7af: sta $023a, x]
+	                     	| [$a7af: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a7b2:
 	jbsr	display_sprites_e1b5              	| [$a7b2: jsr display_sprites_e1b5]
@@ -11161,7 +11171,7 @@ l_a7e2:
 	GET_ADDRESS	0x023a                     	| [$a7e8: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$a7eb: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$a7ed: sta $023a, x]
+	                     	| [$a7ed: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a7f0:
 	GET_ADDRESS	0x02d6                     	| [$a7f0: inc $02d6, x]
@@ -11217,6 +11227,7 @@ l_a82d:
 	GET_ADDRESS	0x73                       	| [$a83e: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a840:
+	NEW_ADDRESS
 	GET_ADDRESS	0x73                       	| [$a840: lda $73, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$a842: cmp $1b]
@@ -11250,10 +11261,11 @@ l_a86b:
 	jbsr	display_sprites_e1b5              	| [$a86b: jsr display_sprites_e1b5]
 	jra	l_a748                             	| [$a86e: jra $a748]
 l_a871:
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a871: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$a874: ora #$80]
-	GET_ADDRESS	0x031a                     	| [$a876: sta $031a, x]
+	                     	| [$a876: sta $031a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$a879: lda #$00]
 	GET_ADDRESS	0x02d6                     	| [$a87b: sta $02d6, x]
@@ -11593,6 +11605,7 @@ l_ab1d:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ab1f: stx current_object_index_4c]
 l_ab21:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ab21: ldx current_object_index_4c]
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$ab23: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_ab31                             	| [$ab26: bpl $ab31]
@@ -11613,10 +11626,10 @@ l_ab3a:
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x40,d0                         	| [$ab3d: and #$40]
 	jne	l_ab51                             	| [$ab3f: jne $ab51]
-	GET_ADDRESS	0x031a                     	| [$ab41: lda $031a, x]
+	                     	| [$ab41: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x40,d0                          	| [$ab44: ora #$40]
-	GET_ADDRESS	0x031a                     	| [$ab46: sta $031a, x]
+	                     	| [$ab46: sta $031a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$ab49: lda #$00]
 	GET_ADDRESS	0x02d6                     	| [$ab4b: sta $02d6, x]
@@ -11705,6 +11718,7 @@ l_ac13:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ac15: stx current_object_index_4c]
 l_ac17:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ac17: ldx current_object_index_4c]
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$ac19: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_ac65                             	| [$ac1c: bpl $ac65]
@@ -11716,10 +11730,10 @@ l_ac17:
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x40,d0                         	| [$ac27: and #$40]
 	jne	l_ac38                             	| [$ac29: jne $ac38]
-	GET_ADDRESS	0x031a                     	| [$ac2b: lda $031a, x]
+	                     	| [$ac2b: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x40,d0                          	| [$ac2e: ora #$40]
-	GET_ADDRESS	0x031a                     	| [$ac30: sta $031a, x]
+	                     	| [$ac30: sta $031a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$ac33: lda #$00]
 	GET_ADDRESS	0x02d6                     	| [$ac35: sta $02d6, x]
@@ -11732,7 +11746,7 @@ l_ac38:
 	GET_ADDRESS	0x023a                     	| [$ac3f: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$ac42: ora #$01]
-	GET_ADDRESS	0x023a                     	| [$ac44: sta $023a, x]
+	                     	| [$ac44: sta $023a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	jbsr	l_a639                            	| [$ac47: jsr $a639]
 	GET_ADDRESS	0x03e0                     	| [$ac4a: lda $03e0]
@@ -11769,7 +11783,7 @@ l_ac6e:
 l_ac78:
 	GET_ADDRESS	0x0081                     	| [$ac78: lda $0081, y]
 	move.b	(a0,d2.w),d0                    	| [...]
-	GET_ADDRESS	0x81                       	| [$ac7b: sta $81, x]
+	                       	| [$ac7b: sta $81, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	move.b	d2,d0                           	| [$ac7d: tya]
 	                           	| [$ac7e: clc]
@@ -11885,6 +11899,7 @@ l_ad82:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ad84: stx current_object_index_4c]
 l_ad86:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ad86: ldx current_object_index_4c]
+	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$ad88: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_ad96                             	| [$ad8b: bpl $ad96]
@@ -11917,7 +11932,7 @@ l_ada6:
 	GET_ADDRESS	0x031a                     	| [$adb5: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x40,d0                          	| [$adb8: ora #$40]
-	GET_ADDRESS	0x031a                     	| [$adba: sta $031a, x]
+	                     	| [$adba: sta $031a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_adbd:
 	clr.b	d0                               	| [$adbd: lda #$00]
@@ -11942,7 +11957,7 @@ l_adce:
 l_add9:
 	GET_ADDRESS	0x0081                     	| [$add9: lda $0081, y]
 	move.b	(a0,d2.w),d0                    	| [...]
-	GET_ADDRESS	0x81                       	| [$addc: sta $81, x]
+	                       	| [$addc: sta $81, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	move.b	d2,d0                           	| [$adde: tya]
 	                           	| [$addf: clc]
@@ -12071,7 +12086,7 @@ l_ae8d:
 	GET_ADDRESS	0x030a                     	| [$ae8d: lda $030a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x40,d0                          	| [$ae90: ora #$40]
-	GET_ADDRESS	0x030a                     	| [$ae92: sta $030a, x]
+	                     	| [$ae92: sta $030a, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	move,game_state_bits_46,d0 |  [$ae95: lda game_state_bits_46]
 	and.b	#0x10,d0                         	| [$ae97: and #$10]
@@ -12086,7 +12101,7 @@ l_ae8d:
 	GET_ADDRESS	0x030e                     	| [$aea5: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x08,d0                          	| [$aea8: ora #$08]
-	GET_ADDRESS	0x030e                     	| [$aeaa: sta $030e, x]
+	                     	| [$aeaa: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_aead:
 	move.b	#0x02,d1                        	| [$aead: ldx #$02]
@@ -12210,20 +12225,20 @@ l_af64:
 	move.b	#0x08,d0                        	| [$af68: lda #$08]
 	GET_ADDRESS	0x030b                     	| [$af6a: sta $030b]
 	move.b	d0,(a0)                         	| [...]
-	GET_ADDRESS	0x030d                     	| [$af6d: sta $030d]
-	move.b	d0,(a0)                         	| [...]
+	                     	| [$af6d: sta $030d]
+	move.b	d0,(2,a0)                         	| [...]
 	move.b	#0x01,d1                        	| [$af70: ldx #$01]
 	GET_ADDRESS	0x47                       	| [$af72: lda $47, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bmi	l_af82                             	| [$af74: bmi $af82]
 	move.b	#0x09,d0                        	| [$af76: lda #$09]
-	GET_ADDRESS	0x47                       	| [$af78: sta $47, x]
+	                       	| [$af78: sta $47, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	move,current_level_38,d0 |  [$af7a: lda current_level_38]
 	cmp.b	#0x10,d0                         	| [$af7c: cmp #$10]
 	* bcs=>bcc
 	bcc	l_af82                             	| [$af7e: bcs $af82]
-	GET_ADDRESS	0x47                       	| [$af80: sta $47, x]
+	                       	| [$af80: sta $47, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_af82:
 	jbsr	move_players_on_field_5bf6        	| [$af82: jsr move_players_on_field_5bf6]
@@ -12302,7 +12317,7 @@ l_afe9:
 	* bcc=>bcs (cmp above)
 	bcs	l_aff5                             	| [$afef: bcc $aff5]
 	or.b	#0x80,d0                          	| [$aff1: ora #$80]
-	GET_ADDRESS	0x73                       	| [$aff3: sta $73, x]
+	                       	| [$aff3: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_aff5:
 	move.b	#0x01,d0                        	| [$aff5: lda #$01]
