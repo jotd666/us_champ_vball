@@ -16598,7 +16598,7 @@ l_cde3:
 	GET_ADDRESS	0x03a0                     	| [$cde3: lda $03a0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	beq	l_cdeb                             	| [$cde6: beq $cdeb]
-	GET_ADDRESS	0x03a0                     	| [$cde8: dec $03a0, x]
+	                     	| [$cde8: dec $03a0, x]
     subq.b	#1,(a0,d1.w)                 	| [...]
 l_cdeb:
 	subq.b	#1,d1                           	| [$cdeb: dex]
@@ -16606,13 +16606,13 @@ l_cdeb:
 	GET_ADDRESS	0x03ee                     	| [$cdee: lda $03ee]
 	move.b	(a0),d0                         	| [...]
 	beq	l_cdf6                             	| [$cdf1: beq $cdf6]
-	GET_ADDRESS	0x03ee                     	| [$cdf3: dec $03ee]
+	                     	| [$cdf3: dec $03ee]
 	subq.b	#1,(a0)                         	| [...]
 l_cdf6:
 	GET_ADDRESS	0x03f4                     	| [$cdf6: lda $03f4]
 	move.b	(a0),d0                         	| [...]
 	beq	l_cdfe                             	| [$cdf9: beq $cdfe]
-	GET_ADDRESS	0x03f4                     	| [$cdfb: dec $03f4]
+	                     	| [$cdfb: dec $03f4]
 	subq.b	#1,(a0)                         	| [...]
 l_cdfe:
 	GET_ADDRESS	0x03f9                     	| [$cdfe: lda $03f9]
@@ -16624,13 +16624,13 @@ l_ce06:
 	GET_ADDRESS	0x03ff                     	| [$ce06: lda $03ff]
 	move.b	(a0),d0                         	| [...]
 	beq	l_ce0e                             	| [$ce09: beq $ce0e]
-	GET_ADDRESS	0x03ff                     	| [$ce0b: dec $03ff]
+	                     	| [$ce0b: dec $03ff]
 	subq.b	#1,(a0)                         	| [...]
 l_ce0e:
 	GET_ADDRESS	0x0406                     	| [$ce0e: lda $0406]
 	move.b	(a0),d0                         	| [...]
 	beq	l_ce16                             	| [$ce11: beq $ce16]
-	GET_ADDRESS	0x0406                     	| [$ce13: dec $0406]
+	                     	| [$ce13: dec $0406]
 	subq.b	#1,(a0)                         	| [...]
 l_ce16:
 	rts                                    	| [$ce16: rts]
@@ -16788,7 +16788,7 @@ l_cf24:
 	OP_R_ON_ZP_ADDRESS	move,0x01,d0 |  [$cf2b: lda $01]
 	OP_R_ON_ZP_ADDRESS	cmp,unpack_mode_and_misc_02,d0 |  [$cf2d: cmp unpack_mode_and_misc_02]
 	* bcc=>bcs (cmp above)
-	bcs	l_cf22                             	| [$cf2f: bcc $cf22]
+	jcs	l_cf22                             	| [$cf2f: bcc $cf22]
 	jbsr	handle_cocktail_mode_d88f         	| [$cf31: jsr handle_cocktail_mode_d88f]
 	rts                                    	| [$cf34: rts]
 
@@ -18550,7 +18550,7 @@ l_d82b:
 	movem.w	d0,-(sp)                       	| [$d831: pha]
 l_d832:
 	jbsr	sync_d822                         	| [$d832: jsr sync_d822]
-	GET_ADDRESS	0x07f6                     	| [$d835: dec $07f6]
+	                     	| [$d835: dec $07f6]
 	subq.b	#1,(a0)                         	| [...]
 	jne	l_d832                             	| [$d838: jne $d832]
 	move.w	(sp)+,d0                        	| [$d83a: pla]
@@ -18642,6 +18642,7 @@ l_d89b:
 	rts                                    	| [$d8a1: rts]
 
 update_prom_banks_d8a2:
+	NEW_ADDRESS
 	GET_ADDRESS	sprite_prom_bank_07f4      	| [$d8a2: lda sprite_prom_bank_07f4]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x07,d0                         	| [$d8a5: and #$07]
@@ -18660,12 +18661,13 @@ update_prom_banks_d8a2:
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x03,d0                         	| [$d8ba: and #$03] keep lower bits (flip screen, scroll)
 	OP_R_ON_ZP_ADDRESS	or,0x00,d0 |  [$d8bc: ora $00]
-	GET_ADDRESS	scrollx_hi_copy_022c       	| [$d8be: sta scrollx_hi_copy_022c]
+	       	| [$d8be: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$d8c1: sta scrollx_hi_1008]
 	rts                                    	| [$d8c4: rts]
 
 update_sprite_prom_bank_d8c5:
+	NEW_ADDRESS
 	GET_ADDRESS	sprite_prom_bank_07f4      	| [$d8c5: lda sprite_prom_bank_07f4]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x07,d0                         	| [$d8c8: and #$07]
@@ -18679,13 +18681,14 @@ update_sprite_prom_bank_d8c5:
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x1f,d0                         	| [$d8d4: and #$1f] keep lower bits (flip screen, scroll, tile prom bank)
 	OP_R_ON_ZP_ADDRESS	or,0x00,d0 |  [$d8d6: ora $00]
-	GET_ADDRESS	scrollx_hi_copy_022c       	| [$d8d8: sta scrollx_hi_copy_022c]
+	       	| [$d8d8: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$d8db: sta scrollx_hi_1008]
 	rts                                    	| [$d8de: rts]
 
 set_bank_d8df:
 	OP_W_ON_ZP_ADDRESS	move,0x00,d0 |  [$d8df: sta $00] save A in temp
+	NEW_ADDRESS
 	GET_ADDRESS	bankswitch_copy_022d       	| [$d8e1: lda bankswitch_copy_022d] get old value
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xf8,d0                         	| [$d8e4: and #$f8] remove 3 low bits
@@ -18771,7 +18774,7 @@ l_d953:
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	player_1_controls_022e     	| [$d956: and player_1_controls_022e]
 	and.b	(a0),d0                          	| [...]
-	GET_ADDRESS	player_1_controls_022e     	| [$d959: eor player_1_controls_022e]
+	     	| [$d959: eor player_1_controls_022e]
 	move.b	(a0),d4	| [...]
 	eor.b	d4,d0                          	| [...]
 	GET_ADDRESS	0x0232                     	| [$d95c: sta $0232]
@@ -18780,7 +18783,7 @@ l_d953:
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	player_2_controls_022f     	| [$d962: and player_2_controls_022f]
 	and.b	(a0),d0                          	| [...]
-	GET_ADDRESS	player_2_controls_022f     	| [$d965: eor player_2_controls_022f]
+	     	| [$d965: eor player_2_controls_022f]
 	move.b	(a0),d4	| [...]
 	eor.b	d4,d0                          	| [...]
 	GET_ADDRESS	0x0233                     	| [$d968: sta $0233]
@@ -18789,7 +18792,7 @@ l_d953:
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	0x0230                     	| [$d96e: and $0230]
 	and.b	(a0),d0                          	| [...]
-	GET_ADDRESS	0x0230                     	| [$d971: eor $0230]
+	                     	| [$d971: eor $0230]
 	move.b	(a0),d4	| [...]
 	eor.b	d4,d0                          	| [...]
 	GET_ADDRESS	0x0234                     	| [$d974: sta $0234]
@@ -18798,7 +18801,7 @@ l_d953:
 	move.b	(a0),d0                         	| [...]
 	GET_ADDRESS	0x0231                     	| [$d97a: and $0231]
 	and.b	(a0),d0                          	| [...]
-	GET_ADDRESS	0x0231                     	| [$d97d: eor $0231]
+	                     	| [$d97d: eor $0231]
 	move.b	(a0),d4	| [...]
 	eor.b	d4,d0                          	| [...]
 	GET_ADDRESS	0x0235                     	| [$d980: sta $0235]
@@ -19587,6 +19590,7 @@ l_e2b2:
 	OP_W_ON_ZP_ADDRESS	move,0x09,d0 |  [$e2c4: sta $09]
 l_e2c6:
 	OP_R_ON_ZP_ADDRESS	move,unknown_07,d0 |  [$e2c6: lda unknown_07]
+	NEW_ADDRESS
 	GET_ADDRESS	0x06                       	| [$e2c8: bit $06]
 	BIT	(a0)                               	| [...]
 	PUSH_SR   | save overflow flag
@@ -19700,7 +19704,7 @@ l_e357:
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x80,d0                         	| [$e367: and #$80]
 	OP_R_ON_ZP_ADDRESS	or,0x1b,d0 |  [$e369: ora $1b]
-	GET_ADDRESS_X	0x14                     	| [$e36b: sta ($14, x)]
+	                     	| [$e36b: sta ($14, x)]
     move.b	d0,(a0)                      	| [...]
 l_e36d:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$e36d: ldx current_object_index_4c]
