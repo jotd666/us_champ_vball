@@ -35,7 +35,7 @@ AFB_68020 = 1
 
 * memory was calibrated on 64 color AGA mode, and proportional
 * to the number of planes
-TOTAL_PUBLIC_MEMORY_SIZE = (400000/6)*NB_PLAYFIELD_PLANES
+TOTAL_PUBLIC_MEMORY_SIZE = (360000/6)*NB_PLAYFIELD_PLANES
 TOTAL_CHIP_MEMORY_SIZE = (550000/6)*NB_PLAYFIELD_PLANES
 
 
@@ -4035,7 +4035,7 @@ floppy_file:
 	.ascii	"floppy"
 	.byte	0
 temp_filename_buffer:
-	ds.b	255
+	.skip	255
 	.align	2
 
 mirror_table:
@@ -4047,26 +4047,34 @@ _end_of_ng_code:
 
 	.align 2
 
-
-
-	.section	.bss
-
-tile_address_table:
-	.skip	0x1000*2
-	
+	* can't put that in .bss, it blocks the bss and turns to data
+	.section 	.data
 	.ifndef	RELEASE
 log_ptr:
 	.long	log_buffer
-
 log_buffer:
 	.skip	LOG_BUFFER_SIZE
 	.rept	20
 	.long	0xCAFECAFE
 	.endr
-
 cpu_log_enable:
 	.word	0
 	.endif
+
+	.section	.bsspublic
+
+	
+public_memory_block:
+	.skip	TOTAL_PUBLIC_MEMORY_SIZE
+	
+	* on amiga, this file is included in mpatrol.68k file
+	* so the assembler can optimize by using PC-relative addressing
+	* whenever possible (and it does)
+
+tile_address_table:
+	.skip	0x1000*2
+	
+
 	
 	.ifne	OPT_ENABLE_LOGGING
 tile_bank_table:
@@ -4082,14 +4090,6 @@ sprite_log_table:
 sprite_log_table_end:
 	.endif
 	
-public_memory_block:
-	.skip	TOTAL_PUBLIC_MEMORY_SIZE
-	
-	* on amiga, this file is included in mpatrol.68k file
-	* so the assembler can optimize by using PC-relative addressing
-	* whenever possible (and it does)
-
-
 
 
 	.section	.datachip

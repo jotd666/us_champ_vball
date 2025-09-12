@@ -6,6 +6,9 @@ Requires a 2-button joystick, or the keyboard
 Features:
 
 - 25 FPS for ECS and AGA amigas
+- 32 color ECS version
+- 64 color AGA version (for classic amigas)
+- 128 color AGA version (for really fast amigas. A bit slow on 68060/50 but runs)
 
 Note:
 

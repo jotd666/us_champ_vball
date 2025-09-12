@@ -261,19 +261,45 @@ b6\@:
 skip\@:
 	.endm
 
+	.ifeq	0
+	.macro	NEW_ADDRESS
+	.endm
+	
+	.macro	CHECK_SAME_ADDRESS_LOADED
+	.endm
+	
+	.else
+	* heavy check to see if same address is loaded twice (optimization)
+	.macro	NEW_ADDRESS
+	sub.l	a4,a4
+	.endm
+	
+	.macro	CHECK_SAME_ADDRESS_LOADED
+	cmp.l	a0,a4
+	jne		okay\@
+	jbsr	osd_get_last_known_pc
+	BREAKPOINT	"same address already loaded (pc in D6)"
+okay\@:
+	move.l	a0,a4
+	.endm
+	.endif	
+	
 	.macro GET_ADDRESS	offset
 	lea	\offset,a0
 	GET_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro GET_BANK_ADDRESS	offset
 	lea	\offset,a0
 	GET_BANK_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 
 	.macro GET_UNCHECKED_ADDRESS	offset
 	lea	\offset,a0
 	lea		(a6,a0.l),a0
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro	PREP_GET_ADDRESS_X	offset
@@ -290,34 +316,40 @@ skip\@:
 	.macro GET_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro GET_UNCHECKED_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_UNCHECKED_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 
 	.macro GET_INDIRECT_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro GET_INDIRECT_UNCHECKED_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_UNCHECKED_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro GET_INDIRECT_BANK_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_BANK_ADDRESS_FUNC
+	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro	GET_UNCHECKED_ADDRESS_FUNC
 	lea		(a6,a0.l),a0
 	.endm
+	
 	.macro	GET_UNCHECKED_BANK_ADDRESS_FUNC
 	move.b	current_bank,d5
 	add.l	bank_base,a0

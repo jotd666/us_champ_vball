@@ -5,8 +5,8 @@
 
 
 
-EXPMEM = $180000
-CHIPSIZE = $100000
+EXPMEM =   $180000
+CHIPSIZE = $180000
 
 _base	SLAVE_HEADER					; ws_security + ws_id
 	dc.w	17					; ws_version (was 10)

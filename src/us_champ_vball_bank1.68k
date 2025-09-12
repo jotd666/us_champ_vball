@@ -8,6 +8,8 @@
 	BANK1_WRAP	ff80
 	BANK1_WRAP	ff83
 	
+
+
 b1_79b9:
 	GET_ADDRESS	0x65                       	| [$79b9: lda $65, x]
 	move.b	(a0,d1.w),d0                    	| [...]
@@ -197,10 +199,11 @@ b1_7aab:
 	rts                                    	| [$7aac: rts]
 
 b1_7aad:
-	move.b	d1,d0                           	| [$7aad: txa]
-	movem.w	d0,-(sp)                       	| [$7aae: pha]
-	move.b	d2,d0                           	| [$7aaf: tya]
-	movem.w	d0,-(sp)                       	| [$7ab0: pha]
+	                           	| [$7aad: txa]
+	movem.w	d1-d2,-(sp)                       	| [$7aae: pha]
+	                       	| [$7aaf: tya]
+	                      	| [$7ab0: pha]
+	NEW_ADDRESS
 	GET_ADDRESS	0x033f                     	| [$7ab1: lda $033f, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x10,d0                         	| [$7ab4: cmp #$10]
@@ -227,7 +230,7 @@ b1_7abb:
 	move.b	(a0,d2.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x10,d0 |  [$7ad1: sta $10]
 	addq.b	#1,d2                           	| [$7ad3: iny]
-	GET_INDIRECT_BANK_ADDRESS	0x1b              	| [$7ad4: lda ($1b), y]
+	              	| [$7ad4: lda ($1b), y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x11,d0 |  [$7ad6: sta $11]
 	jbsr	b1_7b41                            	| [$7ad8: jsr $7b41]
@@ -262,7 +265,7 @@ b1_7abb:
 	move.b	(a0,d2.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x10,d0 |  [$7b05: sta $10]
 	addq.b	#1,d2                           	| [$7b07: iny]
-	GET_INDIRECT_BANK_ADDRESS	0x1b              	| [$7b08: lda ($1b), y]
+	              	| [$7b08: lda ($1b), y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x11,d0 |  [$7b0a: sta $11]
 	jbsr	b1_7b41                            	| [$7b0c: jsr $7b41]
@@ -291,10 +294,10 @@ b1_7b29:
 	OP_R_ON_ZP_ADDRESS	move,0x4c,d1 |  [$7b37: ldx $4c]
 	jbsr	b1_7bf3                            	| [$7b39: jsr $7bf3]
 b1_7b3c:
-	move.w	(sp)+,d0                        	| [$7b3c: pla]
-	move.b	d0,d2                           	| [$7b3d: tay]
-	move.w	(sp)+,d0                        	| [$7b3e: pla]
-	move.b	d0,d1                           	| [$7b3f: tax]
+	movem.w	(sp)+,d1-d2                        	| [$7b3c: pla]
+	                       	| [$7b3d: tay]
+	                       	| [$7b3e: pla]
+	                       	| [$7b3f: tax]
 	rts                                    	| [$7b40: rts]
 b1_7b41:
 	GET_ADDRESS	0x9d                       	| [$7b41: lda $9d, x]
@@ -454,7 +457,7 @@ b1_7c03:
 	GET_ADDRESS	0x030e                     	| [$7c10: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x40,d0                          	| [$7c13: ora #$40]
-	GET_ADDRESS	0x030e                     	| [$7c15: sta $030e, x]
+	                     	| [$7c15: sta $030e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_W_ON_ZP_ADDRESS	addq,0x53,#1 |  [$7c18: inc $53]
 	OP_R_ON_ZP_ADDRESS	move,0x4c,d0 |  [$7c1a: lda $4c]
@@ -531,7 +534,7 @@ b1_7c03:
 	bpl	b1_7c8d                             	| [$7c8a: bpl $7c8d]
 	SET_XC_FLAGS                           	| [$7c8c: sec]
 b1_7c8d:
-	GET_ADDRESS	0x027f                     	| [$7c8d: ror $027f]
+	                     	| [$7c8d: ror $027f]
 	move.b	(a0),d4	| [...]
 	roxr.b	#1,d4                         	| [...]
 	move.b	d4,(a0)	| [...]
@@ -544,7 +547,7 @@ b1_7c8d:
 	not.b	d0                               	| [$7c96: eor #$ff]
 	                           	| [$7c98: clc]
 	add.b	#0x01,d0                        	| [$7c99: adc #$01]
-	GET_ADDRESS	0x028c                     	| [$7c9b: sta $028c]
+	                     	| [$7c9b: sta $028c]
 	move.b	d0,(a0)                         	| [...]
 	PUSH_SR                                	| [$7c9e: php]
 	GET_ADDRESS	0x0299                     	| [$7c9f: lda $0299]
@@ -578,7 +581,7 @@ b1_7cb7:
 	not.b	d0                               	| [$7cc0: eor #$ff]
 	                           	| [$7cc2: clc]
 	add.b	#0x01,d0                        	| [$7cc3: adc #$01]
-	GET_ADDRESS	0x02a6                     	| [$7cc5: sta $02a6]
+	                     	| [$7cc5: sta $02a6]
 	move.b	d0,(a0)                         	| [...]
 	PUSH_SR                                	| [$7cc8: php]
 	GET_ADDRESS	0x02b3                     	| [$7cc9: lda $02b3]
@@ -614,4 +617,5 @@ b1_7ff0:
 	jmp	b1_79b9                             	| [$7ff0: jmp $79b9]
 b1_7ff3:
 	jmp	b1_7aad                             	| [$7ff3: jmp $7aad]
+
 

@@ -43,7 +43,7 @@ OBJS = sounds.o bank0.o bank1.o ram.o rom.o vbr.o ReadJoyPad.o ptplayer.o
 all : amiga_000.o amiga_64_020.o amiga_128_020.o $(MAIN_64_020) $(MAIN_000) $(MAIN_128_020) $(AMIGA_SHELL) $(WHDLOADER_AGA) $(WHDLOADER_ECS) $(AMIGASRC)/sounds.68k 
 
 clean:
-	del $(OBJS) amiga_000.o amiga_64_020.o amiga_128_020.o $(PROGNAME)_000.o $(PROGNAME)_020.o $(MAIN_000) $(MAIN_64_020) $(MAIN_128_020) $(WHDLOADER)
+	del *.slave $(OBJS) amiga_000.o amiga_64_020.o amiga_128_020.o $(PROGNAME)_000.o $(PROGNAME)_020.o $(MAIN_000) $(MAIN_64_020) $(MAIN_128_020) $(WHDLOADER)
 	
 shell.o: $(AMIGASRC)/shell.68k
 	$(ASM) -Iamiga $(AMIGASRC)/shell.68k -o shell.o

@@ -11,7 +11,7 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
     bin_file = merged_path_file / used_name
 
     # merge sprites with existing file + moves from level 1
-    used_dump = data_dir / "aga_128" / used_name
+    used_dump = data_dir / "aga_64" / used_name
     with open(used_dump,"rb") as f:
         new_contents = f.read()
 
@@ -40,7 +40,7 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
             f.write(contents)
 
 
-context = "level_5"
+context = "level_1"
 overwrite = False
 
 
