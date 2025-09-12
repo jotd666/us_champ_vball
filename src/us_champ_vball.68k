@@ -16594,8 +16594,8 @@ l_cdc9:
 	rts                                    	| [$cde0: rts]
 l_cde1:
 	move.b	#0x03,d1                        	| [$cde1: ldx #$03]
+	GET_ADDRESS	0x03a0                     	| [$cde3: lda $03a0, x] early load
 l_cde3:
-	GET_ADDRESS	0x03a0                     	| [$cde3: lda $03a0, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	beq	l_cdeb                             	| [$cde6: beq $cdeb]
 	                     	| [$cde8: dec $03a0, x]
@@ -16764,8 +16764,8 @@ l_cf0c:
 	move.b	#0x2f,d1                        	| [$cf0c: ldx #$2f]
 l_cf0e:
 	clr.b	d0                               	| [$cf0e: lda #$00]
-l_cf10:
 	GET_ADDRESS	0x00                       	| [$cf10: sta $00, x]
+l_cf10:
     move.b	d0,(a0,d1.w)                 	| [...]
 	addq.b	#1,d1                           	| [$cf12: inx]
 	jne	l_cf10                             	| [$cf13: jne $cf10]
@@ -16778,9 +16778,10 @@ l_cf16:
 	OP_W_ON_ZP_ADDRESS	move,0x01,d0 |  [$cf1e: sta $01]
 	clr.b	d2                               	| [$cf20: ldy #$00]
 l_cf22:
+	NEW_ADDRESS
+	GET_INDIRECT_ADDRESS	0x00              	| [$cf24: sta ($00), y] loading early
 	clr.b	d0                               	| [$cf22: lda #$00]
 l_cf24:
-	GET_INDIRECT_ADDRESS	0x00              	| [$cf24: sta ($00), y]
 	move.b	d0,(a0,d2.w)                    	| [...]
 	addq.b	#1,d2                           	| [$cf26: iny]
 	jne	l_cf24                             	| [$cf27: jne $cf24]
