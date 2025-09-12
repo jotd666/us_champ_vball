@@ -15815,6 +15815,7 @@ F4A8: A9 05    lda #$05
 F4AA: 20 B8 D7 jsr queue_sound_d7b8
 F4AD: A9 80    lda #$80
 F4AF: 20 3F D8 jsr $d83f
+; initialize 10 seconds to continue play
 F4B2: A9 00    lda #$00
 F4B4: 85 54    sta player_select_timer_lsb_54
 F4B6: A9 10    lda #$10
@@ -16054,6 +16055,7 @@ F6AB: 85 54    sta player_select_timer_lsb_54
 F6AD: A5 55    lda player_select_timer_seconds_55
 F6AF: F8       sed
 F6B0: 38       sec
+; decrease continue timer
 F6B1: E9 01    sbc #$01
 F6B3: 85 55    sta player_select_timer_seconds_55
 F6B5: D8       cld

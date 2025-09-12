@@ -22430,6 +22430,7 @@ l_f476:
 	move.b	#0x80,d0                        	| [$f4ad: lda #$80]
 	jbsr	l_d83f                            	| [$f4af: jsr $d83f]
 l_f4b2:
+	* initialize 10 seconds to continue play
 	clr.b	d0                               	| [$f4b2: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,player_select_timer_lsb_54,d0 |  [$f4b4: sta player_select_timer_lsb_54]
 	move.b	#0x10,d0                        	| [$f4b6: lda #$10]
@@ -22722,8 +22723,9 @@ l_f692:
 	clr.b	d0                               	| [$f6a9: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,player_select_timer_lsb_54,d0 |  [$f6ab: sta player_select_timer_lsb_54]
 	OP_R_ON_ZP_ADDRESS	move,player_select_timer_seconds_55,d0 |  [$f6ad: lda player_select_timer_seconds_55]
-	SET_Z_FLAG  | required as sbcd doesn't set Z on 0 result
-	SET_XC_FLAGS                           	| [$f6b0: sec]
+
+	* decrease continue timer
+	CLR_XC_FLAGS                           	| [$f6b0: sec]
 	move.b	#0x01,d4	| [$f6b1: sbc #$01]
 	sbcd	d4,d0	| [$f6b1: sbc #$01]
 	PUSH_SR			| preserve carry

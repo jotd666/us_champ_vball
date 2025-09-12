@@ -46,7 +46,8 @@ sr2 = lambda a,b : set(range(a,b,2))
 # each entry associates to entry+4
 sr4i = lambda a,b : set(range(a,b,8)) | set(range(a+2,b+2,8))
 
-net_and_pole_sprites = {int(x,16) for x in """2e2
+# those should not be displayed: static net & pole sprites
+net_and_pole_static_sprites = {int(x,16) for x in """2e2
 2e3
 2e4
 2e5
@@ -69,6 +70,10 @@ net_and_pole_sprites = {int(x,16) for x in """2e2
 445
 446
 447
+""".split()}
+
+# those are displayed when the ball hits the net
+moving_net_sprites = {int(x,16) for x in """
 448
 449
 44a
@@ -93,14 +98,11 @@ net_and_pole_sprites = {int(x,16) for x in """2e2
 462
 463""".split()}
 
-def get_non_mirrored_sprites():
-    # referee, pwunboom, zap, ... "P", "L"..., score red dots, net, "OK" bubble, "1P"..."CPU"
-    # => move in a subdir to extract!!!
-    return {}
+
 def get_hidden_sprites():
     # sprites that were added in US version to hide some potential trademark violations
     # those are static and eat blitter bandwidth so they have to go
-    return net_and_pole_sprites | {
+    return  net_and_pole_static_sprites | {
         0x481,0x482,0x483,0x484,0x485,0X486,0X4Fc,0x4FD,0x4FE,0X4FF,0x487,  # New York stupid "GOOD MONING" signs and more...
         0x7D8,0x7D9,0x7DA,0x7DB,0x22A,0x22B,0x22C,0x228,0x229,              # L.A. hiding stuff for background
 }
@@ -165,7 +167,7 @@ def get_sprite_names():
     0x7e7:"player_leg",
 
     }
-    for i in net_and_pole_sprites:
+    for i in net_and_pole_static_sprites | moving_net_sprites:
         rval[i] = "net"
     for i in range(0x2EE,0x2F5):
         rval[i] = "ball"

@@ -713,8 +713,8 @@ if sprite_size_cache_file.exists():
 plane_range = [5,6,7]
 level_range = range(1,6)
 
-##plane_range = [5,6]
-##level_range = [1]
+plane_range = [5,6]
+level_range = [1]
 for nb_planes in plane_range:
     print(f"*** Generating for nb colors = {1<<nb_planes}")
     gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
@@ -735,4 +735,6 @@ for i in get_hidden_sprites():
 
 with open(src_dir / "disabled_sprites.68k","w") as f:
     bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
+
+
 
