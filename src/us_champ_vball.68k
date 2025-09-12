@@ -13596,8 +13596,8 @@ l_b764:
 	clr.b	d0                               	| [$b768: lda #$00]
 	clr.b	d2                               	| [$b76a: ldy #$00]
 	                           	| [$b76c: clc]
+	GET_ADDRESS	0xb8a5                     	| [$b76d: adc $b8a5, y] early load
 l_b76d:
-	GET_ADDRESS	0xb8a5                     	| [$b76d: adc $b8a5, y]
 	move.b	(a0,d2.w),d4	| [...]
 	add.b	d4,d0                    	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$b770: cmp $1b]
@@ -13696,15 +13696,15 @@ l_b7e7:
 	move.b	d4,(a0)	| [...]
 	OP_R_ON_ZP_ADDRESS	move,0x2a,d0 |  [$b7f6: lda $2a]
 	asl.b	#1,d0                            	| [$b7f8: asl a]
-	GET_ADDRESS	0x2a                       	| [$b7f9: adc $2a]
+	                       	| [$b7f9: adc $2a]
 	move.b	(a0),d4	| [...]
 	addx.b	d4,d0                         	| [...]
 	move.b	d0,d2                           	| [$b7fb: tay]
 	clr.b	d0                               	| [$b7fc: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,0x27,d0 |  [$b7fe: sta $27]
 	                           	| [$b800: clc]
+	GET_ADDRESS	0xb8c9                     	| [$b801: adc $b8c9, y] early load
 l_b801:
-	GET_ADDRESS	0xb8c9                     	| [$b801: adc $b8c9, y]
 	move.b	(a0,d2.w),d4	| [...]
 	add.b	d4,d0                    	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x29,d0 |  [$b804: cmp $29]
@@ -13929,7 +13929,7 @@ l_ba16:
 	GET_ADDRESS	0x023e                     	| [$ba19: lda $023e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x01,d0                          	| [$ba1c: ora #$01]
-	GET_ADDRESS	0x023e                     	| [$ba1e: sta $023e, x]
+	                     	| [$ba1e: sta $023e, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	OP_R_ON_ZP_ADDRESS	move,ball_logical_z_e7,d0 |  [$ba21: lda ball_logical_z_e7]
 	movem.w	d0,-(sp)                       	| [$ba23: pha]
