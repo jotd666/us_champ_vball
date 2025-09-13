@@ -102,7 +102,7 @@ moving_net_sprites = {int(x,16) for x in """
 def get_hidden_sprites():
     # sprites that were added in US version to hide some potential trademark violations
     # those are static and eat blitter bandwidth so they have to go
-    return  net_and_pole_static_sprites | {
+    return  {
         0x481,0x482,0x483,0x484,0x485,0X486,0X4Fc,0x4FD,0x4FE,0X4FF,0x487,  # New York stupid "GOOD MONING" signs and more...
         0x7D8,0x7D9,0x7DA,0x7DB,0x22A,0x22B,0x22C,0x228,0x229,              # L.A. hiding stuff for background
 }

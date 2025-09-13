@@ -11,7 +11,7 @@ possible_hw_sprites = set()
 
 nb_cluts = 8
 
-dump_it = False
+dump_it = True
 
 def asm2bin(source,dest):
     subprocess.run(["vasmm68k_mot","-nosym","-pic","-Fbin",source,"-o",dest],check=True,stdout=subprocess.DEVNULL)
@@ -165,7 +165,7 @@ double_size_sprites = [0]*NB_SPRITES
 def add_tile(table,index,cluts=[0],is_bob=False,double_size=False):
     if isinstance(index,range):
         pass
-    elif not isinstance(index,(list,tuple)):
+    elif not isinstance(index,(list,tuple,set)):
         index = [index]
     for idx in index:
         # merge
@@ -404,8 +404,10 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
             print("Cannot find used_sprites")
 
         # add "2P" sprite to all levels
-        add_tile(sprite_cluts,index=0x2e0,cluts=[5],double_size=True,is_bob=True)
-
+        add_tile(sprite_cluts,index=0x2e0,cluts=[5],double_size=False,is_bob=True)
+        # add moving net sprites to all levels
+        for x in moving_net_sprites:
+            add_tile(sprite_cluts,index=x,cluts=[7],double_size=x not in [0X43B,0x43D,0x43F,0x45A,0x45B,0x462,0x463],is_bob=True)
 
     if dump_it:
         with open(sdump_dir / "used_sprites.json","w") as f:
@@ -705,22 +707,29 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
 
 
 sprite_size_cache_file = this_dir / "sprite_size.json"
-if sprite_size_cache_file.exists():
-    with open(sprite_size_cache_file,"r") as f:
-        double_size_sprites = json.load(f)
+
+from_scratch = False
+if from_scratch:
+    # this generates everything, no gfx dump, no cache
+    dump_it = False
+    plane_range = [5,6,7]
+    level_range = range(1,6)
+else:
+    if sprite_size_cache_file.exists():
+        with open(sprite_size_cache_file,"r") as f:
+            double_size_sprites = json.load(f)
+        # put whatever version (color) or levels you need
+        plane_range = [6]
+        level_range = [1]
 
 
-plane_range = [5,6,7]
-level_range = range(1,6)
-
-plane_range = [5,6]
-level_range = [1]
 for nb_planes in plane_range:
     print(f"*** Generating for nb colors = {1<<nb_planes}")
     gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
     gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
     for level in level_range:
         gen_context_files(f"level_{level}",nb_planes=nb_planes)  # also select
+    dump_it = False     # dumps in the same dump dir anyway
 
 if any(double_size_sprites):
     with open(sprite_size_cache_file,"w") as f:
@@ -736,5 +745,11 @@ for i in get_hidden_sprites():
 with open(src_dir / "disabled_sprites.68k","w") as f:
     bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
 
+
+for i in net_and_pole_static_sprites:
+    disabled_sprites[i] = 1
+
+with open(src_dir / "net_pole_and_disabled_sprites.68k","w") as f:
+    bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
 
 

@@ -40,7 +40,7 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite):
             f.write(contents)
 
 
-context = "level_5"
+context = "level_2"
 overwrite = False
 
 

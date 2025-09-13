@@ -695,16 +695,20 @@ _vblank:
 
 	move.l	joypad_1_state(pc),d1
 	move.l	d1,d2
-	moveq	#1,d0
-	jsr	_read_joystick
+	moveq	#0,d0
+	move.b	p1_joystick_slot,d0
+	jmi		0f
+	jbsr	_read_joystick
 	move.l	d0,joypad_1_state
-	
+0:
 	move.l	joypad_2_state(pc),d1
 	move.l	d1,d2
 	moveq	#0,d0
+	move.b	p2_joystick_slot,d0
+	jmi		0f
 	jsr	_read_joystick
 	move.l	d0,joypad_2_state
-	
+0:
 	jbsr	update_controls
 	
 	move.l	joypad_1_state,d0
@@ -881,7 +885,7 @@ is_game_playing:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
 	* both flags are at 1 when actual game is playing (not demo)
-	cmp.l	a6,a6
+	tst.b	(game_playing_flag_36,a6)
 	movem.l	(a7)+,a6
 	rts
 
@@ -1079,6 +1083,15 @@ really_update_sprites:
 	*********************
 	* draw current BOBs *
 	*********************
+	
+	* small tweak: as we don't draw the net sprite tiles all the time to save blitter
+	* (which saves the game playability btw...) we need to know (if net drawn) if
+	* right players or ball are very close to the net, in which case we force the
+	* drawing of net+poles during that time. This allows to maintain the priority
+	* at this very moment
+	* (at other moments, the fact that the net is in the background doesn't matter)
+	
+	jbsr	check_right_players_close_to_net
 
 	move.l	bobs_ptr,d0
 	jeq		20f
@@ -1095,6 +1108,38 @@ really_update_sprites:
 	addq.w	#CURRENT_SPRITE_SIZE,a0
 	dbf		d7,1b
 20:
+	rts
+	
+check_right_players_close_to_net:
+	tst.b	net_drawn
+	jeq		10f
+	clr.b	net_in_front_of_right_objects
+	* net is noted as "on screen", so we must put it in the foreground
+	* (by enabling tile draw again) if needed, which is fortunately rare
+	GET_RAM_START_IN_A6
+	moveq	#1,d1
+	* start with first of 2 rightmost players logical X (not screen X)
+	* X can't be < 96 (game forbids that) for players but not for ball
+	lea		(objects_logical_x_array_8f+2,a6),a0
+	lea		(objects_side_array_9d+2,a6),a1
+	move.w	#0x100,d2
+	move.w	#0x118,d3
+
+0:
+	move.b	(a1)+,d0		| get X high bit
+	lsl.w	#8,d0
+	move.b	(a0)+,d0		| get X
+	cmp.w	d0,d3
+	jcs		5f				| D0 > max net zone
+	cmp.w	d0,d2
+	jcc		5f		| X < min net: ignore (can only happen for ball)
+	* in the fine X strip where object should be behind the net
+	st.b	net_in_front_of_right_objects
+	COLOR0_FLASH	0x00F
+	jra		10f
+5:	
+	dbf		d1,0b
+10:
 	rts
 	
 compute_sprite_xy_code:
@@ -1213,10 +1258,19 @@ update_one_bob:
 	jbsr	draw_net
 0:
 	.endif
+	lea		net_pole_and_disabled_sprites(pc),a3
+	tst.b	net_in_front_of_right_objects
+	jeq		0f
+	* if net is in front of players/ball on the right, then display it
+	* restoring the display priority allowing the net to appear in front of
+	* players/ball when close to the net, so just consider disabled sprites
+	* stuff like signs, static covering shit, leave net/pole parts alone
 	lea		disabled_sprites(pc),a3
+0:
+
 	tst.b	(a3,d2.w)
 	jne		2f				| some (static) sprites are disabled
-	
+
 	* handle vertical grouping (that game imposes)
 	lea		sprite_size_table(pc),a3
 	move.b	(a3,d2.w),d4
@@ -2252,6 +2306,13 @@ update_bg_tile:
 	jne		0f
 	rts
 0:
+	cmp.b	#0x63,d0
+	jne		0f
+	cmp.w	#0xB6C,d7
+	jne		0f
+	* force redraw net on "player select" screen
+	clr.b 	net_drawn
+0:
 	move.l	d2,a0
 	moveq	#0,d2
 	moveq	#0,d3
@@ -2512,6 +2573,9 @@ scroll_table:
 	
 disabled_sprites:
 	.include	"disabled_sprites.68k"
+* contains disabled sprites, plus net static sprites
+net_pole_and_disabled_sprites:
+	.include	"net_pole_and_disabled_sprites.68k"
 	
 
 osd_debug_hook:
@@ -2528,7 +2592,16 @@ osd_read_p1_inputs:
 	bclr	#BIT_START_1P,d0
 	clr.b	net_drawn	| kludge as "continue" screen redraws the field. Starting resets flag!
 0:
-	move.b	d0,0x200
+	jbsr		is_game_playing
+	jne	0f
+	move.l	joypad_1_state,d1
+	* game not playing, we can start with joypad
+	btst	#JPB_BTN_UP,d1		| "1" key like in MAME
+	beq.b	0f
+	bclr	#BIT_START_1P,d0
+	clr.b	net_drawn
+0:
+
 	movem.l	(a7)+,a0/d1
 	rts
 	
@@ -2537,6 +2610,15 @@ osd_read_p2_inputs:
 	move.l	A0,-(a7)
 	lea		keyboard_table(pc),a0
 	tst.b	(2,a0)		| "2" key like in MAME
+	beq.b	0f
+	bclr	#BIT_START_2P,d0
+	clr.b	net_drawn
+0:	
+	jbsr		is_game_playing
+	jne	0f
+	move.l	joypad_1_state,d1
+	* game not playing, we can start with joypad
+	btst	#JPB_BTN_DOWN,d1		| "2" key like in MAME
 	beq.b	0f
 	bclr	#BIT_START_2P,d0
 	clr.b	net_drawn
@@ -2922,15 +3004,7 @@ update_controls:
 	move.b	d0,player_1_controls
 
 	
-	jbsr		is_game_playing
-	jeq	0f
-	* game not playing, we can insert coin/start with joypad
-	btst	#JPB_BTN_RED,d1		| "5" key like in MAME
-	jeq		0f
-	btst	#JPB_BTN_RED,d2
-	jne		0f
-	nop  | todo insertcoin
-0:
+
 	moveq	#-1,d0
 
 	move.l	joypad_2_state(pc),d1
@@ -2986,21 +3060,17 @@ osd_read_system:
 	bclr	#BIT_COIN2,d0
 0:	
 
-*	jbsr		is_game_playing
-*	jeq	1f
-*	move.l	joypad_1_state,d1
-*	* game not playing, we can start with joypad
-*	btst	#JPB_BTN_UP,d1		| "1" key like in MAME
-*	beq.b	0f
-*	bclr	#BIT_START_1P,d0
-*	clr.b	net_drawn
-*0:
-*	btst	#JPB_BTN_DOWN,d1		| "2" key like in MAME
-*	beq.b	0f
-*	bclr	#BIT_START_2P,d0
-*	clr.b	net_drawn
-*0:	
-*1:	
+	jbsr		is_game_playing
+	jne	1f
+	move.l	joypad_1_state,d1
+
+	* game not playing, we can insert coin/start with joypad
+	btst	#JPB_BTN_RED,d1		| "5" key like in MAME
+	jeq		0f
+	bclr	#BIT_COIN1,d0
+0:
+
+1:	
 	movem.l	(a7)+,a0/d1
 	rts
 
@@ -3142,6 +3212,15 @@ handle_keyboard:
     bne.b   0f
 
     bsr	toggle_pause
+0:
+
+    cmp.b   #38,d0	| "J" key: swap joystick ports
+    bne.b   0f
+
+    move.b	p1_joystick_slot,d0
+	move.b	p2_joystick_slot,p1_joystick_slot
+	move.b	d0,p2_joystick_slot
+	jra		2f
 0:
 
 
@@ -3784,6 +3863,8 @@ difficulty_dsw:
 	.byte	0
 net_drawn:
 	.byte	0
+net_in_front_of_right_objects:
+	.byte	0
 music_playing:
 	.byte	0
 
@@ -3941,6 +4022,10 @@ higher_gfxset:
 	.byte	0
 current_rom_bank:
 	.byte	0
+p1_joystick_slot:
+	.byte	1
+p2_joystick_slot:
+	.byte	0
 	.align	2
 
 
@@ -3977,7 +4062,6 @@ delay_timer:
 	.word	0
 one_out_of_five:
 	.word	0
-
 
 playfield_screen_data_1:
 	.long	0
