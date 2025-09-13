@@ -712,9 +712,9 @@ _vblank:
 	jbsr	update_controls
 	
 	move.l	joypad_1_state,d0
-	btst	#JPB_BTN_BLU,d0
+	btst	#JPB_BTN_PLAY,d0
 	beq.b	0f
-	btst	#JPB_BTN_BLU,d2
+	btst	#JPB_BTN_PLAY,d2
 	bne.b	0f
 	jbsr		toggle_pause
 0:
@@ -1110,6 +1110,7 @@ really_update_sprites:
 20:
 	rts
 	
+* this can be removed/disabled to avoid redrawing the net if the blitter runs short :)
 check_right_players_close_to_net:
 	tst.b	net_drawn
 	jeq		10f
@@ -1120,12 +1121,26 @@ check_right_players_close_to_net:
 	moveq	#1,d1
 	* start with first of 2 rightmost players logical X (not screen X)
 	* X can't be < 96 (game forbids that) for players but not for ball
+	* we also need a Y => X table as X min/max depends on Y (it's diagonal, so variable)
+	* ATM it eats a lot of blitter if the ball is considered, so we could also check
+	* z but we can also forget about the ball. It can be a problem only on 2P side if
+	* hits the net, which CPU never does
 	lea		(objects_logical_x_array_8f+2,a6),a0
 	lea		(objects_side_array_9d+2,a6),a1
-	move.w	#0x100,d2
-	move.w	#0x118,d3
+	lea		(objects_logical_y_array_b9+2,a6),a2
+	lea		x_net_boundary_table,a3
+	moveq	#0,d4
 
 0:
+	move.b	(a2)+,d4		| get object Y
+	.ifdef	MC68020
+	move.w	(a3,d4.w*2),d2	| min X for that Y
+	.else
+	add.w	d4,d4
+	move.w	(a3,d4.w),d2
+	.endif
+	move.w	d2,d3
+	add.w	#0xC,d3		| max X for that Y (empiric)
 	move.b	(a1)+,d0		| get X high bit
 	lsl.w	#8,d0
 	move.b	(a0)+,d0		| get X
@@ -1135,7 +1150,6 @@ check_right_players_close_to_net:
 	jcc		5f		| X < min net: ignore (can only happen for ball)
 	* in the fine X strip where object should be behind the net
 	st.b	net_in_front_of_right_objects
-	COLOR0_FLASH	0x00F
 	jra		10f
 5:	
 	dbf		d1,0b
@@ -2577,6 +2591,8 @@ disabled_sprites:
 net_pole_and_disabled_sprites:
 	.include	"net_pole_and_disabled_sprites.68k"
 	
+x_net_boundary_table:
+	.include	"x_net_boundary_table.68k"
 
 osd_debug_hook:
 	rts

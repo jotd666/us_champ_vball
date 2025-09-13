@@ -1,17 +1,15 @@
-- draw net sprites (not poles) only if some x/y sprites are too close (right side players very close to the net)
-  for that we need to make a separate net sprites table (not with the "do not draw" table)
-  values: +$8F+3/4 between $96 and $96+8?
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
-- maybe not include some unused sounds to save memory?
+- air base: no scrolling
+- hawaii: X scrolling wraps only in that case leave as is...
 
 minor:
 
-- increase screen height as when screen scrolls up, players feet blit 'wrap' to the top other planes (or use clipping)
+- increase screen height as when screen scrolls up, players feet blit 'wrap' to the top other planes: to check
 - sometimes starts with 10 credits!!
-- still missing some black pixels (big score sprites) not always... why????
-- hawaii: X scrolling wraps only in that case grrrrrr
+- still missing some black pixels (big score sprites) not everywhere?... why????
+- maybe not include some unused sounds to save memory?
 
 optims
 
@@ -26,11 +24,6 @@ optims
   we can probably load map with level 1 tiles+sprites loaded but that won't work for higher levels
   so maybe create a context only for "select player" screen (with only a few tiles/sprites) and make a
   special case using screen type variable on top of palette value
-
-
-
-
-
 
 
 

@@ -719,7 +719,7 @@ else:
         with open(sprite_size_cache_file,"r") as f:
             double_size_sprites = json.load(f)
         # put whatever version (color) or levels you need
-        plane_range = [6]
+        plane_range = []
         level_range = [1]
 
 
@@ -751,5 +751,12 @@ for i in net_and_pole_static_sprites:
 
 with open(src_dir / "net_pole_and_disabled_sprites.68k","w") as f:
     bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
+
+increment = (0x110-0x104)/(0x7B-0xF)
+
+x = 0x110
+x_net_boundary = [int(x-y*increment) for y in range(0x0,0xFF)]
+with open(src_dir / "x_net_boundary_table.68k","w") as f:
+    bitplanelib.dump_asm_bytes(x_net_boundary,f,mit_format=True,size=2)
 
 
