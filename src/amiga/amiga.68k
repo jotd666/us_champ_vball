@@ -182,7 +182,6 @@ BIT_FIRE_2 = 5
 
 	.global		_user
 	.global		_player_start
-	.global		_demo_end
 	.global		_resload
 	.global		_dosbase
 	.global		cheat_used
@@ -440,7 +439,7 @@ _user:
 
 0:
 		
-	jsr	 _detect_controller_types 
+	jsr	 _detect_controller_types
 
 	jra		demo_game
 
@@ -1261,7 +1260,7 @@ update_one_bob:
 0:
 
 	jbsr	compute_sprite_xy_code
-	
+		
 	.ifne	OPT_NET_BACKGROUND_TRICK
 	cmp.w	#0X2E2,d2
 	jne 	0f
@@ -1280,6 +1279,8 @@ update_one_bob:
 	* players/ball when close to the net, so just consider disabled sprites
 	* stuff like signs, static covering shit, leave net/pole parts alone
 	lea		disabled_sprites(pc),a3
+	st.b	dont_store_blitted_coords	| tell not to store previous blitted coords for bg restore
+
 0:
 
 	tst.b	(a3,d2.w)
@@ -1409,7 +1410,10 @@ update_one_bob:
 	move.w	d1,d5		| set Y offset
 	moveq	#0,d1		| and coord = 0
 
-	* store attributes for clipped sprite erase
+	tst.b	dont_store_blitted_coords
+	jne		9f
+	
+	* store attributes for clipped sprite erase (unless blocked)
 	move.w	d0,(a6)+			| store current sprite attributes to previous ones
 	clr.w	(a6)+			| store current sprite attributes to previous ones
 	move.w	d4,(a6)+			| store height
@@ -1423,17 +1427,24 @@ update_one_bob:
 
 	* note down that this bob will have to be erased
 	* store attributes for non-clipped sprite erase
+
+	tst.b	dont_store_blitted_coords
+	jne		91f
+
+	* store attributes for clipped sprite erase (unless blocked)
 	move.w	d0,(a6)+			| store current sprite attributes to previous ones
 	move.w	d1,(a6)+			| store current sprite attributes to previous ones
 	move.w	d4,(a6)+			| store height
 	move.w	d5,(a6)+			| store width in bytes
+91:
 	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
 	moveq	#0,d5			| Y-offset
 
 9:
 	moveq	#NB_PLAYFIELD_PLANES,d3
 
-	jbsr		blit_planes_any_internal_cookie_cut
+	jbsr	blit_planes_any_internal_cookie_cut
+	clr.b	dont_store_blitted_coords
 2:
 	move.l	(a7)+,a0
 	rts
@@ -3069,10 +3080,12 @@ osd_read_system:
 	lea		keyboard_table(pc),a0
 	tst.b	(5,a0)		| "5" key like in MAME
 	beq.b	0f
+	jsr	 _detect_controller_types 	
 	bclr	#BIT_COIN1,d0
 0:
 	tst.b	(6,a0)		| "6" key like in MAME
 	beq.b	0f
+	jsr	 _detect_controller_types 	
 	bclr	#BIT_COIN2,d0
 0:	
 
@@ -3083,6 +3096,7 @@ osd_read_system:
 	* game not playing, we can insert coin/start with joypad
 	btst	#JPB_BTN_RED,d1		| "5" key like in MAME
 	jeq		0f
+	jsr	 _detect_controller_types 	
 	bclr	#BIT_COIN1,d0
 0:
 
@@ -3883,7 +3897,8 @@ net_in_front_of_right_objects:
 	.byte	0
 music_playing:
 	.byte	0
-
+dont_store_blitted_coords:
+	.byte	0
 music_loops:
 	.byte	0
 music_volume:

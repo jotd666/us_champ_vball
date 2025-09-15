@@ -3,6 +3,7 @@
 - map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
 - air base: no scrolling
 - hawaii: X scrolling wraps only in that case leave as is...
+=> in levels 4,8,9, do a special scrolling on map
 
 minor:
 
