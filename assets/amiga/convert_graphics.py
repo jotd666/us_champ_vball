@@ -3,6 +3,8 @@ import os,sys,bitplanelib,subprocess,collections
 
 from shared import *
 
+#import find_localized_colors
+
 sprite_names = get_sprite_names()
 
 possible_hw_sprites = set()
@@ -341,7 +343,18 @@ def quantize_palette(rgb_tuples,img_type,nb_quantize,transparent=None):
     return rval
 
 
-def gen_context_files(context_name,nb_planes,with_sprites=True):
+def apply_color_replacement(sprite_set_list,quantized):
+    """ change colors for list of tilesets (tiles, sprites)
+    quantized: RGB => RGB color replacement dictionary
+    """
+
+    for sset in sprite_set_list:
+        for tile in sset:
+            if tile:
+                bitplanelib.replace_color_from_dict(tile,quantized)
+
+
+def gen_context_files(context_name,nb_planes,with_sprites=True,optimize_colors_for_level=None):
 
     nb_colors = 1<<nb_planes
 
@@ -424,11 +437,8 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
         tile_set_list.append(tile_set)
         tile_palette.update(tp)
 
-    # pad
-##    tile_palette = sorted(tile_palette)
-##    tile_palette += (nb_colors//2-len(tile_palette)) * [(0x10,0x20,0x30)]
 
-    sprite_palette = set(tile_palette)  # try to reuse tile palette
+    sprite_palette = set()
     sprite_set_list = [[] for _ in range(nb_cluts)]
     hw_sprite_set_list = []
 
@@ -453,7 +463,21 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
         # add the colors of the net (has also 254,0,254 magenta as transparent)
         sprite_palette.update(bitplanelib.palette_extract(net_img))
 
-    full_palette = sorted(sprite_palette)
+
+    # here we have collected all original colors of used tiles+sprites of the context
+    # even on 128-color mode there's some quantizing to do, but I found that a lot of colors
+    # aren't reused after a given Y so we could optimize by changing the palette dynamically!
+
+
+##    if optimize_colors_for_level is not None:
+##        best_y,dynamic_colors = find_localized_colors.doit(f"level_{optimize_colors_for_level}.png",avoid_colors=sprite_palette)
+##        print(f"{context_name}: Can save {len(dynamic_colors)} with dynamic palette change")
+##        # now remove the colors from the tile palette
+##        tile_palette.difference_update(dynamic_colors)
+##        # and from the tiles themselves
+##        apply_color_replacement(tile_set_list,dynamic_colors)
+
+    full_palette = sorted(sprite_palette | tile_palette)
     must_insert_magenta = False
 
     if magenta in full_palette:
@@ -465,18 +489,13 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
     remaining = (nb_colors-1-used_nb_colors)
     if remaining < 0:
         # it doesn't: we have to reduce
-        print(f"Not enough colors: {nb_colors} < {used_nb_colors+1}, quantizing")
+        print(f"{context_name}: not enough colors: {nb_colors} < {used_nb_colors+1}, quantizing")
         quantized = quantize_palette(full_palette,context_name,nb_colors-1)
         used_nb_colors = len(quantized)
         # apply quantize to all tiles & sprites now
-        for sset in sprite_set_list:
-            for tile in sset:
-                if tile:
-                    bitplanelib.replace_color_from_dict(tile,quantized)
-        for sset in tile_set_list:
-            for tile in sset:
-                if tile:
-                    bitplanelib.replace_color_from_dict(tile,quantized)
+
+        apply_color_replacement(sprite_set_list,quantized)
+        apply_color_replacement(tile_set_list,quantized)
 
         if net_img:
             bitplanelib.replace_color_from_dict(net_img,quantized)
@@ -484,6 +503,7 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
         full_palette = sorted(set(quantized.values()))
         used_nb_colors = len(full_palette)
         remaining = (nb_colors-1-used_nb_colors)
+
     else:
         print(f"{context_name}: Used number of colors {used_nb_colors+1}, tiles number of colors {len(tile_palette)}")
 
@@ -491,6 +511,7 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
     if must_insert_magenta:
         # magenta (transparent) first
         full_palette.insert(0,magenta)
+
 
     # recompute remaining colors
     remaining = nb_colors-len(full_palette)
@@ -719,16 +740,20 @@ else:
         with open(sprite_size_cache_file,"r") as f:
             double_size_sprites = json.load(f)
         # put whatever version (color) or levels you need
-        plane_range = []
+        plane_range = [6]
         level_range = [1]
 
+
+
+replacement_colors = dict()
 
 for nb_planes in plane_range:
     print(f"*** Generating for nb colors = {1<<nb_planes}")
     gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
     gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
     for level in level_range:
-        gen_context_files(f"level_{level}",nb_planes=nb_planes)  # also select
+        replacement_colors[level] = gen_context_files(f"level_{level}",
+                            nb_planes=nb_planes,optimize_colors_for_level=level)
     dump_it = False     # dumps in the same dump dir anyway
 
 if any(double_size_sprites):

@@ -1,21 +1,21 @@
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
-- map glitch: scroll block should be only done when map context is set (do a special case in 0xEA74 if map screen is set)
-- air base: no scrolling
-- hawaii: X scrolling wraps only in that case leave as is...
-=> in levels 4,8,9, do a special scrolling on map
+- DSW seem to have 4 coins per play!!
+
 
 minor:
 
 - increase screen height as when screen scrolls up, players feet blit 'wrap' to the top other planes: to check
 - sometimes starts with 10 credits!!
-- still missing some black pixels (big score sprites) not everywhere?... why????
+- big score sprites: still missing some black pixels not everywhere?... why???? sprite dumps reveal no issue...
 - maybe not include some unused sounds to save memory?
 
 optims
 
 - 32/64 colors: identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
+  problem: if tile replaced colors matches a sprite color after quantization, it will destroy sprite color... Complex, almost coded
+  but would save 10 colors (before quantization) so forget it
 - use CPU-driven erase?
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
 - better bank switching: use A5 for bank base to get more speed

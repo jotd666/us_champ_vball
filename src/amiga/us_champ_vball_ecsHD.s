@@ -45,7 +45,7 @@ _config
 	dc.b	"C2:X:50 Hz update:0;"
 	dc.b	"C2:X:win in 7 points:1;"
 	dc.b	"C3:L:difficulty level:easy,medium,hard,very hard;"
-	dc.b	"C4:L:start level:Daytona,New York,Los Angeles,Hawaii,Daytona 2,New York 2,Los Angeles 2,Hawaii 2,Air Base;"
+	dc.b	"C4:L:start level:Daytona,New York,Los Angeles,Hawaii,Daytona 2,New York 2,Los Angeles 2,Hawaii 2,Aircraft Carrier;"
 
 	dc.b	0
 

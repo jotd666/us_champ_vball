@@ -632,8 +632,6 @@ demo_game:
 	move.l	(a0)+,(a1)+
 	dbf		d0,0b
 	
-	* pre-compute screen address => amiga screen offset address (for first plane)
-	jbsr	cache_tiles_address
 	
 	.ifndef	RELEASE
 	* install dump and quit handler
@@ -691,6 +689,13 @@ _vblank:
 	move.w	(intreqr,a5),d0
 	btst	#5,d0
 	beq.b		1f
+
+	tst.b	detect_controllers
+	jeq	0f
+	clr.b	detect_controllers
+	jsr	 _detect_controller_types_nowait
+
+0:
 
 	move.l	joypad_1_state(pc),d1
 	move.l	d1,d2
@@ -765,6 +770,33 @@ _vblank:
 
 	jbsr		really_update_sprites
 	
+	* handling the 2 special cases of the hawai and aircraft carrier maps
+	* on the original game there are 2 issues
+	* 1) the scrolling is poked erratically (but on real hw it works)
+	* 2) the tiles layout is so that the scrolling has to wrap to display it right
+	* and we don't want to implement scrolling wrap just for that part
+	* so the trick is swapping left/right tiles just for that part, and the superior part is
+	* that the amiga version actually shows the US map with the match number and the location,
+	* then scrolls to the map location of the match
+	* whereas the original game directly sets to the map location of the match
+	
+	tst.b	scrolling_override
+	jeq		0f
+
+	move.w	#0x000,scroll_x_hi
+	move.w	scrolling_timer,d0
+	neg		d0
+	add.w	#0xFC,d0
+	cmp.w	min_forced_scrolling,d0
+	jcc		1f
+	* below min: clip
+	move.w	min_forced_scrolling,d0
+	jra		2f
+1:
+	addq.w	#3,scrolling_timer
+2:
+	move.w	d0,scroll_x_lo
+0:
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
 	.else
@@ -2255,6 +2287,7 @@ osd_w_videoram_out:
 
 	
 * bruteforce all possible x/y combinations
+* d2: 0: no X swap, 1: X swap (for scrolling maps)
 cache_tiles_address:
 	moveq	#0,d7
 	lea		tile_address_table,a0
@@ -2267,6 +2300,13 @@ cache_tiles_address:
 	move.w	#-1,(a0)+		| store invalid offset: -1 is not possible
 	jra		2f
 1:	
+	tst.b	d2
+	jeq		3f
+	* swap left & right screens (scrolling map)
+	add.w	#0x20,d0
+	and.w	#0x3F,d0	
+3:
+
 	* displayable tile
 	add.w	d1,d1
 	move.w	(a1,d1.w),d1
@@ -2277,7 +2317,7 @@ cache_tiles_address:
 	cmp.w	#0x1000,d7
 	jne		0b
 	rts
-	
+
 
 * < D7: 0-0x1000
 * > D0/D1: coords 
@@ -2693,16 +2733,54 @@ osd_set_scrolly_lo:
 	move.b	d0,scroll_y+1
 	rts
 
-	
+* change game context game_context	
 load_tile_data:
 	PUSH_INTERRUPT_STATE
+	DISABLE_INTERRUPTS
 	movem.l	d0-a6,-(a7)
 	.ifndef	RELEASE
 	* purge log data
 	jbsr	purge_tile_log_data
 	jbsr	purge_sprite_log_data
 	.endif
+	
+	* default: use scrolling data provided by game calls to osd_set_scrollxxxx calls
+	clr.b	scrolling_override
+	clr.w	scroll_x_hi
+	clr.w	scroll_x_lo
+	moveq	#0,d2		| normal map
+	
 	and.w	#0xFF,d0
+	cmp.b	#5,d0
+	jne		0f
+	* this is the map context
+	* check the current level
+	GET_RAM_START_IN_A6
+	move.b	(current_level_38,a6),d1
+	cmp.b	#3,d1
+	jeq		1f
+	cmp.b	#3+4,d1
+	jeq		1f
+	cmp.b	#8,d1
+	jne		0f
+1:	
+	* 2 special cases: hawai and air base
+	* game scrolls directly to the location but the scroll emulation
+	* doesn't work for us. Besides, the original game doesn't show the map
+	* at position 0 at all, so it doesn't show "aircraft carrier" or "hawai" at all
+	* we're going to fix both problems at once
+	st.b scrolling_override
+	clr.w	scrolling_timer
+	st.b	d2
+	* Hawai: don't scroll too much on the left, don't show "secret"
+	* Aircraft match location yet.
+	move.w	#96+16,min_forced_scrolling
+	cmp.b	#8,d1
+	jne		0f
+	move.w	#4,min_forced_scrolling
+0:
+	* pre-compute screen address => amiga screen offset address (for first plane)
+
 	add.w	d0,d0
 	add.w	d0,d0
 	lea		context_table(pc),a0
@@ -2712,7 +2790,10 @@ load_tile_data:
 	BREAKPOINT	"unsupported tile context in d0"
 	jra		100f
 0:
-	move.l	d1,a3
+	move.l	d1,a3		| save context name
+	
+	* pre-compute tiles locations
+	jbsr	cache_tiles_address
 	
 	* first, free all memory
 	jbsr	free_all_memory
@@ -3080,12 +3161,12 @@ osd_read_system:
 	lea		keyboard_table(pc),a0
 	tst.b	(5,a0)		| "5" key like in MAME
 	beq.b	0f
-	jsr	 _detect_controller_types 	
+	st.b	detect_controllers
 	bclr	#BIT_COIN1,d0
 0:
 	tst.b	(6,a0)		| "6" key like in MAME
 	beq.b	0f
-	jsr	 _detect_controller_types 	
+	st.b	detect_controllers
 	bclr	#BIT_COIN2,d0
 0:	
 
@@ -3096,7 +3177,7 @@ osd_read_system:
 	* game not playing, we can insert coin/start with joypad
 	btst	#JPB_BTN_RED,d1		| "5" key like in MAME
 	jeq		0f
-	jsr	 _detect_controller_types 	
+	st.b	detect_controllers
 	bclr	#BIT_COIN1,d0
 0:
 
@@ -3893,17 +3974,25 @@ difficulty_dsw:
 	.byte	0
 net_drawn:
 	.byte	0
+detect_controllers:
+	.byte	0
 net_in_front_of_right_objects:
 	.byte	0
 music_playing:
 	.byte	0
 dont_store_blitted_coords:
 	.byte	0
+scrolling_override:
+	.byte	0
 music_loops:
 	.byte	0
 music_volume:
 	.byte	0
 	.align	2
+scrolling_timer:
+	.word	0
+min_forced_scrolling:
+	.word	0
 music_track_start_number:
 	.word	-1
 music_pattern:
@@ -4182,14 +4271,10 @@ cpu_log_enable:
 public_memory_block:
 	.skip	TOTAL_PUBLIC_MEMORY_SIZE
 	
-	* on amiga, this file is included in mpatrol.68k file
-	* so the assembler can optimize by using PC-relative addressing
-	* whenever possible (and it does)
 
 tile_address_table:
 	.skip	0x1000*2
 	
-
 	
 	.ifne	OPT_ENABLE_LOGGING
 tile_bank_table:
@@ -4273,7 +4358,6 @@ game_copperlist:
 	* black color background plane
 	* enable sprite colors now
 	.word	0x0801,0xFFFE
-	.set	current_line,8
 	
 		
 bobs_bitplanes:
@@ -4299,11 +4383,18 @@ copperlist_colors:
 	.endr
 	.endif
 
+*palette_change_wait:
+*	.word	0x01+(275-224)<<8,0xFFFE
+*	.word	bplcon3,0
+*	.word	color,0xF00
+
+
 	* mid-line wait & extra interrupt
 	.word	0x8001,0xFFFE
 pal_intreq_block_game:
 	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
 
+	
 	*.word	0xF001,0xFFFE	| if we don't add an extra wait, NTSC version locks up
 	
 	* pal limit
