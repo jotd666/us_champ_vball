@@ -1310,13 +1310,17 @@ update_one_bob:
 	* restoring the display priority allowing the net to appear in front of
 	* players/ball when close to the net, so just consider disabled sprites
 	* stuff like signs, static covering shit, leave net/pole parts alone
+	lea		net_pole_sprites(pc),a3
+	tst.b	(a3,d2.w)
+	jeq		1f
+	st.b	dont_store_blitted_coords	| tell not to store previous blitted coords for bg restore: it's a net/pole sprite	
+1:
 	lea		disabled_sprites(pc),a3
-	st.b	dont_store_blitted_coords	| tell not to store previous blitted coords for bg restore
-
 0:
 
 	tst.b	(a3,d2.w)
 	jne		2f				| some (static) sprites are disabled
+
 
 	* handle vertical grouping (that game imposes)
 	lea		sprite_size_table(pc),a3
@@ -2636,6 +2640,8 @@ scroll_table:
 	.include	"scroll_table_16.68k"
 	.endif
 	
+net_pole_sprites:
+	.include	"net_pole_sprites.68k"
 disabled_sprites:
 	.include	"disabled_sprites.68k"
 * contains disabled sprites, plus net static sprites
@@ -3189,7 +3195,7 @@ osd_read_system:
 osd_read_dsw2:
 	* actual dipswitches
 	move.b	dip_switches_2(pc),d0
-	
+	move.b	#0x87,d0		| demo sounds on, 1 coin 1 credit
 	rts
 
 

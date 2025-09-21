@@ -354,7 +354,7 @@ def apply_color_replacement(sprite_set_list,quantized):
                 bitplanelib.replace_color_from_dict(tile,quantized)
 
 
-def gen_context_files(context_name,nb_planes,with_sprites=True,optimize_colors_for_level=None):
+def gen_context_files(context_name,nb_planes,with_sprites=True):
 
     nb_colors = 1<<nb_planes
 
@@ -752,8 +752,7 @@ for nb_planes in plane_range:
     gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
     gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
     for level in level_range:
-        replacement_colors[level] = gen_context_files(f"level_{level}",
-                            nb_planes=nb_planes,optimize_colors_for_level=level)
+        replacement_colors[level] = gen_context_files(f"level_{level}",nb_planes=nb_planes)
     dump_it = False     # dumps in the same dump dir anyway
 
 if any(double_size_sprites):
@@ -770,12 +769,16 @@ for i in get_hidden_sprites():
 with open(src_dir / "disabled_sprites.68k","w") as f:
     bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
 
-
+net_pole_sprites = [0]*NB_SPRITES
 for i in net_and_pole_static_sprites:
     disabled_sprites[i] = 1
+    net_pole_sprites[i] = 1
 
 with open(src_dir / "net_pole_and_disabled_sprites.68k","w") as f:
     bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
+
+with open(src_dir / "net_pole_sprites.68k","w") as f:
+    bitplanelib.dump_asm_bytes(net_pole_sprites,f,mit_format=True)
 
 increment = (0x110-0x104)/(0x7B-0xF)
 

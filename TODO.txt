@@ -1,6 +1,5 @@
 - 2P: we have to rip more tiles (net with ball?)
 - 2P: check that (with net) we can fail a serve!!
-- DSW seem to have 4 coins per play!!
 
 
 minor:
@@ -10,7 +9,7 @@ minor:
 - big score sprites: still missing some black pixels not everywhere?... why???? sprite dumps reveal no issue...
 - maybe not include some unused sounds to save memory?
 
-optims
+optims:
 
 - 32/64 colors: identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
@@ -28,14 +27,7 @@ optims
 
 
 
-
-converter:
-- if SBC_IMM	0x00 found later, don't optimize sbc into sub!
-- flag manipulation can sometimes just use ANDI/ORI/EORI CCR to be faster!
-- addx: set Z flag before
-- sbcd/abcd warning: check bpl flag afterwards, change to bcc
-- alternating OP_W_ON_ZP_ADDRESS and OP_R_ON_ZP_ADDRESS: remove PUSH/POP SR
-- add or addx + addq + addx without jmp/jra/rts/CLR_XC_FLAGS/lsr/lsl/asr/asl/ror/rol => error
+notes:
 
 start log regs: f519: start ball (serve)
 
