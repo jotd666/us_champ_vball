@@ -15,6 +15,12 @@ nb_cluts = 8
 
 dump_it = True
 
+all_tile_cluts = False
+
+group_sprite_pairs = get_sprite_groups()
+
+double_size_sprites = [0]*NB_SPRITES
+
 def asm2bin(source,dest):
     subprocess.run(["vasmm68k_mot","-nosym","-pic","-Fbin",source,"-o",dest],check=True,stdout=subprocess.DEVNULL)
 
@@ -158,11 +164,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 
     return sorted(set(palette)),tileset_1
 
-all_tile_cluts = False
 
-group_sprite_pairs = get_sprite_groups()
-
-double_size_sprites = [0]*NB_SPRITES
 
 def add_tile(table,index,cluts=[0],is_bob=False,double_size=False):
     if isinstance(index,range):
@@ -209,7 +211,7 @@ plane_orientations = [("standard",lambda x:x),
 ("mirror",ImageOps.mirror),
 ("flip_mirror",lambda x:ImageOps.flip(ImageOps.mirror(x)))]
 
-def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
+def read_tileset(img_set_list,palette,plane_orientation_flags,cache,nb_planes,is_bob):
     next_cache_id = 1
     tile_table = []
     for n,img_set in enumerate(img_set_list):
@@ -521,10 +523,10 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
 
     # no orientations, only standard, with dynamic mirror
     tile_plane_cache = {}
-    tile_table = read_tileset(tile_set_list,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
+    tile_table = read_tileset(tile_set_list,full_palette,[True,False,False,False],cache=tile_plane_cache, nb_planes=nb_planes, is_bob=False)
 
     bob_plane_cache = {}
-    sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,False,False],cache=bob_plane_cache, is_bob=True)
+    sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,False,False],cache=bob_plane_cache, nb_planes=nb_planes, is_bob=True)
 
     def write_ptr(f,ptr_name):
         f.write(f"{decl_ptr}{ptr_name}-_base\n")
@@ -725,66 +727,69 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
+def doit(from_scratch=True):
+    global double_size_sprites
+
+    sprite_size_cache_file = this_dir / "sprite_size.json"
 
 
-sprite_size_cache_file = this_dir / "sprite_size.json"
-
-from_scratch = False
-if from_scratch:
-    # this generates everything, no gfx dump, no cache
-    dump_it = False
-    plane_range = [5,6,7]
-    level_range = range(1,6)
-else:
-    if sprite_size_cache_file.exists():
-        with open(sprite_size_cache_file,"r") as f:
-            double_size_sprites = json.load(f)
-        # put whatever version (color) or levels you need
-        plane_range = [6]
-        level_range = [1]
+    if from_scratch:
+        # this generates everything, no gfx dump, no cache
+        dump_it = False
+        plane_range = [5,6,7]
+        level_range = range(1,6)
+    else:
+        if sprite_size_cache_file.exists():
+            with open(sprite_size_cache_file,"r") as f:
+                double_size_sprites = json.load(f)
+            # put whatever version (color) or levels you need
+            plane_range = [6]
+            level_range = [1]
 
 
 
-replacement_colors = dict()
+    replacement_colors = dict()
 
-for nb_planes in plane_range:
-    print(f"*** Generating for nb colors = {1<<nb_planes}")
-    gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
-    gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
-    for level in level_range:
-        replacement_colors[level] = gen_context_files(f"level_{level}",nb_planes=nb_planes)
-    dump_it = False     # dumps in the same dump dir anyway
+    for nb_planes in plane_range:
+        print(f"*** Generating for nb colors = {1<<nb_planes}")
+        gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
+        gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
+        for level in level_range:
+            replacement_colors[level] = gen_context_files(f"level_{level}",nb_planes=nb_planes)
+        dump_it = False     # dumps in the same dump dir anyway
 
-if any(double_size_sprites):
-    with open(sprite_size_cache_file,"w") as f:
-        json.dump(double_size_sprites,f)
-    # do that only on level context else it's incomplete and it fails!
-    with open(src_dir / "sprite_size.68k","w") as f:
-        bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
+    if any(double_size_sprites):
+        with open(sprite_size_cache_file,"w") as f:
+            json.dump(double_size_sprites,f)
+        # do that only on level context else it's incomplete and it fails!
+        with open(src_dir / "sprite_size.68k","w") as f:
+            bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
 
-disabled_sprites = [0]*NB_SPRITES
-for i in get_hidden_sprites():
-    disabled_sprites[i] = 1
+    disabled_sprites = [0]*NB_SPRITES
+    for i in get_hidden_sprites():
+        disabled_sprites[i] = 1
 
-with open(src_dir / "disabled_sprites.68k","w") as f:
-    bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
+    with open(src_dir / "disabled_sprites.68k","w") as f:
+        bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
 
-net_pole_sprites = [0]*NB_SPRITES
-for i in net_and_pole_static_sprites:
-    disabled_sprites[i] = 1
-    net_pole_sprites[i] = 1
+    net_pole_sprites = [0]*NB_SPRITES
+    for i in net_and_pole_static_sprites:
+        disabled_sprites[i] = 1
+        net_pole_sprites[i] = 1
 
-with open(src_dir / "net_pole_and_disabled_sprites.68k","w") as f:
-    bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
+    with open(src_dir / "net_pole_and_disabled_sprites.68k","w") as f:
+        bitplanelib.dump_asm_bytes(disabled_sprites,f,mit_format=True)
 
-with open(src_dir / "net_pole_sprites.68k","w") as f:
-    bitplanelib.dump_asm_bytes(net_pole_sprites,f,mit_format=True)
+    with open(src_dir / "net_pole_sprites.68k","w") as f:
+        bitplanelib.dump_asm_bytes(net_pole_sprites,f,mit_format=True)
 
-increment = (0x110-0x104)/(0x7B-0xF)
+    increment = (0x110-0x104)/(0x7B-0xF)
 
-x = 0x110
-x_net_boundary = [int(x-y*increment) for y in range(0x0,0xFF)]
-with open(src_dir / "x_net_boundary_table.68k","w") as f:
-    bitplanelib.dump_asm_bytes(x_net_boundary,f,mit_format=True,size=2)
+    x = 0x110
+    x_net_boundary = [int(x-y*increment) for y in range(0x0,0xFF)]
+    with open(src_dir / "x_net_boundary_table.68k","w") as f:
+        bitplanelib.dump_asm_bytes(x_net_boundary,f,mit_format=True,size=2)
 
 
+if __name__ == "__main__":
+    doit(False)

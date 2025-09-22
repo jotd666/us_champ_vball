@@ -1,10 +1,17 @@
-import subprocess,os,glob,shutil,pathlib
+import subprocess,os,glob,shutil,pathlib,sys
 
 progdir = pathlib.Path(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir)))
 
+sys.path.append(str(progdir / "assets/amiga"))
+import convert_graphics,convert_sounds
+
+# generate graphics
+convert_graphics.doit()
+convert_sounds.doit()
+
 gamename = "us_champ_vball"
 # JOTD path for cranker, adapt to wh :)
-os.environ["PATH"] += os.pathsep+r"K:\progs\cli"
+# os.environ["PATH"] += os.pathsep+r"K:\progs\cli"
 
 cmd_prefix = ["make","-f",os.path.join(progdir,"makefile.am")]
 

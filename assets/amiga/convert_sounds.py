@@ -5,7 +5,7 @@ import shutil
 gamename = "us_champ_vball"
 sox = "sox"
 
-def convert():
+def doit():
     if not shutil.which("sox"):
         raise Exception("sox command not in path, please install it")
     # BTW convert wav to mp3: ffmpeg -i input.wav -codec:a libmp3lame -b:a 330k output.mp3
@@ -214,7 +214,7 @@ yaah_31""".upper().splitlines()
             fst.write(st)
             fst.write(" | {}\n".format(i))
 
-
-convert()
+if __name__ == "__main__":
+    doit()
 
 

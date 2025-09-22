@@ -1,4 +1,4 @@
-from shared import *
+from tools_shared import *
 
 # post-conversion automatic patches, allowing not to change the asm file by hand
 # when everything is stable, I use to stop using 6502 source as source, and work on the 68k file
