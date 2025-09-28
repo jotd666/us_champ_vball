@@ -70,6 +70,10 @@ OPT_FIXED_RANDOM_VALUE = 3   | 1: demo runs without ball going too high, 3: ball
 	\inst\().b	\reg,(a6,\offset\().W)
 	.endm
 
+	.macro OP_NOT_ON_ZP_ADDRESS	inst,offset
+	not.b	(a6,\offset\().W)
+	.endm
+
 	.macro	SBC_X	address
 	INVERT_XC_FLAGS
 	GET_ADDRESS	\address
@@ -251,46 +255,23 @@ b6\@:
 skip\@:
 	.endm
 
-	.ifeq	0
 	.macro	NEW_ADDRESS
 	.endm
 	
-	.macro	CHECK_SAME_ADDRESS_LOADED	ignored
-	.endm
-	
-	.else
-	* heavy check to see if same address is loaded twice (optimization)
-	.macro	NEW_ADDRESS
-	sub.l	a4,a4
-	.endm
-	
-*	.macro	CHECK_SAME_ADDRESS_LOADED
-*	cmp.l	a0,a4
-*	jne		okay\@
-*	jbsr	osd_get_last_known_pc
-*	BREAKPOINT	"same address already loaded (pc in D6)"
-*okay\@:
-*	move.l	a0,a4
-*	.endm
-
-	.endif    | address repeat check
 	
 	.macro GET_ADDRESS	offset
 	lea	\offset,a0
 	GET_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 	
 	.macro GET_BANK_ADDRESS	offset
 	lea	\offset,a0
 	GET_BANK_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 
 	.macro GET_UNCHECKED_ADDRESS	offset
 	lea	\offset,a0
 	lea		(a6,a0.l),a0
-	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 	
 	.macro	PREP_GET_ADDRESS_X	offset
@@ -307,13 +288,11 @@ skip\@:
 	.macro GET_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 	
 	.macro GET_UNCHECKED_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_UNCHECKED_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 
 	.macro GET_INDIRECT_ADDRESS	offset

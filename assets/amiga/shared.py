@@ -173,7 +173,9 @@ def get_sprite_names():
         rval[i] = "ball"
     for i in range(0x2E2,0x2EE):
         rval[i] = "pole"
-    for i in range(0x4D2,0x4D5):
+    for i in range(0x4BA,0x4D5):
+        rval[i] = "referee"
+    for i in range(0x6ED,0x6FD):
         rval[i] = "referee"
 
     return rval
