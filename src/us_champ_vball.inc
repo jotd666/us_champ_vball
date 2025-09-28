@@ -187,17 +187,7 @@ setx\@:
 sxcout\@:
 	.endm
 
-	.macro	SET_X_FROM_CLEARED_Cold
-	PUSH_SR
-	move.w	(sp),d4
-	bset	#4,d4   | set X
-	btst	#0,d4
-	beq.b	skip\@
-	bclr	#4,d4   | C is set: clear X
-skip\@:
-	move.w	d4,(sp)
-	POP_SR
-	.endm
+
 
 * N and V flag set on bits 7 and 6 is now supported
 	.macro    BIT    arg
@@ -265,7 +255,7 @@ skip\@:
 	.macro	NEW_ADDRESS
 	.endm
 	
-	.macro	CHECK_SAME_ADDRESS_LOADED
+	.macro	CHECK_SAME_ADDRESS_LOADED	ignored
 	.endm
 	
 	.else
@@ -274,32 +264,33 @@ skip\@:
 	sub.l	a4,a4
 	.endm
 	
-	.macro	CHECK_SAME_ADDRESS_LOADED
-	cmp.l	a0,a4
-	jne		okay\@
-	jbsr	osd_get_last_known_pc
-	BREAKPOINT	"same address already loaded (pc in D6)"
-okay\@:
-	move.l	a0,a4
-	.endm
-	.endif	
+*	.macro	CHECK_SAME_ADDRESS_LOADED
+*	cmp.l	a0,a4
+*	jne		okay\@
+*	jbsr	osd_get_last_known_pc
+*	BREAKPOINT	"same address already loaded (pc in D6)"
+*okay\@:
+*	move.l	a0,a4
+*	.endm
+
+	.endif    | address repeat check
 	
 	.macro GET_ADDRESS	offset
 	lea	\offset,a0
 	GET_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
+	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 	
 	.macro GET_BANK_ADDRESS	offset
 	lea	\offset,a0
 	GET_BANK_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
+	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 
 	.macro GET_UNCHECKED_ADDRESS	offset
 	lea	\offset,a0
 	lea		(a6,a0.l),a0
-	CHECK_SAME_ADDRESS_LOADED
+	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 	
 	.macro	PREP_GET_ADDRESS_X	offset
@@ -316,34 +307,31 @@ okay\@:
 	.macro GET_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
+	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 	
 	.macro GET_UNCHECKED_ADDRESS_X	offset
 	PREP_GET_ADDRESS_X	\offset
 	GET_UNCHECKED_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
+	CHECK_SAME_ADDRESS_LOADED	offset
 	.endm
 
 	.macro GET_INDIRECT_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro GET_INDIRECT_UNCHECKED_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_UNCHECKED_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro GET_INDIRECT_BANK_ADDRESS	offset
 	GET_ADDRESS	\offset
 	READ_LE_WORD	a0
 	GET_BANK_ADDRESS_FUNC
-	CHECK_SAME_ADDRESS_LOADED
 	.endm
 	
 	.macro	GET_UNCHECKED_ADDRESS_FUNC

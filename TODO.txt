@@ -7,6 +7,7 @@ minor:
 - increase screen height as when screen scrolls up, players feet blit 'wrap' to the top other planes: to check
 - sometimes starts with 10 credits!!
 - big score sprites: still missing some black pixels not everywhere?... why???? sprite dumps reveal no issue...
+  maybe wait blit should be using another tst.b
 - maybe not include some unused sounds to save memory?
 
 optims:
