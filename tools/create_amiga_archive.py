@@ -2,7 +2,9 @@ import subprocess,os,glob,shutil,pathlib,sys
 
 progdir = pathlib.Path(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir)))
 
-sys.path.append(str(progdir / "assets/amiga"))
+assets_dir = str(progdir / "assets/amiga")
+
+sys.path.append(assets_dir)
 import convert_graphics,convert_sounds
 
 # generate graphics
@@ -64,6 +66,10 @@ def distribute(suffix):
                 if p.returncode:
                     print(f"failed packing {destfile}")
                     shutil.copy(sourcefile,destfile)
+    # copy modules (no packing required)
+    for p in (assets_dir / "sounds").glob("*.mod"):
+        destfile = outdir / "data" / p.name
+        shutil.copy(p,destfile)
 
 distribute("ecs")
 distribute("aga_64")

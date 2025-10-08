@@ -59,6 +59,10 @@ yaah_31""".upper().splitlines()
 
     EMPTY_SND = "EMPTY_SND"
 
+    sound_dict["select.mod"] = {"index":2,"volume":32}
+    sound_dict["demo.mod"] = {"index":5,"volume":32}
+
+
 
     #"BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x15,"volume":32,'loops':True},
 
@@ -133,7 +137,8 @@ yaah_31""".upper().splitlines()
                     pass
                 else:
                     # if music loops, ticks are set to 1 so sound orders only can happen once (else music is started 50 times per second!!)
-                    sound_table_set_1[sound_index] = "\t.word\t{},{},{}\n\t.byte\t{},{}".format(2,details["pattern"],details.get("ticks",0),details["volume"],int(details["loops"]))
+                    # sound_table_set_1[sound_index] = "\t.word\t{},{},{}\n\t.byte\t{},{}".format(2,details["pattern"],details.get("ticks",0),details["volume"],int(details["loops"]))
+                    sound_table_set_1[sound_index] = "\t.word\t{},{},{}\n\t.byte\t{},{}".format(2,0,0,details["volume"],0)
             else:
                 wav_name = os.path.basename(wav_entry).lower()[:-4]
                 wav_file = os.path.join(sound_dir,wav_name+".wav")

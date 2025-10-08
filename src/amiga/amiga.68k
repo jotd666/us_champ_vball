@@ -36,7 +36,7 @@ AFB_68020 = 1
 * memory was calibrated on 64 color AGA mode, and proportional
 * to the number of planes
 TOTAL_PUBLIC_MEMORY_SIZE = (360000/6)*NB_PLAYFIELD_PLANES
-TOTAL_CHIP_MEMORY_SIZE = (550000/6)*NB_PLAYFIELD_PLANES
+TOTAL_CHIP_MEMORY_SIZE = (550000/6)*NB_PLAYFIELD_PLANES+0x13000
 
 
 BORDERBLANK = 1
@@ -302,7 +302,7 @@ _user:
 	jsr	_LVOWaitTOF(a6)
 	jsr	_LVOWaitTOF(a6)
 	
-	jbsr		load_highscores
+	*jbsr		load_highscores
     * check if "floppy" file is here
     move.l  _dosbase(pc),a6
     move.l   #floppy_file,d1
@@ -640,6 +640,40 @@ demo_game:
 	move.l	#0x4AFC4EF9,(a0)+
 	move.l	(a7)+,(a0)+
 	.endif
+	
+	* init memory system
+	jbsr	free_all_memory
+	
+	* scan tunes, compute max tune size and allocate memory
+	* once and for all
+	lea		tunes_table,a3
+	move.l	_resload,a2
+	moveq	#0,d2
+0:
+	move.l	(a3)+,d0
+	jmi		1f
+	jeq		0b
+	* not null: check size
+	move.l	d0,a0
+	jbsr	resload_GetFileSize(a2)
+	cmp.l	d0,d2
+	jcc		0b
+	move.l	d0,d2		| new max
+	jra		0b
+1:
+	move.l	d2,d0		| biggest module size
+	jeq		2f
+	moveq	#1,d1		| chip
+
+	jbsr	allocate_memory
+	move.l	d0,music_memory_ptr
+	* now "lose" the memory, can never be freed
+	move.l	chip_memory_current_ptr,d0
+	* align on 16
+	add.l	#0x10,d0
+	and.w	#0xFFF0,d0
+	move.l	d0,chip_memory_start_ptr
+2:
 	* enable interrupts. Game doesn't use them
 	* but relies on vbl sync flags
 	jbsr	cpu_init		| zero all registers
@@ -3454,11 +3488,11 @@ program_args_end:
 	.align	4
 read_args_string:
 	.byte	read_args_string_end-read_args_string
-	.ascii	"INVINCIBLE/S,INFLIVES/S,"
 	.ascii	"CHEATKEYS/S,FIVELIVES/S,FAST/S"
 read_args_string_end:
 	.align	2
 
+	.ifdef	HIGH_SCORES
 * < A0: buffer
 osd_read_high_scores:
 	movem.l	d0-d7/a0-a6,-(a7)
@@ -3497,7 +3531,7 @@ osd_write_high_scores:
 	bne.b	2f
 	.endif
 	GET_RAM_START_IN_A6
-*lea		(high_score_table_0294,a6),a0
+	lea		(high_score_table_0294,a6),a0
 
 	move.l	_resload,d0
 	bne.b	1f
@@ -3570,7 +3604,8 @@ save_highscores:
 1:	
     rts
     
-
+	.endif
+	
 osd_music_stop:
 *	movem.l	d0/a0/a6,-(a7)
 *	lea		_custom,a6
@@ -3660,7 +3695,7 @@ osd_sound_start:
 	
 	* music
 4:
-	BREAKPOINT	"music????"
+	
 	* don't play if already playing
 	* (music_tick value is not important for looped tunes
 	* as long as it's not zero)
@@ -3671,48 +3706,62 @@ osd_sound_start:
 	*bne.b	10b
 	* play the proper module pattern
 	* load up the countdown if loop
-	
-	move.w	(2,a0,d0.w),d1	| pattern number in .mod file
-	* since it's not zero, next vbl tick will play the music
-	
-	cmp.b	music_track_start_number,d1
-	beq.b	10b		| same track, skip
+		
 
     movem.l d0-a6,-(a7)
 	bsr		force_sound_stop
     lea _custom,a6
  	movem.l	d0/a0,-(a7)
-	*lea	burgertime_tunes,a0
-	illegal
+	lea	tunes_table,a0
+	lsr.w	#1,d0		| times 4 not 8
+	move.l	(a0,d0.w),d0	| filename
+	jeq		no_tune
+	move.l	d0,a0
+	move.l	music_memory_ptr,a1
+	move.l	_resload,a2
+	jbsr	resload_LoadFileDecrunch(a2)
 	
-	move.b	d1,music_track_start_number
-	move.w	d1,d0
+	move.l	music_memory_ptr,a0
+	moveq	#0,d0
     sub.l   a1,a1		| samples are in the module
     jsr _mt_init
 	movem.l	(a7)+,d0/a0
 
     * set master volume a little less loud if needed
 	move.b	(6,a0,d0.w),music_volume
-	move.b	(7,a0,d0.w),music_loops
-	move.w	(2,a0,d0.w),music_pattern	| pattern number in .mod file
-	move.w	(4,a0,d0.w),d2
+	*move.b	(7,a0,d0.w),music_loops
+	*move.w	(2,a0,d0.w),music_pattern	| pattern number in .mod file
+	*move.w	(4,a0,d0.w),d2
 
-	move.w	d2,music_duration
-	move.w	d2,music_tick
+	*move.w	d2,music_duration
+	*move.w	d2,music_tick
 
     moveq	#0,d0
 	move.b	music_volume,d0
     jsr	_mt_mastervol
 	st.b	music_playing
     jsr _mt_start
+5:
     movem.l (a7)+,d0-a6
 	
 6:
 	jra	10b
-
+no_tune:
+	movem.l	(a7)+,d0/a0
+	jra		5b
 	
-	
-
+tunes_table:
+	.long	0
+	.long	0
+	.long	select_mod
+	.long	0
+	.long	0
+	.long	intro_mod
+	.long	0
+	.long	0
+	.long	0
+	.long	0
+	.long	-1
 	
 * < D0: required size
 * < D1: 0 any, 1 chip
@@ -3721,7 +3770,7 @@ allocate_memory:
 	movem.l	d2-d4/a0-a1,-(a7)
 	tst.b	d1
 	jeq		0f
-	lea		chip_memory_block,a0
+	move.l	chip_memory_start_ptr,a0
 	lea		chip_memory_current_ptr,a1
 	move.l	#TOTAL_CHIP_MEMORY_SIZE,d3
 	jra		1f
@@ -3761,7 +3810,7 @@ free_all_memory:
 	move.l	a0,-(a7)
 	lea		public_memory_block,a0
 	move.l	a0,public_memory_current_ptr
-	lea		chip_memory_block,a0
+	move.l	chip_memory_start_ptr,a0
 	move.l	a0,chip_memory_current_ptr
 	move.l	(a7)+,a0
 	rts
@@ -3776,7 +3825,7 @@ quit_to_os:
 	* it works as quit_to_os is called from an interrupt
 	move.w	#0,SR
 	move.l	old_stack,a7
-	jbsr		save_highscores
+	*jbsr		save_highscores
 	moveq	#0,d0
 	rts
 0:
@@ -3970,6 +4019,12 @@ looped_sound_enabled:
 
 return_address:
 	.long	0
+	
+select_mod:
+	.asciz	"select.mod"
+intro_mod:
+	.asciz	"demo.mod"
+	
 * game sets prom bank 2 then switches to 7 at bootup
 * prom bank 2 is not used at this moment, let's skip
 current_tile_prom_bank:
@@ -4068,7 +4123,7 @@ context_table:
 	.long	0     | 6
 	.long	intro_context     | 7
 
-	
+
 old_intena:
 	.long	0
 old_dmacon:
@@ -4206,7 +4261,11 @@ public_memory_current_ptr:
 	.long	0
 chip_memory_current_ptr:
 	.long	0
+chip_memory_start_ptr:
+	.long	chip_memory_block
 palette_ptr:
+	.long	0
+music_memory_ptr:
 	.long	0
 tiles_ptr:
 	.long	0
