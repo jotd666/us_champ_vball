@@ -329,6 +329,16 @@ _user:
 	move.l	#-1,184(A0)	| pr_WindowPtr: no more system requesters (insert volume, write protected...)
 
 .no_forbid:
+	.ifne	OPT_ENABLE_LOGGING
+	* protection for end of cpu log buffer
+	lea		log_buffer_end,a0
+	move.l	#0xCAFECAFE,d0
+	.rept	4
+	move.l	d0,(a0)+
+	.endr
+	.endif
+
+
 
 	lea		_custom,a5
 	lea		debug_copperlist,a0
@@ -4316,22 +4326,20 @@ _end_of_ng_code:
 
 	.align 2
 
-	* can't put that in .bss, it blocks the bss and turns to data
 	.section 	.data
 	.ifndef	RELEASE
 log_ptr:
 	.long	log_buffer
-log_buffer:
-	.skip	LOG_BUFFER_SIZE
-	.rept	20
-	.long	0xCAFECAFE
-	.endr
 cpu_log_enable:
 	.word	0
 	.endif
 
 	.section	.bsspublic
 
+log_buffer:
+	.skip	LOG_BUFFER_SIZE
+log_buffer_end:
+	.skip	16
 	
 public_memory_block:
 	.skip	TOTAL_PUBLIC_MEMORY_SIZE
