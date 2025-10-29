@@ -1,9 +1,13 @@
 import subprocess,os,struct,glob,tempfile
+from shared import *
 import shutil
+sound_dir = this_dir.parent / "sounds"
 
 
 gamename = "us_champ_vball"
 sox = "sox"
+
+sound_dict = {}
 
 def doit():
     if not shutil.which("sox"):
@@ -12,13 +16,9 @@ def doit():
 
     #wav_files = glob.glob("sounds/*.wav")
 
-    this_dir = os.path.dirname(__file__)
-    sound_dir = os.path.join(this_dir,"..","sounds")
 
-    this_dir = os.path.dirname(__file__)
-    src_dir = os.path.join(this_dir,"../../src/amiga")
-    outfile = os.path.join(src_dir,"sounds.68k")
-    sndfile = os.path.join(src_dir,"sound_entries.68k")
+    outfile = src_dir / "sounds.68k"
+    sndfile = src_dir / "sound_entries.68k"
 
 
     hq_sample_rate = 18000
@@ -50,7 +50,6 @@ yaah_31""".upper().splitlines()
     srdict = {0x38:lq_sample_rate}
     priodict = {0x21:20,0x36:50}
     chandict = {0x36:2}
-    sound_dict = {}
     for s in sounds:
         toks = s.rsplit("_",maxsplit=1)
         idx = int(toks[1],16)
@@ -61,11 +60,11 @@ yaah_31""".upper().splitlines()
 
     sound_dict["select.mod"] = {"index":2,"volume":32}
     sound_dict["demo.mod"] = {"index":5,"volume":32}
+    sound_dict["level_1.mod"] = {"index":9,"volume":28}
 
 
 
     #"BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x15,"volume":32,'loops':True},
-
 
 
 
@@ -113,14 +112,12 @@ yaah_31""".upper().splitlines()
             n += 1
         fw.write("\n")
 
-    music_module_label = f"{gamename}_tunes"
 
     raw_file = os.path.join(tempfile.gettempdir(),"out.raw")
     with open(sndfile,"w") as fst,open(outfile,"w") as fw:
         fst.write(snd_header)
 
         fw.write("\t.section\t.datachip\n")
-        fw.write("\t.global\t{}\n".format(music_module_label))
 
         for wav_file,details in sound_dict.items():
             wav_name = os.path.basename(wav_file).lower()[:-4]
@@ -205,10 +202,7 @@ yaah_31""".upper().splitlines()
 
 
         # make sure next section will be aligned
-##        with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
-##            contents = f.read()
-##
-##        fw.write("{}:".format(music_module_label))
+
 ##        write_asm(contents,fw)
         fw.write("\t.align\t8\n")
 
@@ -221,5 +215,9 @@ yaah_31""".upper().splitlines()
 
 if __name__ == "__main__":
     doit()
+    for sd in ["aga_64","aga_128","ecs"]:
+        for k in sound_dict:
+            if k.endswith(".mod"):
+                shutil.copy(sound_dir/ k, data_dir / sd / k)
 
 

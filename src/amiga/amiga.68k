@@ -3770,7 +3770,7 @@ tunes_table:
 	.long	0
 	.long	0
 	.long	0
-	.long	0
+	.long	level_1_mod
 	.long	-1
 	
 * < D0: required size
@@ -4034,6 +4034,8 @@ select_mod:
 	.asciz	"select.mod"
 intro_mod:
 	.asciz	"demo.mod"
+level_1_mod:
+	.asciz	"level_1.mod"
 	
 * game sets prom bank 2 then switches to 7 at bootup
 * prom bank 2 is not used at this moment, let's skip

@@ -2,9 +2,9 @@ import subprocess,os,glob,shutil,pathlib,sys
 
 progdir = pathlib.Path(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir)))
 
-assets_dir = str(progdir / "assets/amiga")
+assets_dir = progdir / "assets/amiga"
 
-sys.path.append(assets_dir)
+sys.path.append(str(assets_dir))
 import convert_graphics,convert_sounds
 
 # generate graphics
@@ -19,15 +19,12 @@ cmd_prefix = ["make","-f",os.path.join(progdir,"makefile.am")]
 
 subprocess.check_call(cmd_prefix+["clean"],cwd=os.path.join(progdir,"src"))
 
-##for s in ["convert_sounds.py","convert_graphics.py"]:
-##    subprocess.check_call(["cmd","/c",s],cwd=os.path.join(progdir,"assets","amiga"))
-
 subprocess.check_call(cmd_prefix+["RELEASE_BUILD=1"],cwd=os.path.join(progdir,"src"))
 # create archive
 
 def distribute(suffix):
     outdir = progdir / f"{gamename}_{suffix}_HD"
-
+    print(f"Creating {outdir}...")
     chipset = "ecs" if suffix == "ecs" else "aga"
 
     if outdir.exists():
@@ -42,17 +39,17 @@ def distribute(suffix):
     shutil.copy(os.path.join(progdir,"assets","amiga",f"USChampionshipVball{chipset.upper()}.info"),outdir)
     datain = progdir/"data"/suffix
 
-##    for suffix in ["000"]: #,"020"]:
-##        # pack the file for floppy
-##        exename = f"{gamename}_{suffix}"
-##        subprocess.check_output(["cranker_windows.exe","-f",str(datain/exename),"-o",str(progdir/f"{exename}.rnc")])
+    for suffix in ["000"]: #,"020"]:
+        # pack the file for floppy
+        exename = f"{gamename}_{suffix}"
+        subprocess.check_output(["cranker_windows.exe","-f",str(datain/exename),"-o",str(progdir/f"{exename}.rnc")])
 
     pack_data = True
 
     for p in ["bobs_*","tiles_*","palette_*","net_*","us_champ_vball_*"]:
         for sourcefile in datain.glob(p):
         # -= RNC ProPackED v1.8 [by Lab 313] (01/26/2021) =-
-            destfile = outdir / "data" / sourcefile.name
+            destfile = datadir / sourcefile.name
             with open(sourcefile,"rb") as f:
                 header = f.read(3).decode(errors="ignore")
             if header=="RNC" or not pack_data or sourcefile.name.startswith("palette_"):
@@ -67,8 +64,9 @@ def distribute(suffix):
                     print(f"failed packing {destfile}")
                     shutil.copy(sourcefile,destfile)
     # copy modules (no packing required)
-    for p in (assets_dir / "sounds").glob("*.mod"):
-        destfile = outdir / "data" / p.name
+    for p in (assets_dir.parent / "sounds").glob("*.mod"):
+        print(f"copying module {p}")
+        destfile = datadir / p.name
         shutil.copy(p,destfile)
 
 distribute("ecs")
