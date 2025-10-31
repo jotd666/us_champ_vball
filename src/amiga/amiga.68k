@@ -3761,17 +3761,17 @@ no_tune:
 	jra		5b
 	
 tunes_table:
-	.long	0
-	.long	0
-	.long	select_mod
-	.long	0
-	.long	0
-	.long	intro_mod
-	.long	0
-	.long	0
-	.long	0
-	.long	level_1_mod
-	.long	-1
+	.long	0                  | 0
+	.long	0                  | 1
+	.long	select_mod         | 2
+	.long	0                  | 3
+	.long	0                  | 4
+	.long	intro_mod          | 5
+	.long	level_2_mod        | 6
+	.long	0                  | 7
+	.long	0                  | 8
+	.long	level_1_mod        | 9
+	.long	-1                 | 0
 	
 * < D0: required size
 * < D1: 0 any, 1 chip
@@ -4036,6 +4036,14 @@ intro_mod:
 	.asciz	"demo.mod"
 level_1_mod:
 	.asciz	"level_1.mod"
+level_2_mod:
+	.asciz	"level_2.mod"
+level_3_mod:
+	.asciz	"level_3.mod"
+level_4_mod:
+	.asciz	"level_4.mod"
+level_5_mod:
+	.asciz	"level_5.mod"
 	
 * game sets prom bank 2 then switches to 7 at bootup
 * prom bank 2 is not used at this moment, let's skip

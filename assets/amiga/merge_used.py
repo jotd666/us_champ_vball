@@ -62,7 +62,7 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite,sprites=False,ignor
             f.write(contents)
 
 
-context = "level_3"
+context = "level_2"
 overwrite = False
 
 
