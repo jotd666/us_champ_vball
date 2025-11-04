@@ -3764,14 +3764,24 @@ tunes_table:
 	.long	0                  | 0
 	.long	0                  | 1
 	.long	select_mod         | 2
-	.long	0                  | 3
+	.long	hurry_mod          | 3
 	.long	0                  | 4
 	.long	intro_mod          | 5
 	.long	level_2_mod        | 6
 	.long	0                  | 7
 	.long	0                  | 8
 	.long	level_1_mod        | 9
-	.long	-1                 | 0
+	.long	-1                 | A
+	.long	-1                 | B
+	.long	-1                 | C
+	.long	-1                 | D level_5_mod
+	.long	-1                  | E lost
+	.long	0                  | F
+	.long	-1                  | 10
+	.long	0                  | 11
+	.long	0                  | 12
+	.long	0                  | 13
+	.long	-1                  | 14 won
 	
 * < D0: required size
 * < D1: 0 any, 1 chip
@@ -4044,6 +4054,8 @@ level_4_mod:
 	.asciz	"level_4.mod"
 level_5_mod:
 	.asciz	"level_5.mod"
+hurry_mod:
+	.asciz	"hurry.mod"
 	
 * game sets prom bank 2 then switches to 7 at bootup
 * prom bank 2 is not used at this moment, let's skip

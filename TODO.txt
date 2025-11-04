@@ -1,3 +1,4 @@
+- when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
 - continue play: fire doesn't work. Detect when "continue" screen is on to know if it can be
   activated (fire + up/down)
