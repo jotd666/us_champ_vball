@@ -2785,6 +2785,10 @@ osd_set_scrolly_lo:
 
 * change game context game_context	
 load_tile_data:
+	* if we don't stop the music it sounds weird when
+	* game is loading new files
+	jbsr	osd_music_stop
+	
 	PUSH_INTERRUPT_STATE
 	DISABLE_INTERRUPTS
 	movem.l	d0-a6,-(a7)
