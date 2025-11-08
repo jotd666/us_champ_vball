@@ -18,6 +18,10 @@ UTILITY_MACROS_INC = 1
 	move.w	#0x4000,_custom+intena
 	.endm
 
+	.macro	DISABLE_INTERRUPTS_BUT_NOT_LEVEL_6
+	move.w	#0x1FFF,_custom+intena
+	.endm
+
 
 	.macro	WAIT_BLIT
 	.ifndef	RELEASE
