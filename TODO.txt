@@ -1,6 +1,5 @@
-- crash won sound not setup
-- interrupt level 6 disabled or not 3FFF?
 - when pressing start, reset the "net is drawn" flag!! already done, no dice
+  keep drawing net as long as "continue" window is showing
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
 - continue play: fire doesn't work. Detect when "continue" screen is on to know if it can be

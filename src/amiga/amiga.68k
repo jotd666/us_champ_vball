@@ -3769,12 +3769,12 @@ tunes_table:
 	.long	intro_mod          | 5
 	.long	level_2_mod        | 6
 	.long	0                  | 7
-	.long	0                  | 8
+	.long	level_4_mod        | 8
 	.long	level_1_mod        | 9
 	.long	-1                 | A
 	.long	-1                 | B
 	.long	-1                 | C
-	.long	-1                 | D level_5_mod
+	.long	level_5_mod         | D level_5_mod
 	.long	-1                  | E lost
 	.long	0                  | F
 	.long	-1                  | 10
