@@ -3775,9 +3775,9 @@ tunes_table:
 	.long	-1                 | B
 	.long	-1                 | C
 	.long	level_5_mod         | D level_5_mod
-	.long	-1                  | E lost
+	.long	lost_mod            | E lost
 	.long	0                  | F
-	.long	-1                  | 10
+	.long	game_over_mod         | 10
 	.long	0                  | 11
 	.long	0                  | 12
 	.long	0                  | 13
@@ -4058,6 +4058,10 @@ hurry_mod:
 	.asciz	"hurry.mod"
 won_mod:
 	.asciz	"won.mod"
+lost_mod:
+	.asciz	"lost.mod"
+game_over_mod:
+	.asciz	"game_over.mod"
 	
 * game sets prom bank 2 then switches to 7 at bootup
 * prom bank 2 is not used at this moment, let's skip
