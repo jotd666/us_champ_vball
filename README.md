@@ -5,15 +5,21 @@ Requires a 2-button joystick, or the keyboard
 
 Features:
 
-- 25 FPS for ECS and AGA amigas
+- 25/50 FPS for ECS and AGA amigas
 - 32 color ECS version
 - 64 color AGA version (for classic amigas)
 - 128 color AGA version (for really fast amigas. A bit slow on 68060/50 but runs)
 
-Note:
+Notes:
 
-You need a hard drive, whdload and some fast memory to run this game.
-
+- You need a hard drive, whdload and some fast memory to run this game.
+- The main optimization is to avoid drawing the net sprite all the time. It is
+  drawn in the main background so it's part of the background. If
+  they were drawn all the time the game FPS drops, so it's drawn only on screen
+  change and when right team is right behind it (else the players would appear in
+  front of it even if they're behind and it would look bad!). This was pretty hard
+  to finetune but worth doing.
+  
 Credits:
 
 - jotd: reverse-engineering, 68000 transcode, graphics conversion
@@ -23,11 +29,17 @@ Credits:
 
 Instructions:
 
-5: insert coin
-1/2: start game
+5/fire when not playing: insert coin
+1/2/joy up/down when not playing: start game
 arrows/joystick: move
 red/ctrl: hit ball
 blue/alt: jump/increase spike power
+
+Cheat keys:
+
+F1: left side gets 9-0 (or 6-0 in 7-point match)
+F2: right side gets 9-0
+F3: left side wins immediately
 
 How to play:
 

@@ -1,15 +1,9 @@
-- when pressing start, reset the "net is drawn" flag!! already done, no dice
-  keep drawing net as long as "continue" window is showing
-- when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
-- continue play: fire doesn't work. Detect when "continue" screen is on to know if it can be
-  activated (fire + up/down)
-- 2P: we have to rip more tiles (net with ball?)
-- 2P: check that (with net) we can fail a serve!!
-
+- level 3 music
 
 minor:
 
+- when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
 - big score sprites: still missing some black pixels not everywhere?... why???? sprite dumps reveal no issue...
   maybe wait blit should be using another tst.b

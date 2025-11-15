@@ -1205,7 +1205,6 @@ l_61df:
 	SET_XC_FLAGS                           	| [$61f7: sec]
 	GET_ADDRESS	score_array_57             	| [$61f8: lda score_array_57, x]
 	move.b	(a0,d1.w),d0                    	| [...]
-	NEW_ADDRESS
 	SBC_Y	score_array_57                           	| [$61fa: sbc $0057, y]
 	beq	l_6203                             	| [$61fd: beq $6203]
 	jcs	l_6205                             	| [$61ff: bcs $6205]
@@ -1251,7 +1250,6 @@ l_621b:
 	SET_XC_FLAGS                           	| [$6236: sec]
 	GET_ADDRESS	score_array_57             	| [$6237: lda score_array_57, x]
 	move.b	(a0,d1.w),d0                    	| [...]
-	NEW_ADDRESS
 	SBC_Y	score_array_57                           	| [$6239: sbc $0057, y]
 	beq	l_6242                             	| [$623c: beq $6242]
 	jcs	l_6244                             	| [$623e: bcs $6244]
@@ -1341,7 +1339,6 @@ l_6288:
 
 move_player_62ae:
 	OP_R_ON_ZP_ADDRESS	move,0x01,d1 |  [$62ae: ldx $01]
-	NEW_ADDRESS
 	GET_ADDRESS	0x030e                     	| [$62b0: lda $030e, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x01,d0                         	| [$62b3: and #$01]
@@ -1839,7 +1836,6 @@ l_662b:
 	OP_W_ON_ZP_ADDRESS	addq,0x1e,#1 |  [$6630: inc $1e]
 	jra	l_6637                             	| [$6632: jra $6637]
 l_6635:
-	NEW_ADDRESS
 	GET_ADDRESS	base_screen_pointer_list_001d	| [$6635: adc base_screen_pointer_list_001d]
 	move.b	(a0),d4	| [...]
 	addx.b	d4,d0                         	| [...]
@@ -5483,7 +5479,6 @@ l_7f2e:
 	rts |  [$7f41: jra ($001b)] [indirect_jump]
 l_7f4c:
 	or.b	#0x80,d0                          	| [$7f4c: ora #$80]
-	NEW_ADDRESS
 	GET_ADDRESS	0x0316                     	| [$7f4e: sta $0316, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 	clr.b	d0                               	| [$7f51: lda #$00]
@@ -8245,7 +8240,6 @@ l_9130:
     move.b	d0,(a0,d1.w)                 	| [...]
 	jbsr	l_91f3                            	| [$915c: jsr $91f3]
 l_915f:
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$915f: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$9162: and #$7f]
@@ -8259,7 +8253,6 @@ l_915f:
 	clr.b	d0                               	| [$9170: lda #$00]
 	jbsr	set_bank_d8df                     	| [$9172: jsr set_bank_d8df]
 l_9175:
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$9175: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$9178: and #$7f]
@@ -8275,7 +8268,6 @@ l_9189:
 	rts                                    	| [$9189: rts]
 
 l_91d8:
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$91d8: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$91db: and #$7f]
@@ -8299,7 +8291,6 @@ l_91f2:
 	rts                                    	| [$91f2: rts]
 
 l_91f3:
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$91f3: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x17,d0                         	| [$91f6: cmp #$17]
@@ -9466,7 +9457,6 @@ l_998a:
 callback_999d:
 l_999d:
 	jbsr	l_9d8d                            	| [$999d: jsr $9d8d]
-	NEW_ADDRESS
 	GET_ADDRESS	0x023a                     	| [$99a0: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$99a3: ora #$80]
@@ -9977,7 +9967,6 @@ l_9de7:
     move.b	d0,(a0,d1.w)                 	| [...]
 	jra	l_9e01                             	| [$9def: jra $9e01]
 l_9df2:
-	NEW_ADDRESS
 	GET_ADDRESS	0x03c4                     	| [$9df2: lda $03c4, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_9dfd                             	| [$9df5: bpl $9dfd]
@@ -10356,7 +10345,6 @@ l_a2e0:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d0 |  [$a2e2: sta current_object_index_4c]
 l_a2e4:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$a2e4: ldx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a2e6: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_a305                             	| [$a2e9: bpl $a305]
@@ -11035,7 +11023,6 @@ l_a700:
 	jra	l_a65d                             	| [$a700: jra $a65d]
 
 l_a71f:
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a71f: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$a722: ora #$80]
@@ -11050,7 +11037,6 @@ l_a71f:
 l_a730:
 	move.b	#0x05,d1                        	| [$a730: ldx #$05]
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$a732: stx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a734: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x7f,d0                         	| [$a737: and #$7f]
@@ -11227,7 +11213,6 @@ l_a82d:
 	GET_ADDRESS	0x73                       	| [$a83e: sta $73, x]
     move.b	d0,(a0,d1.w)                 	| [...]
 l_a840:
-	NEW_ADDRESS
 	GET_ADDRESS	0x73                       	| [$a840: lda $73, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	OP_R_ON_ZP_ADDRESS	cmp,0x1b,d0 |  [$a842: cmp $1b]
@@ -11261,7 +11246,6 @@ l_a86b:
 	jbsr	display_sprites_e1b5              	| [$a86b: jsr display_sprites_e1b5]
 	jra	l_a748                             	| [$a86e: jra $a748]
 l_a871:
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$a871: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	or.b	#0x80,d0                          	| [$a874: ora #$80]
@@ -11605,7 +11589,6 @@ l_ab1d:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ab1f: stx current_object_index_4c]
 l_ab21:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ab21: ldx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$ab23: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_ab31                             	| [$ab26: bpl $ab31]
@@ -11718,7 +11701,6 @@ l_ac13:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ac15: stx current_object_index_4c]
 l_ac17:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ac17: ldx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$ac19: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_ac65                             	| [$ac1c: bpl $ac65]
@@ -11899,7 +11881,6 @@ l_ad82:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ad84: stx current_object_index_4c]
 l_ad86:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$ad86: ldx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x031a                     	| [$ad88: lda $031a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bpl	l_ad96                             	| [$ad8b: bpl $ad96]
@@ -16778,7 +16759,6 @@ l_cf16:
 	OP_W_ON_ZP_ADDRESS	move,0x01,d0 |  [$cf1e: sta $01]
 	clr.b	d2                               	| [$cf20: ldy #$00]
 l_cf22:
-	NEW_ADDRESS
 	GET_INDIRECT_ADDRESS	0x00              	| [$cf24: sta ($00), y] loading early
 	clr.b	d0                               	| [$cf22: lda #$00]
 l_cf24:
@@ -18643,7 +18623,6 @@ l_d89b:
 	rts                                    	| [$d8a1: rts]
 
 update_prom_banks_d8a2:
-	NEW_ADDRESS
 	GET_ADDRESS	sprite_prom_bank_07f4      	| [$d8a2: lda sprite_prom_bank_07f4]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x07,d0                         	| [$d8a5: and #$07]
@@ -18668,7 +18647,6 @@ update_prom_banks_d8a2:
 	rts                                    	| [$d8c4: rts]
 
 update_sprite_prom_bank_d8c5:
-	NEW_ADDRESS
 	GET_ADDRESS	sprite_prom_bank_07f4      	| [$d8c5: lda sprite_prom_bank_07f4]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x07,d0                         	| [$d8c8: and #$07]
@@ -18689,7 +18667,6 @@ update_sprite_prom_bank_d8c5:
 
 set_bank_d8df:
 	OP_W_ON_ZP_ADDRESS	move,0x00,d0 |  [$d8df: sta $00] save A in temp
-	NEW_ADDRESS
 	GET_ADDRESS	bankswitch_copy_022d       	| [$d8e1: lda bankswitch_copy_022d] get old value
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xf8,d0                         	| [$d8e4: and #$f8] remove 3 low bits
@@ -19591,7 +19568,6 @@ l_e2b2:
 	OP_W_ON_ZP_ADDRESS	move,0x09,d0 |  [$e2c4: sta $09]
 l_e2c6:
 	OP_R_ON_ZP_ADDRESS	move,unknown_07,d0 |  [$e2c6: lda unknown_07]
-	NEW_ADDRESS
 	GET_ADDRESS	0x06                       	| [$e2c8: bit $06]
 	BIT	(a0)                               	| [...]
 	PUSH_SR   | save overflow flag
@@ -19775,7 +19751,6 @@ l_e396:
     move.b	d0,(a0,d1.w)                 	| [...]
 l_e3c0:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$e3c0: ldx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x65                       	| [$e3c2: lda $65, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	cmp.b	#0x16,d0                         	| [$e3c4: cmp #$16]
@@ -19851,7 +19826,6 @@ l_e3e1:
 	OP_W_ON_ZP_ADDRESS	move,current_object_index_4c,d0 |  [$e42b: sta current_object_index_4c]
 l_e42d:
 	OP_R_ON_ZP_ADDRESS	move,current_object_index_4c,d1 |  [$e42d: ldx current_object_index_4c]
-	NEW_ADDRESS
 	GET_ADDRESS	0x023a                     	| [$e42f: lda $023a, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	and.b	#0x02,d0                         	| [$e432: and #$02]
@@ -19862,7 +19836,6 @@ l_e42d:
 	rts                                    	| [$e43c: rts]
 
 l_e43d:
-	NEW_ADDRESS
 	GET_ADDRESS	0xc7                       	| [$e43d: lda $c7, x]
 	move.b	(a0,d1.w),d0                    	| [...]
 	bmi	l_e477                             	| [$e43f: bmi $e477]
@@ -20305,6 +20278,8 @@ l_e6f1:
 	clr.b	d0                               	| [$e6ff: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,0x49,d0 |  [$e701: sta $49]
 	 |  [$e704: sec]
+	tst.b	infinite_time_flag
+	jne		l_e71c
 	OP_R_ON_ZP_ADDRESS	move,time_seconds_4a,d0 |  [$e705: lda time_seconds_4a]
 	moveq	#1,d4
 	sbcd	d4,d0 |  [$e707: sbc #$01]
@@ -20328,6 +20303,7 @@ l_e71c:
 	OP_R_ON_ZP_ADDRESS	move,time_seconds_4a,d0 |  [$e724: lda time_seconds_4a]
 	cmp.b	#0x29,d0                         	| [$e726: cmp #$29]
 	jne	l_e72f                             	| [$e728: jne $e72f]
+	* 30 seconds left: play "hurry the f*ck up" music
 	move.b	#0x03,d0                        	| [$e72a: lda #$03]
 	jbsr	queue_sound_d7b8                  	| [$e72c: jsr queue_sound_d7b8] stressful level end music!
 l_e72f:
@@ -20571,7 +20547,6 @@ l_e85c:
 	OP_R_ON_ZP_ADDRESS	move,current_level_38,d0 |  [$e85c: lda current_level_38]
 	and.b	#0x0f,d0                         	| [$e85e: and #$0f]
 	move.b	d0,d2                           	| [$e860: tay]
-	NEW_ADDRESS
 	GET_ADDRESS	0xe8ae                     	| [$e861: lda $e8ae, y]
 	move.b	(a0,d2.w),d0                    	| [...]
 	OP_W_ON_ZP_ADDRESS	move,0x5c,d0 |  [$e864: sta $5c]
@@ -20846,7 +20821,6 @@ l_ea78:
 update_scrolling_ea7c:
 	                           	| [$ea7c: tya]
 	move.w	d2,-(sp)                       	| [$ea7d: pha]
-	NEW_ADDRESS
 	GET_ADDRESS	scroll_lock_07db                     	| [$ea7e: lda $07db]
 	move.b	(a0),d0                         	| [...]
 	cmp.b	#0x02,d0                         	| [$ea81: cmp #$02]
@@ -20876,12 +20850,13 @@ update_scrolling_ea7c:
 	asl.b	#1,d0                            	| [$eaa5: asl a]
 	GET_ADDRESS	scroll_hi_copy_07f8        	| [$eaa6: sta scroll_hi_copy_07f8]
 	move.b	d0,(a0)                         	| [...]
+	move.l	a0,a1
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eaa9: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xfd,d0                         	| [$eaac: and #$fd]
-	GET_ADDRESS	scroll_hi_copy_07f8        	| [$eaae: ora scroll_hi_copy_07f8]
-	or.b	(a0),d0                           	| [...]
-	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eab1: sta scrollx_hi_copy_022c]
+	        	| [$eaae: ora scroll_hi_copy_07f8]
+	or.b	(a1),d0                           	| [...]
+	      	| [$eab1: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eab4: sta scrollx_hi_1008]
 update_scroll_out_eab7:
@@ -20903,7 +20878,7 @@ l_eac4:
 	move.b	(a0),d0                         	| [...]
 	move.b	#0xfc,d0                        	| [$eacb: lda #$fc]
 	jbsr	osd_set_scrollx_lo |  [$eacd: sta scrollx_lo_100c]
-	GET_ADDRESS	scrollx_hi_copy_022c       	| [$ead0: lda scrollx_hi_copy_022c]
+	       	| [$ead0: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x02,d0                          	| [$ead3: ora #$02]
 	       	| [$ead5: sta scrollx_hi_copy_022c]
@@ -20915,7 +20890,6 @@ reset_scrolling_eae2:
 	 |  [$eae2: lda scrollx_hi_copy_022c] [disable] useless lda
 	move.b	#0xfc,d0                        	| [$eae5: lda #$fc]
 	jbsr	osd_set_scrollx_lo |  [$eae7: sta scrollx_lo_100c]
-	NEW_ADDRESS
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eaea: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	or.b	#0x02,d0                          	| [$eaed: ora #$02]
@@ -20944,12 +20918,13 @@ l_eb06:
 	asl.b	#1,d0                            	| [$eb16: asl a]
 	GET_ADDRESS	scroll_hi_copy_07f8        	| [$eb17: sta scroll_hi_copy_07f8]
 	move.b	d0,(a0)                         	| [...]
+	move.l	a0,a1
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eb1a: lda scrollx_hi_copy_022c]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xfd,d0                         	| [$eb1d: and #$fd]
-	GET_ADDRESS	scroll_hi_copy_07f8        	| [$eb1f: ora scroll_hi_copy_07f8]
-	or.b	(a0),d0                           	| [...]
-	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eb22: sta scrollx_hi_copy_022c]
+	        	| [$eb1f: ora scroll_hi_copy_07f8]
+	or.b	(a1),d0                           	| [...]
+	       	| [$eb22: sta scrollx_hi_copy_022c]
 	move.b	d0,(a0)                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eb25: sta scrollx_hi_1008]
 	GET_ADDRESS	logical_y_scroll_07e0      	| [$eb28: lda logical_y_scroll_07e0]
@@ -20992,13 +20967,12 @@ setup_background_screen_eb52:
 
 set_context_scroll_and_prom_banks_eb5e:
 	jbsr	handle_cocktail_mode_d88f         	| [$eb5e: jsr handle_cocktail_mode_d88f]
-	NEW_ADDRESS
 	GET_ADDRESS	scroll_lock_07db                     	| [$eb61: lda $07db]
 	move.b	(a0),d0                         	| [...]
-	GET_ADDRESS	0x07dc                     	| [$eb64: sta $07dc]
-	move.b	d0,(a0)                         	| [...]
+	                     	| [$eb64: sta $07dc]
+	move.b	d0,(1,a0)                         	| [...]
 	st.b	d0                        	| [$eb67: lda #$ff]
-	GET_ADDRESS	scroll_lock_07db                     	| [$eb69: sta $07db]
+	                     	| [$eb69: sta $07db]
 	move.b	d0,(a0)                         	| [...]
 	GET_ADDRESS	bankswitch_copy_022d       	| [$eb6c: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
@@ -21015,9 +20989,9 @@ set_context_scroll_and_prom_banks_eb5e:
 	GET_ADDRESS	0xebcb                     	| [$eb82: ora $ebcb, y]
 	or.b	(a0,d2.w),d0                      	| [...]
 	GET_ADDRESS	scrollx_hi_copy_022c       	| [$eb85: sta scrollx_hi_copy_022c]
-	move.b	d0,(a0)                         	| [...]
+	move.b	d0,(a0)+                         	| [...]
 	jbsr	osd_set_scrollx_hi |  [$eb88: sta scrollx_hi_1008]
-	GET_ADDRESS	bankswitch_copy_022d       	| [$eb8b: lda bankswitch_copy_022d]
+	       	| [$eb8b: lda bankswitch_copy_022d]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0xdf,d0                         	| [$eb8e: and #$df]
 	GET_ADDRESS	0xebde                     	| [$eb90: ora $ebde, y]
@@ -21614,11 +21588,12 @@ reset_ef0d:
 	jbsr	l_cf16                            	| [$ef1c: jsr $cf16]
 	jbsr	clear_screen_cf35                 	| [$ef1f: jsr clear_screen_cf35]
 	jbsr	l_cf73                            	| [$ef22: jsr $cf73]
-	st.b	d0                        	| [$ef25: lda #$ff]
-	OP_W_ON_ZP_ADDRESS	move,0x42,d0 |  [$ef27: sta $42]
-	OP_W_ON_ZP_ADDRESS	move,0x43,d0 |  [$ef29: sta $43]
-	OP_W_ON_ZP_ADDRESS	move,0x44,d0 |  [$ef2b: sta $44]
-	OP_W_ON_ZP_ADDRESS	move,0x45,d0 |  [$ef2d: sta $45]
+	GET_ADDRESS	0x42
+	                        	| [$ef25: lda #$ff]
+	move.l	#-1,(a0) |  [$ef27: sta $42]
+	 |  [$ef29: sta $43]
+	 |  [$ef2b: sta $44]
+	 |  [$ef2d: sta $45]
 	CLR_I_FLAG                             	| [$ef2f: cli]
 	 |  [$ef30: sta irq_ack_100a]
 	 |  [$ef33: sta irq_ack_100b]
@@ -22497,7 +22472,6 @@ l_f521:
 l_f529:
 	OP_R_ON_ZP_ADDRESS	move,toggle_timer_2f,d0 |  [$f529: lda toggle_timer_2f]
 	jne	l_f529                             	| [$f52b: jne $f529]
-	NEW_ADDRESS
 	GET_ADDRESS	timer_07f5                 	| [$f52d: inc timer_07f5]
 	addq.b	#1,(a0)                         	| [...]
 	OP_R_ON_ZP_ADDRESS	move,game_state_bits_46,d0 |  [$f530: lda game_state_bits_46]
@@ -22617,7 +22591,7 @@ l_f5ee:
 	clr.b	d0                               	| [$f5f0: lda #$00]
 	OP_W_ON_ZP_ADDRESS	move,0x49,d0 |  [$f5f2: sta $49]
 	OP_R_ON_ZP_ADDRESS	move,time_seconds_4a,d0 |  [$f5f4: lda time_seconds_4a]
-	move.b	#0x30,d4	| [$f5f6: adc #$30]
+	move.b	#0x30,d4	| [$f5f6: adc #$30]		| "generously" add 30 seconds
 	abcd	d4,d0                        	| [$f5f6: adc #$30]
 	OP_W_ON_ZP_ADDRESS	move,time_seconds_4a,d0 |  [$f5f8: sta time_seconds_4a]
 	OP_R_ON_ZP_ADDRESS	move,time_minutes_4b,d0 |  [$f5fa: lda time_minutes_4b]
