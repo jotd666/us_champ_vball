@@ -1,5 +1,6 @@
 - increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
 - level 3 music
+- "select" screen: up/down should simulate 1P start/2P start
 
 minor:
 
@@ -11,6 +12,7 @@ minor:
 
 optims:
 
+- do a EHB version for ECS
 - 32/64 colors: identify colors used only on top of tiles: create an array with "palette entry => min/max y" for each color of the background
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
   problem: if tile replaced colors matches a sprite color after quantization, it will destroy sprite color... Complex, almost coded
@@ -81,9 +83,9 @@ c: short tune
 D: naval base last level music
 E: lost!
 F: ominous very short tune
-10: game over???
+10: game over
 11: credit inserted
-12: another upbeat music
+12: season/game completed
 13: short upbeat
 14: won!
 15: unknown ???

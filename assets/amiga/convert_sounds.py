@@ -68,6 +68,7 @@ yaah_31""".upper().splitlines()
     sound_dict["won.mod"] = {"index":0x14,"volume":28}
     sound_dict["lost.mod"] = {"index":0xE,"volume":28}
     sound_dict["game_over.mod"] = {"index":0x10,"volume":28}
+    sound_dict["game_won.mod"] = {"index":0x12,"volume":34}
 
 
 

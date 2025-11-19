@@ -3798,7 +3798,7 @@ tunes_table:
 	.long	0                  | F
 	.long	game_over_mod         | 10
 	.long	0                  | 11
-	.long	0                  | 12
+	.long	game_won_mod            | 12
 	.long	0                  | 13
 	.long	won_mod             | 14 won
 	
@@ -4075,6 +4075,8 @@ level_5_mod:
 	.asciz	"level_5.mod"
 hurry_mod:
 	.asciz	"hurry.mod"
+game_won_mod:
+	.asciz	"game_won.mod"
 won_mod:
 	.asciz	"won.mod"
 lost_mod:
