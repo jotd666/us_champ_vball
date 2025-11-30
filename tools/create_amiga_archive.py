@@ -7,8 +7,11 @@ assets_dir = progdir / "assets/amiga"
 sys.path.append(str(assets_dir))
 import convert_graphics,convert_sounds
 
+skip_data_files = False
+
 # generate graphics
-convert_graphics.doit()
+if not skip_data_files:
+    convert_graphics.doit()
 convert_sounds.doit()
 
 gamename = "us_champ_vball"
@@ -19,6 +22,7 @@ cmd_prefix = ["make","-f",os.path.join(progdir,"makefile.am")]
 
 subprocess.check_call(cmd_prefix+["clean"],cwd=os.path.join(progdir,"src"))
 
+
 subprocess.check_call(cmd_prefix+["RELEASE_BUILD=1"],cwd=os.path.join(progdir,"src"))
 # create archive
 
@@ -27,11 +31,12 @@ def distribute(suffix):
     print(f"Creating {outdir}...")
     chipset = "ecs" if suffix == "ecs" else "aga"
 
-    if outdir.exists():
-        shutil.rmtree(outdir)
+    if not skip_data_files:
+        if outdir.exists():
+            shutil.rmtree(outdir)
     outdir.mkdir(exist_ok=True)
     datadir = outdir / "data"
-    datadir.mkdir()
+    datadir.mkdir(exist_ok=True)
 
     for file in ["readme.md",f"{gamename}_{chipset}.slave"]:
         shutil.copy(os.path.join(progdir,file),outdir)
@@ -46,7 +51,11 @@ def distribute(suffix):
 
     pack_data = True
 
-    for p in ["bobs_*","tiles_*","palette_*","net_*","us_champ_vball_*"]:
+    files = ["us_champ_vball_*"]
+    if not skip_data_files:
+        files += ["bobs_*","tiles_*","palette_*","net_*"]
+
+    for p in files:
         for sourcefile in datain.glob(p):
         # -= RNC ProPackED v1.8 [by Lab 313] (01/26/2021) =-
             destfile = datadir / sourcefile.name

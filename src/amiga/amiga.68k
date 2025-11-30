@@ -3787,7 +3787,7 @@ tunes_table:
 	.long	0                  | 4
 	.long	intro_mod          | 5
 	.long	level_2_mod        | 6
-	.long	0                  | 7
+	.long	level_3_mod        | 7
 	.long	level_4_mod        | 8
 	.long	level_1_mod        | 9
 	.long	-1                 | A
