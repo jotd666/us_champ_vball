@@ -971,6 +971,9 @@ is_game_playing:
 	* game seen as "playing". But if "CONTINUE PLAY" is shown we
 	* consider that game is not playing (so fire works to insert coins)
 	cmp.b	#0x63,(c_address_of_continue_2949,a6)		| 'c'
+	jeq		0f
+	* same for in-between match player select screen
+	cmp.b	#0x63,(0x2B6,a6)   | 'credit'
 0:
 	movem.l	(a7)+,a6
 	rts
