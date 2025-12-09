@@ -236,7 +236,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,nb_planes,is
                             actual_nb_planes += 1
 
                             # only 4 planes + mask => 5 planes
-                            y_start,wtilec = bitplanelib.autocrop_y(wtile)
+                            y_start,wtilec = bitplanelib.autocrop_y(wtile,mask_color=magenta)
                             height = wtilec.size[1]
                             width = wtilec.size[0]//8 + 2
                             bitplane_data = bitplanelib.palette_image2raw(wtilec,None,palette,
@@ -744,7 +744,7 @@ def doit(from_scratch=True):
                 double_size_sprites = json.load(f)
             # put whatever version (color) or levels you need
             plane_range = [6]
-            level_range = [4,5]
+            level_range = [1]
 
 
 

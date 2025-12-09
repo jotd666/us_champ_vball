@@ -1,13 +1,12 @@
 - increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
-- level 3 music
 - "select" screen: up/down should simulate 1P start/2P start
+- level 3: missing some frames for opponents?
 
 minor:
 
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
-- big score sprites: still missing some black pixels not everywhere?... why???? sprite dumps reveal no issue...
-  maybe wait blit should be using another tst.b
+- big score sprites: display issue flickering black pixels
 - maybe not include some unused sounds to save memory?
 
 optims:
@@ -19,7 +18,6 @@ optims:
   but would save 10 colors (before quantization) so forget it
 - use CPU-driven erase?
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
-- better bank switching: use A5 for bank base to get more speed
 - optimize bob erase/redraw at least for referee and score sprites (not trivial as the position of the sprites
   change with Y priority)
 - level 1 then map context: make a kludge to avoid having to reload level 1 tiles+sprites after map

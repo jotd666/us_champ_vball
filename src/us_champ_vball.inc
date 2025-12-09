@@ -319,7 +319,7 @@ skip\@:
 	
 	.macro	GET_UNCHECKED_BANK_ADDRESS_FUNC
 	move.b	current_bank,d5
-	add.l	bank_base,a0
+	add.l	a5,a0
 	.endm
 	
 	.ifdef	RELEASE

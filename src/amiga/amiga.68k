@@ -691,6 +691,7 @@ demo_game:
 	jbsr	cpu_init		| zero all registers
 	moveq	#1,d0
 	jbsr	osd_interrupt_control
+	move.l	bank_base,a5
 	jmp		reset_eea1								| pass control to the mpatrol core
 	
 	.ifndef	RELEASE
@@ -722,6 +723,9 @@ install_bank_0:
 	
 	jbra	copy_bank_0
 
+call_nmi:
+	move.l	bank_base,a5
+	jra	nmi_ee9e
 	
 * just in case some hardware calls nmi
 _nmi:
@@ -797,7 +801,7 @@ _vblank:
 	addq.b	#1,d0
 	cmp.b	#5,d0
 	bne.b	1f
-	jbsr	nmi_ee9e
+	jbsr	call_nmi
 	clr.b	d0
 1:
 	move.b	d0,mid_screen_interrupt_count
@@ -806,7 +810,7 @@ _vblank:
 
 	subq.w	#1,delay_timer
 		
-	jbsr	nmi_ee9e
+	jbsr	call_nmi
 
 	tst.b	frameskip
 	jeq		0f
@@ -2245,6 +2249,7 @@ osd_sound_command:
 	.ifndef	RELEASE
 	move.w	last_known_m6502_pc,last_bankswitch_pc
 	.endif
+	move.l	bank_base,a5		| update bank pointer
 0:
 	rts	
 	.endm
@@ -3265,7 +3270,7 @@ osd_read_dsw2:
 	
 
 level2_interrupt:
-	bsr		handle_keyboard
+	jbsr		handle_keyboard
 	move.w	#8,_custom+intreq
 	rte
 	
