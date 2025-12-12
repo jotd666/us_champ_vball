@@ -1,7 +1,8 @@
 - increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
+  => display screen scrolled up to debug
 - "select" screen: up/down should simulate 1P start/2P start
   "CREDIT" is displayed on bottom only there!!! "credit" at 2B6C: to test
-  
+- in-game music: lower volume : to test
 - level 3: missing some frames for opponents?
 
 minor:
