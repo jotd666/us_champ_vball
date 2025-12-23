@@ -62,9 +62,9 @@ def merge(context_name,used_name,nb_items,nb_cluts,overwrite,sprites=False,ignor
             f.write(contents)
 
 
-context = "level_2"
+context = "level_3"
 overwrite = False
 
 
-merge(context,"used_tiles",0x4000,nb_cluts = 8,overwrite=overwrite)
+#merge(context,"used_tiles",0x4000,nb_cluts = 8,overwrite=overwrite)
 merge(context,"used_sprites",0x800,nb_cluts=8,overwrite=overwrite,sprites=True)

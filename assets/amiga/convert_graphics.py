@@ -744,7 +744,7 @@ def doit(from_scratch=True):
                 double_size_sprites = json.load(f)
             # put whatever version (color) or levels you need
             plane_range = [6]
-            level_range = [1]
+            level_range = [3]
 
 
 
@@ -792,4 +792,4 @@ def doit(from_scratch=True):
 
 
 if __name__ == "__main__":
-    doit(True)
+    doit(False)

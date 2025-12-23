@@ -89,17 +89,22 @@ TARGET_SPRITE_SIZEOF = 4
 
 OPT_ENABLE_LOGGING = 0           | DO NOT CHANGE THIS
 OPT_DEBUG_BANKSWITCH = 0          | DO NOT CHANGE THIS
+OPT_NET_BACKGROUND_TRICK = 1   | DO NOT CHANGE THIS
 	.else
 OPT_ENABLE_LOGGING = 1
 OPT_DEBUG_BANKSWITCH = 0
+OPT_NET_BACKGROUND_TRICK = 1
 	.endif
-	
+
+* uncomment to fix y scroll	
+* OPT_FIX_Y_SCROLL_TO = 0x60
+
+
 * neat trick to avoid drawing the net/poles sprites continuously (there are a lot of them)
 * instead: draw only once per screen (first time) and draw it in the restore buffer too
 * (draw it 2/3 times only once, then it's free to display it)
 * the net is mostly on the background except for some rare cases where we reactivate sprite
 * display of the net, but only for a short time (and only net, not poles)
-OPT_NET_BACKGROUND_TRICK = 1
 OPT_ENABLE_DOUBLE_BUFFERING = 1
 
 _custom = 0xDFF000
@@ -780,7 +785,7 @@ _vblank:
 	jra	3f
 1:
 	* has to be copper: set sync
-
+	
 	* we're going to ack copper & software/level 5 interrupt now
 	* do it twice (040/pistorm bug)
 	move.w	#0x14+(1<<11),(intreq,a5)
@@ -1184,7 +1189,7 @@ really_update_sprites:
 	jeq		20f
 	GET_RAM_START_IN_A6
 	lea		(SPRITE_ADDRESS,a6),a0
-	*lea		mockup,a0
+	*lea		mock,a0
     lea _custom,A5
 	move.l	bob_previous_drawed_sprites(pc),a6
 	move.l		d0,a4
@@ -1196,7 +1201,27 @@ really_update_sprites:
 	dbf		d7,1b
 20:
 	rts
-	
+
+* mockup showing scrolled down sprites (if 240-Y < 0 not filtered for poles it "wraps")
+*mock:
+*.byte  0xfd,0xb7,0x9e,0x48,0xfd,0xb7,0xa0,0x38,0x1d,0x37,0x6c,0x37,0xed,0x62,0x29,0x0b	|	0x0000
+*.byte  0xed,0x62,0x2a,0x1b,0xed,0x62,0x2b,0x2b,0xed,0x62,0x2c,0x3b,0xed,0x67,0xd8,0x74	|	0x0010
+*.byte  0xed,0x67,0xd9,0x84,0xed,0x67,0xda,0x94,0xed,0x67,0xdb,0xa4,0xb7,0x74,0x87,0xb3	|	0x0020
+*.byte  0x8f,0xc4,0xc2,0x34,0x6f,0xc4,0xc4,0x34,0x8f,0xc4,0xc6,0x44,0x6f,0xc4,0xc8,0x44	|	0x0030
+*.byte  0x68,0xdd,0x10,0x94,0x58,0x5d,0x12,0x94,0x48,0x5d,0x13,0x94,0x68,0xdd,0x14,0xa4	|	0x0040
+*.byte  0x58,0x5d,0x16,0xa4,0x48,0x5d,0x17,0xa4,0x41,0xd2,0x5e,0x8b,0x31,0x52,0x60,0x8b	|	0x0050
+*.byte  0x21,0x52,0x61,0x8b,0x41,0xd2,0x62,0x9b,0x31,0x52,0x64,0x9b,0x21,0x52,0x65,0x9b	|	0x0060
+*.byte  0x97,0xfa,0xe2,0x4c,0x77,0xfa,0xe4,0x4c,0x5f,0xfa,0xe6,0x4c,0x37,0xfa,0xe8,0x64	|	0x0070
+*.byte  0x17,0xfa,0xea,0x64,0x0f,0x7a,0xec,0x64,0xff,0x7a,0xed,0x64,0x8f,0xfc,0x3a,0x4c	|	0x0080
+*.byte  0x6f,0xfc,0x3c,0x4c,0x4f,0xfc,0x3e,0x4c,0x3f,0x7c,0x46,0x4c,0x5f,0xfc,0x40,0x5c	|	0x0090
+*.byte  0x3f,0xfc,0x42,0x5c,0x1f,0xfc,0x44,0x5c,0x0f,0x7c,0x47,0x5c,0x5e,0x82,0x16,0x20	|	0x00a0
+*.byte  0x5e,0x82,0x18,0x10,0x4e,0x02,0x1a,0x20,0x4e,0x02,0x1b,0x10,0x3e,0x02,0x1c,0x20	|	0x00b0
+*.byte  0x3e,0x02,0x1d,0x10,0xe1,0x72,0xf0,0x37,0x77,0x0b,0x8c,0x66,0x67,0x8b,0x84,0x56	|	0x00c0
+*.byte  0x47,0x8b,0x86,0x56,0x67,0x8b,0x88,0x46,0x47,0x8b,0x8a,0x46,0x86,0x6a,0xdf,0x4e	|	0x00d0
+*.byte  0xf8,0x00,0x00,0xf8,0xf8,0x00,0x00,0xf8,0xf8,0x00,0x00,0xf8,0xf8,0x00,0x00,0xf8	|	0x00e0
+*.byte  0xf8,0x00,0x00,0xf8,0xf8,0x00,0x00,0xf8,0xf8,0x00,0x00,0xf8,0xf8,0x00,0x00,0xf8	|	0x00f0
+
+
 * this can be removed/disabled to avoid redrawing the net if the blitter runs short :)
 check_right_players_close_to_net:
 	tst.b	net_needs_drawing
@@ -1253,6 +1278,8 @@ compute_sprite_xy_code:
 	* sy = 240 - m_spriteram[i];
 	moveq	#0,d1
 	move.b	(TARGET_SPRITE_Y,a0),d1
+
+
 	neg.w	d1
 	add.w	#240,d1
 
@@ -1278,11 +1305,11 @@ draw_net:
 	cmp.b	#0x12,(screen_id_07e4,a6)
 	jeq		0f
 	move.w	#242,d0
-	move.w	#103,d1
+	move.w	#103+SMALL_SCROLL_HEIGHT-48,d1
 	jra		1f
 0:
 	move.w	#114,d0
-	move.w	#55,d1
+	move.w	#55+SMALL_SCROLL_HEIGHT-48,d1
 1:
 	move.w	(a0)+,d2	| width
 	addq	#2,d2
@@ -1347,7 +1374,9 @@ update_one_bob:
 0:
 
 	jbsr	compute_sprite_xy_code
-		
+	tst.w	d1
+	jmi		2f
+	
 	.ifne	OPT_NET_BACKGROUND_TRICK
 	cmp.w	#0X2E2,d2
 	jne 	0f
@@ -1372,7 +1401,6 @@ update_one_bob:
 1:
 	move.l	a3,a6
 0:
-	.endif
 	lea		net_pole_and_disabled_sprites(pc),a3
 	tst.b	net_in_front_of_right_objects
 	jeq		0f
@@ -1385,6 +1413,7 @@ update_one_bob:
 	jeq		1f
 	st.b	dont_store_blitted_coords	| tell not to store previous blitted coords for bg restore: it's a net/pole sprite	
 1:
+	.endif
 	lea		disabled_sprites(pc),a3
 0:
 
@@ -1483,8 +1512,11 @@ update_one_bob:
 	jbsr	mirror_sprite_planes
 	
 	* BOBs must follow screen scroll
+
 	add.w	scroll_y,d1
+
 	sub.w	#256-SMALL_SCROLL_HEIGHT,d1
+
 	add.w	scroll_x_lo,d0
 	add.w	scroll_x_hi,d0
 	and.w	#0x1FF,d0
@@ -1528,9 +1560,15 @@ update_one_bob:
 	jra		9f
 
 8:
-	cmp.w	#NB_LINES,d1
-	jcc		2f		| avoid out of screen
-
+	move.w	d1,d2
+	add.w	d4,d2
+	sub.w	#NB_LINES,d2
+	jmi		90f
+	jeq		90f
+	* needs to clip as Y+sprite height > NB_LINES
+	BREAKPOINT	"clipping"
+	jra		2f		| avoid out of screen
+90:
 	* note down that this bob will have to be erased
 	* store attributes for non-clipped sprite erase
 
@@ -2524,6 +2562,11 @@ update_bg_tile:
 	jra		11f
 	.endif
 12:
+	move.l	a5,-(a7)
+	LEA		_custom,a5
+	WAIT_BLIT
+	move.l	(a7)+,a5
+	
 	move.l	d0,a4
 	.ifdef	MC68020
 	move.l	(a4,d3.w*4),d0	| get proper clut
@@ -2642,7 +2685,12 @@ set_bobs_bitplanes:
 	moveq	#0,d0
 	
 
+
 	move.w	scroll_y,d0
+	.ifdef	OPT_FIX_Y_SCROLL_TO
+	move.w	#OPT_FIX_Y_SCROLL_TO,d0
+	.endif
+	
 	sub.w	#256-SMALL_SCROLL_HEIGHT,d0
 	jpl		0f
 	moveq	#0,d0
@@ -3459,6 +3507,7 @@ handle_keyboard:
 	cmp.b	#34,d0
 	bne		0f
 	* 'D': dump all logging buffers to data dir
+	move.w	#0x0F0,_custom+color
 	jbsr	osd_dump_logs
 0:
 
@@ -4018,6 +4067,12 @@ osd_dump_logs:
 	move.l	#SPRITE_LOG_LENGTH,d0
 	jbsr	resload_SaveFile(a2)
 	
+	GET_RAM_START_IN_A6
+	lea		(SPRITE_ADDRESS,a6),a1
+	lea		video_sprite_log_name(pc),a0
+	move.l	#NB_TARGET_SPRITES*TARGET_SPRITE_SIZEOF,d0
+	jbsr	resload_SaveFile(a2)
+	
     movem.l (a7)+,d0-a6
 	move.w	(a7)+,SR
 	rts
@@ -4045,6 +4100,8 @@ tile_log_name:
 	.asciz	"used_tiles"
 sprite_log_name:
 	.asciz	"used_sprites"
+video_sprite_log_name:
+	.asciz	"video_sprites"
 
 	.align	2
 	.endif	
@@ -4245,6 +4302,7 @@ mid_screen_interrupt_count:
 	.align	2
 system_vbr:
 	.long	0
+
 
 scroll_y:
 	.word	0

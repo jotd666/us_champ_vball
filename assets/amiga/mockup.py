@@ -10,7 +10,7 @@ print(sprite_names)
 
 
 def load_tileset(image_name,width,height,dump_prefix=""):
-    full_image_path = sheets_path / "select" / "sprites" / image_name
+    full_image_path = sheets_path / "level_3" / "sprites" / image_name
     tiles_1 = Image.open(full_image_path)
     nb_rows = tiles_1.size[1] // height
     nb_cols = tiles_1.size[0] // width
@@ -69,6 +69,8 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
         which = m_spriteram[i + 2]+ ((attr & 0x07) << 8);
         sx = ((m_spriteram[i + 3] + 8) & 0xff) - 7;
         sy = 240 - m_spriteram[i];
+        if sy < 0:
+            print(f"Y < 0: offset = {i:02x}, spriteram[0]={m_spriteram[i]:02x}")
         size = bool((attr & 0x80) >> 7)
         color = (attr & 0x38) >> 3;
         flipx = ~attr & 0x40;
@@ -85,7 +87,8 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
         name = sprite_names.get(which,"unknown")
 
 
-
+        if "pole" not in name:
+            continue
         block = "".join(f"{x:02x}" for x in block)
 
         if not size:
@@ -113,6 +116,6 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     print(f"nb active: {nb_active}")
 
 #process(bytes([0x51,0x96,0xA6,0x4A])+bytes([0xF8,0,0,0xF8])*63)
-process(r"serve")
+process(r"sprites")
 #process(r"sprites_amiga_2")
 
