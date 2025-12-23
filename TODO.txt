@@ -1,14 +1,11 @@
-- increase screen height as when screen scrolls up, net poles wrap and can be seen in the sky (level 2)
-  => display screen scrolled up to debug, level 3
 - "select" screen: up/down should simulate 1P start/2P start
   "CREDIT" is displayed on bottom only there!!! "credit" at 2B6C: to test
-- in-game music: lower volume : to test
 
 minor:
 
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
-- big score sprites: display issue flickering black pixels
+- big score sprites: shifted bitplane effect on bottom wtf...
 - maybe not include some unused sounds to save memory?
 
 optims:

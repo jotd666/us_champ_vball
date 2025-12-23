@@ -60,7 +60,7 @@ yaah_31""".upper().splitlines()
 
     sound_dict["select.mod"] = {"index":2,"volume":32}
     sound_dict["demo.mod"] = {"index":5,"volume":32}
-    sound_dict["level_1.mod"] = {"index":9,"volume":24}
+    sound_dict["level_1.mod"] = {"index":9,"volume":22}
     sound_dict["level_2.mod"] = {"index":6,"volume":24}
     sound_dict["level_3.mod"] = {"index":7,"volume":24}
     sound_dict["level_4.mod"] = {"index":8,"volume":24}

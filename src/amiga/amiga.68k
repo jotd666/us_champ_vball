@@ -978,7 +978,7 @@ is_game_playing:
 	cmp.b	#0x63,(c_address_of_continue_2949,a6)		| 'c'
 	jeq		0f
 	* same for in-between match player select screen
-	cmp.b	#0x63,(0x2B6,a6)   | 'credit'
+	cmp.b	#0x63,(0x2B6C,a6)   | 'credit'
 0:
 	movem.l	(a7)+,a6
 	rts
@@ -995,17 +995,30 @@ set_09:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
 	move.b	#0,(score_array_57,a6)
+	cmp.b	#0x10,max_score
+	jeq		0f
 	move.b	max_score,(score_array_57+1,a6)
 	sub.b	#1,(score_array_57+1,a6)
+	jra		1f
+0:
+	move.b	#9,(score_array_57+1,a6)
+1:
 	move.l	(a7)+,a6
 	rts
 
 set_90:
 	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
+	move.b	#0,(score_array_57+1,a6)
+	cmp.b	#0x10,max_score
+	jeq		0f
 	move.b	max_score,(score_array_57,a6)
 	sub.b	#1,(score_array_57,a6)
-	move.b	#0,(score_array_57+1,a6)
+	jra		1f
+0:
+	* BCD shit!!
+	move.b	#9,(score_array_57,a6)
+1:
 	move.l	(a7)+,a6
 	rts
 
@@ -1163,7 +1176,7 @@ really_update_sprites:
 	move.w	(a4)+,d4			| height
 	move.w	(a4)+,d2		| width
 				
-	bsr		blit_background
+	jbsr		blit_background
 	dbf		d7,1b	
 	bra.b	12f
 11:
@@ -1299,7 +1312,6 @@ compute_sprite_xy_code:
 	.ifne	OPT_NET_BACKGROUND_TRICK
 draw_net:
 	movem.l	d0-d5/a0-a3/a6,-(a7)
-	move.l net_ptr,a0
 	* on "player select" screen coords are those
 	GET_RAM_START_IN_A6
 	cmp.b	#0x12,(screen_id_07e4,a6)
@@ -1311,6 +1323,9 @@ draw_net:
 	move.w	#114,d0
 	move.w	#55+SMALL_SCROLL_HEIGHT-48,d1
 1:
+	* first draw the net into the pristine tiles background
+	
+	move.l net_ptr,a0
 	move.w	(a0)+,d2	| width
 	addq	#2,d2
 	move.w	(a0)+,d4	| height
@@ -1318,20 +1333,32 @@ draw_net:
 	move.l	(NB_PLAYFIELD_PLANES*4,a0),a3
 	moveq	#0,d5		| no offset
 	lea		_custom,a5
-	move.l	playfield_drawed_screen_ptr,a1
-	movem.l	d0-d5/a0/a3,-(a7)
-	jbsr	blit_planes_any_internal_cookie_cut
-	movem.l	(a7)+,d0-d5/a0/a3
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	move.l	playfield_displayed_screen_ptr,a1
-	movem.l	d0-d5/a0/a3,-(a7)
-	jbsr	blit_planes_any_internal_cookie_cut
-	movem.l	(a7)+,d0-d5/a0/a3
-	.endif
 	lea		background_restore_buffer,a1
+	movem.l	d0-d1,-(a7)
 	jbsr	blit_planes_any_internal_cookie_cut
+	movem.l	(a7),d0-d1
 
+	* then blit the background in both buffers, no cookie cut
+	* (so it really erases: faster and avoids slight scrolling Y shifts that make the net
+	* completely opaque, we hack the sprites Y to follow scroll that causes issue with the net hack)
 	
+	move.l	playfield_drawed_screen_ptr,a1
+	lea		background_restore_buffer,a0
+	move.l	#-1,bltalwm(a5)		| needed for blit_background
+	jbsr	blit_background
+	
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	* double buffering: act on the other buffer too
+	movem.l	(a7)+,d0-d1		| restore X,Y
+	lea		background_restore_buffer,a0
+	move.l	playfield_displayed_screen_ptr,a1
+	jbsr	blit_background
+	.else
+	addq	#8,a7		| pop up stack (single buffering)
+	.endif
+
+
+
 	movem.l	(a7)+,d0-d5/a0-a3/a6
 	subq.b	#1,net_needs_drawing
 	rts
@@ -2687,6 +2714,17 @@ set_bobs_bitplanes:
 
 
 	move.w	scroll_y,d0
+	.ifne	OPT_NET_BACKGROUND_TRICK
+	cmp.w	#0x100,d0
+	jne		0f
+	cmp.w	prev_scroll_y,d0
+	jeq		0f
+	* scrolling just stabilize: draw net again
+	move.b	#1,net_needs_drawing
+0:
+	move.w	d0,prev_scroll_y
+	.endif
+	
 	.ifdef	OPT_FIX_Y_SCROLL_TO
 	move.w	#OPT_FIX_Y_SCROLL_TO,d0
 	.endif
@@ -4304,6 +4342,8 @@ system_vbr:
 	.long	0
 
 
+prev_scroll_y:
+	.word	0
 scroll_y:
 	.word	0
 scroll_x_hi:
