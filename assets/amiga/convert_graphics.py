@@ -13,7 +13,6 @@ possible_hw_sprites = set()
 
 nb_cluts = 8
 
-dump_it = True
 
 all_tile_cluts = False
 
@@ -23,13 +22,6 @@ double_size_sprites = [0]*NB_SPRITES
 
 def asm2bin(source,dest):
     subprocess.run(["vasmm68k_mot","-nosym","-pic","-Fbin",source,"-o",dest],check=True,stdout=subprocess.DEVNULL)
-
-
-if dump_it:
-    if not os.path.exists(dump_dir):
-        os.mkdir(dump_dir)
-        with open(os.path.join(dump_dir,".gitignore"),"w") as f:
-            f.write("*")
 
 
 def dump_asm_bytes(*args,**kwargs):
@@ -47,7 +39,7 @@ def ensure_empty(d : pathlib.Path):
         d.mkdir(parents=True)
 
 def load_tileset(image_name,palette_index,width,height,tileset_name,dumpdir,
-dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
+name_dict=None,cluts=None,tile_number=0,is_bob=False,dump_it=False):
 
 ##    if isinstance(image_name,str):
 ##        full_image_path = os.path.join(this_dir,os.path.pardir,"sheets",
@@ -63,7 +55,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 
     tileset_1 = []
 
-    if dump:
+    if dump_it:
         dump_subdir = dumpdir / tileset_name
         if is_bob:
             dump_subdir_orphan = dump_subdir / "not_grouped"
@@ -95,7 +87,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 
                 tileset_1.append(img)
                 # dump tiles
-                if not is_bob and dump:
+                if not is_bob and dump_it:
                     img = ImageOps.scale(img,5,resample=Image.Resampling.NEAREST)
                     if name_dict:
                         name = name_dict.get(tile_number,"unknown")
@@ -291,7 +283,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,nb_planes,is
 magenta = (254,0,254)
 
 
-def quantize_palette(rgb_tuples,img_type,nb_quantize,transparent=None):
+def quantize_palette(rgb_tuples,img_type,nb_quantize,transparent=None,dump_it=False):
     rgb_configs = set(rgb_tuples)
 
     nb_target_colors = nb_quantize
@@ -356,7 +348,7 @@ def apply_color_replacement(sprite_set_list,quantized):
                 bitplanelib.replace_color_from_dict(tile,quantized)
 
 
-def gen_context_files(context_name,nb_planes,with_sprites=True):
+def gen_context_files(context_name,nb_planes,with_sprites=True,dump_it=False):
 
     nb_colors = 1<<nb_planes
 
@@ -433,9 +425,9 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
             json.dump(tile_cluts_dict,f,indent=2)
 
     for i,tsd in tile_sheet_dict.items():
-        tp,tile_set = load_tileset(tsd,i,8,8,"tiles",sdump_dir,dump=dump_it,
+        tp,tile_set = load_tileset(tsd,i,8,8,"tiles",sdump_dir,
         cluts=tile_cluts,
-        name_dict=None)
+        name_dict=None,dump_it=dump_it)
         tile_set_list.append(tile_set)
         tile_palette.update(tp)
 
@@ -455,8 +447,8 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
         for clut_index,tsd in sprite_sheet_dict.items():
             # BOBs
 
-            sp,sprite_set = load_tileset(tsd,clut_index,16,16,"sprites",sdump_dir,dump=dump_it,
-            name_dict=sprite_names,cluts=sprite_cluts,is_bob=True)
+            sp,sprite_set = load_tileset(tsd,clut_index,16,16,"sprites",sdump_dir,
+            name_dict=sprite_names,cluts=sprite_cluts,is_bob=True,dump_it=dump_it)
             sprite_set_list[clut_index] = sprite_set
             sprite_palette.update(sp)
 
@@ -492,7 +484,7 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
     if remaining < 0:
         # it doesn't: we have to reduce
         print(f"{context_name}: not enough colors: {nb_colors} < {used_nb_colors+1}, quantizing")
-        quantized = quantize_palette(full_palette,context_name,nb_colors-1)
+        quantized = quantize_palette(full_palette,context_name,nb_colors-1,dump_it=dump_it)
         used_nb_colors = len(quantized)
         # apply quantize to all tiles & sprites now
 
@@ -727,8 +719,15 @@ def gen_context_files(context_name,nb_planes,with_sprites=True):
                         f.write("\n")
     asm2bin(out_asm_file,out_bin_file)
 
-def doit(from_scratch=True):
+def doit(from_scratch=True,dump_it=True):
     global double_size_sprites
+
+
+    if dump_it:
+        if not os.path.exists(dump_dir):
+            os.mkdir(dump_dir)
+            with open(os.path.join(dump_dir,".gitignore"),"w") as f:
+                f.write("*")
 
     sprite_size_cache_file = this_dir / "sprite_size.json"
 
@@ -752,8 +751,8 @@ def doit(from_scratch=True):
 
     for nb_planes in plane_range:
         print(f"*** Generating for nb colors = {1<<nb_planes}")
-        gen_context_files("intro",nb_planes=nb_planes,with_sprites=False)
-        gen_context_files("map",nb_planes=nb_planes,with_sprites=False)
+        gen_context_files("intro",nb_planes=nb_planes,with_sprites=False,dump_it=dump_it)
+        gen_context_files("map",nb_planes=nb_planes,with_sprites=False,dump_it=dump_it)
         for level in level_range:
             replacement_colors[level] = gen_context_files(f"level_{level}",nb_planes=nb_planes)
         dump_it = False     # dumps in the same dump dir anyway
@@ -792,4 +791,4 @@ def doit(from_scratch=True):
 
 
 if __name__ == "__main__":
-    doit(False)
+    doit(True,False)

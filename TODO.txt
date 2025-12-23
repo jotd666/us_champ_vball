@@ -1,5 +1,3 @@
-- "select" screen: up/down should simulate 1P start/2P start
-  "CREDIT" is displayed on bottom only there!!! "credit" at 2B6C: to test
 
 minor:
 
