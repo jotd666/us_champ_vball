@@ -318,7 +318,6 @@ skip\@:
 	.endm
 	
 	.macro	GET_UNCHECKED_BANK_ADDRESS_FUNC
-	move.b	current_bank,d5
 	add.l	a5,a0
 	.endm
 	
