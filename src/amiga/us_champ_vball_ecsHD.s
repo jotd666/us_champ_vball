@@ -1,13 +1,17 @@
-; US Championship V'ball slave
+; US Championship V'ball ECS slave
+; still requires more than 1MB of chip to run grrrr
 	INCDIR	Include:
 	INCLUDE	whdload.i
 	INCLUDE	whdmacros.i
 
 
 
-EXPMEM =   $180000
-CHIPSIZE = $180000
+EXPMEM =   $100000
+CHIPSIZE = $140000
 
+	IFEQ	EXPMEM 
+CHIP_ONLY = 1	
+	ENDC
 _base	SLAVE_HEADER					; ws_security + ws_id
 	dc.w	17					; ws_version (was 10)
 	dc.w	WHDLF_NoError
@@ -26,7 +30,7 @@ _keyexit
 	dc.b	$59					; ws_keyexit
 _expmem
     IFEQ RELEASE
-    dc.l    $700000
+    dc.l    EXPMEM*2 
     ELSE
 	dc.l	EXPMEM					; ws_expmem
     ENDC
@@ -90,11 +94,14 @@ start:
 	move.l	#WCPUF_All,d1
 	jsr	(resload_SetCPU,a2)
    
-
+	IFND	CHIP_ONLY
 	move.l	_expmem(pc),a0
 	add.l	#EXPMEM,a0
 	move.l 	a0,a7		; top of fastmem
-
+	ELSE
+	lea		CHIPSIZE,a7
+	ENDC
+	
     lea progstart(pc),a0
     move.l  _expmem(pc),(a0)
 

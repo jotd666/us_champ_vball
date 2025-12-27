@@ -1,11 +1,11 @@
-after newyork out of mem on ECS
+- draw score prites 2 pixels lower to avoid conflict with crowd tiles
 
 minor:
 
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
 - big score sprites: shifted bitplane effect on bottom wtf...
-- maybe not include some unused sounds to save memory?
+- maybe not include some unused sounds to save memory? (yaah_31?)
 
 optims:
 

@@ -39,8 +39,8 @@ AFB_68020 = 1
 * some levels consume more memory than others: music, graphics
 
 	.if	NB_PLAYFIELD_PLANES==5
-TOTAL_PUBLIC_MEMORY_SIZE = 360000
-TOTAL_CHIP_MEMORY_SIZE = 560000
+TOTAL_PUBLIC_MEMORY_SIZE = 0x53000		| L.A. stage consumes a lot
+TOTAL_CHIP_MEMORY_SIZE = 0x6F100
 	.else
 		.if NB_PLAYFIELD_PLANES==6
 TOTAL_PUBLIC_MEMORY_SIZE = 360000
@@ -60,7 +60,6 @@ PREVIOUS_SPRITE_SIZE = 8
 CURRENT_SPRITE_SIZE = 4
 
 
-SCORE_FILE_SIZE = 0x23		| wrong
 
 LOG_BUFFER_SIZE = 0x8000
 
@@ -111,6 +110,8 @@ OPT_DEBUG_BANKSWITCH = 0
 OPT_NET_BACKGROUND_TRICK = 1
 	.endif
 
+OPT_DEBUG_ALLOC = 1
+
 * uncomment to fix y scroll	
 * OPT_FIX_Y_SCROLL_TO = 0x60
 
@@ -148,7 +149,7 @@ BASE_BPLCON2_VALUE = 0x0024
 * (scrolls very little)
 * so we just ignore the upper half which saves a lot of chipmem!
 NB_TARGET_LINES = 512
-SMALL_SCROLL_HEIGHT = 48
+SMALL_SCROLL_HEIGHT = 32
 NB_LINES = 256+SMALL_SCROLL_HEIGHT
 Y_MAX = NB_LINES
 NB_PLAYFIELD_LINES = NB_LINES
@@ -3948,6 +3949,17 @@ allocate_memory:
 	jcc		out_of_memory
 	add.l	d0,(a1)
 	move.l	d4,d0		| return value
+
+	.ifne	OPT_DEBUG_ALLOC
+	move.l	chip_memory_current_ptr,d1
+	sub.l	chip_memory_start_ptr,d1
+	move.l	d1,0x100
+
+	move.l	public_memory_current_ptr,d1
+	sub.l	#public_memory_block,d1
+	move.l	d1,0x104
+	.endif
+	
 	movem.l	(a7)+,d2-d4/a0-a1
 	rts
 	
@@ -4255,12 +4267,6 @@ last_bankswitch_pc:
 	.word	0xFFFF
 music_duration:
 	.word	0
-high_score_buffer:
-	.skip	SCORE_FILE_SIZE
-highscore_needs_saving:
-	.byte	0
-highscore_loaded:
-	.byte	0
 last_sound_played:
 	.byte	0
 normal_hiscorename:
