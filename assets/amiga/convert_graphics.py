@@ -10,6 +10,7 @@ sprite_names = get_sprite_names()
 possible_hw_sprites = set()
 
 
+SCALE_FACTOR = 1
 
 nb_cluts = 8
 
@@ -88,7 +89,9 @@ name_dict=None,cluts=None,tile_number=0,is_bob=False,dump_it=False):
                 tileset_1.append(img)
                 # dump tiles
                 if not is_bob and dump_it:
-                    img = ImageOps.scale(img,5,resample=Image.Resampling.NEAREST)
+                    if SCALE_FACTOR != 1:
+                        img = ImageOps.scale(img,SCALE_FACTOR,resample=Image.Resampling.NEAREST)
+
                     if name_dict:
                         name = name_dict.get(tile_number,"unknown")
                     else:
@@ -144,8 +147,10 @@ name_dict=None,cluts=None,tile_number=0,is_bob=False,dump_it=False):
         for tile_number,wtile in enumerate(tileset_1):
             if dump_it and wtile:
                 ds = dump_subdir if not is_bob or wtile.size[0]>16 else dump_subdir_orphan
-
-                img = ImageOps.scale(wtile,5,resample=Image.Resampling.NEAREST)
+                if SCALE_FACTOR != 1:
+                    img = ImageOps.scale(wtile,SCALE_FACTOR,resample=Image.Resampling.NEAREST)
+                else:
+                    img = wtile
                 if sprite_names:
                     name = sprite_names.get(tile_number,"unknown")
                 else:
@@ -742,8 +747,8 @@ def doit(from_scratch=True,dump_it=True):
             with open(sprite_size_cache_file,"r") as f:
                 double_size_sprites = json.load(f)
             # put whatever version (color) or levels you need
-            plane_range = [6]
-            level_range = [3]
+        plane_range = [6]
+        level_range = range(1,6)
 
 
 
@@ -754,7 +759,7 @@ def doit(from_scratch=True,dump_it=True):
         gen_context_files("intro",nb_planes=nb_planes,with_sprites=False,dump_it=dump_it)
         gen_context_files("map",nb_planes=nb_planes,with_sprites=False,dump_it=dump_it)
         for level in level_range:
-            replacement_colors[level] = gen_context_files(f"level_{level}",nb_planes=nb_planes)
+            replacement_colors[level] = gen_context_files(f"level_{level}",nb_planes=nb_planes,dump_it=dump_it)
         dump_it = False     # dumps in the same dump dir anyway
 
     if any(double_size_sprites):
@@ -791,4 +796,4 @@ def doit(from_scratch=True,dump_it=True):
 
 
 if __name__ == "__main__":
-    doit(True,False)
+    doit(from_scratch=True,dump_it=False)
