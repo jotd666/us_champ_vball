@@ -188,6 +188,11 @@ c_address_of_continue_2949 = 0x2949
 * blitter macros *
 ******************
 
+	.macro	NEW_BLITLIST	skip_label
+	.endm
+	.macro	COMMIT_BLITLIST
+	.endm
+	
 	.macro	WAIT_BLIT
 	.ifndef	RELEASE
 	cmp.l	#_custom,a5
@@ -782,67 +787,23 @@ _nmi:
 	move.w	#0x7FFF,_custom+intreq
 	rts
 	
-_vblank:
+level1_interrupt:
     movem.l d0-d7/a0-a6,-(a7)
 	lea		_custom,a5
 	move.w	(intreqr,a5),d0
-	btst	#5,d0
-	beq.b		1f
-
-	tst.b	detect_controllers
-	jeq	0f
-	clr.b	detect_controllers
-	jsr	 _detect_controller_types_nowait
-
-0:
-
-	move.l	joypad_1_state(pc),d1
-	move.l	d1,d2
-	moveq	#0,d0
-	move.b	p1_joystick_slot,d0
-	jmi		0f
-	jbsr	_read_joystick
-	move.l	d0,joypad_1_state
-0:
-	move.l	joypad_2_state(pc),d1
-	move.l	d1,d2
-	moveq	#0,d0
-	move.b	p2_joystick_slot,d0
-	jmi		0f
-	jsr	_read_joystick
-	move.l	d0,joypad_2_state
-0:
-	jbsr	update_controls
-	
-	move.l	joypad_1_state,d0
-	btst	#JPB_BTN_PLAY,d0
-	beq.b	0f
-	btst	#JPB_BTN_PLAY,d2
-	bne.b	0f
-	jbsr		toggle_pause
-0:
-
-	
-	* ack vbl twice (040/pistorm bug)
-	move.w	#0x20,(intreq,a5)
-	move.w	#0x20,(intreq,a5)	
-	jra	3f
-1:
-	* has to be copper: set sync
-	
-	* we're going to ack copper & software/level 5 interrupt now
+	* we're going to ack copper & software level 1 interrupt now
 	* do it twice (040/pistorm bug)
-	move.w	#0x14+(1<<11),(intreq,a5)
-	move.w	#0x14+(1<<11),(intreq,a5)
+	move.w	#0x14,(intreq,a5)
+	move.w	#0x14,(intreq,a5)
 
 	tst.b	pause_flag
 	jne	23f
 
 
 	* declare that we're in interrupt mode so osd_disable_interrupts/osd_enable_interrupts
-	* is level 1 interrupt set? that would mean that mid-screen interrupt
+	* is copper interrupt set? that would mean that mid-screen interrupt
 	* is the source of the interrupt
-	btst	#2,d0
+	btst	#4,d0
 	beq.b	2f
 	* mid-screen copper interrupt, must occur once every 5 times
 	* to simulate ~60 Hz on 50 Hz display
@@ -867,7 +828,12 @@ _vblank:
 	jeq		23f
 0:
 
+	* if blitter isn't finished, then we skip sprite update
+	NEW_BLITLIST	1f
+	
 	jbsr		really_update_sprites
+1:	
+	COMMIT_BLITLIST
 	
 	* handling the 2 special cases of the hawai and aircraft carrier maps
 	* on the original game there are 2 issues
@@ -914,15 +880,67 @@ _vblank:
 	.ifne	OPT_ENABLE_LOGGING
 	jbsr	log_used_tiles
 	jbsr	log_used_sprites
-	.endif
-3:
+	.endif	
     movem.l (a7)+,d0-d7/a0-a6
  	tst.l	return_address
 	beq.b	4f
 	move.l	return_address,(2,a7)		| change return address
 	clr.l	return_address				| just for this time
-	
 4:
+    rte
+	
+_vblank:
+    movem.l d0-d7/a0-a6,-(a7)
+	lea		_custom,a5
+	move.w	(intreqr,a5),d0
+	btst	#5,d0
+	beq.b		1f
+
+	tst.b	detect_controllers
+	jeq	0f
+	clr.b	detect_controllers
+	jsr	 _detect_controller_types_nowait
+
+0:
+
+	move.l	joypad_1_state(pc),d1
+	move.l	d1,d2
+	moveq	#0,d0
+	move.b	p1_joystick_slot,d0
+	jmi		0f
+	jbsr	_read_joystick
+	move.l	d0,joypad_1_state
+0:
+	move.l	joypad_2_state(pc),d1
+	move.l	d1,d2
+	moveq	#0,d0
+	move.b	p2_joystick_slot,d0
+	jmi		0f
+	jsr	_read_joystick
+	move.l	d0,joypad_2_state
+0:
+	jbsr	update_controls
+	
+	move.l	joypad_1_state,d0
+	btst	#JPB_BTN_PLAY,d0
+	beq.b	0f
+	btst	#JPB_BTN_PLAY,d2
+	bne.b	0f
+	jbsr		toggle_pause
+0:
+
+	
+	* ack vbl twice (040/pistorm bug)
+	move.w	#0x20,(intreq,a5)
+	move.w	#0x20,(intreq,a5)	
+	jra	3f
+1:
+	ILLEGAL
+	* has to be copper: set sync
+	
+
+3:
+    movem.l (a7)+,d0-d7/a0-a6
     rte
 	
 	
@@ -2274,6 +2292,8 @@ platform_init:
 
 	* install keyboard and vblank/copper handler
 	move.l	system_vbr(pc),a1
+	pea		level1_interrupt(pc)
+	move.l	(a7)+,(0x64,a1)
 	pea		level2_interrupt(pc)
 	move.l	(a7)+,(0x68,a1)
 	pea		_vblank(pc)
@@ -2324,10 +2344,12 @@ osd_set_irq_return_address:
 osd_interrupt_control:
 	tst.b	d0
 	jeq		0f
-	move.w	#0xC038,_custom+intena
+	* enable vblank & software level 1
+	move.w	#0xC02C,_custom+intena
 	rts
 0:
-	move.w	#0x0030,_custom+intena
+	* leave keyboard
+	move.w	#0x0024,_custom+intena
 	rts
 	
 	
@@ -4698,7 +4720,7 @@ pal_wait:
 	.word	0x1801,0xFFFE
 	*.word	bplcon3,(BORDERBLANK<<5)
 	*.word	color,0x0F0
-	.word	 intreq,0x8010
+	.word	 intreq,0x8004
 
 
 
