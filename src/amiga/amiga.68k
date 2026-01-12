@@ -53,6 +53,7 @@ TOTAL_CHIP_MEMORY_SIZE = (550000/6)*7+0x13000
 	.endif
 
 
+MIRROR_BIT = 6
 
 BORDERBLANK = 1
 
@@ -182,6 +183,35 @@ BIT_FIRE_1 = 4
 BIT_FIRE_2 = 5
 
 c_address_of_continue_2949 = 0x2949
+
+******************
+* blitter macros *
+******************
+
+	.macro	WAIT_BLIT
+	.ifndef	RELEASE
+	cmp.l	#_custom,a5
+	jeq		0f
+	BREAKPOINT	"custom should be set in A5"
+0:
+	.endif
+	move.w	#0x8400,(dmacon,a5)		| blitter high priority
+wait\@:
+	BTST	#6,(dmaconr,a5)
+	BNE.S	wait\@
+	move.w	#0x0400,(dmacon,a5)		| blitter normal priority
+.endm
+	.macro	WRITE_BLITTER_REG_LONG	value,offset
+	move.l	\value,\offset(a5)
+	.endm
+	.macro	WRITE_BLITTER_REG_WORD	value,offset
+	move.w	\value,\offset(a5)
+	.endm
+	.macro	WRITE_BLITTER_REG_SIZE	value
+	WRITE_BLITTER_REG_WORD	\value,bltsize
+	.endm
+
+******************
 
 	.macro	GET_RAM_START_IN_A6	
 	.ifdef	RELEASE
@@ -1045,7 +1075,6 @@ left_team_wins_now:
 	move.l	(a7)+,a6
 	rts
 
-
 	
 * what: blits data on bg plane, no horizontal shifting (erase)
 * args:
@@ -1087,14 +1116,15 @@ blit_background:
     
     * blitter registers set
 
-	move.l d3,bltcon0(a5)	| sets con0 and con1
+	
+	WRITE_BLITTER_REG_LONG	d3,bltcon0	| sets con0 and con1
 
-    move.w  d1,bltamod(a5)	|A modulo
-    move.w  d1,bltdmod(a5)	|D modulo
+    WRITE_BLITTER_REG_WORD  d1,bltamod	|A modulo
+    WRITE_BLITTER_REG_WORD  d1,bltdmod	|D modulo
 							
-	move.l a0,bltapt(a5)	|source graphic top left corner
-	move.l a1,bltdpt(a5)	|destination top (bottom) left corner
-	move.w  d4,bltsize(a5)	|rectangle size, starts blit
+	WRITE_BLITTER_REG_LONG a0,bltapt	|source graphic top left corner
+	WRITE_BLITTER_REG_LONG a1,bltdpt	|destination top (bottom) left corner
+	WRITE_BLITTER_REG_SIZE  d4	|rectangle size, starts blit
 	
 	.rept	NB_PLAYFIELD_PLANES-1
 	.if	SCREEN_PLANE_SIZE>0x7FFF
@@ -1106,9 +1136,9 @@ blit_background:
 	.endif
 	WAIT_BLIT
 	* second bitplane
-	move.l a0,bltapt(a5)	|source graphic top left corner
-	move.l a1,bltdpt(a5)	|destination top (bottom) left corner
-	move.w  d4,bltsize(a5)	|rectangle size, starts blit
+	WRITE_BLITTER_REG_LONG a0,bltapt	|source graphic top left corner
+	WRITE_BLITTER_REG_LONG a1,bltdpt	|destination top (bottom) left corner
+	WRITE_BLITTER_REG_SIZE  d4	|rectangle size, starts blit
 	.endr
 	
 	movem.l	(a7)+,d2-d6/a0-a5
@@ -1177,7 +1207,7 @@ really_update_sprites:
 	move.l	playfield_drawed_screen_ptr(pc),a1
 	move.w	#NB_TARGET_SPRITES-1,d7
 	WAIT_BLIT
-	move.l	#-1,bltalwm(a5)		| needed for blit_background
+	WRITE_BLITTER_REG_LONG	#-1,bltalwm		| needed for blit_background
 1:
 	move.w	(a4),d0
 	bmi.b	11f		| x=0: inactive
@@ -1360,7 +1390,7 @@ draw_net:
 	lea		background_restore_buffer,a0
 	* wait blitter before changing lwm
 	WAIT_BLIT
-	move.l	#-1,bltalwm(a5)		| needed for blit_background
+	WRITE_BLITTER_REG_LONG	#-1,bltalwm		| needed for blit_background
 	jbsr	blit_background
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
@@ -1489,7 +1519,7 @@ update_one_bob:
 	jeq		10f			| nothing to do
 
 
-	btst	#6,d3
+	btst	#MIRROR_BIT,d3
 	jne		101f
 	* mirror: negate the code
 	neg		d4	
@@ -1827,16 +1857,16 @@ clear_planes_any_blitter_internal:
     * now just wait for blitter ready to write all registers
 	WAIT_BLIT
     
-	move.l	d2,bltafwm(a5)
-	move.l d1,bltcon0(a5)	
-    move.w  d0,bltdmod(a5)	|D modulo
+	WRITE_BLITTER_REG_LONG	d2,bltafwm
+	WRITE_BLITTER_REG_LONG d1,bltcon0	
+    WRITE_BLITTER_REG_WORD  d0,bltdmod	|D modulo
 	
 	subq	#1,d3
 	jeq		4f
 3:
 	WAIT_BLIT
-	move.l a1,bltdpt(a5)	|destination top left corner
-	move.w  d4,bltsize(a5)	|rectangle size, starts blit
+	WRITE_BLITTER_REG_LONG	a1,bltdpt	|destination top left corner
+	WRITE_BLITTER_REG_SIZE	d4	|rectangle size, starts blit
 32:
 	add.w	#SCREEN_PLANE_SIZE,a1
 	dbf		d3,3b
@@ -1937,33 +1967,33 @@ blit_planes_any_internal_cookie_cut:
     
     * blitter registers set
 
-	move.w d2,bltamod(a5)		|A modulo=bytes to skip between lines
-	move.w d2,bltbmod(a5)		|B modulo=bytes to skip between lines
+	WRITE_BLITTER_REG_WORD d2,bltamod		|A modulo=bytes to skip between lines
+	WRITE_BLITTER_REG_WORD d2,bltbmod		|B modulo=bytes to skip between lines
 	moveq	#0,d2
-    move.w  d2,bltalwm(a5)	    | so the -2 modulo trick works
+    WRITE_BLITTER_REG_WORD  d2,bltalwm	    | so the -2 modulo trick works
 	
-    move.w  d0,bltcmod(a5)	|C modulo
-    move.w  d0,bltdmod(a5)	|D modulo
+    WRITE_BLITTER_REG_WORD  d0,bltcmod	|C modulo
+    WRITE_BLITTER_REG_WORD  d0,bltdmod	|D modulo
 					
 	subq	#1,d3
 	beq.b	7f
 	subq	#1,d3
 6:
-	move.l a3,bltapt(a5)	|source graphic top left corner (mask)
+	WRITE_BLITTER_REG_LONG a3,bltapt	|source graphic top left corner (mask)
 	bsr.b	start_process_1_plane
 	
-	move.l	a1,bltcpt(a5)	|pristine background top (bottom) left corner
-	move.l	a1,bltdpt(a5)	|destination top (bottom) left corner
-	move.w  d4,bltsize(a5)	|rectangle size, starts blit
+	WRITE_BLITTER_REG_LONG	a1,bltcpt	|pristine background top (bottom) left corner
+	WRITE_BLITTER_REG_LONG	a1,bltdpt	|destination top (bottom) left corner
+	WRITE_BLITTER_REG_WORD  d4,bltsize	|rectangle size, starts blit
 	add.w		#SCREEN_PLANE_SIZE,a1
 	WAIT_BLIT
 	dbf		d3,6b
 7:
-	move.l a3,bltapt(a5)	|source graphic top left corner (mask)
+	WRITE_BLITTER_REG_LONG a3,bltapt	|source graphic top left corner (mask)
 	bsr.b	start_process_1_plane
-	move.l	a1,bltcpt(a5)	|pristine background top (bottom) left corner
-	move.l	a1,bltdpt(a5)	|destination top (bottom) left corner
-	move.w  d4,bltsize(a5)	|rectangle size, starts blit
+	WRITE_BLITTER_REG_LONG	a1,bltcpt	|pristine background top (bottom) left corner
+	WRITE_BLITTER_REG_LONG	a1,bltdpt	|destination top (bottom) left corner
+	WRITE_BLITTER_REG_WORD  d4,bltsize	|rectangle size, starts blit
 10:
     movem.l (a7)+,d0-d7/a4
     rts
@@ -1976,13 +2006,13 @@ start_process_1_plane:
 	bra.b	61f
 60:
 	* source is 0: just apply mask (less bandwidth lost) and change bltcon
-	move.l	d6,bltcon0(a5)	| sets con0 and con1: C-A->D cookie cut, B fixed
- 	move.w	d2,bltbdat(a5)	|B word is zero
+	WRITE_BLITTER_REG_LONG	d6,bltcon0	| sets con0 and con1: C-A->D cookie cut, B fixed
+ 	WRITE_BLITTER_REG_WORD	d2,bltbdat	|B word is zero
 	rts
 61:
 	* non-zero: set data source & bltcon
-	move.l	d7,bltcon0(a5)	| sets con0 and con1: C-A+B->D cookie cut full
-	move.l	a4,bltbpt(a5)	|source graphic top left corner
+	WRITE_BLITTER_REG_LONG	d7,bltcon0	| sets con0 and con1: C-A+B->D cookie cut full
+	WRITE_BLITTER_REG_LONG	a4,bltbpt	|source graphic top left corner
 	rts
 
 	.macro	GEN_MINTERM_TABLE	name,value
@@ -2153,9 +2183,6 @@ platform_init:
 	lea		_custom,a5
 	move.w	#0x7FFF,dmacon(a5)
 	move.w	#0x7FFF,intena(a5)
-	* set blitter parameters once and for all
-	* not useful here, it changes from restore to blit
-    * move.l  #-1,bltafwm(a5)
 
 	move.l	chiprevbits,d1
 	and.l	#SETCHIPREV_AA,d1

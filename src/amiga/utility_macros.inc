@@ -23,19 +23,7 @@ UTILITY_MACROS_INC = 1
 	.endm
 
 
-	.macro	WAIT_BLIT
-	.ifndef	RELEASE
-	cmp.l	#_custom,a5
-	jeq		0f
-	BREAKPOINT	"custom should be set in A5"
-0:
-	.endif
-	move.w	#0x8400,(dmacon,a5)		| blitter high priority
-wait\@:
-	BTST	#6,(dmaconr,a5)
-	BNE.S	wait\@
-	move.w	#0x0400,(dmacon,a5)		| blitter normal priority
-.endm
+
 
 	.macro MUL_TABLE value,len
 mul\value\()_table:
