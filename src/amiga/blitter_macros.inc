@@ -69,13 +69,11 @@ wait\@:
 	
 	.macro	NEW_BLITLIST
 sw\@:
-	move.b	#0,0x111
 	* if blitter isn't finished, then we wait
 	* this is called from level 1 interrupt so
 	* blitter interrupts can interrupt
 	tst.b	blitter_chain_running
 	jne		sw\@
-	move.b	#0,0x110
 
 	clr.b	size_command_issued
 	* blitter chain has completed: we can switch lists
