@@ -22,6 +22,14 @@ start:
 	.include "data.inc"
 	.include "utility_macros.inc"
 	
+* blitter mode must remain at 0, blitter chain cannot work here as characters
+* are flipped in-place so when the blitter tries to read input, it may have changed
+* when using chained blit interrupts. But it may prove useful on games that have
+* pre-mirrored bobs and require speed
+
+OPT_BLITTER_MODE = 0
+	.include "blitter_macros.inc"
+	
 AttnFlags = 0x128
 AFB_68010 = 0
 AFB_68020 = 1
@@ -184,39 +192,7 @@ BIT_FIRE_2 = 5
 
 c_address_of_continue_2949 = 0x2949
 
-******************
-* blitter macros *
-******************
 
-	.macro	NEW_BLITLIST	skip_label
-	.endm
-	.macro	COMMIT_BLITLIST
-	.endm
-	
-	.macro	WAIT_BLIT
-	.ifndef	RELEASE
-	cmp.l	#_custom,a5
-	jeq		0f
-	BREAKPOINT	"custom should be set in A5"
-0:
-	.endif
-	move.w	#0x8400,(dmacon,a5)		| blitter high priority
-wait\@:
-	BTST	#6,(dmaconr,a5)
-	BNE.S	wait\@
-	move.w	#0x0400,(dmacon,a5)		| blitter normal priority
-.endm
-	.macro	WRITE_BLITTER_REG_LONG	value,offset
-	move.l	\value,\offset(a5)
-	.endm
-	.macro	WRITE_BLITTER_REG_WORD	value,offset
-	move.w	\value,\offset(a5)
-	.endm
-	.macro	WRITE_BLITTER_REG_SIZE	value
-	WRITE_BLITTER_REG_WORD	\value,bltsize
-	.endm
-
-******************
 
 	.macro	GET_RAM_START_IN_A6	
 	.ifdef	RELEASE
@@ -828,11 +804,11 @@ level1_interrupt:
 	jeq		23f
 0:
 
-	* if blitter isn't finished, then we skip sprite update
-	NEW_BLITLIST	1f
+	
+	NEW_BLITLIST
 	
 	jbsr		really_update_sprites
-1:	
+
 	COMMIT_BLITLIST
 	
 	* handling the 2 special cases of the hawai and aircraft carrier maps
@@ -894,7 +870,7 @@ _vblank:
 	lea		_custom,a5
 	move.w	(intreqr,a5),d0
 	btst	#5,d0
-	beq.b		1f
+	jeq		1f
 
 	tst.b	detect_controllers
 	jeq	0f
@@ -935,9 +911,19 @@ _vblank:
 	move.w	#0x20,(intreq,a5)	
 	jra	3f
 1:
-	ILLEGAL
-	* has to be copper: set sync
+	.ifndef	RELEASE
+	btst	#6,d0
+	jne		2f
+	BREAKPOINT	"unexpected level 3 interrupt"
+2:
+	.endif
+	* has to be blitter operation completed: handle next blit
+	* ack blitter int twice (040/pistorm bug)
+	move.w	#0x40,(intreq,a5)
+	move.w	#0x40,(intreq,a5)	
+
 	
+	PROCESS_ONE_BLIT
 
 3:
     movem.l (a7)+,d0-d7/a0-a6
@@ -1994,24 +1980,24 @@ blit_planes_any_internal_cookie_cut:
     WRITE_BLITTER_REG_WORD  d0,bltdmod	|D modulo
 					
 	subq	#1,d3
-	beq.b	7f
+	jeq		7f
 	subq	#1,d3
 6:
 	WRITE_BLITTER_REG_LONG a3,bltapt	|source graphic top left corner (mask)
-	bsr.b	start_process_1_plane
+	jbsr	start_process_1_plane
 	
 	WRITE_BLITTER_REG_LONG	a1,bltcpt	|pristine background top (bottom) left corner
 	WRITE_BLITTER_REG_LONG	a1,bltdpt	|destination top (bottom) left corner
-	WRITE_BLITTER_REG_WORD  d4,bltsize	|rectangle size, starts blit
+	WRITE_BLITTER_REG_SIZE  d4			|rectangle size, starts blit
 	add.w		#SCREEN_PLANE_SIZE,a1
 	WAIT_BLIT
 	dbf		d3,6b
 7:
 	WRITE_BLITTER_REG_LONG a3,bltapt	|source graphic top left corner (mask)
-	bsr.b	start_process_1_plane
+	jbsr	start_process_1_plane
 	WRITE_BLITTER_REG_LONG	a1,bltcpt	|pristine background top (bottom) left corner
 	WRITE_BLITTER_REG_LONG	a1,bltdpt	|destination top (bottom) left corner
-	WRITE_BLITTER_REG_WORD  d4,bltsize	|rectangle size, starts blit
+	WRITE_BLITTER_REG_SIZE  		d4	|rectangle size, starts blit
 10:
     movem.l (a7)+,d0-d7/a4
     rts
@@ -2021,7 +2007,7 @@ start_process_1_plane:
 	beq.b	60f
 	move.l	d0,a4
 	add.w	d5,a4		| add Y offset
-	bra.b	61f
+	jra		61f
 60:
 	* source is 0: just apply mask (less bandwidth lost) and change bltcon
 	WRITE_BLITTER_REG_LONG	d6,bltcon0	| sets con0 and con1: C-A->D cookie cut, B fixed
@@ -2344,12 +2330,21 @@ osd_set_irq_return_address:
 osd_interrupt_control:
 	tst.b	d0
 	jeq		0f
-	* enable vblank & software level 1
+	.if		OPT_BLITTER_MODE==1
+	* enable blitter, vblank & software level 1
+	move.w	#0xC06C,_custom+intena
+	.else
+	* enable vblank & software level 1 only
 	move.w	#0xC02C,_custom+intena
+	.endif
 	rts
 0:
+	.if		OPT_BLITTER_MODE==1
 	* leave keyboard
+	move.w	#0x0064,_custom+intena
+	.else
 	move.w	#0x0024,_custom+intena
+	.endif
 	rts
 	
 	
@@ -4557,6 +4552,7 @@ temp_filename_buffer:
 mirror_table:
 	.include 	"mirror_table.68k"
 
+	DECL_BLITLISTS	0x10000
 _end_of_ng_code:
 		
   
