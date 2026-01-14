@@ -117,6 +117,7 @@ size_command_issued:
 	
 	.macro	COMMIT_BLITLIST
 	* complete filled list
+	lea	_custom,a5
 	move.l	filled_blitter_list_ptr,a0
 	move.w	#0xFFFE,(a0)
 	

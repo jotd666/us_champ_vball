@@ -1,5 +1,6 @@
 - draw score prites 2 pixels lower to avoid conflict with crowd tiles
-
+- remove flickering in blitter-chain mode. buffer switch must be done right before the blits start
+  but that doesn't work either
 minor:
 
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites

@@ -793,7 +793,7 @@ level1_interrupt:
 	move.b	d0,mid_screen_interrupt_count
 	jra		3f	| no need to update sprites we're in the middle of a frame
 2:
-
+	* level 1 interrupt at the bottom of the frame (not the mid-screen one)
 	subq.w	#1,delay_timer
 		
 	jbsr	call_nmi
@@ -4698,7 +4698,7 @@ copperlist_colors:
 	* mid-line wait & extra interrupt
 	.word	0x8001,0xFFFE
 pal_intreq_block_game:
-	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
+	.word	 intreq,0x8014  | call level 1 interrupt in the middle of a frame, also flag with copper bit so interrupt knows it's middle frame
 
 	
 	*.word	0xF001,0xFFFE	| if we don't add an extra wait, NTSC version locks up
