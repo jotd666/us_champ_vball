@@ -4569,10 +4569,6 @@ cpu_log_enable:
 
 	.section	.bsspublic
 
-log_buffer:
-	.skip	LOG_BUFFER_SIZE
-log_buffer_end:
-	.skip	16
 	
 public_memory_block:
 	.skip	TOTAL_PUBLIC_MEMORY_SIZE
@@ -4583,6 +4579,10 @@ tile_address_table:
 	
 	
 	.ifne	OPT_ENABLE_LOGGING
+log_buffer:
+	.skip	LOG_BUFFER_SIZE
+log_buffer_end:
+	.skip	16
 tile_bank_table:
 	.skip	0x1000
 tile_log_table:
