@@ -807,6 +807,15 @@ level1_interrupt:
 	
 	NEW_BLITLIST
 	
+	.if		OPT_BLITTER_MODE==1
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	jbsr		switch_screen_buffers
+	.else
+	jbsr	set_bobs_bitplanes
+	.endif
+	.endif
+	
+	
 	jbsr		really_update_sprites
 
 	COMMIT_BLITLIST
@@ -838,12 +847,13 @@ level1_interrupt:
 2:
 	move.w	d0,scroll_x_lo
 0:
+	.if		OPT_BLITTER_MODE==0
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
 	.else
 	jbsr	set_bobs_bitplanes
 	.endif
-	
+	.endif
 	
 	lea	_custom,a5
 	move.w	(intreqr,a5),d0
