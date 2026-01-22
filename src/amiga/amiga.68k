@@ -25,7 +25,7 @@ start:
 * blitter mode must remain at 0, blitter chain cannot work here as characters
 * are flipped in-place so when the blitter tries to read input, it may have changed
 * when using chained blit interrupts. But it may prove useful on games that have
-* pre-mirrored bobs and require speed
+* pre-mirrored bobs and require speed. This game was used as a proof of concept
 
 OPT_BLITTER_MODE = 0
 	.include "blitter_macros.inc"
@@ -109,17 +109,18 @@ TARGET_SPRITE_CODE = 2
 TARGET_SPRITE_SIZEOF = 4
 
 	.ifdef	RELEASE
-
 OPT_ENABLE_LOGGING = 0           | DO NOT CHANGE THIS
 OPT_DEBUG_BANKSWITCH = 0          | DO NOT CHANGE THIS
 OPT_NET_BACKGROUND_TRICK = 1   | DO NOT CHANGE THIS
+OPT_DEBUG_ALLOC = 0   			| DO NOT CHANGE THIS
 	.else
+	* dev mode, adjust when needed
 OPT_ENABLE_LOGGING = 1
 OPT_DEBUG_BANKSWITCH = 0
 OPT_NET_BACKGROUND_TRICK = 1
+OPT_DEBUG_ALLOC = 1
 	.endif
 
-OPT_DEBUG_ALLOC = 1
 
 * uncomment to fix y scroll	
 * OPT_FIX_Y_SCROLL_TO = 0x60
@@ -133,8 +134,6 @@ OPT_DEBUG_ALLOC = 1
 OPT_ENABLE_DOUBLE_BUFFERING = 1
 
 _custom = 0xDFF000
-
-OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
 	
 	.if	NB_PLAYFIELD_PLANES>5
@@ -804,20 +803,27 @@ level1_interrupt:
 	jeq		23f
 0:
 
-	
+
+	* wait for blits to complete (via soft flag that last blitter command
+	* sets when reaching the end of the list) and reset list pointers
 	NEW_BLITLIST
 	
+	* show the newly drawn buffer THEN switch the buffers
 	.if		OPT_BLITTER_MODE==1
+	jbsr	set_bobs_bitplanes
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
-	.else
-	jbsr	set_bobs_bitplanes
 	.endif
 	.endif
 	
+	lea		_custom,a5
+	* start the chain reaction
+	PROCESS_BLITS
 	
+	* fill the blitter command list while blitter interrupt 
+	* is processing the other blitter command list
 	jbsr		really_update_sprites
-
+	* terminate the blitter command list
 	COMMIT_BLITLIST
 	
 	* handling the 2 special cases of the hawai and aircraft carrier maps
@@ -848,11 +854,11 @@ level1_interrupt:
 	move.w	d0,scroll_x_lo
 0:
 	.if		OPT_BLITTER_MODE==0
+	* switch the screen buffers THEN show newly drawn buffer
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	jbsr		switch_screen_buffers
-	.else
-	jbsr	set_bobs_bitplanes
 	.endif
+	jbsr	set_bobs_bitplanes
 	.endif
 	
 	lea	_custom,a5
@@ -2079,7 +2085,6 @@ bob_previous_positions_2:
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 switch_screen_buffers:
-
 	* let's switch screen buffers, background (chars)
 	* toggle fg planes (double buffering)
 	* also toggle previous sprite positions
@@ -2101,7 +2106,7 @@ switch_screen_buffers:
 	move.l	a3,bob_previous_displayed_sprites
 	move.l	a2,bob_previous_drawed_sprites
 
-	jbra		set_bobs_bitplanes
+	rts
 	.endif
 	
 	
@@ -4562,7 +4567,7 @@ temp_filename_buffer:
 mirror_table:
 	.include 	"mirror_table.68k"
 
-	DECL_BLITLISTS	0x10000
+	DECL_BLITLISTS	0x11000
 _end_of_ng_code:
 		
   

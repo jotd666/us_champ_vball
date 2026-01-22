@@ -1,5 +1,47 @@
 	.include "custom.i"
 
+* how to use in double buffering mode with a "drawn" and a "displayed" buffer
+*
+* - set OPT_BLITTER_MODE to 0 or 1: 0 classic blit+waitblit, 1 blit in interrupts
+* - replace all blit writes by WRITE_BLITTER_REG_xxx macros. When writing bltsize
+*   use WRITE_BLITTER_REG_SIZE instead of WRITE_BLITTER_REG_WORD
+*
+* mode 0: classic mode. WAIT_BLIT is active, all operations are synchronous so
+* in vblank (top of frame) or copper interrupt (set at bottom of frame):
+* - blit in "drawn" buffer 
+* - switch buffer pointers
+* - show "displayed" buffer in copperlist
+*
+* mode 1: with blitter interrupt chain.
+* - use DECL_BLITLISTS with an arbitrary size. Error will trigger if too small
+* - setup level 1 interrupt at end of copperlist (instead of copper interrupt)
+*   so it can be interrupted by blitter
+* - setup level 3 interrupt with vblank and blitter (copper isn't useful)
+* - on level 1 interrupt:
+*   - call NEW_BLITLIST
+*   - set bitplanes
+*   - switch screen pointers (note the reversed order vs synchronous mode!)
+*   - call PROCESS_BLITS to process the previous blits
+*   - call the routine to perform the "blits" (fake blits now, fills filled_blitter_list instead)
+*   - call COMMIT_BLITLIST to end the list (by setting -2 in it)
+*
+*   that's it. PROCESS_BLITS started the chain reaction, and there are not blitwaits
+*   anymore in the code
+*
+*   this can be used only if there isn't in-place mirroring. The code has been developed
+*   for a test on US Champ VBall but cannot apply here else there isn't enough memory
+*   to store all static frames, so we use in-place mirroring, which only works with
+*   option 0. If used anyway, there will be strange artifacts because of concurrent
+*   mirroring with CPU & blitting at times.
+*
+*   it's however ideal on games that need a lot of blitting and exclusively use
+*   static source data. Interleaved mode would trigger less interrupts too.
+*
+*   most macros do nothing in mode 0, so it allows to lay them out and compare speed
+*   with mode 0 or 1 without changing the code
+*   only the screen switch order and location changes (in double buffered mode, if
+*   you race the beam, there's nothing to do)
+*
 ******************
 * blitter macros *
 ******************
@@ -38,6 +80,9 @@ wait\@:
 	.macro	PROCESS_ONE_BLIT
 	.endm
 	
+	.macro	PROCESS_BLITS
+	.endm
+	
 	.macro	COMMIT_BLITLIST
 	.endm
 	
@@ -72,13 +117,15 @@ sw\@:
 	* if blitter isn't finished, then we wait
 	* this is called from level 1 interrupt so
 	* blitter interrupts can interrupt
+	lea		blitter_list_1,a0
+	lea		blitter_list_2,a1
+
+
 	tst.b	blitter_chain_running
 	jne		sw\@
 
-	clr.b	size_command_issued
+
 	* blitter chain has completed: we can switch lists
-	lea		blitter_list_1,a0
-	lea		blitter_list_2,a1
 	cmp.l	drawn_blitter_list_start,a0
 	jeq		s0\@
 	move.l	a0,drawn_blitter_list_start
@@ -90,6 +137,19 @@ s0\@:
 	move.l	a1,drawn_blitter_list_ptr
 	move.l	a0,filled_blitter_list_ptr
 s1\@:
+	.endm
+	
+	.macro	PROCESS_BLITS
+	tst.b	size_command_issued
+	jeq		s\@		| empty list or no bltsize command in the current command list: skip
+	* signal that the blitter chain is now running
+	st.b	blitter_chain_running
+	* start first blit from outside the blitter interrupt to
+	* start the chain reaction reading from drawn_blitter_list_ptr
+	PROCESS_ONE_BLIT
+s\@:
+	* clear size command issued for next blitlist creation
+	clr.b	size_command_issued
 	.endm
 
 	.macro	DECL_BLITLISTS	size
@@ -117,15 +177,8 @@ size_command_issued:
 	
 	.macro	COMMIT_BLITLIST
 	* complete filled list
-	lea	_custom,a5
 	move.l	filled_blitter_list_ptr,a0
 	move.w	#0xFFFE,(a0)
-	
-	tst.b	size_command_issued
-	jeq		s\@		| no bltsize command in the current command list: skip
-	st.b	blitter_chain_running
-	PROCESS_ONE_BLIT
-s\@:
 	.endm
 
 	.macro	PROCESS_ONE_BLIT
@@ -183,7 +236,7 @@ g1\@:
 b1\@:
 	cmp.w	d2,d0
 	jeq		b3\@		| -1: end of command
-	* -2: end of list
+	* -2: end of list: nothing to do, we're done for that frame
 	clr.b	blitter_chain_running
 b3\@:
 	move.l	a0,drawn_blitter_list_ptr
