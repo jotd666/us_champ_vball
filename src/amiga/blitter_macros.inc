@@ -28,11 +28,9 @@
 *   that's it. PROCESS_BLITS started the chain reaction, and there are not blitwaits
 *   anymore in the code
 *
-*   this can be used only if there isn't in-place mirroring. The code has been developed
-*   for a test on US Champ VBall but cannot apply here else there isn't enough memory
-*   to store all static frames, so we use in-place mirroring, which only works with
-*   option 0. If used anyway, there will be strange artifacts because of concurrent
-*   mirroring with CPU & blitting at times.
+*   In most games, for memory considerations, we use in-place mirroring, so no problem with
+*   option 0. But option 1 needs more work. So we introduce a new virtual blitter command if OPT_VBLIT_MIRROR_MODE=1
+*   in the WRITE_VIRTUAL_MIRROR_COMMAND, mirror_function expects the bitplane data in A2 and the height minus 1 in D1
 *
 *   it's however ideal on games that need a lot of blitting and exclusively use
 *   static source data. Interleaved mode would trigger less interrupts too.
@@ -98,6 +96,15 @@ wait\@:
 	WRITE_BLITTER_REG_WORD	\value,bltsize
 	.endm
 	
+	.if		OPT_VBLIT_MIRROR_MODE==1
+	.macro	WRITE_BLITTER_VIRTUAL_MIRROR	height,mirror_function,bitplane
+	move.w	\height,d1		| height
+	subq	#1,d1		| minus one for dbf
+	jsr		(\mirror_function)	  | in: A2 bitplane (parameter is ignored it is already a2), D1: height-1
+	.endm
+	.endif
+	
+	* no blitlists, empty
 	.macro	DECL_BLITLISTS	size
 	.endm
 	
@@ -194,7 +201,33 @@ b0\@:
 
 	bclr	#14,d0
 	jne		b2\@
-
+	* word or virtual mirror command
+	.if	OPT_VBLIT_MIRROR_MODE==1
+	cmp.w	#deniseid,d0
+	jne		nv0\@
+	* mirror command
+	movem.l	d0-d2/a0-a2,-(a7)
+	lea		mirror_table,a1
+	move.w	(a0)+,d1
+	subq	#1,d1			| height minus one
+	.ifndef	RELEASE
+	jpl		pos\@
+	BREAKPOINT	"zero height for mirror"
+pos\@:
+	.endif
+	move.l	(a0)+,a2
+	.ifndef	MC68020
+	move.l	(a0),a0
+	jsr		(a0)
+	.else
+	jsr		([a0])
+	.endif
+	movem.l	(a7)+,d0-d2/a0-a2
+	add.w	#10,a0		| advance to next command
+	jra		b0\@		| not size: continue parsing list
+nv0\@:
+	.endif
+	* word command, check bounds
 	.ifndef	RELEASE
 	cmp.w	#bltcon0,d0		| sanity check for commands!
 	jcc		f1\@
@@ -214,6 +247,7 @@ f1\@:
 	
 	move.w	d1,(a5,d0.w)
 	jra		b0\@		| not size: continue parsing list
+	* long write command
 b2\@:
 	.ifndef	RELEASE
 	cmp.w	#bltcon0,d0		| sanity check for commands!
@@ -256,12 +290,27 @@ c0\@:
 	move.l	a5,filled_blitter_list_ptr
 	.endm
 	
+	.if		OPT_VBLIT_MIRROR_MODE==1
+	.macro	WRITE_BLITTER_VIRTUAL_MIRROR	height,mirror_function,bitplane
+	move.l	a5,-(a7)
+	move.w	d6,-(a7)
+	LOAD_FILLED_LIST
+	move.w	#deniseid,(a5)+		| fake custom reg,(a5)+
+	move.w	\height,(a5)+
+	move.l	\bitplane,(a5)+
+	move.l	\mirror_function,(a5)+
+	STORE_FILLED_LIST
+	move.w	(a7)+,d6
+	move.l	(a7)+,a5
+	.endm
+	.endif
+
 	.macro	WRITE_BLITTER_REG_LONG	value,offset
 	move.l	a5,-(a7)
 	move.w	d6,-(a7)
 	LOAD_FILLED_LIST
 	move.w	#\offset,d6
-	bset	#14,d6
+	bset	#14,d6		| bit set to tell it's a long command
 	move.w 	d6,(a5)+
 	move.l	\value,(a5)+
 	STORE_FILLED_LIST

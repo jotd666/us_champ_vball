@@ -1,17 +1,16 @@
-- blitter chain: note down when a frame needs flipping (with a +1), so when the next swap frame
-  is requested we know and we wait. That requires blitter command queue to push
-  the address of the source plane and reserve 1 word before it to put the flag
-  test that on start screen
-  
-- draw score prites 2 pixels lower to avoid conflict with crowd tiles
-- restore background: alternate between blitter and cpu
-- use CPU-driven erase?
+- blitter chain: works but mirror seems to cause issues on shades, possibly issues with 1-bitplane pics
+  maybe debug with score display (as they seem very trashed too: score display is displayed alone at some point
+  which makes a perfect opportunity to debug)
+- draw score sprites 2 pixels lower to avoid conflict with crowd tiles
+- restore background: alternate between blitter and cpu (if no blitter chain)
+- use CPU-driven erase? (if no blitter chain)
+- big score sprites: (when no blitter chain) shifted bitplane effect on bottom probably because mirror plane with cpu while blitting it!
+  if we can achieve blitter chaining this issue goes away
 
 minor:
 
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
-- big score sprites: shifted bitplane effect on bottom wtf...
 - maybe not include some unused sounds to save memory? (yaah_31?)
 
 optims:

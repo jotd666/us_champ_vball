@@ -28,6 +28,7 @@ start:
 * pre-mirrored bobs and require speed. This game was used as a proof of concept
 
 OPT_BLITTER_MODE = 0
+OPT_VBLIT_MIRROR_MODE = 1
 	.include "blitter_macros.inc"
 	
 AttnFlags = 0x128
@@ -1697,8 +1698,9 @@ mirror_sprite_planes:
 	movem.l	d0-d2/a0,-(a7)
 	* bitplanes aren't pre-computed: check bitplanes current orientation and swap
 	* if required. This is slow but saves memory
+	.if		OPT_BLITTER_MODE==0
 	lea		mirror_table,a1
-	moveq	#0,d2
+	.endif
 	moveq	#NB_PLAYFIELD_PLANES+1-1,d6
 	lea		mirror_function_table(pc),a3
 	.ifndef	MC68020
@@ -1716,16 +1718,20 @@ mirror_sprite_planes:
 	jeq		1f
 	* not the proper orientation: change it
 	move.b	d3,(-2,a2)
-	move.w	d4,d1		| height
-	subq	#1,d1		| minus one for dbf
-	jsr		(a3)
+	* perform or queue the mirroring
+	WRITE_BLITTER_VIRTUAL_MIRROR	d4,a3,a2
 
 	* next bitplane
 1:
 	dbf		d6,0b
 	movem.l	(a7)+,d0-d2/a0
 	rts
-	
+
+* < A1: mirror table
+* < A2: bitmap
+* < D1+1: height
+* destroys d0-d2, a2
+
 mirror_16_bit_wide:
 	.ifdef	MC68020
 	moveq	#0,d0
@@ -1747,7 +1753,7 @@ mirror_16_bit_wide:
 	dbf		d1,10b		| next
 	rts
 
-mirror_32_bit_wide:	
+mirror_32_bit_wide:
 	.ifdef	MC68020
 	moveq	#0,d0
 	moveq	#0,d2
@@ -1758,18 +1764,22 @@ mirror_32_bit_wide:
 	moveq	#0,d0
 	moveq	#0,d2
 	.endif
-	move.w	(a2)+,d2
-	move.w	(a2),d0	
+	move.l	(a2)+,d2
+	jeq		14f		| if line is blank, no need to mirror
+	move.w	d2,d0
+	clr.w	d2
+	swap	d2
 	.ifndef	MC68020
 	add.l	d2,d2
 	add.l	d0,d0
-	move.w	(a1,d2.l),(a2)		| get mirror value
+	move.w	(a1,d2.l),-(a2)		| get mirror value
 	move.w	(a1,d0.l),-(a2)		| get mirror value
 	.else
-	move.w	(a1,d2.l*2),(a2)		| get mirror value
+	move.w	(a1,d2.l*2),-(a2)		| get mirror value
 	move.w	(a1,d0.l*2),-(a2)		| get mirror value
 	.endif
 	addq	#4,a2					| skip row
+14:
 	dbf		d1,10b
 	rts
 
@@ -4566,7 +4576,7 @@ temp_filename_buffer:
 mirror_table:
 	.include 	"mirror_table.68k"
 
-	DECL_BLITLISTS	0x11000
+	DECL_BLITLISTS	0x14000
 _end_of_ng_code:
 		
   
