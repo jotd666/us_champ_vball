@@ -1,6 +1,12 @@
+- blitter chain: note down when a frame needs flipping (with a +1), so when the next swap frame
+  is requested we know and we wait. That requires blitter command queue to push
+  the address of the source plane and reserve 1 word before it to put the flag
+  test that on start screen
+  
 - draw score prites 2 pixels lower to avoid conflict with crowd tiles
-- remove flickering in blitter-chain mode. buffer switch must be done right before the blits start
-  but that doesn't work either
+- restore background: alternate between blitter and cpu
+- use CPU-driven erase?
+
 minor:
 
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
@@ -15,7 +21,6 @@ optims:
   simpler: find a zone where color 1 & 2 isn't used at all (scrolling !!!)
   problem: if tile replaced colors matches a sprite color after quantization, it will destroy sprite color... Complex, almost coded
   but would save 10 colors (before quantization) so forget it
-- use CPU-driven erase?
 - more horizontal grouping (x3/x4) marginal gain as not often displayed
 - optimize bob erase/redraw at least for referee and score sprites (not trivial as the position of the sprites
   change with Y priority)

@@ -1701,6 +1701,13 @@ mirror_sprite_planes:
 	moveq	#0,d2
 	moveq	#NB_PLAYFIELD_PLANES+1-1,d6
 	lea		mirror_function_table(pc),a3
+	.ifndef	MC68020
+	move.w	d5,d0       | number of byte values (4: 16 bits + shifting)
+	add.w	d0,d0
+	move.l	(a3,d0.w),a3
+	.else
+	move.l	(a3,d5.w*2),a3		| compute mirror function once and for all
+	.endif
 0:
 	move.l	(a0)+,d1		| current plane data
 	jeq		1f				| no data: skip
@@ -1711,16 +1718,8 @@ mirror_sprite_planes:
 	move.b	d3,(-2,a2)
 	move.w	d4,d1		| height
 	subq	#1,d1		| minus one for dbf
-
-	.ifndef	MC68020
-	lea		mirror_function_table(pc),a3
-	move.w	d5,d0       | number of byte values (4: 16 bits + shifting)
-	add.w	d0,d0
-	move.l	(a3,d0.w),a3
 	jsr		(a3)
-	.else
-	jsr		([a3,d5.w*2])
-	.endif
+
 	* next bitplane
 1:
 	dbf		d6,0b

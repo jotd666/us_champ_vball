@@ -23,6 +23,7 @@ gen_dir.mkdir(exist_ok=True)
 
 decl_ptr = "\tdc.l\t"
 decl_word = "\tdc.w\t"
+decl_byte = "\tdc.b\t"
 
 def palette_pad(palette,pad_nb):
     palette += (pad_nb-len(palette)) * [(0x10,0x20,0x30)]
