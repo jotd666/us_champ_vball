@@ -157,7 +157,8 @@ def get_sprite_names():
     0x2DE:"T",
     0x2E8:"pole",
     0x2E9:"pole",
-
+    0x76A:"big_shadow",
+    0x76C:"small_shadow",
     0x7e0:"player_head_1",
     0x7e1:"player_torso_1",
     0x7e2:"player_tigh_1",
@@ -170,6 +171,8 @@ def get_sprite_names():
     }
     for i in net_and_pole_static_sprites | moving_net_sprites:
         rval[i] = "net"
+    for i in range(0x7A6,0x7B1):
+        rval[i] = "score"
     for i in range(0x2EE,0x2F5):
         rval[i] = "ball"
     for i in range(0x2E2,0x2EE):

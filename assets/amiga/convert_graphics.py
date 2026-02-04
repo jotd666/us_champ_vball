@@ -10,7 +10,7 @@ sprite_names = get_sprite_names()
 possible_hw_sprites = set()
 
 
-SCALE_FACTOR = 1
+SCALE_FACTOR = 5
 
 nb_cluts = 8
 
