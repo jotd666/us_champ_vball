@@ -769,6 +769,13 @@ def doit(from_scratch=True,dump_it=True):
         with open(src_dir / "sprite_size.68k","w") as f:
             bitplanelib.dump_asm_bytes(double_size_sprites,f,mit_format=True)
 
+    score_sprites_table = [0]*NB_SPRITES
+    for i in score_sprites:
+        score_sprites_table[i] = 1
+
+    with open(src_dir / "score_sprites.68k","w") as f:
+        bitplanelib.dump_asm_bytes(score_sprites_table,f,mit_format=True)
+
     disabled_sprites = [0]*NB_SPRITES
     for i in get_hidden_sprites():
         disabled_sprites[i] = 1

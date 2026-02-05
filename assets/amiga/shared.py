@@ -47,6 +47,8 @@ sr2 = lambda a,b : set(range(a,b,2))
 # each entry associates to entry+4
 sr4i = lambda a,b : set(range(a,b,8)) | set(range(a+2,b+2,8))
 
+score_sprites = set(range(0x7A6,0x7B1))
+
 # those should not be displayed: static net & pole sprites
 net_and_pole_static_sprites = {int(x,16) for x in """2e2
 2e3
@@ -171,7 +173,7 @@ def get_sprite_names():
     }
     for i in net_and_pole_static_sprites | moving_net_sprites:
         rval[i] = "net"
-    for i in range(0x7A6,0x7B1):
+    for i in score_sprites:
         rval[i] = "score"
     for i in range(0x2EE,0x2F5):
         rval[i] = "ball"

@@ -1,12 +1,3 @@
-- blitter chain: works but mirror seems to cause issues on shades, possibly issues with 1-bitplane pics
-  maybe debug with score display (as they seem very trashed too: score display is displayed alone at some point
-  which makes a perfect opportunity to debug). Also maybe compare blit of 1 ball shadow (alone) with blitter chain vs no blitter chain
-  => mirror seems to destroy other pics
-- draw score sprites 2 pixels lower to avoid conflict with crowd tiles
-- restore background: alternate between blitter and cpu (if no blitter chain)
-- use CPU-driven erase? (if no blitter chain)
-- big score sprites: (when no blitter chain) shifted bitplane effect on bottom probably because mirror plane with cpu while blitting it!
-  if we can achieve blitter chaining this issue goes away
 
 minor:
 
@@ -28,6 +19,7 @@ optims:
   we can probably load map with level 1 tiles+sprites loaded but that won't work for higher levels
   so maybe create a context only for "select player" screen (with only a few tiles/sprites) and make a
   special case using screen type variable on top of palette value
+- big score sprites (only when no blitter chain) shifted bitplane effect on bottom probably because mirror plane with cpu while blitting it!
 
 
 

@@ -1552,7 +1552,11 @@ update_one_bob:
 	tst.b	(a3,d2.w)
 	jne		2f				| some (static) sprites are disabled
 
-
+	lea		score_sprites(pc),a3
+	tst.b	(a3,d2.w)
+	jeq		44f				| some sprites needs to be drawn lower (conflict with crowd)
+	addq	#2,d1
+44:
 	* handle vertical grouping (that game imposes)
 	lea		sprite_size_table(pc),a3
 	move.b	(a3,d2.w),d4
@@ -2930,6 +2934,8 @@ net_pole_sprites:
 	.include	"net_pole_sprites.68k"
 disabled_sprites:
 	.include	"disabled_sprites.68k"
+score_sprites:
+	.include	"score_sprites.68k"
 * contains disabled sprites, plus net static sprites
 net_pole_and_disabled_sprites:
 	.include	"net_pole_and_disabled_sprites.68k"
