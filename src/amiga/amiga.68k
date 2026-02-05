@@ -812,7 +812,15 @@ level1_interrupt:
 	* sets when reaching the end of the list) and reset list pointers
 	NEW_BLITLIST
 	
+	* In sync blitter, the ball is drawn, then buffers are switched
+	* and current scroll makes up for ball moving in the opposite direction perfectly.
+	*
+	* In async blitter (OPT_BLITTER_MODE==1), we use the current scroll value
+	
 	* show the newly drawn buffer THEN switch the buffers
+	* problem: frames and scroll values aren't in sync, this is visible when
+	* the ball crosses the screen, this is because we're now displaying what's been drawn
+	* at the previous frame. 
 	.if		OPT_BLITTER_MODE==1
 	jbsr	handle_forced_scroll
 	jbsr	set_bobs_bitplanes
@@ -830,7 +838,6 @@ level1_interrupt:
 	jbsr		really_update_sprites
 	* terminate the blitter command list
 	COMMIT_BLITLIST
-	
 
 	.if		OPT_BLITTER_MODE==0
 	jbsr	handle_forced_scroll
@@ -4496,6 +4503,8 @@ prev_scroll_y:
 	.word	0
 scroll_y:
 	.word	0
+	
+* hi & lo must follow!!
 scroll_x_hi:
 	.word	0
 scroll_x_lo:
@@ -4736,7 +4745,7 @@ game_copperlist:
 	
 	* black color background plane
 	* enable sprite colors now
-	.word	0x0801,0xFFFE
+	.word	0x1801,0xFFFE
 	
 		
 bobs_bitplanes:
