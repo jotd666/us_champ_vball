@@ -12,7 +12,7 @@ skip_data_files = False
 # generate graphics
 if not skip_data_files:
     convert_graphics.doit()
-convert_sounds.doit()
+    convert_sounds.doit()
 
 gamename = "us_champ_vball"
 # JOTD path for cranker, adapt to wh :)
@@ -78,9 +78,9 @@ def distribute(suffix):
         destfile = datadir / p.name
         shutil.copy(p,destfile)
 
-distribute("ecs")
-distribute("aga_64")
-distribute("aga_128")
+for v in ["ecs","aga_64","aga_128"]:
+    distribute(v)
+
 
 subprocess.check_call(cmd_prefix+["clean"],cwd=progdir/"src")
 

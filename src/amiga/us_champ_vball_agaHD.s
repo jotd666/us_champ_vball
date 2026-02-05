@@ -54,7 +54,7 @@ _config
 	ENDC
 
 DECL_VERSION:MACRO
-	dc.b	"1.1"
+	dc.b	"1.2"
 	IFD BARFLY
 		dc.b	" "
 		INCBIN	"T:date"
@@ -70,8 +70,9 @@ _name	dc.b	"US Championship Volleyball AGA"
 	dc.b	" (dev mode)"
 	ENDC
 		dc.b	0
-_copy	dc.b	'2025 JOTD',0
+_copy	dc.b	'2026 JOTD',0
 _info
+    dc.b    "Music by no9",10
     dc.b    "Original by Technos 1988",0
 	dc.b	0
 _kickname   dc.b    0

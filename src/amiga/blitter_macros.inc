@@ -120,27 +120,22 @@ wait\@:
 	.endm
 	
 	.macro	NEW_BLITLIST
+	lea		blitter_list_1,a0
+	lea		blitter_list_2,a1
 sw\@:
 	* if blitter isn't finished, then we wait
 	* this is called from level 1 interrupt so
 	* blitter interrupts can interrupt
-	lea		blitter_list_1,a0
-	lea		blitter_list_2,a1
-
-
 	tst.b	blitter_chain_running
 	jne		sw\@
 
-
 	* blitter chain has completed: we can switch lists
-	cmp.l	drawn_blitter_list_start,a0
-	jeq		s0\@
-	move.l	a0,drawn_blitter_list_start
+	eor.b	#1,blitter_list_toggle
+	jne		s0\@
 	move.l	a0,drawn_blitter_list_ptr
 	move.l	a1,filled_blitter_list_ptr
 	jra		s1\@
 s0\@:
-	move.l	a1,drawn_blitter_list_start
 	move.l	a1,drawn_blitter_list_ptr
 	move.l	a0,filled_blitter_list_ptr
 s1\@:
@@ -160,8 +155,6 @@ s\@:
 	.endm
 
 	.macro	DECL_BLITLISTS	size
-drawn_blitter_list_start:	
-	.long	0
 drawn_blitter_list_ptr:
 	.long	0
 filled_blitter_list_ptr:
@@ -171,15 +164,20 @@ blitter_list_1:
 	.skip	\size
 	.long	0xdeaddead
 	.long	0xdeaddead
+	.long	0xdeaddead
 blitter_list_2:
 	.word	-2
 	.skip	\size
+	.long	0xdeaddead
 	.long	0xdeaddead
 	.long	0xdeaddead
 blitter_chain_running:
 	.byte	0
 size_command_issued:
 	.byte	0
+blitter_list_toggle:	
+	.byte	0
+	.align	2
 	.endm
 	
 	.macro	COMMIT_BLITLIST
@@ -233,8 +231,7 @@ nv0\@:
 	jcc		f1\@
 f0\@:
 	lea		(-2,a0),a1
-	move.l		drawn_blitter_list_start,a2
-	BREAKPOINT	"word command: not a blitter register (in A1), start in A2!!"
+	BREAKPOINT	"word command: not a blitter register (in A1)"
 	illegal
 f1\@:
 	cmp.w	#deniseid,d0

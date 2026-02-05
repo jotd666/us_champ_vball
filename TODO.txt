@@ -1,3 +1,4 @@
+with blitter chain, the ball "jumps" left and right when service crosses the field
 
 minor:
 

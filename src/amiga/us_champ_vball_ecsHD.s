@@ -6,8 +6,12 @@
 
 
 
-EXPMEM =   $100000
-CHIPSIZE = $140000
+    IFEQ RELEASE
+EXPMEM =   $200000
+	ELSE
+EXPMEM =   $120000
+	ENDC
+CHIPSIZE = $120000
 
 	IFEQ	EXPMEM 
 CHIP_ONLY = 1	
@@ -29,11 +33,7 @@ _keydebug
 _keyexit
 	dc.b	$59					; ws_keyexit
 _expmem
-    IFEQ RELEASE
-    dc.l    EXPMEM*2 
-    ELSE
 	dc.l	EXPMEM					; ws_expmem
-    ENDC
 	dc.w	_name-_base				; ws_name
 	dc.w	_copy-_base				; ws_copy
 	dc.w	_info-_base				; ws_info
@@ -58,7 +58,7 @@ _config
 	ENDC
 
 DECL_VERSION:MACRO
-	dc.b	"1.1"
+	dc.b	"1.2"
 	IFD BARFLY
 		dc.b	" "
 		INCBIN	"T:date"
@@ -74,9 +74,10 @@ _name	dc.b	"US Championship Volleyball ECS"
 	dc.b	" (dev mode)"
 	ENDC
 		dc.b	0
-_copy	dc.b	'2025 JOTD',0
+_copy	dc.b	'2026 JOTD',0
 _info
-    dc.b    "Original by Technos 1988",0
+    dc.b    "Music by no9",10
+	dc.b	"Original by Technos 1988",0
 	dc.b	0
 _kickname   dc.b    0
 ;--- version id
@@ -105,6 +106,7 @@ start:
     lea progstart(pc),a0
     move.l  _expmem(pc),(a0)
 
+
 	lea	exe(pc),a0
 	move.l  progstart(pc),a1
 	jsr	(resload_LoadFileDecrunch,a2)
@@ -119,7 +121,6 @@ start:
     move.w  #$1200,bplcon0(a1)
     move.w  #$0024,bplcon2(a1)
 	
-
     rts
 	
 _Relocate	movem.l	d0-d1/a0-a2,-(sp)
