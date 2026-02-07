@@ -2,7 +2,7 @@
 
 * how to use in double buffering mode with a "drawn" and a "displayed" buffer
 *
-* - set OPT_BLITTER_MODE to 0 or 1: 0 classic blit+waitblit, 1 blit in interrupts
+* - set OPT_BLIT_CHAIN_MODE to 0 or 1: 0 classic blit+waitblit, 1 blit in interrupts
 * - replace all blit writes by WRITE_BLITTER_REG_xxx macros. When writing bltsize
 *   use WRITE_BLITTER_REG_SIZE instead of WRITE_BLITTER_REG_WORD
 *
@@ -32,6 +32,9 @@
 *   option 0. But option 1 needs more work. So we introduce a new virtual blitter command if OPT_VBLIT_MIRROR_MODE=1
 *   in the WRITE_VIRTUAL_MIRROR_COMMAND, mirror_function expects the bitplane data in A2 and the height minus 1 in D1
 *
+*   Game that scroll and that can't use dual playfield for sprites also need a command to store the current scroll value
+*   else if the screen moves a lot, the scroll offset added to the bobs doesn't match the current scroll offset
+*
 *   it's however ideal on games that need a lot of blitting and exclusively use
 *   static source data. Interleaved mode would trigger less interrupts too.
 *
@@ -43,6 +46,8 @@
 ******************
 * blitter macros *
 ******************
+
+*DEBUG_BLIT_WAIT = 1
 
 	.macro	CHECK_A5_IS_CUSTOM
 	.ifndef	RELEASE
@@ -67,7 +72,7 @@ wait\@:
 * classic handling *
 ********************
 
-	.if		OPT_BLITTER_MODE==0
+	.if		OPT_BLIT_CHAIN_MODE==0
 	.macro	WAIT_BLIT
 	REALLY_WAIT_BLIT
 	.endm
@@ -79,6 +84,9 @@ wait\@:
 	.endm
 	
 	.macro	PROCESS_BLITS
+	.endm
+	
+	.macro	FORCE_PROCESS_BLITS
 	.endm
 	
 	.macro	COMMIT_BLITLIST
@@ -104,6 +112,14 @@ wait\@:
 	.endm
 	.endif
 	
+	.if		OPT_VBLIT_SCROLL_MODE==1
+	.macro	WRITE_BLITTER_SCROLL_VALUES	scroll_x,scroll_y
+	* the blits are synchronous, the scrolling is updated at the same time
+	move.l	\scroll_x,blitter_scroll_x
+	move.w	\scroll_y,blitter_scroll_y
+	.endm
+	.endif
+	
 	* no blitlists, empty
 	.macro	DECL_BLITLISTS	size
 	.endm
@@ -114,7 +130,7 @@ wait\@:
 * queue handling *
 ******************
 
-	.if		OPT_BLITTER_MODE==1
+	.if		OPT_BLIT_CHAIN_MODE==1
 	.macro	WAIT_BLIT
 	* do nothing!
 	.endm
@@ -122,13 +138,25 @@ wait\@:
 	.macro	NEW_BLITLIST
 	lea		blitter_list_1,a0
 	lea		blitter_list_2,a1
+	.ifdef	DEBUG_BLIT_WAIT
+sw\@:
+	* if blitter isn't finished, then we wait
+	* this is called from level 1 interrupt so
+	* blitter interrupts can interrupt
+	tst.b	blitter_chain_running
+	jeq		snw\@
+	COLOR0_FLASH	0xF00
+	jra		sw\@
+snw\@:
+	.else
 sw\@:
 	* if blitter isn't finished, then we wait
 	* this is called from level 1 interrupt so
 	* blitter interrupts can interrupt
 	tst.b	blitter_chain_running
 	jne		sw\@
-
+	.endif
+	
 	* blitter chain has completed: we can switch lists
 	eor.b	#1,blitter_list_toggle
 	jne		s0\@
@@ -154,7 +182,22 @@ s\@:
 	clr.b	size_command_issued
 	.endm
 
+	* we know that size_command_issued is set
+	.macro	FORCE_PROCESS_BLITS
+	* signal that the blitter chain is now running
+	st.b	blitter_chain_running
+	* start first blit from outside the blitter interrupt to
+	* start the chain reaction reading from drawn_blitter_list_ptr
+	PROCESS_ONE_BLIT
+	* clear size command issued for next blitlist creation
+	clr.b	size_command_issued
+	.endm
+
 	.macro	DECL_BLITLISTS	size
+blitter_scroll_x:
+	.long	0
+blitter_scroll_y:
+	.word	0
 drawn_blitter_list_ptr:
 	.long	0
 filled_blitter_list_ptr:
@@ -225,6 +268,15 @@ pos\@:
 	jra		b0\@		| not size: continue parsing list
 nv0\@:
 	.endif
+	.if		OPT_VBLIT_SCROLL_MODE==1
+	cmp.w	#dsksync,d0
+	jne		nv1\@
+	* store scrolling command
+	move.l	(a0)+,blitter_scroll_x
+	move.w	(a0)+,blitter_scroll_y
+	jra		b0\@		| not size: continue parsing list
+nv1\@:
+	.endif
 	* word command, check bounds
 	.ifndef	RELEASE
 	cmp.w	#bltcon0,d0		| sanity check for commands!
@@ -290,14 +342,24 @@ c0\@:
 	.if		OPT_VBLIT_MIRROR_MODE==1
 	.macro	WRITE_BLITTER_VIRTUAL_MIRROR	height,mirror_function,bitplane
 	move.l	a5,-(a7)
-	move.w	d6,-(a7)
 	LOAD_FILLED_LIST
 	move.w	#deniseid,(a5)+		| fake custom reg,(a5)+
 	move.w	\height,(a5)+
 	move.l	\bitplane,(a5)+
 	move.l	\mirror_function,(a5)+
 	STORE_FILLED_LIST
-	move.w	(a7)+,d6
+	move.l	(a7)+,a5
+	.endm
+	.endif
+
+	.if		OPT_VBLIT_SCROLL_MODE==1
+	.macro	WRITE_BLITTER_SCROLL_VALUES	scroll_x,scroll_y
+	move.l	a5,-(a7)
+	LOAD_FILLED_LIST
+	move.w	#dsksync,(a5)+		| fake custom reg,(a5)+
+	move.l	\scroll_x,(a5)+		| here we adapted to long for convenience (HI/LO)
+	move.w	\scroll_y,(a5)+
+	STORE_FILLED_LIST
 	move.l	(a7)+,a5
 	.endm
 	.endif

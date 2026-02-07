@@ -1,7 +1,6 @@
-with blitter chain, the ball "jumps" left and right when service crosses the field
-
 minor:
 
+- 50 fps flickers a lot like if double buffering is not working
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
 - maybe not include some unused sounds to save memory? (yaah_31?)

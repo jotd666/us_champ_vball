@@ -22,13 +22,10 @@ start:
 	.include "data.inc"
 	.include "utility_macros.inc"
 	
-* blitter mode must remain at 0, blitter chain cannot work here as characters
-* are flipped in-place so when the blitter tries to read input, it may have changed
-* when using chained blit interrupts. But it may prove useful on games that have
-* pre-mirrored bobs and require speed. This game was used as a proof of concept
 
-OPT_BLITTER_MODE = 1
-OPT_VBLIT_MIRROR_MODE = 1
+OPT_BLIT_CHAIN_MODE = 1			| enable blitter chaining
+OPT_VBLIT_MIRROR_MODE = 1		| we need to mirror sprites on the fly, just before blitting them if needed
+OPT_VBLIT_SCROLL_MODE = 1		| we need to store scrolling values else BOBs can shake
 	.include "blitter_macros.inc"
 	
 AttnFlags = 0x128
@@ -43,7 +40,7 @@ AFB_68020 = 1
 	.endif
 
 * proportional to the number of bitplanes
-BLITTER_LIST_SIZE = 15000*NB_PLAYFIELD_PLANES
+BLITTER_LIST_SIZE = 17500*NB_PLAYFIELD_PLANES
 
 * memory was calibrated on 64 color AGA mode, and proportional
 * to the number of planes except for the sound
@@ -815,13 +812,13 @@ level1_interrupt:
 	* In sync blitter, the ball is drawn, then buffers are switched
 	* and current scroll makes up for ball moving in the opposite direction perfectly.
 	*
-	* In async blitter (OPT_BLITTER_MODE==1), we use the current scroll value
+	* In async blitter (OPT_BLIT_CHAIN_MODE==1), we use the scroll value stored in the blitter command list
 	
 	* show the newly drawn buffer THEN switch the buffers
 	* problem: frames and scroll values aren't in sync, this is visible when
 	* the ball crosses the screen, this is because we're now displaying what's been drawn
 	* at the previous frame. 
-	.if		OPT_BLITTER_MODE==1
+	.if		OPT_BLIT_CHAIN_MODE==1
 	jbsr	handle_forced_scroll
 	jbsr	set_bobs_bitplanes
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
@@ -831,15 +828,29 @@ level1_interrupt:
 	
 	lea		_custom,a5
 	* start the chain reaction
-	PROCESS_BLITS
-	
+	tst.b	size_command_issued
+	jne		0f
+	* size command not issued: set blitter scrolling immediately
+	* no risks of bob shifting, there are no bobs on screen
+	move.l	scroll_x_hi,blitter_scroll_x
+	move.w	scroll_y,blitter_scroll_y
+	jra		1f
+0:
+	FORCE_PROCESS_BLITS
+1:	
 	* fill the blitter command list while blitter interrupt 
 	* is processing the other blitter command list
+		
+	* first fix the scrolling, so when it is set at the next frame, it is still coherent
+	* with the shifting that we put on BOBs to follow it (original game doesn't need that
+	* it has a separate layer for sprites, we just have crap dual playfield we cannot use here)
+	
+	WRITE_BLITTER_SCROLL_VALUES		scroll_x_hi,scroll_y
 	jbsr		really_update_sprites
 	* terminate the blitter command list
 	COMMIT_BLITLIST
 
-	.if		OPT_BLITTER_MODE==0
+	.if		OPT_BLIT_CHAIN_MODE==0
 	jbsr	handle_forced_scroll
 	* switch the screen buffers THEN show newly drawn buffer
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
@@ -1753,7 +1764,7 @@ mirror_sprite_planes:
 	movem.l	d0-d2/a0,-(a7)
 	* bitplanes aren't pre-computed: check bitplanes current orientation and swap
 	* if required. This is slow but saves memory
-	.if		OPT_BLITTER_MODE==0
+	.if		OPT_BLIT_CHAIN_MODE==0
 	lea		mirror_table,a1
 	.endif
 	moveq	#NB_PLAYFIELD_PLANES+1-1,d6
@@ -1938,7 +1949,7 @@ clear_planes_any_blitter_internal:
 	moveq	#-1,d2
     * now just wait for blitter ready to write all registers
 	WAIT_BLIT
-    .if		OPT_BLITTER_MODE==0
+    .if		OPT_BLIT_CHAIN_MODE==0
 	WRITE_BLITTER_REG_LONG	d2,bltafwm
 	.endif
 	WRITE_BLITTER_REG_LONG d1,bltcon0	
@@ -2408,7 +2419,7 @@ osd_set_irq_return_address:
 osd_interrupt_control:
 	tst.b	d0
 	jeq		0f
-	.if		OPT_BLITTER_MODE==1
+	.if		OPT_BLIT_CHAIN_MODE==1
 	* enable blitter, vblank & software level 1
 	move.w	#0xC06C,_custom+intena
 	.else
@@ -2417,7 +2428,7 @@ osd_interrupt_control:
 	.endif
 	rts
 0:
-	.if		OPT_BLITTER_MODE==1
+	.if		OPT_BLIT_CHAIN_MODE==1
 	* leave keyboard
 	move.w	#0x0064,_custom+intena
 	.else
@@ -2854,6 +2865,8 @@ HW_SpriteYTable_\height:
 	DEF_HW_SPRITE_Y_TABLE	16
 
 
+* update bitplanes, using the scroll values that the blitter chain/command tells us to use
+* else bobs may shake when the scrolling is too fast
 set_bobs_bitplanes:
 	movem.l	a0-a1/d0-d2,-(a7)
 	
@@ -2861,8 +2874,7 @@ set_bobs_bitplanes:
 	moveq	#0,d0
 	
 
-
-	move.w	scroll_y,d0
+	move.w	blitter_scroll_y,d0
 	.ifne	OPT_NET_BACKGROUND_TRICK
 	cmp.w	#0x100,d0
 	jne		0f
@@ -2896,8 +2908,8 @@ set_bobs_bitplanes:
 	* m_scrollx = (m_scrollx_hi + m_scrollx_lo + 4)
 	moveq	#4,d2
 
-	add.w	scroll_x_lo,d2
-	add.w	scroll_x_hi,d2
+	add.w	blitter_scroll_x,d2
+	add.w	blitter_scroll_x+2,d2
 	and.w	#0x1FF,d2			| wraps at 0x200!
 	
 	move.l	scroll_table_ptr,a2
@@ -4509,6 +4521,7 @@ scroll_x_hi:
 	.word	0
 scroll_x_lo:
 	.word	0
+
 
 
 
