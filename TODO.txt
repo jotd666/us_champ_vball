@@ -1,7 +1,14 @@
+- 25 fps real hardware flickers like crazy at "select" screen, perfect afterwards!
+  => in 2P mode the game spends a lot of time flipping the same characters. What needs to be done
+  is 1) separate enemy players from level data to load it separately (or not)
+  2) if 2P mode (or player select screen), generate the flipped versions once and for all. Do that when relocating
+  sprites.
+  3) re-introduce a "mirror available" flag. For instance if bitmap-2 == 2, then pick pointer of mirror in bitmap-6. Size is available
+    for an allocation
+- 50 fps flickers a lot like if double buffering is not working
+
 minor:
 
-- 25 fps real hardware flickers like crazy at "select" screen, perfect afterwards!
-- 50 fps flickers a lot like if double buffering is not working
 - when hitting net, sprite default red flash occurs but dump reveals no new sprites
 - sometimes starts with 10+ credits!!
 
