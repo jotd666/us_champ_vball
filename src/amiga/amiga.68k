@@ -861,7 +861,7 @@ level1_interrupt:
 	
 	lea	_custom,a5
 	move.w	(intreqr,a5),d0
-	btst	#4,d0
+	btst	#2,d0
 	jeq		23f
 	* interrupt arrived during this interrupt: this is taking too long
 	* so skip the refresh
@@ -1254,7 +1254,7 @@ really_update_sprites:
 	move.l	playfield_drawed_screen_ptr(pc),a1
 	move.w	#NB_TARGET_SPRITES-1,d7
 	WAIT_BLIT
-	WRITE_BLITTER_REG_LONG	#-1,bltalwm		| needed for blit_background
+	WRITE_BLITTER_REG_WORD	#-1,bltalwm		| needed for blit_background
 1:
 	move.w	(a4),d0
 	bmi.b	11f		| x=0: inactive
@@ -2207,6 +2207,7 @@ store_system:
 	move.w	dmaconr(a6),old_dmacon
 	lea		old_sysvectors,a0
 	move.l	system_vbr(pc),a1
+	move.l	(0x64,a1),(a0)+
 	move.l	(0x68,a1),(a0)+
 	move.l	(0x6c,a1),(a0)+
 	move.l	(0x70,a1),(a0)+
@@ -2223,6 +2224,7 @@ restore_system:
 	move.w	#0x4000,intena(a6)	| ints off
 	lea		old_sysvectors,a0
 	move.l	system_vbr(pc),a1
+	move.l	(a0)+,(0x64,a1)
 	move.l	(a0)+,(0x68,a1)
 	move.l	(a0)+,(0x6c,a1)
 	move.l	(a0)+,(0x70,a1)
@@ -3339,6 +3341,7 @@ relocate_sprite_data:
 	jeq		11f
 	* clut exists: get it (skip 8 byte header)
 	move.l	d2,a2
+	move.l	a2,a3		| store a3 for future use
 	addq	#8,a2
 	move.w	#NB_PLAYFIELD_PLANES-1+1,d3  | mask!!
 100:
@@ -3347,25 +3350,52 @@ relocate_sprite_data:
 	add.l	d2,(-4,a2)
 101:
 	dbf		d3,100b
-*	tst.w	(a2)
-*	jmi		11f
-*	* mirror exists: must relocate it too
-*	addq	#8,a2
-*	move.w	#NB_PLAYFIELD_PLANES-1+1,d3  | mask!!
-*100:
-*	move.l	(a2)+,d4
-*	jeq		101f
-*	add.l	d2,(-4,a2)
-*101:
-*	dbf		d3,100b
+	cmp.w	#-1,(a2)
+	jeq		11f
+	jbsr	compute_mirror_bitplanes
 
 11:
 	dbf		d1,10b
 1:
 	dbf		d0,0b
 	rts
+
+* < A2: bitplane pointer list to fill
+* < A3: original bitplane pointers (with headers)
 	
+compute_mirror_bitplanes:
+	movem.l	d0-a6,-(a7)
+	* mirror exists: must first copy the bitplane data above
+	* a3 points on dimensions
+	* compute memory needed to clone the bitmap
+	move.l	mirror_buffer_ptr,a0  fuck
+	move.w	(a3)+,d4		| height
+	move.w	(a3)+,d5		| width in bytes + 2
+	subq	#2,d5
+	mulu	d5,d4			| size of data to allocate
+	addq	d4,a0
+	move.l	a0,mirror_buffer	| update for next time
+	.ifndef	RELEASE
+	cmp.l	#mirror_buffer_end,a0
+	jcs		0f
+	BREAKPOINT	"mirror buffer too small"
+	illegal
+0:
+	.endif
+	subq	d4,a0
 	
+	addq	#4,a3			| skip rest to point on source bitplanes
+	move.w	#NB_PLAYFIELD_PLANES-1+1,d3  | mask!!
+	
+100:
+	move.l	(a2)+,d4
+	jeq		101f
+	add.l	d2,(-4,a2)
+101:
+	dbf		d3,100b
+	movem.l	(a7)+,d0-a6
+	rts
+
 	.ifne	OPT_ENABLE_LOGGING
 purge_tile_log_data:
 	movem.l	d0-a6,-(a7)
@@ -4823,7 +4853,9 @@ pal_wait:
 	.align	8
 	
 		.section .bsschip
-	
+
+
+
 background_restore_buffer:
 	.skip	SCREEN_SIZE
 		

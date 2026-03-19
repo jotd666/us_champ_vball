@@ -101,6 +101,113 @@ moving_net_sprites = {int(x,16) for x in """
 462
 463""".split()}
 
+human_player = {int(x,16) for x in """
+002
+00a
+012
+01a
+022
+026
+02a
+02b
+030
+032
+03a
+040
+042
+048
+04a
+050
+052
+054
+05a
+060
+064
+080
+084
+08c
+090
+09c
+09e
+0a4
+0a6
+0ac
+0ae
+0b4
+0b6
+0b8
+0be
+0c0
+0c6
+0c8
+0d0
+0d2
+0d6
+0d8
+0dc
+0de
+0e2
+0e4
+0e8
+0ea
+0ee
+0f0
+0f4
+0fa
+100
+102
+104
+10a
+10c
+10e
+11c
+11e
+120
+126
+128
+12a
+13a
+142
+144
+145
+14a
+152
+154
+155
+15a
+162
+164
+165
+16a
+172
+174
+175
+192
+194
+1aa
+1ac
+1b2
+1b4
+1bc
+1be
+1ce
+216
+21a
+21c
+222
+223
+22e
+230
+232
+384
+386
+7e8
+7ea
+7eb
+7e3
+7e2
+7e0
+""".split()}
 
 def get_hidden_sprites():
     # sprites that were added in US version to hide some potential trademark violations
@@ -171,6 +278,8 @@ def get_sprite_names():
     0x7e7:"player_leg",
 
     }
+    for i in human_player:
+        rval[i] = "human_player"
     for i in net_and_pole_static_sprites | moving_net_sprites:
         rval[i] = "net"
     for i in score_sprites:
