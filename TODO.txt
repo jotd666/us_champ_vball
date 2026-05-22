@@ -1,3 +1,4 @@
+- FUCK #define to protect non working mirror computation
 - referee tiles: if must be erased but are present in the current draw then don't erase. Not easy to implement. So maybe when drawing a referee tile, add a "don't erase" countdown on the tile. it's at least shown for a few frames. Adjust the frame per referee tile type (depends on 25/50 fps). That will save blitter bandwidth
 - 25 fps real hardware flickers like crazy at "select" screen, perfect afterwards!
   => in 2P mode the game spends a lot of time flipping the same characters. What needs to be done

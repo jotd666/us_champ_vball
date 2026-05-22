@@ -367,7 +367,7 @@ def gen_context_files(context_name,nb_planes,with_sprites=True,dump_it=False):
     tile_set_list = []
 
     sdump_dir = dump_dir / context_name
-    sdump_dir.mkdir(exist_ok=True)
+    sdump_dir.mkdir(exist_ok=True,parents=True)
 
     tile_cluts = collections.defaultdict(list)
     try:
@@ -794,4 +794,5 @@ def doit(from_scratch=True,dump_it=True):
 
 
 if __name__ == "__main__":
-    doit(from_scratch=True,dump_it=False)
+    #doit(from_scratch=True,dump_it=False)
+    doit(from_scratch=False,dump_it=True)

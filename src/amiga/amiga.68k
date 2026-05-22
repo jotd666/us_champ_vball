@@ -771,7 +771,7 @@ level1_interrupt:
 	* do it twice (040/pistorm bug)
 	.rept	2
 	move.w	#0x14,(intreq,a5)
-	.endif
+	.endr
 	tst.b	pause_flag
 	jne	23f
 
@@ -3350,10 +3350,11 @@ relocate_sprite_data:
 	add.l	d2,(-4,a2)
 101:
 	dbf		d3,100b
+	.ifdef	FUCK
 	cmp.w	#-1,(a2)
 	jeq		11f
 	jbsr	compute_mirror_bitplanes
-
+	.endif
 11:
 	dbf		d1,10b
 1:
@@ -3362,7 +3363,7 @@ relocate_sprite_data:
 
 * < A2: bitplane pointer list to fill
 * < A3: original bitplane pointers (with headers)
-	
+	.ifdef 	FUCK
 compute_mirror_bitplanes:
 	movem.l	d0-a6,-(a7)
 	* mirror exists: must first copy the bitplane data above
@@ -3395,6 +3396,7 @@ compute_mirror_bitplanes:
 	dbf		d3,100b
 	movem.l	(a7)+,d0-a6
 	rts
+	.endif
 
 	.ifne	OPT_ENABLE_LOGGING
 purge_tile_log_data:
