@@ -1,5 +1,7 @@
 - FUCK #define to protect non working mirror computation
 - referee tiles: if must be erased but are present in the current draw then don't erase. Not easy to implement. So maybe when drawing a referee tile, add a "don't erase" countdown on the tile. it's at least shown for a few frames. Adjust the frame per referee tile type (depends on 25/50 fps). That will save blitter bandwidth
+  simpler: the "static" referee sprites that are displayed most of the time can be not erased it should not
+  be noticeable
 - 25 fps real hardware flickers like crazy at "select" screen, perfect afterwards!
   => in 2P mode the game spends a lot of time flipping the same characters. What needs to be done
   is 1) separate enemy players from level data to load it separately (or not)
@@ -7,7 +9,7 @@
   sprites.
   3) re-introduce a "mirror available" flag. For instance if bitmap-2 == 2, then pick pointer of mirror in bitmap-6. Size is available
     for an allocation
-- 50 fps flickers a lot like if double buffering is not working
+- 50 fps flickers a lot like if double buffering is not working: too much blitter activity
 
 minor:
 
@@ -31,8 +33,7 @@ won't be done:
   we can probably load map with level 1 tiles+sprites loaded but that won't work for higher levels
   so maybe create a context only for "select player" screen (with only a few tiles/sprites) and make a
   special case using screen type variable on top of palette value => not a problem as whdload + HD only
-- optimize bob erase/redraw at least for referee (not trivial as the position of the sprites
-  change with Y priority)
+
 
 
 

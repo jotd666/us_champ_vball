@@ -58,6 +58,10 @@ s0\@:
 	.endif		
 	.endm
 
+********************
+* classic handling *
+********************
+	.if		OPT_BLIT_CHAIN_MODE==0
 	.macro	REALLY_WAIT_BLIT
 	CHECK_A5_IS_CUSTOM
 	move.w	#0x8400,(dmacon,a5)		| blitter high priority
@@ -68,11 +72,7 @@ wait\@:
 	.endm
 
 
-********************
-* classic handling *
-********************
 
-	.if		OPT_BLIT_CHAIN_MODE==0
 	.macro	WAIT_BLIT
 	REALLY_WAIT_BLIT
 	.endm
@@ -135,10 +135,8 @@ wait\@:
 	* do nothing!
 	.endm
 	
-	.macro	NEW_BLITLIST
-	lea		blitter_list_1,a0
-	lea		blitter_list_2,a1
-	.ifdef	DEBUG_BLIT_WAIT
+	.macro	REALLY_WAIT_BLIT
+	.if	OPT_BLIT_WAIT_DEBUG
 sw\@:
 	* if blitter isn't finished, then we wait
 	* this is called from level 1 interrupt so
@@ -156,6 +154,11 @@ sw\@:
 	tst.b	blitter_chain_running
 	jne		sw\@
 	.endif
+	.endm
+	.macro	NEW_BLITLIST
+	lea		blitter_list_1,a0
+	lea		blitter_list_2,a1
+	REALLY_WAIT_BLIT
 	
 	* blitter chain has completed: we can switch lists
 	eor.b	#1,blitter_list_toggle
@@ -170,16 +173,35 @@ s1\@:
 	.endm
 	
 	.macro	PROCESS_BLITS
+	.ifndef	RELEASE
+	tst.b	blitter_chain_running
+	jeq		nob\@
+	BREAKPOINT	"PROCESS_BLITS called while blitter chain is running"
+nob\@:
+	.endif
 	tst.b	size_command_issued
 	jeq		s\@		| empty list or no bltsize command in the current command list: skip
 	* signal that the blitter chain is now running
 	st.b	blitter_chain_running
 	* start first blit from outside the blitter interrupt to
 	* start the chain reaction reading from drawn_blitter_list_ptr
-	PROCESS_ONE_BLIT
-s\@:
 	* clear size command issued for next blitlist creation
 	clr.b	size_command_issued
+	.ifndef	RELEASE
+	* cheap sanity check
+	move.l	drawn_blitter_list_ptr,a0
+	tst.w	(a0)
+	jne		okay\@
+	BREAKPOINT	"zero in drawn blitter list when starting blits" 
+okay\@:
+	.endif
+	* turn off blitter interrupts to make sure that the first
+	* blit is atomic and not interrupted by the blitter interrupt!
+	move.w	#0x0040,(intena,a5)
+	PROCESS_ONE_BLIT
+	* turn on blitter interrupts again
+	move.w	#0x8040,(intena,a5)
+s\@:
 	.endm
 
 	* we know that size_command_issued is set
@@ -188,7 +210,12 @@ s\@:
 	st.b	blitter_chain_running
 	* start first blit from outside the blitter interrupt to
 	* start the chain reaction reading from drawn_blitter_list_ptr
+	* turn off blitter interrupts to make sure that the first
+	* blit is atomic and not interrupted by the blitter interrupt!
+	move.w	#0x0040,(intena,a5)
 	PROCESS_ONE_BLIT
+	* turn on blitter interrupts again
+	move.w	#0x8040,(intena,a5)
 	* clear size command issued for next blitlist creation
 	clr.b	size_command_issued
 	.endm
@@ -294,7 +321,7 @@ f1\@:
 	move.w	(a0)+,d1		| word value
 	
 	
-	move.w	d1,(a5,d0.w)
+	move.w	d1,(a5,d0.w)	| word blitter command
 	jra		b0\@		| not size: continue parsing list
 	* long write command
 b2\@:
@@ -314,9 +341,10 @@ g1\@:
 	move.l	(a0)+,d1		| long value
 
 	
-	move.l	d1,(a5,d0.w)
+	move.l	d1,(a5,d0.w)	| long blitter command
 	jra		b0\@		| not size: continue parsing list
 b1\@:
+	* negative: can be -1 or -2
 	cmp.w	d2,d0
 	jeq		b3\@		| -1: end of command
 	* -2: end of list: nothing to do, we're done for that frame
@@ -332,6 +360,10 @@ b3\@:
 	jne		c0\@
 	BREAKPOINT	"Blitter list overflow"
 c0\@:
+	cmp.l	#0,a5
+	jne		c1\@
+	BREAKPOINT	"null pointer on blitter list"
+c1\@:
 	.endif
 	.endm
 	
@@ -371,35 +403,32 @@ c0\@:
 	move.w	#\offset,d6
 	bset	#14,d6		| bit set to tell it's a long command
 	move.w 	d6,(a5)+
+	move.w	(a7)+,d6
 	move.l	\value,(a5)+
 	STORE_FILLED_LIST
-	move.w	(a7)+,d6
 	move.l	(a7)+,a5
 	.endm
 	
 	.macro	WRITE_BLITTER_REG_WORD	value,offset
 	move.l	a5,-(a7)
-	move.w	d6,-(a7)
 	LOAD_FILLED_LIST
-	move.w	#\offset,d6
-	move.w 	d6,(a5)+
+	.if	\offset==bltsize
+	.error  "WRITE_BLITTER_REG_WORD doesn't accept bltsize arg, use WRITE_BLITTER_REG_SIZE"
+	.endif
+	move.w	#\offset,(a5)+
 	move.w	\value,(a5)+
 	STORE_FILLED_LIST
-	move.w	(a7)+,d6
 	move.l	(a7)+,a5
 	.endm
 	
 	.macro	WRITE_BLITTER_REG_SIZE	value
 	move.l	a5,-(a7)
-	move.w	d6,-(a7)
 	LOAD_FILLED_LIST
-	move.w	#bltsize,d6
-	move.w 	d6,(a5)+
+	move.w	#bltsize,(a5)+
 	move.w	\value,(a5)+
 	st.b	size_command_issued
 	move.w	#-1,(a5)+		| end of command
 	STORE_FILLED_LIST
-	move.w	(a7)+,d6
 	move.l	(a7)+,a5
 	.endm
 	.endif

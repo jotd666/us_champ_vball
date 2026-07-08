@@ -26,6 +26,8 @@ start:
 OPT_BLIT_CHAIN_MODE = 1			| enable blitter chaining
 OPT_VBLIT_MIRROR_MODE = 1		| we need to mirror sprites on the fly, just before blitting them if needed
 OPT_VBLIT_SCROLL_MODE = 1		| we need to store scrolling values else BOBs can shake
+OPT_BLIT_WAIT_DEBUG = 0
+
 	.include "blitter_macros.inc"
 	
 AttnFlags = 0x128
@@ -908,7 +910,7 @@ handle_forced_scroll:
 	move.w	d0,scroll_x_lo
 0:
 	rts
-_vblank:
+level3_interrupt:
     movem.l d0-d7/a0-a6,-(a7)
 	lea		_custom,a5
 	move.w	(intreqr,a5),d0
@@ -1020,7 +1022,7 @@ osd_break:
 * can work with interrupts enabled or disabled
 osd_wait:
 	move.w	d0,delay_timer
-	**jbsr	osd_is_vblank_interrupt_enabled
+	**jbsr	osd_islevel3_interrupt_interrupt_enabled
 	tst.w	d0
 	jne		2f
 	* interrupts are disabled: timer isn't going to change
@@ -2373,7 +2375,7 @@ platform_init:
 	move.l	(a7)+,(0x64,a1)
 	pea		level2_interrupt(pc)
 	move.l	(a7)+,(0x68,a1)
-	pea		_vblank(pc)
+	pea		level3_interrupt(pc)
 	move.l	(a7)+,(0x6C,a1)
 	pea		_nmi(pc)
 	move.l	(a7)+,(0x7C,a1)
