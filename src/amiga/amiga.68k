@@ -149,6 +149,8 @@ TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 80
 
 Y_START = 0x20
+* number of consecutive late frames after which the blitter chain is considered stuck
+LATE_FRAMES_WATCHDOG = 50
 
 	.if	NB_PLAYFIELD_PLANES == 6
 BASE_BPLCON2_VALUE = 0x0224			| add killehb
@@ -761,8 +763,10 @@ call_nmi:
 	
 * just in case some hardware calls nmi
 _nmi:
-	move.w	#0x7FFF,_custom+intreq
-	move.w	#0x7FFF,_custom+intreq
+	* ack all interrupts but the blitter (0x40): losing a blitter
+	* interrupt would stop the blit chain
+	move.w	#0x7FBF,_custom+intreq
+	move.w	#0x7FBF,_custom+intreq
 	rts
 	
 level1_interrupt:
@@ -807,8 +811,17 @@ level1_interrupt:
 0:
 
 
-	* wait for blits to complete (via soft flag that last blitter command
-	* sets when reaching the end of the list) and reset list pointers
+	.if		OPT_BLIT_CHAIN_MODE==1
+	* late check: if the previous blit chain is still running, don't wait for it
+	* here (waiting, then showing the buffer and starting the next blits in the
+	* middle of the frame draws into the buffer which is still displayed
+	* => blinking bobs). Skip the display update and retry at next frame instead
+	SW_BLITTER_ACTIVE_TEST	level1_late
+	clr.b	late_frames_count
+	.endif
+	
+	* blits are complete (via soft flag that last blitter command
+	* sets when reaching the end of the list): reset list pointers
 	NEW_BLITLIST
 	
 	* In sync blitter, the ball is drawn, then buffers are switched
@@ -868,6 +881,30 @@ level1_interrupt:
 	* interrupt arrived during this interrupt: this is taking too long
 	* so skip the refresh
 	move.b	#1,flip_flop
+	.if		OPT_BLIT_CHAIN_MODE==1
+	jra		23f
+level1_late:
+	* retry at next level 1 interrupt (even in 25 Hz mode)
+	clr.b	flip_flop
+	* watchdog: a chain never lasts that long. If it's still flagged as
+	* running after many frames, a blitter interrupt was lost (used to be
+	* an infinite wait in NEW_BLITLIST): restart the chain if blitter is idle
+	addq.b	#1,late_frames_count
+	cmp.b	#LATE_FRAMES_WATCHDOG,late_frames_count
+	jcs		23f
+	clr.b	late_frames_count
+	lea		_custom,a5
+	move.w	#0x0040,(intena,a5)		| no blitter interrupt during the check
+	btst	#6,(intreqr+1,a5)
+	jne		0f						| interrupt is just pending: let it do the job
+	btst	#6,(dmaconr,a5)
+	jne		0f						| blitter is really busy
+	SW_BLITTER_INACTIVE_TEST	0f	| completed in the meantime
+	* blitter idle, no interrupt pending, chain not complete: restart it
+	PROCESS_ONE_BLIT
+0:
+	move.w	#0x8040,(intena,a5)
+	.endif
 23:
 	.ifne	OPT_ENABLE_LOGGING
 	jbsr	log_used_tiles
@@ -951,26 +988,37 @@ level3_interrupt:
 0:
 
 	
-	* ack vbl twice (040/pistorm bug)
+	* ack vbl twice (040/pistorm/vampire: handler can be re-entered before ack is effective)
+	.rept	2
 	move.w	#0x20,(intreq,a5)
-	move.w	#0x20,(intreq,a5)	
+	.endr
 	jra	3f
 1:
-	.ifndef	RELEASE
+	* don't assume it's the blitter just because it's not the VBL:
+	* on fast CPUs (Vampire, 040/060, PiStorm) the handler can be re-entered
+	* before the ack is effective. Processing a blit on such a spurious entry
+	* writes blitter registers (or mirrors sprite data) while a blit is running,
+	* or, after the end of the list, used to parse stale data beyond the end marker
+	* (random blits, mirror calls, custom register writes => trashed display or lockup)
 	btst	#6,d0
-	jne		2f
-	BREAKPOINT	"unexpected level 3 interrupt"
-2:
-	.endif
-	* has to be blitter operation completed: handle next blit
-	* ack blitter int twice (040/pistorm bug)
-	move.w	#0x40,(intreq,a5)
-	move.w	#0x40,(intreq,a5)	
-
+	jeq		3f				| not the blitter: spurious, ignore
 	
+	* blitter operation completed: ack twice
+	.rept	2
+	move.w	#0x40,(intreq,a5)
+	.endr
+
+	.if		OPT_BLIT_CHAIN_MODE==1
+	* all blits come from the blitter lists, so a blitter interrupt
+	* while no chain is running is a leftover: ignore it
+	SW_BLITTER_INACTIVE_TEST	3f
+	.endif
+	
+	* handle next blit
 	PROCESS_ONE_BLIT
 
 3:
+	tst.w (intreqr,a5)
     movem.l (a7)+,d0-d7/a0-a6
     rte
 	
@@ -4540,6 +4588,9 @@ ntsc_flag:
 	.byte 	0
 mid_screen_interrupt_count:
 	.byte	0
+* consecutive frames skipped because the blitter chain was still running
+late_frames_count:
+	.byte	0
 	.align	2
 system_vbr:
 	.long	0
@@ -4880,4 +4931,4 @@ chip_memory_block_end:
 
 
 
-		
+		

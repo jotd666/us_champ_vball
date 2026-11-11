@@ -17,13 +17,29 @@
 * - setup level 1 interrupt at end of copperlist (instead of copper interrupt)
 *   so it can be interrupted by blitter
 * - setup level 3 interrupt with vblank and blitter (copper isn't useful)
-* - on level 1 interrupt:
-*   - call NEW_BLITLIST
+* - on level 1 interrupt (triggered by the copper at the bottom of the frame):
+*   - late check, never wait for the blitter there: if SW_BLITTER_ACTIVE_TEST says that the
+*     chain is still running, skip the display update and retry next frame. Waiting then
+*     showing the buffer and starting the next chain in the middle of the frame draws
+*     into the buffer that is still displayed (blinking bobs)
+*   - call NEW_BLITLIST (doesn't wait since the chain is over)
 *   - set bitplanes
 *   - switch screen pointers (note the reversed order vs synchronous mode!)
 *   - call PROCESS_BLITS to process the previous blits
 *   - call the routine to perform the "blits" (fake blits now, fills filled_blitter_list instead)
 *   - call COMMIT_BLITLIST to end the list (by setting -2 in it)
+* - on blitter interrupt (level 3): check that INTREQR really has the blitter bit set and
+*   that a chain is running (SW_BLITTER_INACTIVE_TEST) then PROCESS_ONE_BLIT
+*
+* fast blitters/CPUs (Vampire V4): a blit can complete before the CPU has executed the next
+* instruction after the bltsize write, and the level 3 handler can be re-entered before the
+* interrupt ack is effective. Rules to keep it working:
+*   - never rely on the chain being still running after PROCESS_BLITS
+*   - only process a blit on a real blitter interrupt, while a chain is running
+*   - PROCESS_ONE_BLIT must be harmless if called once too many: the list pointer
+*     stays on the end marker (-2) instead of moving past it
+*   - never ack all interrupts (intreq 0x7FFF) or disable the blitter interrupt for long
+*     while a chain may be running
 *
 *   that's it. PROCESS_BLITS started the chain reaction, and there are not blitwaits
 *   anymore in the code
@@ -78,6 +94,11 @@ wait\@:
 	.endm
 	
 	.macro	NEW_BLITLIST
+	.endm
+	
+	.macro	SW_BLITTER_ACTIVE_TEST	label
+	.endm
+	.macro	SW_BLITTER_INACTIVE_TEST	label
 	.endm
 	
 	.macro	PROCESS_ONE_BLIT
@@ -155,9 +176,23 @@ sw\@:
 	jne		sw\@
 	.endif
 	.endm
+	* branch if a blit chain is running
+	.macro	SW_BLITTER_ACTIVE_TEST	label
+	tst.b	blitter_chain_running
+	jne		\label
+	.endm
+	* branch if no blit chain is running (used in the blitter interrupt
+	* to ignore leftover/spurious blitter interrupts)
+	.macro	SW_BLITTER_INACTIVE_TEST	label
+	tst.b	blitter_chain_running
+	jeq		\label
+	.endm
+	
 	.macro	NEW_BLITLIST
 	lea		blitter_list_1,a0
 	lea		blitter_list_2,a1
+	* only waits if called while the chain is running (the level 1
+	* interrupt now checks that first and skips the frame instead)
 	REALLY_WAIT_BLIT
 	
 	* blitter chain has completed: we can switch lists
@@ -349,6 +384,10 @@ b1\@:
 	jeq		b3\@		| -1: end of command
 	* -2: end of list: nothing to do, we're done for that frame
 	clr.b	blitter_chain_running
+	* stay on the end marker: if this is called once too many (spurious
+	* interrupt) it finds the end marker again instead of parsing the
+	* stale data which is beyond
+	subq.l	#2,a0
 b3\@:
 	move.l	a0,drawn_blitter_list_ptr
 	.endm
@@ -432,4 +471,4 @@ c1\@:
 	move.l	(a7)+,a5
 	.endm
 	.endif
-	
+	
